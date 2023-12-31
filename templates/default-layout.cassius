@@ -1,0 +1,24 @@
+
+@media screen and (min-width: 768px)
+  main
+    margin-left: 5rem
+    margin-right: 5rem
+
+@media screen and (min-width: 992px)
+  main
+    margin-left: 10rem
+    margin-right: 10rem
+
+@media screen and (min-width: 1200px)
+  main
+    margin-left: 20%
+    margin-right: 20%
+
+@media screen and (min-width: 1400px)
+  main
+    margin-left: 25%
+    margin-right: 25%
+    
+html body
+  margin: 0
+  padding: 0

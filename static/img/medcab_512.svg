@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="135.46666mm"
+   height="135.46666mm"
+   viewBox="0 0 135.46666 135.46666"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="medcab_512.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showborder="true"
+     inkscape:zoom="0.63250561"
+     inkscape:cx="397.62493"
+     inkscape:cy="561.25984"
+     inkscape:window-width="1920"
+     inkscape:window-height="1003"
+     inkscape:window-x="0"
+     inkscape:window-y="40"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient52176">
+      <stop
+         style="stop-color:#ffccaa;stop-opacity:1;"
+         offset="0"
+         id="stop52172" />
+      <stop
+         style="stop-color:#ffccaa;stop-opacity:0;"
+         offset="1"
+         id="stop52174" />
+    </linearGradient>
+    <rect
+       x="163.8006"
+       y="192.68588"
+       width="261.60947"
+       height="71.616646"
+       id="rect4062" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient52176"
+       id="radialGradient52246"
+       cx="100.32285"
+       cy="135.45108"
+       fx="100.32285"
+       fy="135.45108"
+       r="35.611637"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.05816365,2.2026307,-6.6603849,0.1758771,964.05453,-177.06361)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:url(#radialGradient52246);fill-opacity:1;stroke:none;stroke-width:0.125276;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000"
+       id="path846"
+       cx="67.73333"
+       cy="67.73333"
+       r="67.73333" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.50370287,0,0,0.50370287,-80.416449,-41.654923)"
+       id="text4060"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:64px;line-height:1.05;font-family:Roboto;-inkscape-font-specification:Roboto;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect4062);fill:#ff0000;stroke:#ff0000;text-align:center"
+       x="203.09961"
+       y="0"><tspan
+         x="164.73047"
+         y="242.91055"
+         id="tspan95611"><tspan
+           style="fill:#aa0000;stroke:#aa0000"
+           id="tspan95607">Med</tspan><tspan
+           style="fill:#000080;stroke:#000080"
+           id="tspan95609">Cab</tspan></tspan></text>
+  </g>
+</svg>

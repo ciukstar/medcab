@@ -1,0 +1,36 @@
+<header.primary>
+  <div #headerStart>
+    <md-filled-icon-button href=# aria-label=_{MsgMainMenu}>
+      <md-icon>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+          <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z">
+    <span.title-large>
+      _{MsgWelcome}
+
+  <md-filled-icon-button href=# aria-label=_{MsgSignIn}>
+    <md-icon>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+        <path d="M480-120v-80h280v-560H480v-80h280q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H480Zm-80-160-55-58 102-102H120v-80h327L345-622l55-58 200 200-200 200Z">
+
+  
+<main>
+
+  <figure #figureLogo>
+    <svg xmlns="http://www.w3.org/2000/svg" height="128" viewBox="0 -960 960 960" width="128" fill=red>
+      <path d="M160-80q-33 0-56.5-23.5T80-160v-480q0-33 23.5-56.5T160-720h160v-80q0-33 23.5-56.5T400-880h160q33 0 56.5 23.5T640-800v80h160q33 0 56.5 23.5T880-640v480q0 33-23.5 56.5T800-80H160Zm0-80h640v-480H160v480Zm240-560h160v-80H400v80ZM160-160v-480 480Zm280-200v120h80v-120h120v-80H520v-120h-80v120H320v80h120Z">
+    <figcaption.display-large>
+      MedCab
+
+  <md-tabs aria-label=Tabs
+    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{HomeR}' : '@{VideoR}'">
+    <md-primary-tab #tabHealth aria-controls=panelHealth>
+      Health
+    <md-primary-tab #tabVideo aria-controls=panelVideo active=true>
+      Video
+
+  <div #panelHealth role=tabpanel aria-labelledby=tabHealth hidden>
+
+  <div #panelVideo role=tabpanel aria-labelledby=tabVideo>
+
+    <md-filled-tonal-button>
+      Video Conferencing

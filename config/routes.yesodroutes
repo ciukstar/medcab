@@ -1,0 +1,11 @@
+
+/video VideoR GET
+/      HomeR  GET
+
+/auth   AuthR   Auth   getAuth
+/static StaticR Static appStatic
+
+/manifest.json WebAppManifestR GET
+/sitemap.xml   SitemapR        GET
+/favicon.ico   FaviconR        GET
+/robots.txt    RobotsR         GET
