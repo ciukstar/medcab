@@ -14,18 +14,10 @@ header
     justify-content: flex-start
     align-items: center
     gap: 1rem
-  
+    
 main
   display: flex
   flex-direction: column
+  justify-content: center
+  align-items: center
   gap: 1rem
-  #figureLogo
-    text-align: center
-  md-primary-tab a
-    text-decoration: none
-    border: 1px solid black
-  div[role=tabpanel]
-    margin: 1rem
-    display: flex
-    flex-direction: column
-    gap: 1rem

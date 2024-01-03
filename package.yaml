@@ -11,6 +11,8 @@ dependencies:
 - yesod-form
 - yesod-persistent
 - yesod-sitemap
+- yesod-auth-oauth2
+- yesod-auth-hashdb
 - classy-prelude
 - classy-prelude-conduit
 - classy-prelude-yesod

@@ -19,7 +19,7 @@ import Foundation
     , Route (HomeR, StaticR)
     , AppMessage (MsgAppName, MsgAppDescription)
     )
-import Settings.StaticFiles (img_medcab_512_svg)
+import Settings.StaticFiles (img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
 import Yesod.Core.Content
     ( TypedContent (TypedContent), typePlain, ToContent (toContent) )
 import Yesod.Core.Handler
@@ -42,12 +42,12 @@ getWebAppManifestR = do
         , "theme_color" .= String "#FFFFFF"
         , "background_color" .= String "#FFFFFF"
         , "display" .= String "standalone"
-        , "icons" .= array [ object [ "src" .= urlRender (StaticR img_medcab_512_svg)
-                                    , "type" .= String "image/svg+xml"
+        , "icons" .= array [ object [ "src" .= urlRender (StaticR img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
+                                    , "type" .= String "image/png"
                                     , "sizes" .= String "512x512"
                                     ]
-                           , object [ "src" .= urlRender (StaticR img_medcab_512_svg)
-                                    , "type" .= String "image/svg+xml"
+                           , object [ "src" .= urlRender (StaticR img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
+                                    , "type" .= String "image/png"
                                     , "sizes" .= String "512x512"
                                     , "purpose" .= String "maskable"
                                     ]

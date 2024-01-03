@@ -1,0 +1,13 @@
+
+<div ##{formWrapper}>
+  <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
+    <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
+      _{MsgOr}
+
+  <form method=POST action=@{r} ##{formAuth}>
+    <md-filled-text-field label=_{MsgEmailAddress} type=text name=username autocomplete=username required=true>
+
+    <md-filled-text-field label=_{MsgPassword} type=password name=password autocomplete=current-password required=true>
+
+    <md-filled-button type=submit #btnLogin>
+      _{MsgSignIn}

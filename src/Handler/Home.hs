@@ -3,11 +3,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Handler.Home where
+module Handler.Home (getHomeR) where
 
 import Foundation
     ( Handler
-    , Route (StaticR, HomeR, VideoR)
+    , Route (StaticR, AuthR, HomeR, VideoR)
     , AppMessage
       ( MsgWelcome, MsgMainMenu, MsgSignIn
       )
@@ -15,6 +15,7 @@ import Foundation
 import Text.Hamlet (Html)
 import Settings (widgetFile)
 import Settings.StaticFiles ( js_homepage_min_js )
+import Yesod.Auth ( Route (LoginR) )
 import Yesod.Core.Widget (addScript, setTitleI)
 import Yesod.Core (Yesod(defaultLayout))
 

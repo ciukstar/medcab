@@ -1,0 +1,19 @@
+<header.background>
+  <div #headerStart>
+    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+      <md-icon>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+          <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z">
+          
+    <span.title-large>
+      _{MsgLogin}
+      
+<main>
+
+  ^{w}
+  
+  <div>
+    <div.body-small>
+      Don't have an account?
+    <md-text-button href=#>
+      Create account

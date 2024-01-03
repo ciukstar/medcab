@@ -36,5 +36,8 @@ database:
   database: "_env:YESOD_SQLITE_DATABASE:medcab.sqlite3"
   poolsize: "_env:YESOD_SQLITE_POOLSIZE:10"
 
+google-client-id: "_env:YESOD_GOOGLE_CLIENT_ID:xxx"
+google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xxx"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

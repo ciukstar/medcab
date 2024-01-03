@@ -61,6 +61,9 @@ data AppSettings = AppSettings
 
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
+
+    , appGoogleClientId :: Text
+    , appGoogleClientSecret :: Text
     }
 
 instance FromJSON AppSettings where
@@ -90,7 +93,9 @@ instance FromJSON AppSettings where
         appAnalytics              <- o .:? "analytics"
 
         appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
-
+        appGoogleClientId         <- o .:  "google-client-id"
+        appGoogleClientSecret     <- o .:  "google-client-secret"
+                                     
         return AppSettings {..}
 
 -- | Settings for 'widgetFile', such as which template languages to support and
