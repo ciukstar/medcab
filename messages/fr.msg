@@ -1,3 +1,8 @@
+UserRegistered: Utilisateur enregistré
+FullName: Nom et prénom
+Save: Enregistrer
+Cancel: Annuler
+UserAccount: Compte d'utilisateur
 Photo: Photo
 Password: Mot de passe
 EmailAddress: Adresse e-mail
@@ -7,6 +12,7 @@ SignInWithGoogle: Connectez-vous avec Google
 VideoConference: Conférence vidéo
 SignOut: Se déconnecter
 SignIn: Se connecter
+SignUp: S'inscrire
 Login: Connexion
 MainMenu: Menu principal
 Welcome: Bienvenu

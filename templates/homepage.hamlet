@@ -55,3 +55,7 @@
       Payment Integration
 
   <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
+
+$forall (_,msg) <- msgs
+  <div.app-snackbar>
+    #{msg}

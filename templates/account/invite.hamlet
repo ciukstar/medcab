@@ -1,0 +1,12 @@
+
+<h1>
+  Please verify your email
+
+<div>
+  We just sent an email to <code>your@email.com</code>. Click the link in the email to verify your account.
+
+<button>
+  Resend email
+
+<button>
+  Update email

@@ -23,7 +23,7 @@ import Database.Esqueleto.Experimental
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 
-import Yesod.Auth.Message (AuthMessage(InvalidLogin))
+import Yesod.Auth.Message (AuthMessage(InvalidLogin), englishMessage, frenchMessage, russianMessage)
 import Yesod.Auth.HashDB (authHashDBWithForm)
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
@@ -125,10 +125,12 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     
+    isAuthorized AccountsR _ = return Authorized
+    isAuthorized AccountCreateR _ = return Authorized
     isAuthorized (AccountPhotoR _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
-    
+
     isAuthorized WebAppManifestR _ = return Authorized
     isAuthorized SitemapR _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
@@ -174,6 +176,10 @@ instance Yesod App where
     makeLogger = return . appLogger
 
 
+info :: Text
+info = "info"
+
+
 -- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
@@ -191,6 +197,13 @@ instance YesodPersistRunner App where
 instance YesodAuth App where
     type AuthId App = UserId
 
+    renderAuthMessage :: App -> [Lang] -> AuthMessage -> Text
+    renderAuthMessage _ [] = englishMessage
+    renderAuthMessage _ ("en":_) = englishMessage
+    renderAuthMessage _ ("fr":_) = frenchMessage
+    renderAuthMessage _ ("ru":_) = russianMessage
+    renderAuthMessage app (_:xs) = renderAuthMessage app xs
+
     authLayout :: (MonadHandler m, HandlerSite m ~ App) => WidgetFor App () -> m Html
     authLayout w = liftHandler $ defaultLayout $ do
         setTitleI MsgSignIn
@@ -200,11 +213,11 @@ instance YesodAuth App where
     -- Where to send a user after successful login
     loginDest :: App -> Route App
     loginDest _ = HomeR
-    
+
     -- Where to send a user after logout
     logoutDest :: App -> Route App
     logoutDest _ = HomeR
-    
+
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer :: App -> Bool
     redirectToReferer _ = True
@@ -256,7 +269,7 @@ instance YesodAuth App where
                     Nothing -> return ()
                   return $ Authenticated uid
               _otherwise -> return $ UserError InvalidLogin
-              
+
       "hashdb" -> do
           user <- runDB $ selectOne $ do
               x <- from $ table @User
@@ -280,6 +293,7 @@ formLogin :: Route App -> Widget
 formLogin r = do
     formWrapper <- newIdent
     formAuth <- newIdent
+    msgs <- getMessages
     $(widgetFile "auth/form")
 
 
@@ -366,7 +380,7 @@ googleButton = do
 .gsi-material-button:disabled .gsi-material-button-icon
   opacity: 38%
 
-.gsi-material-button:not(:disabled):active .gsi-material-button-state, 
+.gsi-material-button:not(:disabled):active .gsi-material-button-state,
 .gsi-material-button:not(:disabled):focus .gsi-material-button-state
   background-color: #303030
   opacity: 12%
@@ -395,7 +409,7 @@ googleButton = do
     <span style="display: none">_{MsgSignInWithGoogle}
 |]
 
-        
+
 -- | Access function to determine if a user is logged in.
 isAuthenticated :: Handler AuthResult
 isAuthenticated = do

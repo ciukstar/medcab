@@ -1,5 +1,7 @@
 
-/account/#UserId/photo AccountPhotoR GET
+/form/account/create    AccountCreateR GET
+/accounts/#UserId/photo AccountPhotoR  GET
+/accounts               AccountsR      POST
 
 /video VideoR GET
 /      HomeR  GET

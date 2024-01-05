@@ -18,12 +18,13 @@ import Settings (widgetFile)
 import Settings.StaticFiles ( js_homepage_min_js )
 import Yesod.Auth ( Route (LoginR), maybeAuth )
 import Yesod.Core.Widget (addScript, setTitleI)
-import Yesod.Core (Yesod(defaultLayout))
+import Yesod.Core (Yesod(defaultLayout), getMessages)
 
 
 getHomeR :: Handler Html
 getHomeR = do
     user <- maybeAuth
+    msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgWelcome
         addScript (StaticR js_homepage_min_js)
