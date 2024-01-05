@@ -1,5 +1,12 @@
 name:    medcab
 version: "0.0.0"
+synopsis:   Healthcare Web Application
+category:   Application
+author:     Sergiu Starciuc
+maintainer: ciukstar@gmail.com
+license:    MIT
+github:     ciukstar/medcab
+homepage:   https://medcab-jjgwe5ufda-de.a.run.app/docs
 
 dependencies:
 
@@ -46,6 +53,10 @@ dependencies:
 - case-insensitive
 - wai
 - foreign-store
+- esqueleto
+- lens
+- lens-aeson
+- wreq
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

@@ -1,3 +1,4 @@
+Photo: Photo
 Password: Mot de passe
 EmailAddress: Adresse e-mail
 Or: ou

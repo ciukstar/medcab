@@ -1,4 +1,6 @@
 
+/account/#UserId/photo AccountPhotoR GET
+
 /video VideoR GET
 /      HomeR  GET
 

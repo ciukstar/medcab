@@ -8,16 +8,22 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Foundation where
 
+import Control.Lens (folded, filtered, (^?), _2, to)
+import Data.Aeson.Lens ( key, AsValue(_String) )
 import Control.Monad.Logger (LogSource)
 import Import.NoFoundation
 import Data.Kind (Type)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import Database.Esqueleto.Experimental
+    (selectOne, from, table, val, where_, (^.))
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 
+import Yesod.Auth.Message (AuthMessage(InvalidLogin))
 import Yesod.Auth.HashDB (authHashDBWithForm)
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
@@ -30,6 +36,10 @@ import Yesod.Form.I18n.Russian (russianFormMessage)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import qualified Database.Esqueleto.Experimental as E ((==.))
+import qualified Network.Wreq as W (get, responseHeader, responseBody)
+import qualified Data.ByteString.Lazy as BSL (toStrict)
+
 
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -113,7 +123,9 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
+
     
+    isAuthorized (AccountPhotoR _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
     
@@ -197,16 +209,63 @@ instance YesodAuth App where
     redirectToReferer :: App -> Bool
     redirectToReferer _ = True
 
-    authenticate :: (MonadHandler m, HandlerSite m ~ App)
-                 => Creds App -> m (AuthenticationResult App)
-    authenticate creds = liftHandler $ runDB $ do
-        x <- getBy $ UniqueUser $ credsIdent creds
-        case x of
-            Just (Entity uid _) -> return $ Authenticated uid
-            Nothing -> Authenticated <$> insert User
-                { userIdent = credsIdent creds
-                , userPassword = Nothing
-                }
+    authenticate :: (MonadHandler m, HandlerSite m ~ App) => Creds App -> m (AuthenticationResult App)
+    authenticate (Creds plugin ident extra) = liftHandler $ case plugin of
+      "google" -> do
+          let atoken :: Maybe Text
+              atoken = extra ^? folded . filtered ((== "accessToken") . fst) . _2
+          let name :: Maybe Text
+              name = extra ^? folded . filtered ((== "userResponse") . fst) . _2 . key "name" . _String
+          let subject :: Maybe Text
+              subject = extra ^? folded . filtered ((== "userResponse") . fst) . _2 . key "sub" . _String
+          let picture :: Maybe Text
+              picture = extra ^? folded . filtered ((== "userResponse") . fst) . _2 . key "picture" . _String
+          let email :: Maybe Text
+              email = extra ^? folded . filtered ((== "userResponse") . fst) . _2 . key "email" . _String
+
+          case (atoken,email) of
+              (Just at,Just em) -> do
+                  Entity uid _ <- runDB $ upsert User { userEmail = em
+                                                      , userAuthType = UserAuthTypeGoogle
+                                                      , userPassword = Nothing
+                                                      , userName = name
+                                                      }
+                                  [UserEmail =. em]
+                  _ <- runDB $ upsert UserCred { userCredUser = uid
+                                               , userCredName = "google_access_token"
+                                               , userCredIdent = subject
+                                               , userCredVal = at
+                                               }
+                       [UserCredVal =. at]
+
+                  case picture of
+                    Just src -> do
+                        r <- liftIO $ W.get (unpack src)
+                        case (r ^? W.responseHeader "Content-Type" . to decodeUtf8, BSL.toStrict <$> r ^? W.responseBody) of
+                            (Just mime, Just bs) -> do
+                                liftIO $ print mime
+                                liftIO $ print bs
+                                _ <- runDB $ upsert UserPhoto { userPhotoUser = uid
+                                                              , userPhotoMime = mime
+                                                              , userPhotoPhoto = bs
+                                                              }
+                                     [UserPhotoMime =. mime, UserPhotoPhoto =. bs]
+                                return ()
+                            _otherwise -> return ()
+                        return ()
+                    Nothing -> return ()
+                  return $ Authenticated uid
+              _otherwise -> return $ UserError InvalidLogin
+              
+      "hashdb" -> do
+          user <- runDB $ selectOne $ do
+              x <- from $ table @User
+              where_ $ x ^. UserEmail E.==. val ident
+              return x
+          return $ case user of
+            Just (Entity uid _) -> Authenticated uid
+            Nothing -> UserError InvalidLogin
+      _ -> return $ UserError InvalidLogin
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]

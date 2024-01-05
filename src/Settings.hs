@@ -15,6 +15,7 @@ import qualified Control.Exception as Exception
 import Data.Aeson                  (Result (..), fromJSON, withObject, (.!=),
                                     (.:?))
 import Data.FileEmbed              (embedFile)
+import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml                   (decodeEither')
 import Database.Persist.Sqlite     (SqliteConf)
 import Language.Haskell.TH.Syntax  (Exp, Name, Q)
@@ -62,6 +63,7 @@ data AppSettings = AppSettings
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
 
+    , appIdleTimeout :: NominalDiffTime
     , appGoogleClientId :: Text
     , appGoogleClientSecret :: Text
     }
@@ -93,6 +95,7 @@ instance FromJSON AppSettings where
         appAnalytics              <- o .:? "analytics"
 
         appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
+        appIdleTimeout            <- o .: "idle-timeout"
         appGoogleClientId         <- o .:  "google-client-id"
         appGoogleClientSecret     <- o .:  "google-client-secret"
                                      

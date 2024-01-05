@@ -1,3 +1,4 @@
+Photo: Фото
 Password: Пароль
 EmailAddress: Адрес электронной почты
 Or: или

@@ -20,26 +20,35 @@ module Application
     , db
     ) where
 
-import Control.Monad.Logger                 (liftLoc, runLoggingT)
-import Database.Persist.Sqlite              (createSqlitePool, runSqlPool,
-                                             sqlDatabase, sqlPoolSize)
+import Control.Monad.Logger ( liftLoc, runLoggingT )
+import Database.Persist.Sqlite
+    ( runSqlPool, sqlDatabase, sqlPoolSize, createSqlitePoolWithConfig
+    , ConnectionPoolConfig
+      ( ConnectionPoolConfig, connectionPoolConfigStripes
+      , connectionPoolConfigIdleTimeout, connectionPoolConfigSize
+      )
+    )
 import Import
-import Language.Haskell.TH.Syntax           (qLocation)
-import Network.HTTP.Client.TLS              (getGlobalManager)
+import Language.Haskell.TH.Syntax ( qLocation )
+import Network.HTTP.Client.TLS ( getGlobalManager )
 import Network.Wai (Middleware)
-import Network.Wai.Handler.Warp             (Settings, defaultSettings,
-                                             defaultShouldDisplayException,
-                                             runSettings, setHost,
-                                             setOnException, setPort, getPort)
-import Network.Wai.Middleware.RequestLogger (Destination (Logger),
-                                             IPAddrSource (..),
-                                             OutputFormat (..), destination,
-                                             mkRequestLogger, outputFormat)
-import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
-                                             toLogStr)
+import Network.Wai.Middleware.Gzip
+    ( gzip, GzipSettings (gzipFiles), GzipFiles (GzipCompress) )
+import Network.Wai.Handler.Warp
+    ( Settings, defaultSettings, defaultShouldDisplayException
+    , runSettings, setHost, setOnException, setPort, getPort
+    )
+import Network.Wai.Middleware.RequestLogger
+    ( Destination (Logger),IPAddrSource (..), OutputFormat (..)
+    , destination, mkRequestLogger, outputFormat
+    )
+import System.Log.FastLogger
+    ( defaultBufSize, newStdoutLoggerSet, toLogStr )
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
+
+import Handler.Accounts ( getAccountPhotoR )
 import Handler.Video ( getVideoR )
 import Handler.Home ( getHomeR )
 
@@ -78,9 +87,12 @@ makeFoundation appSettings = do
         logFunc = messageLoggerSource tempFoundation appLogger
 
     -- Create the database connection pool
-    pool <- flip runLoggingT logFunc $ createSqlitePool
+    pool <- flip runLoggingT logFunc $ createSqlitePoolWithConfig
         (sqlDatabase $ appDatabaseConf appSettings)
-        (sqlPoolSize $ appDatabaseConf appSettings)
+        ConnectionPoolConfig { connectionPoolConfigStripes = 1
+                             , connectionPoolConfigIdleTimeout = appIdleTimeout appSettings
+                             , connectionPoolConfigSize = sqlPoolSize $ appDatabaseConf appSettings
+                             }
 
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
@@ -95,7 +107,7 @@ makeApplication foundation = do
     logWare <- makeLogWare foundation
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
-    return $ logWare $ defaultMiddlewaresNoLogging appPlain
+    return $ logWare $ defaultMiddlewaresNoLogging $ gzip def { gzipFiles = GzipCompress } appPlain
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation =

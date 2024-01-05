@@ -24,3 +24,12 @@ medcab
 node_modules/
 package-lock.json
 package.json
+build-demo-en.sh
+build-demo-fr.sh
+build-demo-ro.sh
+build-demo-ru.sh
+deploy-demo-en.sh
+deploy-demo-fr.sh
+deploy-demo-ro.sh
+deploy-demo-ru.sh
+env.sh
