@@ -21,6 +21,11 @@ import Database.Persist.Quasi
 import Yesod.Auth.HashDB (HashDBUser (userPasswordHash, setPasswordHash))
 
 
+data SaveOption = SaveOptionUserSession | SaveOptionDatabase
+    deriving (Show, Read, Eq, Ord)
+derivePersistField "SaveOption"
+
+
 data AuthenticationType = UserAuthTypePassword | UserAuthTypeGoogle
     deriving (Show, Read, Eq, Ord)
 derivePersistField "AuthenticationType"
@@ -41,3 +46,13 @@ instance HashDBUser User where
     
     setPasswordHash :: Text -> User -> User
     setPasswordHash h u = u { userPassword = Just h }
+
+
+gmailAccessToken :: Text
+gmailAccessToken = "gmail_access_token"
+
+gmailRefreshToken :: Text
+gmailRefreshToken = "gmail_refresh_token"
+
+gmail :: Text
+gmail = "GMAIL_API"

@@ -8,9 +8,10 @@ module Handler.Home (getHomeR) where
 import Database.Persist (Entity(Entity))
 import Foundation
     ( Handler
-    , Route (StaticR, AuthR, HomeR, VideoR, AccountPhotoR)
+    , Route (StaticR, AuthR, HomeR, VideoR, AccountPhotoR, AdminR)
+    , AdminR (TokensR)
     , AppMessage
-      ( MsgWelcome, MsgMainMenu, MsgSignIn, MsgPhoto
+      ( MsgWelcome, MsgMainMenu, MsgSignIn, MsgPhoto, MsgTokens
       )
     )
 import Text.Hamlet (Html)

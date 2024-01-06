@@ -7,15 +7,18 @@ $doctype 5
     <title>#{pageTitle pc}
     <meta name=description content="MedCab Healthcare App">
     <meta name=author content="Sergiu Starciuc, ciukstar@gmail.com">
-    <meta name=theme-color content="rgb(101 85 143)">
+    <meta name="theme-color" content="rgb(101 85 143)">
+    <meta name="color-scheme" content="light dark">
     <meta name=viewport content="width=device-width,initial-scale=1">
     
     <link href=@{WebAppManifestR} rel=manifest>
-    
-    <link rel=stylesheet media=print onload="this.media = 'all'"
-      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
     <noscript>
-      <link rel=stylesheet type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    
 
     
     <link rel=stylesheet media=print onload="this.media = 'all'"

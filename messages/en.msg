@@ -1,3 +1,14 @@
+Cleared: Cleared
+InvalidFormData: Invalid form data
+RecordDeleted: Record deleted
+ClearSettings: Clear
+RecordEdited: Record edited
+InvalidStoreType: Invalid store type
+StoreType: Store type
+Database: Database
+UserSession: User session
+Initialize: Initialize
+Tokens: Tokens
 UserRegistered: User registered
 FullName: Full name
 Save: Save

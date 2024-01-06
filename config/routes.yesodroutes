@@ -1,4 +1,5 @@
 
+
 /form/account/create    AccountCreateR GET
 /accounts/#UserId/photo AccountPhotoR  GET
 /accounts               AccountsR      POST
@@ -13,3 +14,8 @@
 /sitemap.xml   SitemapR        GET
 /favicon.ico   FaviconR        GET
 /robots.txt    RobotsR         GET
+
+/admin AdminR:
+    /tokens/clear TokensClearR POST
+    /tokens/hook  TokensHookR  GET
+    /tokens 	  TokensR      GET POST

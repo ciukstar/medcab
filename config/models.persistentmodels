@@ -21,7 +21,19 @@ User
     name Text Maybe
     UniqueUser email
     deriving Typeable
-    
+
+
+Store
+  token TokenId OnDeleteCascade
+  key Text
+  val Text
+  UniqueStore token key
+
+Token
+  api Text
+  store SaveOption
+  UniqueToken api
+
 Email
     email Text
     userId UserId Maybe

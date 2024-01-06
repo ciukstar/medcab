@@ -1,3 +1,14 @@
+Cleared: Очищено
+InvalidFormData: Неверные данные формы
+RecordDeleted: Запись удалена
+ClearSettings: Сбросить
+RecordEdited: Запись отредактирована
+InvalidStoreType: Неверный тип хранилища
+StoreType: Тип хранилища
+Database: База данных
+UserSession: Пользовательская сессия
+Initialize: Инициализировать
+Tokens: Токены
 UserRegistered: Пользователь зарегистрирован
 FullName: Full name
 Save: Сохранить

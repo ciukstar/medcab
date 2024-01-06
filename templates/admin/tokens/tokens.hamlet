@@ -1,0 +1,25 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <span.title-large>
+      _{MsgTokens}
+      
+<main>
+
+  <div.app-card.shape-large.outline>
+    <div.app-card-title.headline-medium>
+      Gmail
+    <div.app-card-content>
+    
+      <form method=post action=@{AdminR TokensR} enctype=#{et} #formStoreType>
+        ^{fw}
+          
+    <div.app-card-actions>
+      <form method=post action=@{AdminR TokensClearR} enctype=#{et2} #formTokensClear>
+        ^{fw2}
+      <md-text-button type=submit form=formTokensClear>
+        _{MsgClearSettings}
+      <md-filled-button type=submit form=formStoreType>
+        _{MsgInitialize}

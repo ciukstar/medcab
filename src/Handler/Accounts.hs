@@ -52,8 +52,11 @@ postAccountsR :: Handler Html
 postAccountsR = do
     ((fr,fw),et) <- runFormPost formAccount
     case fr of
-      FormSuccess r -> do
+      FormSuccess r@(User email _ _ name) -> do
           runDB $ insert_ r
+
+          
+          
           addMessageI info MsgUserRegistered
           redirect HomeR
       _otherwise ->  defaultLayout $ do
