@@ -58,6 +58,10 @@ dependencies:
 - lens-aeson
 - wreq
 - blaze-html
+- mime-mail
+- safe-exceptions
+- base64-bytestring
+- http-client
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

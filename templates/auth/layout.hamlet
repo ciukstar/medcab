@@ -9,9 +9,3 @@
 <main>
 
   ^{w}
-  
-  <div>
-    <div.body-small>
-      Don't have an account?
-    <md-text-button href=@{AccountCreateR}>
-      Create account

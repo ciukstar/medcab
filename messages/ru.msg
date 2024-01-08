@@ -1,3 +1,4 @@
+SignInViaEmail: Войти по электронной почте
 Cleared: Очищено
 InvalidFormData: Неверные данные формы
 RecordDeleted: Запись удалена

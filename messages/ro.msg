@@ -1,3 +1,4 @@
+SignInViaEmail: Conectați-vă prin e-mail
 Cleared: S-a șters
 InvalidFormData: Date de formular nevalide
 RecordDeleted: Înregistrarea a fost ștearsă

@@ -1,3 +1,4 @@
+SignInViaEmail: Sign in via email
 Cleared: Cleared
 InvalidFormData: Invalid form data
 RecordDeleted: Record deleted

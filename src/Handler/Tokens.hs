@@ -38,9 +38,9 @@ import Foundation
     )
 import Model
     ( gmailAccessToken, gmailRefreshToken, gmail
-    , SaveOption (SaveOptionUserSession, SaveOptionDatabase)
+    , StoreType (StoreTypeDatabase, StoreTypeSession)
     , Store (Store), Token (Token, tokenStore)
-    , EntityField (StoreVal, TokenStore, TokenApi)
+    , EntityField (StoreVal, TokenStore, TokenApi), gmailSender
     )
 import Network.Wreq (post, FormParam ((:=)), responseBody)
 import Network.Wreq.Lens (statusCode, responseStatus)
@@ -93,18 +93,22 @@ getTokensHookR = do
 
     let accessToken = r L.^. responseBody . key "access_token" . _String
     let refreshToken = r L.^. responseBody . key "refresh_token" . _String
+    let sender = "ciukstar@gmail.com"
+
     
     case store of
-      Just x@SaveOptionUserSession -> do
+      Just x@StoreTypeSession -> do
           setSession gmailAccessToken accessToken
           setSession gmailRefreshToken refreshToken
+          setSession gmailSender sender
           _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           addMessageI info MsgRecordEdited
           redirect $ AdminR TokensR
-      Just x@SaveOptionDatabase -> do
+      Just x@StoreTypeDatabase -> do
           Entity tid _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           _ <- runDB $ upsert (Store tid gmailAccessToken accessToken) [StoreVal P.=. accessToken]
           _ <- runDB $ upsert (Store tid gmailRefreshToken refreshToken) [StoreVal P.=. refreshToken]
+          _ <- runDB $ upsert (Store tid gmailSender sender) [StoreVal P.=. sender]
           addMessageI info MsgRecordEdited
           redirect $ AdminR TokensR
       Nothing -> do
@@ -122,13 +126,13 @@ postTokensClearR = do
         
     ((fr2,fw2),et2) <- runFormPost formTokensClear
     case (fr2,token) of
-      (FormSuccess (),Just (Entity tid (Token _ SaveOptionUserSession))) -> do
+      (FormSuccess (),Just (Entity tid (Token _ StoreTypeSession))) -> do
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
           runDB $ delete tid
           addMessageI info MsgRecordDeleted
           redirect $ AdminR TokensR
-      (FormSuccess (),Just (Entity tid (Token _ SaveOptionDatabase))) -> do
+      (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           runDB $ delete tid
           addMessageI info MsgRecordDeleted
           redirect $ AdminR TokensR
@@ -200,19 +204,19 @@ getTokensR = do
         $(widgetFile "admin/tokens/tokens")
 
 
-formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult SaveOption, Widget)
+formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult StoreType, Widget)
 formStoreOptions token extra = do
-    let storeOptions = [ (MsgUserSession, SaveOptionUserSession)
-                       , (MsgDatabase, SaveOptionDatabase)
+    let storeOptions = [ (MsgUserSession, StoreTypeSession)
+                       , (MsgDatabase, StoreTypeDatabase)
                        ]
-    (r,v) <- mreq (m3radioField (optionsPairs storeOptions)) FieldSettings
+    (storeR,storeV) <- mreq (m3radioField (optionsPairs storeOptions)) FieldSettings
         { fsLabel = SomeMessage MsgStoreType
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
         , fsAttrs = [("class","app-options-store-type")]
         } (tokenStore . entityVal <$> token)
-    return (r,[whamlet|
+    return (storeR,[whamlet|
 #{extra}
-^{fvInput v}
+^{fvInput storeV}
 |])
 
 

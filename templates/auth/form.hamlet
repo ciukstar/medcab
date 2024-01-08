@@ -4,6 +4,8 @@
     <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
       _{MsgOr}
 
+    <h1>Deprecated
+
   $forall (_,msg) <- filter ((/=) info . fst) msgs
     <div.app-banner.error.body-medium>
       #{msg}
@@ -16,3 +18,9 @@
 
     <md-filled-button type=submit #btnLogin>
       _{MsgSignIn}
+  
+  <div>
+    <div.body-small>
+      Don't have an account?
+    <md-text-button href=@{AccountCreateR}>
+      Create account

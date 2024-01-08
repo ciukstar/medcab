@@ -9,21 +9,25 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Foundation where
 
-import Control.Lens (folded, filtered, (^?), _2, to)
+import Control.Lens (folded, filtered, (^?), _2, to, (?~))
+import qualified Control.Lens as L ((^.))
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import Control.Monad.Logger (LogSource)
 import Import.NoFoundation
+import Data.Function ((&))
 import Data.Kind (Type)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Database.Esqueleto.Experimental
-    (selectOne, from, table, val, where_, (^.))
+    (selectOne, from, table, val, where_, (^.), Value (unValue))
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 
-import Yesod.Auth.Message (AuthMessage(InvalidLogin), englishMessage, frenchMessage, russianMessage)
+import Yesod.Auth.Message
+    ( AuthMessage(InvalidLogin), englishMessage, frenchMessage, russianMessage)
 import Yesod.Auth.HashDB (authHashDBWithForm)
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
@@ -39,6 +43,33 @@ import qualified Data.Text.Encoding as TE
 import qualified Database.Esqueleto.Experimental as E ((==.))
 import qualified Network.Wreq as W (get, responseHeader, responseBody)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
+import Yesod.Auth.Email
+    ( authEmail, VerKey, VerUrl
+    , YesodAuthEmail
+      ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
+      , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
+      , afterPasswordRoute, needOldPassword, emailLoginHandler
+      )
+    , SaltedPass, Identifier
+    , EmailCreds
+      ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus, emailCredsVerkey
+      , emailCredsEmail
+      ), Email, loginR, registerR
+    )
+import Network.Wreq (defaults, auth, oauth2Bearer, postWith)
+import qualified Network.Wreq.Lens as WL
+import Network.Mail.Mime
+    ( Part (Part, partHeaders, partContent, partDisposition, partEncoding, partType)
+    , Mail (mailParts, mailHeaders, mailTo), emptyMail, PartContent (PartContent)
+    , Disposition (DefaultDisposition), Encoding (None), Address (Address)
+    , renderMail'
+    )
+import qualified Data.ByteString.Base64.Lazy as B64L
+import qualified Data.Text.Lazy.Encoding
+import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
+import Text.Printf (printf)
+import Text.Shakespeare.Text (stext)
+import Handler.Material3 (m3emailField, m3passwordField)
 
 
 
@@ -246,6 +277,8 @@ instance YesodAuth App where
                   Entity uid _ <- runDB $ upsert User { userEmail = em
                                                       , userAuthType = UserAuthTypeGoogle
                                                       , userPassword = Nothing
+                                                      , userVerkey = Nothing
+                                                      , userVerified = True
                                                       , userName = name
                                                       }
                                   [UserEmail =. em]
@@ -275,7 +308,7 @@ instance YesodAuth App where
                   return $ Authenticated uid
               _otherwise -> return $ UserError InvalidLogin
 
-      "hashdb" -> do
+      _ -> do
           user <- runDB $ selectOne $ do
               x <- from $ table @User
               where_ $ x ^. UserEmail E.==. val ident
@@ -283,15 +316,221 @@ instance YesodAuth App where
           return $ case user of
             Just (Entity uid _) -> Authenticated uid
             Nothing -> UserError InvalidLogin
-      _ -> return $ UserError InvalidLogin
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]
     authPlugins app = [ oauth2GoogleScopedWidget googleButton ["email","openid","profile"]
                         (appGoogleClientId . appSettings $ app)
                         (appGoogleClientSecret . appSettings $ app)
+                      , authEmail
                       , authHashDBWithForm formLogin (Just . UniqueUser)
                       ]
+
+
+instance YesodAuthEmail App where
+    type AuthEmailId App = UserId
+
+    emailLoginHandler :: (Route Auth -> Route App) -> Widget
+    emailLoginHandler parent = do
+        (fw,et) <- liftHandler $ generateFormPost formEmailLogin
+        idFormEmailLoginWarpper <- newIdent
+        idFormEmailLogin <- newIdent
+        toWidget [cassius|
+            ##{idFormEmailLoginWarpper}
+              align-self: stretch
+              padding: 2rem 2rem 1rem 2rem
+              display: flex
+              flex-direction: column
+              gap: 1rem
+              ##{idFormEmailLogin}
+                display: flex
+                flex-direction: column
+                gap: 1rem
+        |]
+        [whamlet|
+            <div ##{idFormEmailLoginWarpper}>
+               <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
+                 <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
+                   _{MsgOr}
+              <form method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>
+                ^{fw}
+                <md-filled-button type=submit #btnLogin>
+                  _{MsgSignIn}
+
+            <div>
+              <div.body-small>
+                Don&apos;t have an account?
+              <md-text-button href=@{parent registerR}>
+                Create account
+
+        |]
+      where
+          formEmailLogin :: Html -> MForm Handler (FormResult (Text,Text),Widget)
+          formEmailLogin extra = do
+              msgRender <- liftHandler getMessageRender
+              (emailR,emailV) <- mreq m3emailField FieldSettings
+                  { fsLabel = SomeMessage MsgEmailAddress
+                  , fsId = Nothing, fsTooltip = Nothing, fsName = Nothing
+                  , fsAttrs = [("label", msgRender MsgEmailAddress)]
+                  } Nothing
+              (passR,passV) <- mreq m3passwordField FieldSettings
+                  { fsLabel = SomeMessage MsgPassword
+                  , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+                  , fsAttrs = [("label", msgRender MsgPassword)]
+                  } Nothing
+              let r = (,) <$> emailR <*> passR
+                  w = do
+                      toWidget [cassius|
+                          ##{fvId emailV}, ##{fvId passV}
+                            align-self: stretch
+                      |]
+                      [whamlet|
+                          #{extra}
+                          ^{fvInput emailV}
+                          ^{fvInput passV}
+                      |]
+              return (r,w)
+              
+              
+
+    afterPasswordRoute :: App -> Route App
+    afterPasswordRoute _ = HomeR
+
+    addUnverified :: Text -> VerKey -> AuthHandler App (AuthEmailId App)
+    addUnverified email vk = liftHandler $ runDB $ insert
+        (User email UserAuthTypeEmail Nothing (Just vk) False Nothing)
+
+    sendVerifyEmail :: Text -> VerKey -> VerUrl -> AuthHandler App ()
+    sendVerifyEmail email _ verurl = do
+
+        liftIO $ putStrLn $ "Copy/ Paste this URL in your browser:" ++ verurl
+
+        token <- liftHandler $ runDB $ selectOne $ do
+            x <- from $ table @Token
+            where_ $ x ^. TokenApi E.==. val gmail
+            return x
+
+        (atoken,rtoken,sender) <- case token of
+          Just (Entity tid (Token _ StoreTypeDatabase)) -> do
+              access <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Store
+                  where_ $ x ^. StoreToken E.==. val tid
+                  where_ $ x ^. StoreKey E.==. val gmailAccessToken
+                  return $ x ^. StoreVal )
+              refresh <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Store
+                  where_ $ x ^. StoreToken E.==. val tid
+                  where_ $ x ^. StoreKey E.==. val gmailRefreshToken
+                  return $ x ^. StoreVal )
+              sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Store
+                  where_ $ x ^. StoreToken E.==. val tid
+                  where_ $ x ^. StoreKey E.==. val gmailSender
+                  return $ x ^. StoreVal )
+              return (access,refresh,sender)
+          Just (Entity _ (Token _ StoreTypeSession)) -> do
+              access <- lookupSession gmailAccessToken
+              refresh <- lookupSession gmailRefreshToken
+              sender <- lookupSession gmailSender
+              return (access,refresh,sender)
+          Nothing -> return (Nothing, Nothing, Nothing)
+
+        case (atoken,rtoken,sender) of
+          (Just at,Just rt,Just sendby) -> do
+              
+              let mail = (emptyMail $ Address Nothing "noreply")
+                      { mailTo = [Address Nothing email]
+                      , mailHeaders = [("Subject", "Verify your email address")]
+                      , mailParts = [[textPart, htmlPart]]
+                      }
+                    where
+                      textPart = Part
+                          { partType = "text/plain; charset=utf-8"
+                          , partEncoding = None
+                          , partDisposition = DefaultDisposition
+                          , partContent = PartContent $ Data.Text.Lazy.Encoding.encodeUtf8 [stext|
+                              Please confirm your email address by clicking on the link below.
+
+                              #{verurl}
+
+                              Thank you
+                              |]
+                          , partHeaders = []
+                          }
+                      htmlPart = Part
+                          { partType = "text/html; charset=utf-8"
+                          , partEncoding = None
+                          , partDisposition = DefaultDisposition
+                          , partContent = PartContent $ renderHtml [shamlet|
+                              <p>Please confirm your email address by clicking on the link below.
+                              <p>
+                                  <a href=#{verurl}>#{verurl}
+                              <p>Thank you
+                              |]
+                          , partHeaders = []
+                          }
+
+              raw <- liftIO $ TE.decodeUtf8 . toStrict . B64L.encode <$> renderMail' mail
+
+              let opts = defaults & auth ?~ oauth2Bearer (TE.encodeUtf8 at)
+              response <- liftIO $ tryAny $ postWith
+                  opts (gmailApi $ unpack sendby) (object ["raw" .= raw])
+
+              case response of
+                Left e@(SomeException _) -> case fromException e of
+                  Just (HttpExceptionRequest _ (StatusCodeException r' bs)) -> do
+                      case r' L.^. WL.responseStatus . WL.statusCode of
+                        401 -> undefined
+                        403 -> do
+                            liftIO $ print response
+                        _   -> undefined
+                  _other -> undefined
+                Right _ok -> return ()
+          _otherwise -> undefined
+        
+    getVerifyKey :: AuthEmailId App -> AuthHandler App (Maybe VerKey)
+    getVerifyKey = liftHandler . runDB . fmap (userVerkey =<<) . get
+    
+    setVerifyKey :: AuthEmailId App -> VerKey -> AuthHandler App ()
+    setVerifyKey uid k = liftHandler $ runDB $ update uid [UserVerkey =. Just k]
+
+    needOldPassword :: AuthId App -> AuthHandler App Bool
+    needOldPassword _ = return False
+    
+    verifyAccount :: AuthEmailId App -> AuthHandler App (Maybe (AuthId App))
+    verifyAccount uid = liftHandler $ runDB $ do
+        mu <- get uid
+        case mu of
+          Nothing -> return Nothing
+          Just _ -> do
+              update uid [UserVerified =. True, UserVerkey =. Nothing]
+              return $ Just uid
+    
+    getPassword :: AuthId App -> AuthHandler App (Maybe SaltedPass)
+    getPassword = liftHandler . runDB . fmap (userPassword =<<) . get
+    
+    setPassword :: AuthId App -> SaltedPass -> AuthHandler App ()
+    setPassword uid pass = liftHandler $ runDB $ update uid [UserPassword =. Just pass]
+    
+    getEmailCreds :: Identifier -> AuthHandler App (Maybe (EmailCreds App))
+    getEmailCreds email = liftHandler $ runDB $ do
+        mu <- getBy $ UniqueUser email
+        case mu of
+          Nothing -> return Nothing
+          Just (Entity uid u) -> return $ Just EmailCreds
+              { emailCredsId = uid
+              , emailCredsAuthId = Just uid
+              , emailCredsStatus = isJust $ userPassword u
+              , emailCredsVerkey = userVerkey u
+              , emailCredsEmail = email
+              }
+    
+    getEmail :: AuthEmailId App -> AuthHandler App (Maybe Yesod.Auth.Email.Email)
+    getEmail = liftHandler . runDB . fmap (fmap userEmail) . get
+    
+
+gmailApi :: String -> String
+gmailApi = printf "https://gmail.googleapis.com/gmail/v1/users/%s/messages/send"
 
 
 formLogin :: Route App -> Widget

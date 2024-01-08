@@ -1,3 +1,4 @@
+SignInViaEmail: Connectez-vous par e-mail
 Cleared: Effacé
 InvalidFormData: Données de formulaire incorrectes
 RecordDeleted: L'enregistrement a été supprimé

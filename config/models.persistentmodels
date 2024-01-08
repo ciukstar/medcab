@@ -16,8 +16,10 @@ UserCred
 
 User
     email Text
-    password Text Maybe
     authType AuthenticationType
+    password Text Maybe
+    verkey Text Maybe
+    verified Bool
     name Text Maybe
     UniqueUser email
     deriving Typeable
@@ -31,7 +33,7 @@ Store
 
 Token
   api Text
-  store SaveOption
+  store StoreType
   UniqueToken api
 
 Email
