@@ -1,3 +1,7 @@
+GmailAccount: Gmail account
+ClickToVerifyAccount: Click the link in the email to verify your account
+JustSentEmailTo: We just sent an email to
+VerifyEmailPlease: Please verify your email
 SignInViaEmail: Sign in via email
 Cleared: Cleared
 InvalidFormData: Invalid form data

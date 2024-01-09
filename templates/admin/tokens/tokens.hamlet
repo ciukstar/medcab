@@ -23,3 +23,7 @@
         _{MsgClearSettings}
       <md-filled-button type=submit form=formStoreType>
         _{MsgInitialize}
+
+$forall (_,msg) <- messages
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <span.body-small>#{msg}

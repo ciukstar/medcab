@@ -1,3 +1,7 @@
+GmailAccount: Учетная запись Gmail
+ClickToVerifyAccount: Нажмите ссылку в письме, чтобы подтвердить свою учетную запись
+JustSentEmailTo: Мы только что отправили электронное письмо на
+VerifyEmailPlease: Пожалуйста, подтвердите вашу электронную почту
 SignInViaEmail: Войти по электронной почте
 Cleared: Очищено
 InvalidFormData: Неверные данные формы

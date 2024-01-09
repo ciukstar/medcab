@@ -1,8 +1,23 @@
 
 <header.primary>
   <div #headerStart>
-    <md-filled-icon-button aria-label=_{MsgMainMenu} #sidenavToggle>
-      <md-icon>menu
+    <details.app-nav-drawer>
+      <summary>
+        <md-filled-icon-button aria-label=_{MsgMainMenu}
+          onclick="document.querySelector('details.app-nav-drawer').open = true">
+          <md-icon>menu
+
+      <aside.app-nav-drawer.surface.large-end.elevation-5>
+        <div.app-header>
+          <md-icon-button onclick="document.querySelector('details.app-nav-drawer').open = false">
+            <md-icon>close
+
+        <md-filled-tonal-button href=@{HomeR}>
+          _{MsgWelcome}
+
+        <md-filled-tonal-button href=@{AdminR TokensR}>
+          _{MsgTokens}
+          
     <span.title-large>
       _{MsgWelcome}
 
@@ -53,17 +68,5 @@
   <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
 
 $forall (_,msg) <- msgs
-  <div.app-snackbar>
+  <div.app-snackbar.shape-small.elevation-1.primary-container>
     #{msg}
-
-<aside.app-nav-drawer.background #sidenav style="display:none">
-
-  <div.app-header>
-    <md-icon-button #buttonClose>
-      <md-icon>close
-
-  <md-filled-tonal-button href=@{HomeR}>
-    _{MsgWelcome}
-    
-  <md-filled-tonal-button href=@{AdminR TokensR}>
-    _{MsgTokens}

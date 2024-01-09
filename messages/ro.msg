@@ -1,3 +1,7 @@
+GmailAccount: Cont Gmail
+ClickToVerifyAccount: Faceți clic pe linkul din e-mail pentru a vă verifica contul
+JustSentEmailTo: Tocmai am trimis un e-mail la
+VerifyEmailPlease: Vă rugăm să vă verificați e-mailul
 SignInViaEmail: Conectați-vă prin e-mail
 Cleared: S-a șters
 InvalidFormData: Date de formular nevalide

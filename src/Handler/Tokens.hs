@@ -33,7 +33,7 @@ import Foundation
     , AppMessage
       ( MsgTokens, MsgBack, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
-      , MsgRecordDeleted, MsgInvalidFormData, MsgCleared
+      , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress, MsgGmailAccount
       ), App (appSettings)
     )
 import Model
@@ -52,7 +52,7 @@ import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
-    , getUrlRender, deleteSession
+    , getUrlRender, deleteSession, getMessageRender, getMessages
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
 import Yesod.Core.Widget (setTitleI, addScript)
@@ -65,7 +65,7 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsId, fsName, fsTooltip, fsAttrs)
     )
 
-import Handler.Material3 (m3radioField)
+import Handler.Material3 (md3radioField, md3emailField)
 
 
 getTokensHookR :: Handler Html
@@ -76,7 +76,7 @@ getTokensHookR = do
     let googleClientSecret = appGoogleClientSecret app
     
     code <- runInputGet $ ireq textField "code"
-    store <- readMaybe .  unpack <$> runInputGet (ireq textField "state")
+    state <- readMaybe .  unpack <$> runInputGet (ireq textField "state")
 
     r <- liftIO $ post "https://oauth2.googleapis.com/token"
          [ "code" := code
@@ -93,22 +93,21 @@ getTokensHookR = do
 
     let accessToken = r L.^. responseBody . key "access_token" . _String
     let refreshToken = r L.^. responseBody . key "refresh_token" . _String
-    let sender = "ciukstar@gmail.com"
 
     
-    case store of
-      Just x@StoreTypeSession -> do
+    case state of
+      Just (email,x@StoreTypeSession) -> do
           setSession gmailAccessToken accessToken
           setSession gmailRefreshToken refreshToken
-          setSession gmailSender sender
+          setSession gmailSender email
           _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           addMessageI info MsgRecordEdited
           redirect $ AdminR TokensR
-      Just x@StoreTypeDatabase -> do
+      Just (email,x@StoreTypeDatabase) -> do
           Entity tid _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           _ <- runDB $ upsert (Store tid gmailAccessToken accessToken) [StoreVal P.=. accessToken]
           _ <- runDB $ upsert (Store tid gmailRefreshToken refreshToken) [StoreVal P.=. refreshToken]
-          _ <- runDB $ upsert (Store tid gmailSender sender) [StoreVal P.=. sender]
+          _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
           addMessageI info MsgRecordEdited
           redirect $ AdminR TokensR
       Nothing -> do
@@ -142,6 +141,7 @@ postTokensClearR = do
       _otherwise -> do
           (fw,et) <- generateFormPost $ formStoreOptions token
           addMessageI warn MsgInvalidFormData
+          messages <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               $(widgetFile "admin/tokens/tokens")
@@ -182,6 +182,7 @@ postTokensR = do
           
       _otherwise -> do
           (fw2,et2) <- generateFormPost formTokensClear
+          messages <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               addScript (StaticR js_tokens_min_js)
@@ -198,26 +199,38 @@ getTokensR = do
 
     (fw2,et2) <- generateFormPost formTokensClear
     (fw,et) <- generateFormPost $ formStoreOptions token
+    messages <- getMessages
     defaultLayout $ do
         setTitleI MsgTokens
         addScript (StaticR js_tokens_min_js)
         $(widgetFile "admin/tokens/tokens")
 
 
-formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult StoreType, Widget)
+formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult (Text,StoreType), Widget)
 formStoreOptions token extra = do
+    msg <- getMessageRender
     let storeOptions = [ (MsgUserSession, StoreTypeSession)
                        , (MsgDatabase, StoreTypeDatabase)
                        ]
-    (storeR,storeV) <- mreq (m3radioField (optionsPairs storeOptions)) FieldSettings
+    (emailR,emailV) <- mreq md3emailField FieldSettings
+        { fsLabel = SomeMessage MsgEmailAddress
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = [("label", msg MsgGmailAccount)]
+        } (Just "ciukstar@gmail.com")
+    (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
         { fsLabel = SomeMessage MsgStoreType
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
         , fsAttrs = [("class","app-options-store-type")]
         } (tokenStore . entityVal <$> token)
-    return (storeR,[whamlet|
-#{extra}
-^{fvInput storeV}
-|])
+    return ( (,) <$> emailR <*> storeR
+           , [whamlet|
+               #{extra}
+               ^{fvInput emailV}
+               <fieldset.shape-medium>
+                 <legend.body-medium>_{MsgStoreType}<sup>*
+                 ^{fvInput storeV}
+             |]
+           )
 
 
 info :: Text

@@ -27,7 +27,7 @@ import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 
 import Yesod.Auth.Message
-    ( AuthMessage(InvalidLogin), englishMessage, frenchMessage, russianMessage)
+    ( AuthMessage(InvalidLogin, EnterEmail, Register, RegisterLong, ConfirmationEmailSentTitle), englishMessage, frenchMessage, russianMessage)
 import Yesod.Auth.HashDB (authHashDBWithForm)
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
@@ -48,7 +48,7 @@ import Yesod.Auth.Email
     , YesodAuthEmail
       ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
       , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
-      , afterPasswordRoute, needOldPassword, emailLoginHandler
+      , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler, confirmationEmailSentResponse
       )
     , SaltedPass, Identifier
     , EmailCreds
@@ -69,7 +69,7 @@ import qualified Data.Text.Lazy.Encoding
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
-import Handler.Material3 (m3emailField, m3passwordField)
+import Handler.Material3 (md3emailField, md3passwordField)
 
 
 
@@ -155,7 +155,7 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-    
+
     isAuthorized AccountsR _ = return Authorized
     isAuthorized AccountCreateR _ = return Authorized
     isAuthorized (AccountPhotoR _) _ = isAuthenticated
@@ -169,7 +169,7 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-    
+
     isAuthorized (AdminR TokensClearR) _ = return Authorized
     isAuthorized (AdminR TokensHookR) _ = return Authorized
     isAuthorized (AdminR TokensR) _ = return Authorized
@@ -330,6 +330,68 @@ instance YesodAuth App where
 instance YesodAuthEmail App where
     type AuthEmailId App = UserId
 
+    confirmationEmailSentResponse :: Text -> AuthHandler App TypedContent
+    confirmationEmailSentResponse email = do
+        selectRep $ provideRep $ authLayout $ do
+            setTitleI ConfirmationEmailSentTitle
+            [whamlet|
+                <h1.title-medium>
+                  _{MsgVerifyEmailPlease}
+
+                <div.body-medium>
+                  _{MsgJustSentEmailTo} <code>#{email}</code>. _{MsgClickToVerifyAccount}.
+
+                <button>
+                  Resend email
+
+                <button>
+                  Update email
+            |]
+
+    registerHandler :: AuthHandler App Html
+    registerHandler = do
+        (fw,et) <- liftHandler $ generateFormPost formRegEmailForm
+        parent <- getRouteToParent
+        authLayout $ do
+            setTitleI RegisterLong
+            formRegisterWrapper <- newIdent
+            formRegister <- newIdent
+            toWidget [cassius|
+                         ##{formRegisterWrapper}
+                           padding: 1rem 2rem
+                           display: flex
+                           flex-direction: column
+                           gap: 1rem
+                           ##{formRegister}
+                             display: flex
+                             flex-direction: column
+                             gap: 1rem
+                     |]
+            [whamlet|
+                <div ##{formRegisterWrapper}>
+                  <h1.body-medium>
+                    _{EnterEmail}
+                  <form method=post action=@{parent registerR} enctype=#{et} ##{formRegister}>
+                    ^{fw}
+                    <md-filled-button type=submit>
+                      _{Register}
+            |]
+      where
+          formRegEmailForm :: Html -> MForm Handler (FormResult Text, Widget)
+          formRegEmailForm extra = do
+              renderMsg <- getMessageRender
+              (emailR,emailV) <- mreq md3emailField FieldSettings
+                  { fsLabel = SomeMessage MsgEmailAddress
+                  , fsId = Just "email", fsName = Just "email", fsTooltip = Nothing
+                  , fsAttrs = [("label", renderMsg MsgEmailAddress)]
+                  } Nothing
+              let w = [whamlet|
+                          #{extra}
+                          ^{fvInput emailV}
+                      |]
+              return (emailR,w)
+
+
     emailLoginHandler :: (Route Auth -> Route App) -> Widget
     emailLoginHandler parent = do
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
@@ -368,14 +430,14 @@ instance YesodAuthEmail App where
           formEmailLogin :: Html -> MForm Handler (FormResult (Text,Text),Widget)
           formEmailLogin extra = do
               msgRender <- liftHandler getMessageRender
-              (emailR,emailV) <- mreq m3emailField FieldSettings
+              (emailR,emailV) <- mreq md3emailField FieldSettings
                   { fsLabel = SomeMessage MsgEmailAddress
-                  , fsId = Nothing, fsTooltip = Nothing, fsName = Nothing
+                  , fsTooltip = Nothing, fsId = Just "email", fsName = Just "email"
                   , fsAttrs = [("label", msgRender MsgEmailAddress)]
                   } Nothing
-              (passR,passV) <- mreq m3passwordField FieldSettings
+              (passR,passV) <- mreq md3passwordField FieldSettings
                   { fsLabel = SomeMessage MsgPassword
-                  , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+                  , fsTooltip = Nothing, fsId = Just "password", fsName = Just "password"
                   , fsAttrs = [("label", msgRender MsgPassword)]
                   } Nothing
               let r = (,) <$> emailR <*> passR
@@ -390,8 +452,8 @@ instance YesodAuthEmail App where
                           ^{fvInput passV}
                       |]
               return (r,w)
-              
-              
+
+
 
     afterPasswordRoute :: App -> Route App
     afterPasswordRoute _ = HomeR
@@ -437,7 +499,7 @@ instance YesodAuthEmail App where
 
         case (atoken,rtoken,sender) of
           (Just at,Just rt,Just sendby) -> do
-              
+
               let mail = (emptyMail $ Address Nothing "noreply")
                       { mailTo = [Address Nothing email]
                       , mailHeaders = [("Subject", "Verify your email address")]
@@ -487,16 +549,16 @@ instance YesodAuthEmail App where
                   _other -> undefined
                 Right _ok -> return ()
           _otherwise -> undefined
-        
+
     getVerifyKey :: AuthEmailId App -> AuthHandler App (Maybe VerKey)
     getVerifyKey = liftHandler . runDB . fmap (userVerkey =<<) . get
-    
+
     setVerifyKey :: AuthEmailId App -> VerKey -> AuthHandler App ()
     setVerifyKey uid k = liftHandler $ runDB $ update uid [UserVerkey =. Just k]
 
     needOldPassword :: AuthId App -> AuthHandler App Bool
     needOldPassword _ = return False
-    
+
     verifyAccount :: AuthEmailId App -> AuthHandler App (Maybe (AuthId App))
     verifyAccount uid = liftHandler $ runDB $ do
         mu <- get uid
@@ -505,13 +567,13 @@ instance YesodAuthEmail App where
           Just _ -> do
               update uid [UserVerified =. True, UserVerkey =. Nothing]
               return $ Just uid
-    
+
     getPassword :: AuthId App -> AuthHandler App (Maybe SaltedPass)
     getPassword = liftHandler . runDB . fmap (userPassword =<<) . get
-    
+
     setPassword :: AuthId App -> SaltedPass -> AuthHandler App ()
     setPassword uid pass = liftHandler $ runDB $ update uid [UserPassword =. Just pass]
-    
+
     getEmailCreds :: Identifier -> AuthHandler App (Maybe (EmailCreds App))
     getEmailCreds email = liftHandler $ runDB $ do
         mu <- getBy $ UniqueUser email
@@ -524,10 +586,10 @@ instance YesodAuthEmail App where
               , emailCredsVerkey = userVerkey u
               , emailCredsEmail = email
               }
-    
+
     getEmail :: AuthEmailId App -> AuthHandler App (Maybe Yesod.Auth.Email.Email)
     getEmail = liftHandler . runDB . fmap (fmap userEmail) . get
-    
+
 
 gmailApi :: String -> String
 gmailApi = printf "https://gmail.googleapis.com/gmail/v1/users/%s/messages/send"

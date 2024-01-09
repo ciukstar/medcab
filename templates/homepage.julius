@@ -1,17 +1,1 @@
 
-[ document.getElementById('sidenavToggle'),
-  document.getElementById('buttonClose')
-].forEach(function (x) {
-  x.addEventListener('click',function (e) {
-    const menu = document.getElementById('sidenav');
-    if ("none" === menu.style.display) {
-      menu.style.width = 'auto';
-      menu.style.display = 'flex';
-      menu.style['flex-direction'] = 'column';
-      menu.style.gap = '1rem';
-    } else {
-      menu.style.width = 0;
-      menu.style.display = 'none';
-    }
-  });
-});

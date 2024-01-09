@@ -1,3 +1,7 @@
+GmailAccount: Compte Gmail
+ClickToVerifyAccount: Cliquez sur le lien dans l'e-mail pour vérifier votre compte
+JustSentEmailTo: Nous venons d'envoyer un email à
+VerifyEmailPlease: Veuillez vérifier votre email
 SignInViaEmail: Connectez-vous par e-mail
 Cleared: Effacé
 InvalidFormData: Données de formulaire incorrectes

@@ -2,10 +2,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Handler.Material3
-  ( m3emailField
-  , m3passwordField
-  , m3textField
-  , m3radioField
+  ( md3emailField
+  , md3passwordField
+  , md3textField
+  , md3radioField
   ) where
 
 import Data.Text (Text)
@@ -19,8 +19,8 @@ import Yesod.Core.Handler (HandlerFor)
 import Text.Shakespeare.I18N (RenderMessage)
 
 
-m3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
-m3radioField options = (radioField options)
+md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
+md3radioField options = (radioField options)
     { fieldView = \theId name attrs x isReq -> do
           opts <- zip [1 :: Int ..] . olOptions <$> handlerToWidget options
           let sel (Left _) _ = False
@@ -34,19 +34,19 @@ m3radioField options = (radioField options)
 |] }
 
 
-m3textField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
-m3textField = textField { fieldView = \theId name attrs eval isReq -> [whamlet|
+md3textField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
+md3textField = textField { fieldView = \theId name attrs eval isReq -> [whamlet|
 <md-filled-text-field ##{theId} type=text name=#{name} :isReq:required=true value=#{either id id eval} *{attrs}>
 |] }
 
 
-m3passwordField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
-m3passwordField = passwordField { fieldView = \theId name attrs eval isReq -> [whamlet|
+md3passwordField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
+md3passwordField = passwordField { fieldView = \theId name attrs eval isReq -> [whamlet|
 <md-filled-text-field ##{theId} type=password name=#{name} :isReq:required=true value=#{either id id eval} *{attrs}>
 |] }
 
 
-m3emailField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
-m3emailField = emailField { fieldView = \theId name attrs eval isReq -> [whamlet|
+md3emailField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
+md3emailField = emailField { fieldView = \theId name attrs eval isReq -> [whamlet|
 <md-filled-text-field ##{theId} type=email name=#{name} :isReq:required=true value=#{either id id eval} *{attrs}>
 |] }

@@ -61,7 +61,7 @@ import Yesod.Form.Types
 import Yesod.Persist (YesodPersist(runDB))
 
 import Handler.Material3
-    ( m3textField, m3passwordField, m3emailField )
+    ( md3textField, md3passwordField, md3emailField )
 import Text.Printf (printf)
 import Network.Mail.Mime
     ( Mail, simpleMailInMemory, Address (Address), renderMail' )
@@ -175,17 +175,17 @@ getAccountCreateR = do
 formAccount :: Html -> MForm Handler (FormResult User, Widget)
 formAccount extra = do
     msgRender <- liftHandler getMessageRender
-    (emailR,emailV) <- mreq m3emailField FieldSettings
+    (emailR,emailV) <- mreq md3emailField FieldSettings
         { fsLabel = SomeMessage MsgEmailAddress
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", msgRender MsgEmailAddress)]
         } Nothing
-    (passR,passV) <- mreq m3passwordField FieldSettings
+    (passR,passV) <- mreq md3passwordField FieldSettings
         { fsLabel = SomeMessage MsgPassword
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", msgRender MsgPassword)]
         } Nothing
-    (nameR,nameV) <- mreq m3textField FieldSettings
+    (nameR,nameV) <- mreq md3textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", msgRender MsgFullName)]
