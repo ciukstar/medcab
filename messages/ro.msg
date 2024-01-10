@@ -1,3 +1,5 @@
+DoNotHaveAnAccount: Nu aveți cont?
+CreateAccount: Creează-ți un cont
 GmailAccount: Cont Gmail
 ClickToVerifyAccount: Faceți clic pe linkul din e-mail pentru a vă verifica contul
 JustSentEmailTo: Tocmai am trimis un e-mail la

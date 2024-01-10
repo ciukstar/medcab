@@ -2,6 +2,7 @@
 
 /form/account/create    AccountCreateR GET
 /accounts/#UserId/photo AccountPhotoR  GET
+/accounts/#UserId       AccountR       GET
 /accounts               AccountsR      POST
 
 /video VideoR GET

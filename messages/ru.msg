@@ -1,3 +1,5 @@
+DoNotHaveAnAccount: У вас нет учетной записи?
+CreateAccount: Зарегистрироваться
 GmailAccount: Учетная запись Gmail
 ClickToVerifyAccount: Нажмите ссылку в письме, чтобы подтвердить свою учетную запись
 JustSentEmailTo: Мы только что отправили электронное письмо на

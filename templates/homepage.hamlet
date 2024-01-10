@@ -3,7 +3,7 @@
   <div #headerStart>
     <details.app-nav-drawer>
       <summary>
-        <md-filled-icon-button aria-label=_{MsgMainMenu}
+        <md-filled-icon-button type=button aria-label=_{MsgMainMenu}
           onclick="document.querySelector('details.app-nav-drawer').open = true">
           <md-icon>menu
 
@@ -17,18 +17,25 @@
 
         <md-filled-tonal-button href=@{AdminR TokensR}>
           _{MsgTokens}
-          
+
     <span.title-large>
       _{MsgWelcome}
 
   $maybe Entity uid _ <- user
-    <a href=#>
-      <img src=@{AccountPhotoR uid} width=24 height=24 style="clip-path:circle(50%)" alt=_{MsgPhoto} loading=lazy>
+    <span style="position:relaive">
+      <md-filled-icon-button type=button aria-label=_{MsgUserAccount} #btnUserAccount
+        onclick="document.getElementById('menuUserAccount').open = !document.getElementById('menuUserAccount').open">
+        <img src=@{AccountPhotoR uid} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
+      <md-menu anchor=btnUserAccount x-offset=16 y-offset=16 #menuUserAccount>
+        <md-menu-item href=@{AccountR uid}>
+          <div slot=headline>_{MsgUserAccount}
+        <md-menu-item href=@{AuthR LogoutR}>
+          <div slot=headline>_{MsgSignOut}
   $nothing
     <md-filled-icon-button href=@{AuthR LoginR} aria-label=_{MsgSignIn}>
       <md-icon>login
 
-  
+
 <main>
 
   <figure #figureLogo>

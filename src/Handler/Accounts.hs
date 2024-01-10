@@ -7,6 +7,7 @@ module Handler.Accounts
   ( getAccountPhotoR
   , getAccountCreateR
   , postAccountsR
+  , getAccountR
   ) where
 
 import Control.Exception.Safe
@@ -16,7 +17,6 @@ import qualified Control.Lens as L ((^.))
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (object, (.=))
 import Database.Persist (Entity(Entity), PersistStoreWrite (insert_))
-import Data.FileEmbed (embedFile)
 import Data.Function ((&))
 import Database.Esqueleto.Experimental
     (selectOne, from, table, where_, (^.), (==.), val, Value (unValue))
@@ -27,7 +27,7 @@ import Model
     , EntityField (UserPhotoUser, TokenApi, StoreToken, StoreVal, StoreKey)
     , User (User), AuthenticationType (UserAuthTypePassword), Token (Token)
     , StoreType (StoreTypeDatabase, StoreTypeSession)
-    , gmail, gmailAccessToken, gmailRefreshToken, Store (Store), gmailSender
+    , gmail, gmailAccessToken, gmailRefreshToken, Store, gmailSender
     )
 import Network.HTTP.Client
     ( HttpExceptionContent(StatusCodeException)
@@ -35,23 +35,25 @@ import Network.HTTP.Client
     )
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith)
 import Foundation
-    ( Handler, Widget
-    , Route (HomeR, AccountsR, StaticR)
+    ( Handler, Widget, App
+    , Route (HomeR, AccountsR, StaticR, AuthR)
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgEmailAddress
-      , MsgPassword, MsgFullName, MsgUserRegistered, MsgSignUp
-      ), App
+      , MsgPassword, MsgFullName, MsgUserRegistered, MsgSignUp, MsgSignOut
+      )
     )
 import Settings (widgetFile)
-import Settings.StaticFiles (js_account_min_js)
+import Settings.StaticFiles
+    ( js_account_min_js, img_person_FILL0_wght400_GRAD0_opsz24_white_svg )
 import Text.Hamlet (Html, HtmlUrlI18n, ihamlet)
+import Yesod.Auth (Route (LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
     , MonadHandler (liftHandler), addMessageI, redirect, lookupSession
-    , getUrlRender, toHtml, getUrlRenderParams
+    , toHtml, getUrlRenderParams
     )
 import Yesod.Core.Content
-    (TypedContent (TypedContent), typeSvg, ToContent (toContent))
+    (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Core.Widget (setTitleI, whamlet, addScript)
 import Yesod.Form.Functions (runFormPost, generateFormPost, mreq)
 import Yesod.Form.Types
@@ -70,6 +72,14 @@ import qualified Data.Text.Lazy as TL (empty)
 import Data.ByteString.Lazy as BSL (toStrict)
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import Network.Wreq.Lens (responseStatus, statusCode)
+
+
+getAccountR :: UserId -> Handler Html
+getAccountR uid = do
+    defaultLayout $ do
+        setTitleI MsgUserAccount
+        addScript (StaticR js_account_min_js)
+        $(widgetFile "accounts/account")
 
 
 postAccountsR :: Handler Html
@@ -139,7 +149,7 @@ postAccountsR = do
       _otherwise ->  defaultLayout $ do
           setTitleI MsgUserAccount
           addScript (StaticR js_account_min_js)
-          $(widgetFile "account/create")
+          $(widgetFile "accounts/create")
 
 
 buildHtml :: HtmlUrlI18n AppMessage (Route App)
@@ -169,7 +179,7 @@ getAccountCreateR = do
     defaultLayout $ do
         setTitleI MsgUserAccount
         addScript (StaticR js_account_min_js)
-        $(widgetFile "account/create")
+        $(widgetFile "accounts/create")
 
 
 formAccount :: Html -> MForm Handler (FormResult User, Widget)
@@ -193,10 +203,10 @@ formAccount extra = do
     return ( User <$> emailR <*> pure UserAuthTypePassword
              <*> (pure <$> passR) <*> pure Nothing <*> pure True <*> (pure <$> nameR)
            , [whamlet|
-#{extra}
-$forall v <- [emailV,passV,nameV]
-  ^{fvInput v}
-|]
+                     #{extra}
+                     $forall v <- [emailV,passV,nameV]
+                       ^{fvInput v}
+                     |]
            )
       
 
@@ -206,10 +216,9 @@ getAccountPhotoR uid = do
         x <- from $ table @UserPhoto
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
-    return $ case photo of
-      Just (Entity _ (UserPhoto _ mime bs)) -> TypedContent (encodeUtf8 mime) $ toContent bs
-      Nothing -> TypedContent typeSvg
-        $ toContent $(embedFile "static/img/person_FILL0_wght400_GRAD0_opsz24.svg")
+    case photo of
+      Just (Entity _ (UserPhoto _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      Nothing -> redirect $ StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg
 
 
 info :: Text

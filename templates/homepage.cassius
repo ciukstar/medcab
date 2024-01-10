@@ -2,7 +2,7 @@
 header
   position: sticky
   top: 0
-  z-index: 1
+  z-index: 2
   padding: 1rem
   display: flex
   flex-direction: row
@@ -24,9 +24,11 @@ main
     md-icon
       color: red
       --md-icon-size: 128px
-  md-primary-tab a
-    text-decoration: none
-    border: 1px solid black
+  md-tabs
+    z-index: 0
+    md-primary-tab a
+      text-decoration: none
+      border: 1px solid black
   div[role=tabpanel]
     margin: 1rem
     display: flex

@@ -53,6 +53,7 @@ import Handler.Accounts
     ( getAccountPhotoR
     , getAccountCreateR
     , postAccountsR
+    , getAccountR
     )
     
 import Handler.Video ( getVideoR )

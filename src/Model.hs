@@ -17,8 +17,10 @@
 module Model where
 
 import ClassyPrelude.Yesod
-import Database.Persist.Quasi
-import Yesod.Auth.HashDB (HashDBUser (userPasswordHash, setPasswordHash))
+    ( Eq, Ord, Read, Show, Typeable, Bool, ByteString, Text, derivePersistField
+    , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
+    )
+import Database.Persist.Quasi ( lowerCaseSettings )
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession
@@ -26,7 +28,9 @@ data StoreType = StoreTypeDatabase | StoreTypeSession
 derivePersistField "StoreType"
 
 
-data AuthenticationType = UserAuthTypePassword | UserAuthTypeEmail | UserAuthTypeGoogle
+data AuthenticationType = UserAuthTypePassword
+                        | UserAuthTypeEmail
+                        | UserAuthTypeGoogle
     deriving (Show, Read, Eq, Ord)
 derivePersistField "AuthenticationType"
 
@@ -36,16 +40,6 @@ derivePersistField "AuthenticationType"
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
-
-
-
-instance HashDBUser User where
-    
-    userPasswordHash :: User -> Maybe Text
-    userPasswordHash = userPassword
-    
-    setPasswordHash :: Text -> User -> User
-    setPasswordHash h u = u { userPassword = Just h }
 
 
 gmailSender :: Text

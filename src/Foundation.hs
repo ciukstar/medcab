@@ -27,8 +27,13 @@ import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 
 import Yesod.Auth.Message
-    ( AuthMessage(InvalidLogin, EnterEmail, Register, RegisterLong, ConfirmationEmailSentTitle), englishMessage, frenchMessage, russianMessage)
-import Yesod.Auth.HashDB (authHashDBWithForm)
+    ( AuthMessage
+      ( InvalidLogin, EnterEmail, Register, RegisterLong
+      , ConfirmationEmailSentTitle, SetPassTitle, SetPass, CurrentPassword
+      , NewPass, ConfirmPass
+      )
+    , englishMessage, frenchMessage, russianMessage
+    )
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
 import Yesod.Default.Util (addStaticContentExternal)
@@ -48,13 +53,14 @@ import Yesod.Auth.Email
     , YesodAuthEmail
       ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
       , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
-      , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler, confirmationEmailSentResponse
+      , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler
+      , confirmationEmailSentResponse, setPasswordHandler
       )
     , SaltedPass, Identifier
     , EmailCreds
-      ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus, emailCredsVerkey
-      , emailCredsEmail
-      ), Email, loginR, registerR
+      ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus
+      , emailCredsVerkey, emailCredsEmail
+      ), Email, loginR, registerR, setpassR
     )
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith)
 import qualified Network.Wreq.Lens as WL
@@ -155,7 +161,8 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-
+    
+    isAuthorized (AccountR _) _ = isAuthenticated
     isAuthorized AccountsR _ = return Authorized
     isAuthorized AccountCreateR _ = return Authorized
     isAuthorized (AccountPhotoR _) _ = isAuthenticated
@@ -323,12 +330,81 @@ instance YesodAuth App where
                         (appGoogleClientId . appSettings $ app)
                         (appGoogleClientSecret . appSettings $ app)
                       , authEmail
-                      , authHashDBWithForm formLogin (Just . UniqueUser)
                       ]
 
 
 instance YesodAuthEmail App where
     type AuthEmailId App = UserId
+
+    setPasswordHandler :: Bool -> AuthHandler App TypedContent
+    setPasswordHandler old = do
+        parent <- getRouteToParent
+        selectRep $ provideRep $ authLayout $ do
+            setTitleI SetPassTitle
+            idFormSetPassWrapper <- newIdent
+            idFormSetPass <- newIdent
+            (fw,et) <- liftHandler $ generateFormPost formSetPassword
+            toWidget [cassius|
+                             ##{idFormSetPassWrapper}
+                               align-self: stretch
+                               padding: 2rem 2rem 1rem 2rem
+                               display: flex
+                               flex-direction: column
+                               gap: 1rem
+                               ##{idFormSetPass}
+                                 display: flex
+                                 flex-direction: column
+                                 gap: 1rem
+                             |]
+            [whamlet|
+                    <h1.title-medium>_{SetPass}
+                    <div ##{idFormSetPassWrapper}>
+                      <form method=post action=@{parent setpassR} enctype=#{et} ##{idFormSetPass}>
+                        ^{fw}
+                        <md-filled-button type=submit>
+                          _{SetPassTitle}
+                    |]
+      where
+          formSetPassword :: Html -> MForm Handler (FormResult (Text,Text,Text),Widget)
+          formSetPassword extra = do
+              rndr <- getMessageRender
+              (currR,currV) <- mreq md3passwordField FieldSettings
+                  { fsLabel = SomeMessage CurrentPassword
+                  , fsTooltip = Nothing
+                  , fsId = Just "currentPassword"
+                  , fsName = Just "current"
+                  , fsAttrs = [("label", rndr CurrentPassword)]
+                  } Nothing
+              (newR,newV) <- mreq md3passwordField FieldSettings
+                  { fsLabel = SomeMessage NewPass
+                  , fsTooltip = Nothing
+                  , fsId = Just "newPassword"
+                  , fsName = Just "new"
+                  , fsAttrs = [("label", rndr NewPass)]
+                  } Nothing
+              (confR,confV) <- mreq md3passwordField FieldSettings
+                  { fsLabel = SomeMessage ConfirmPass
+                  , fsTooltip = Nothing
+                  , fsId = Just "confirmPassword"
+                  , fsName = Just "confirm"
+                  , fsAttrs = [("label", rndr ConfirmPass)]
+                  } Nothing
+
+              let r = (,,) <$> currR <*> newR <*> confR
+              let w = do
+                      toWidget [cassius|
+                                       ##{fvId currV}, ##{fvId newV}, ##{fvId confV}
+                                         align-self: stretch
+                                       |]
+                      [whamlet|
+                              #{extra}
+                              $if old
+                                ^{fvInput currV}
+                              ^{fvInput newV}
+                              ^{fvInput confV}
+                              |]
+              return (r,w)
+
 
     confirmationEmailSentResponse :: Text -> AuthHandler App TypedContent
     confirmationEmailSentResponse email = do
@@ -338,8 +414,11 @@ instance YesodAuthEmail App where
                 <h1.title-medium>
                   _{MsgVerifyEmailPlease}
 
-                <div.body-medium>
-                  _{MsgJustSentEmailTo} <code>#{email}</code>. _{MsgClickToVerifyAccount}.
+                <p>
+                  <div.body-medium>
+                    _{MsgJustSentEmailTo} <code>#{email}</code>.
+                  <div.body-medium>
+                    _{MsgClickToVerifyAccount}.
 
                 <button>
                   Resend email
@@ -394,6 +473,7 @@ instance YesodAuthEmail App where
 
     emailLoginHandler :: (Route Auth -> Route App) -> Widget
     emailLoginHandler parent = do
+        msgs <- getMessages
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
@@ -404,6 +484,8 @@ instance YesodAuthEmail App where
               display: flex
               flex-direction: column
               gap: 1rem
+              .error
+                padding: 1rem
               ##{idFormEmailLogin}
                 display: flex
                 flex-direction: column
@@ -411,9 +493,13 @@ instance YesodAuthEmail App where
         |]
         [whamlet|
             <div ##{idFormEmailLoginWarpper}>
-               <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
-                 <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
-                   _{MsgOr}
+              <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
+                <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
+                  _{MsgOr}
+
+              $forall (_,msg) <- filter ((/=) info . fst) msgs
+                <div.app-banner.error.body-medium>
+                  #{msg}
               <form method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>
                 ^{fw}
                 <md-filled-button type=submit #btnLogin>
@@ -421,9 +507,9 @@ instance YesodAuthEmail App where
 
             <div>
               <div.body-small>
-                Don&apos;t have an account?
+                _{MsgDoNotHaveAnAccount}
               <md-text-button href=@{parent registerR}>
-                Create account
+                _{MsgCreateAccount}
 
         |]
       where
@@ -593,14 +679,6 @@ instance YesodAuthEmail App where
 
 gmailApi :: String -> String
 gmailApi = printf "https://gmail.googleapis.com/gmail/v1/users/%s/messages/send"
-
-
-formLogin :: Route App -> Widget
-formLogin r = do
-    formWrapper <- newIdent
-    formAuth <- newIdent
-    msgs <- getMessages
-    $(widgetFile "auth/form")
 
 
 googleButton :: Widget

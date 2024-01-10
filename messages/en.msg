@@ -1,3 +1,5 @@
+DoNotHaveAnAccount: Don't have an account?
+CreateAccount: Create account
 GmailAccount: Gmail account
 ClickToVerifyAccount: Click the link in the email to verify your account
 JustSentEmailTo: We just sent an email to
