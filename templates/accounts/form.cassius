@@ -1,0 +1,14 @@
+
+##{idUserIdent}
+  text-align: center
+
+##{idFigurePhotoUser}
+  figcaption
+    text-transform: lowercase
+
+##{idLabelPhotoUser}
+  text-align: center
+  align-self: center
+  
+##{idImgPhotoUser}
+  clip-path: circle(50%)

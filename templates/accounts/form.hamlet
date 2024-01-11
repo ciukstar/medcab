@@ -1,0 +1,19 @@
+
+#{extra}
+
+$maybe Entity _ (User email _ _ _ _ _) <- user
+  <div.label-large ##{idUserIdent}>#{email}
+  
+<label for=#{fvId photoV} ##{idLabelPhotoUser}>
+  <figure ##{idFigurePhotoUser}>
+    $maybe Entity uid _ <- user
+      <img src=@{AccountPhotoR uid} width=96 height=auto
+           ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
+    $nothing
+      <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=96 height=auto
+           ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
+    <figcaption.body-medium>
+      _{MsgPhoto}
+^{fvInput photoV}
+
+^{fvInput nameV}
