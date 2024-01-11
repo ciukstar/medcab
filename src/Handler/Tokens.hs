@@ -27,20 +27,22 @@ import Database.Persist
     )
 import qualified Database.Persist as P ((=.))
 import Foundation
-    ( Handler, Widget
+    ( Handler, Widget, App (appSettings)
     , Route (HomeR, StaticR, AdminR)
     , AdminR (TokensR, TokensHookR, TokensClearR)
     , AppMessage
       ( MsgTokens, MsgBack, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
-      , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress, MsgGmailAccount
-      ), App (appSettings)
+      , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
+      , MsgGmailAccount
+      )
     )
 import Model
     ( gmailAccessToken, gmailRefreshToken, gmail
     , StoreType (StoreTypeDatabase, StoreTypeSession)
     , Store (Store), Token (Token, tokenStore)
-    , EntityField (StoreVal, TokenStore, TokenApi), gmailSender
+    , EntityField (StoreVal, TokenStore, TokenApi)
+    , gmailSender, statusSuccess, statusError
     )
 import Network.Wreq (post, FormParam ((:=)), responseBody)
 import Network.Wreq.Lens (statusCode, responseStatus)
@@ -101,17 +103,17 @@ getTokensHookR = do
           setSession gmailRefreshToken refreshToken
           setSession gmailSender email
           _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
-          addMessageI info MsgRecordEdited
+          addMessageI statusSuccess MsgRecordEdited
           redirect $ AdminR TokensR
       Just (email,x@StoreTypeDatabase) -> do
           Entity tid _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           _ <- runDB $ upsert (Store tid gmailAccessToken accessToken) [StoreVal P.=. accessToken]
           _ <- runDB $ upsert (Store tid gmailRefreshToken refreshToken) [StoreVal P.=. refreshToken]
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
-          addMessageI info MsgRecordEdited
+          addMessageI statusSuccess MsgRecordEdited
           redirect $ AdminR TokensR
       Nothing -> do
-          addMessageI warn MsgInvalidStoreType
+          addMessageI statusError MsgInvalidStoreType
           redirect $ AdminR TokensR
 
 
@@ -129,19 +131,19 @@ postTokensClearR = do
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
           runDB $ delete tid
-          addMessageI info MsgRecordDeleted
+          addMessageI statusSuccess MsgRecordDeleted
           redirect $ AdminR TokensR
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           runDB $ delete tid
-          addMessageI info MsgRecordDeleted
+          addMessageI statusSuccess MsgRecordDeleted
           redirect $ AdminR TokensR
       (FormSuccess (),Nothing) -> do
-          addMessageI info MsgCleared
+          addMessageI statusSuccess MsgCleared
           redirect $ AdminR TokensR
       _otherwise -> do
           (fw,et) <- generateFormPost $ formStoreOptions token
-          addMessageI warn MsgInvalidFormData
-          messages <- getMessages
+          addMessageI statusError MsgInvalidFormData
+          msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               $(widgetFile "admin/tokens/tokens")
@@ -182,7 +184,7 @@ postTokensR = do
           
       _otherwise -> do
           (fw2,et2) <- generateFormPost formTokensClear
-          messages <- getMessages
+          msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               addScript (StaticR js_tokens_min_js)
@@ -199,7 +201,7 @@ getTokensR = do
 
     (fw2,et2) <- generateFormPost formTokensClear
     (fw,et) <- generateFormPost $ formStoreOptions token
-    messages <- getMessages
+    msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgTokens
         addScript (StaticR js_tokens_min_js)
@@ -231,11 +233,3 @@ formStoreOptions token extra = do
                  ^{fvInput storeV}
              |]
            )
-
-
-info :: Text
-info = "info"
-
-
-warn :: Text
-warn = "warn"

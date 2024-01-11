@@ -3,11 +3,21 @@
     <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <span.title-large>
+    <h1.title-large>
       _{MsgUserAccount}
+
+  <div #headerEnd>
+    <md-icon-button href=@{AccountEditR uid}>
+      <md-icon>edit
       
 <main>
 
-  <h1.title-large>
-    User info ...
+  <figure>
+    <img src=@{AccountPhotoR uid} width=96 height=auto loading=lazy alt=_{MsgPhoto}>
+    <figcation>
+      $maybe Entity _ (User email _ _ _ _ name) <- user
+        $maybe name <- name
+          <div.body-large>#{name}
+        <div.body-medium>#{email}
+
   <md-text-button href=@{AuthR LogoutR}>_{MsgSignOut}

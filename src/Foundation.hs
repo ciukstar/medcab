@@ -30,7 +30,7 @@ import Yesod.Auth.Message
     ( AuthMessage
       ( InvalidLogin, EnterEmail, Register, RegisterLong
       , ConfirmationEmailSentTitle, SetPassTitle, SetPass, CurrentPassword
-      , NewPass, ConfirmPass
+      , NewPass, ConfirmPass, PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail
       )
     , englishMessage, frenchMessage, russianMessage
     )
@@ -54,13 +54,13 @@ import Yesod.Auth.Email
       ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
       , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
       , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler
-      , confirmationEmailSentResponse, setPasswordHandler
+      , confirmationEmailSentResponse, setPasswordHandler, forgotPasswordHandler
       )
     , SaltedPass, Identifier
     , EmailCreds
       ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus
       , emailCredsVerkey, emailCredsEmail
-      ), Email, loginR, registerR, setpassR
+      ), Email, loginR, registerR, setpassR, forgotPasswordR
     )
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith)
 import qualified Network.Wreq.Lens as WL
@@ -164,7 +164,7 @@ instance Yesod App where
     
     isAuthorized (AccountR _) _ = isAuthenticated
     isAuthorized AccountsR _ = return Authorized
-    isAuthorized AccountCreateR _ = return Authorized
+    isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
@@ -219,10 +219,6 @@ instance Yesod App where
     makeLogger = return . appLogger
 
 
-info :: Text
-info = "info"
-
-
 -- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
@@ -248,10 +244,12 @@ instance YesodAuth App where
     renderAuthMessage app (_:xs) = renderAuthMessage app xs
 
     authLayout :: (MonadHandler m, HandlerSite m ~ App) => WidgetFor App () -> m Html
-    authLayout w = liftHandler $ defaultLayout $ do
-        setTitleI MsgSignIn
-        addScript (StaticR js_auth_min_js)
-        $(widgetFile "auth/layout")
+    authLayout w = liftHandler $ do
+        msgs <- getMessages
+        defaultLayout $ do
+            setTitleI MsgSignIn
+            addScript (StaticR js_auth_min_js)
+            $(widgetFile "auth/layout")
 
     -- Where to send a user after successful login
     loginDest :: App -> Route App
@@ -326,7 +324,7 @@ instance YesodAuth App where
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]
-    authPlugins app = [ oauth2GoogleScopedWidget googleButton ["email","openid","profile"]
+    authPlugins app = [ oauth2GoogleScopedWidget googleBrandButton ["email","openid","profile"]
                         (appGoogleClientId . appSettings $ app)
                         (appGoogleClientSecret . appSettings $ app)
                       , authEmail
@@ -335,6 +333,39 @@ instance YesodAuth App where
 
 instance YesodAuthEmail App where
     type AuthEmailId App = UserId
+
+    forgotPasswordHandler :: AuthHandler App Html
+    forgotPasswordHandler = do
+        (fw,et) <- liftHandler $ generateFormPost formForgotPassword
+        parent <- getRouteToParent
+        authLayout $ do
+            setTitleI PasswordResetTitle
+            idFormForgotPassword <- newIdent
+            toWidget [cassius|
+                             ##{idFormForgotPassword}
+                               align-self: stretch
+                               display: flex
+                               flex-direction: column
+                               gap: 1rem
+                             |]
+            [whamlet|
+                    <h1.body-medium>_{PasswordResetPrompt}
+                    <form method=post action=@{parent forgotPasswordR} enctype=#{et} ##{idFormForgotPassword}>
+                      ^{fw}
+                      <md-filled-button type=submit>
+                        _{SendPasswordResetEmail}
+                    |]
+      where
+          formForgotPassword :: Html -> MForm Handler (FormResult Text,Widget)
+          formForgotPassword extra = do
+              rndr <- getMessageRender
+              (r,v) <- mreq md3emailField FieldSettings
+                  { fsLabel = SomeMessage MsgEmailAddress
+                  , fsId = Just "forgotPassword", fsName = Just "email", fsTooltip = Nothing
+                  , fsAttrs = [("label", rndr MsgEmailAddress)]
+                  } Nothing
+              return (r,[whamlet|#{extra}^{fvInput v}|])
+
 
     setPasswordHandler :: Bool -> AuthHandler App TypedContent
     setPasswordHandler old = do
@@ -347,7 +378,6 @@ instance YesodAuthEmail App where
             toWidget [cassius|
                              ##{idFormSetPassWrapper}
                                align-self: stretch
-                               padding: 2rem 2rem 1rem 2rem
                                display: flex
                                flex-direction: column
                                gap: 1rem
@@ -437,7 +467,6 @@ instance YesodAuthEmail App where
             formRegister <- newIdent
             toWidget [cassius|
                          ##{formRegisterWrapper}
-                           padding: 1rem 2rem
                            display: flex
                            flex-direction: column
                            gap: 1rem
@@ -473,19 +502,15 @@ instance YesodAuthEmail App where
 
     emailLoginHandler :: (Route Auth -> Route App) -> Widget
     emailLoginHandler parent = do
-        msgs <- getMessages
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
         toWidget [cassius|
             ##{idFormEmailLoginWarpper}
               align-self: stretch
-              padding: 2rem 2rem 1rem 2rem
               display: flex
               flex-direction: column
               gap: 1rem
-              .error
-                padding: 1rem
               ##{idFormEmailLogin}
                 display: flex
                 flex-direction: column
@@ -496,12 +521,10 @@ instance YesodAuthEmail App where
               <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
                 <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
                   _{MsgOr}
-
-              $forall (_,msg) <- filter ((/=) info . fst) msgs
-                <div.app-banner.error.body-medium>
-                  #{msg}
               <form method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>
                 ^{fw}
+                <div style="text-align:end">
+                  <md-text-button href=@{parent forgotPasswordR}>_{MsgForgotPassword}
                 <md-filled-button type=submit #btnLogin>
                   _{MsgSignIn}
 
@@ -540,18 +563,17 @@ instance YesodAuthEmail App where
               return (r,w)
 
 
-
     afterPasswordRoute :: App -> Route App
     afterPasswordRoute _ = HomeR
+
 
     addUnverified :: Text -> VerKey -> AuthHandler App (AuthEmailId App)
     addUnverified email vk = liftHandler $ runDB $ insert
         (User email UserAuthTypeEmail Nothing (Just vk) False Nothing)
+        
 
     sendVerifyEmail :: Text -> VerKey -> VerUrl -> AuthHandler App ()
     sendVerifyEmail email _ verurl = do
-
-        liftIO $ putStrLn $ "Copy/ Paste this URL in your browser:" ++ verurl
 
         token <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
@@ -628,13 +650,19 @@ instance YesodAuthEmail App where
                 Left e@(SomeException _) -> case fromException e of
                   Just (HttpExceptionRequest _ (StatusCodeException r' bs)) -> do
                       case r' L.^. WL.responseStatus . WL.statusCode of
-                        401 -> undefined
+                        401 -> do
+                            liftIO $ print response
                         403 -> do
                             liftIO $ print response
-                        _   -> undefined
-                  _other -> undefined
+                        _   -> do
+                            liftIO $ print response
+                  _other -> do
+                      liftIO $ print response
                 Right _ok -> return ()
-          _otherwise -> undefined
+          _otherwise -> do
+              addMessageI statusError MsgGmailAccountNotSet
+              redirectUltDest HomeR
+              
 
     getVerifyKey :: AuthEmailId App -> AuthHandler App (Maybe VerKey)
     getVerifyKey = liftHandler . runDB . fmap (userVerkey =<<) . get
@@ -681,8 +709,8 @@ gmailApi :: String -> String
 gmailApi = printf "https://gmail.googleapis.com/gmail/v1/users/%s/messages/send"
 
 
-googleButton :: Widget
-googleButton = do
+googleBrandButton :: Widget
+googleBrandButton = do
     toWidget [cassius|
 .gsi-material-button
   -moz-user-select: none
@@ -798,9 +826,19 @@ googleButton = do
 isAuthenticated :: Handler AuthResult
 isAuthenticated = do
     muid <- maybeAuthId
-    return $ case muid of
-        Nothing -> Unauthorized "You must login to access this page"
-        Just _ -> Authorized
+    case muid of
+        Nothing -> unauthorizedI MsgOtherProfileChangeRestricted
+        Just _ -> return Authorized
+
+        
+isAuthenticatedSelf :: UserId -> Handler AuthResult
+isAuthenticatedSelf uid = do
+    muid <- maybeAuthId
+    case muid of
+        Just uid' | uid == uid' -> return Authorized
+                  | otherwise -> unauthorizedI MsgOtherProfileChangeRestricted
+        Nothing -> unauthorizedI MsgLoginRequired
+
 
 instance YesodAuthPersist App
 

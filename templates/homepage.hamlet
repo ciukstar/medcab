@@ -38,6 +38,10 @@
 
 <main>
 
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
   <figure #figureLogo>
     <md-icon>medical_services
     <figcaption.display-large>
@@ -74,6 +78,6 @@
 
   <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
 
-$forall (_,msg) <- msgs
-  <div.app-snackbar.shape-small.elevation-1.primary-container>
-    #{msg}
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    #{status}. #{msg}

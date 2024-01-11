@@ -1,3 +1,8 @@
+LoginRequired: Vous devez vous connecter pour accéder à cette page
+OtherProfileChangeRestricted: La modification du profil d'un autre utilisateur est restreinte
+GmailAccountNotSet: Le compte Gmail n'est pas défini. Initialisez les jetons.
+Authentication: Authentification
+ForgotPassword: Mot de passe oublié?
 DoNotHaveAnAccount: Vous n'avez pas de compte ?
 CreateAccount: Créer un compte
 GmailAccount: Compte Gmail

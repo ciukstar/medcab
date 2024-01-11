@@ -7,11 +7,11 @@
       _{MsgUserAccount}
       
 <main>
-  <form method=post action=@{AccountsR} enctype=#{et}>
+  <form method=post action=@{AccountR uid} enctype=#{et}>
     ^{fw}
     <div.app-form-actions>
       <md-text-button href=@{HomeR} type=button>
         _{MsgCancel}
       <md-filled-button type=submit>
-        _{MsgSignUp}
+        _{MsgSave}
   

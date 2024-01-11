@@ -8,6 +8,10 @@
       
 <main>
 
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
   <div.app-card.shape-large.outline>
     <div.app-card-title.headline-medium>
       Gmail
@@ -24,6 +28,6 @@
       <md-filled-button type=submit form=formStoreType>
         _{MsgInitialize}
 
-$forall (_,msg) <- messages
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <span.body-small>#{msg}
+    #{status}. #{msg}

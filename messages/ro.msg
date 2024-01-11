@@ -1,3 +1,8 @@
+LoginRequired: Trebuie să vă autentificați pentru a accesa această pagină
+OtherProfileChangeRestricted: Modificarea profilului altui utilizator este restricționată
+GmailAccountNotSet: Contul Gmail nu este setat. Inițializați jetoanele.
+Authentication: Autentificare
+ForgotPassword: Ați uitat parola?
 DoNotHaveAnAccount: Nu aveți cont?
 CreateAccount: Creează-ți un cont
 GmailAccount: Cont Gmail

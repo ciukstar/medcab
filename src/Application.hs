@@ -51,9 +51,10 @@ import System.Log.FastLogger
 
 import Handler.Accounts
     ( getAccountPhotoR
-    , getAccountCreateR
-    , postAccountsR
+    , getAccountEditR
+    , getAccountsR
     , getAccountR
+    , postAccountR
     )
     
 import Handler.Video ( getVideoR )

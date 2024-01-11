@@ -3,7 +3,7 @@ header
   position: sticky
   top: 0
   z-index: 2
-  padding: 1rem
+  padding: 0 1rem
   display: flex
   flex-direction: row
   justify-content: space-between
@@ -21,3 +21,7 @@ main
   justify-content: center
   align-items: center
   gap: 1rem
+  figure
+    text-align: center
+    img
+      clip-path: circle(50%)

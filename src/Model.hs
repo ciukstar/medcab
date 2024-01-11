@@ -53,3 +53,10 @@ gmailRefreshToken = "gmail_refresh_token"
 
 gmail :: Text
 gmail = "GMAIL_API"
+
+
+statusSuccess :: Text
+statusSuccess = "success"
+
+statusError :: Text
+statusError = "error"

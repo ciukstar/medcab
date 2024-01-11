@@ -1,3 +1,8 @@
+LoginRequired: Вы должны авторизоваться, чтобы получить доступ к этой странице
+OtherProfileChangeRestricted: Изменение профиля другого пользователя ограничено
+GmailAccountNotSet: Аккаунт Gmail не установлен. Инициализируйте токены.
+Authentication: Аутентификация
+ForgotPassword: Забыли пароль?
 DoNotHaveAnAccount: У вас нет учетной записи?
 CreateAccount: Зарегистрироваться
 GmailAccount: Учетная запись Gmail

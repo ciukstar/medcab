@@ -1,3 +1,8 @@
+LoginRequired: You must login to access this page
+OtherProfileChangeRestricted: Changing another user's profile is restricted
+GmailAccountNotSet: Gmail account is not set. Initialize tokens.
+Authentication: Authentication
+ForgotPassword: Forgot your password?
 DoNotHaveAnAccount: Don't have an account?
 CreateAccount: Create account
 GmailAccount: Gmail account

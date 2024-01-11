@@ -16,8 +16,21 @@ header
     gap: 1rem
     
 main
+  margin: 1rem 2rem
   display: flex
   flex-direction: column
   justify-content: center
   align-items: center
   gap: 1rem
+  .error
+    align-self: stretch
+    padding: 1rem
+
+aside.app-snackbar
+  box-sizing: border-box
+  position: fixed
+  bottom: 0
+  left: 0
+  margin: 1rem
+  width: calc(100% - 2 * 1rem)
+  padding: 1rem

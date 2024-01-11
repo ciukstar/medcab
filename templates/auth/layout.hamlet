@@ -4,8 +4,17 @@
       <md-icon>arrow_back
           
     <span.title-large>
-      _{MsgLogin}
+      _{MsgAuthentication}
       
 <main>
 
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+  
   ^{w}
+
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    #{status}. #{msg}

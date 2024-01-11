@@ -5,6 +5,7 @@
 
 module Handler.Home (getHomeR) where
 
+import Data.Text (Text)
 import Database.Persist (Entity(Entity))
 import Foundation
     ( Handler
@@ -21,6 +22,7 @@ import Settings.StaticFiles ( js_homepage_min_js )
 import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )
 import Yesod.Core.Widget (addScript, setTitleI)
 import Yesod.Core (Yesod(defaultLayout), getMessages)
+import Model (statusError)
 
 
 getHomeR :: Handler Html
@@ -31,3 +33,4 @@ getHomeR = do
         setTitleI MsgWelcome
         addScript (StaticR js_homepage_min_js)
         $(widgetFile "homepage")
+

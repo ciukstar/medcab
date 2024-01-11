@@ -1,9 +1,9 @@
 
 
-/form/account/create    AccountCreateR GET
-/accounts/#UserId/photo AccountPhotoR  GET
-/accounts/#UserId       AccountR       GET
-/accounts               AccountsR      POST
+/accounts/#UserId/edit  AccountEditR  GET
+/accounts/#UserId/photo AccountPhotoR GET
+/accounts/#UserId       AccountR      GET POST
+/accounts               AccountsR     GET
 
 /video VideoR GET
 /      HomeR  GET
