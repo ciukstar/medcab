@@ -19,6 +19,7 @@ InvalidStoreType: Type de stockage invalide
 StoreType: Type de stockage
 Database: Base de données
 UserSession: Session utilisateur
+GoogleSecretManager: Google Secret Manager
 Initialize: Initialiser
 Tokens: Jetons
 UserRegistered: Utilisateur enregistré

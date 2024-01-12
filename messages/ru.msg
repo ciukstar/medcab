@@ -19,6 +19,7 @@ InvalidStoreType: Неверный тип хранилища
 StoreType: Тип хранилища
 Database: База данных
 UserSession: Пользовательская сессия
+GoogleSecretManager: Google Secret Manager
 Initialize: Инициализировать
 Tokens: Токены
 UserRegistered: Пользователь зарегистрирован

@@ -19,6 +19,7 @@ InvalidStoreType: Invalid store type
 StoreType: Store type
 Database: Database
 UserSession: User session
+GoogleSecretManager: Google Secret Manager
 Initialize: Initialize
 Tokens: Tokens
 UserRegistered: User registered

@@ -63,7 +63,10 @@ import Handler.Home ( getHomeR )
 import Handler.Common
     ( getRobotsR, getFaviconR, getSitemapR, getWebAppManifestR )
 
-import Handler.Tokens (getTokensR, postTokensR, getTokensHookR, postTokensClearR)
+import Handler.Tokens
+    (getTokensR, postTokensR, getTokensHookR, postTokensClearR
+    , getGoogleSecretManagerReadR
+    )
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

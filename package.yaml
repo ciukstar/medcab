@@ -61,6 +61,7 @@ dependencies:
 - safe-exceptions
 - base64-bytestring
 - http-client
+- listsafe
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

@@ -28,9 +28,9 @@ import Text.Jasmine (minifym)
 
 import Yesod.Auth.Message
     ( AuthMessage
-      ( InvalidLogin, EnterEmail, Register, RegisterLong
-      , ConfirmationEmailSentTitle, SetPassTitle, SetPass, CurrentPassword
-      , NewPass, ConfirmPass, PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail
+      ( InvalidLogin, EnterEmail, Register, RegisterLong, SetPassTitle, SetPass
+      , ConfirmationEmailSentTitle, CurrentPassword, NewPass, ConfirmPass
+      , PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail
       )
     , englishMessage, frenchMessage, russianMessage
     )
@@ -177,6 +177,9 @@ instance Yesod App where
     isAuthorized (StaticR _) _ = return Authorized
 
 
+    
+    
+    isAuthorized GoogleSecretManagerReadR _ = return Authorized
     isAuthorized (AdminR TokensClearR) _ = return Authorized
     isAuthorized (AdminR TokensHookR) _ = return Authorized
     isAuthorized (AdminR TokensR) _ = return Authorized

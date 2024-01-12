@@ -23,7 +23,7 @@ import ClassyPrelude.Yesod
 import Database.Persist.Quasi ( lowerCaseSettings )
 
 
-data StoreType = StoreTypeDatabase | StoreTypeSession
+data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager
     deriving (Show, Read, Eq, Ord)
 derivePersistField "StoreType"
 
@@ -44,6 +44,9 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
 
 gmailSender :: Text
 gmailSender = "gmail_sender"
+
+gmailAccessTokenExpiresIn :: Text
+gmailAccessTokenExpiresIn = "gmail_access_token_expires_in"
 
 gmailAccessToken :: Text
 gmailAccessToken = "gmail_access_token"

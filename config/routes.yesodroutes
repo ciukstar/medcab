@@ -1,4 +1,4 @@
-
+/gsm/read GoogleSecretManagerReadR GET
 
 /accounts/#UserId/edit  AccountEditR  GET
 /accounts/#UserId/photo AccountPhotoR GET

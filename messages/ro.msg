@@ -19,6 +19,7 @@ InvalidStoreType: Tip de stocare nevalid
 StoreType: Tipul de stocare
 Database: Baza de date
 UserSession: Sesiunea de utilizator
+GoogleSecretManager: Google Secret Manager
 Initialize: Inițializează
 Tokens: Jetoane
 UserRegistered: Utilizatorul înregistrat
