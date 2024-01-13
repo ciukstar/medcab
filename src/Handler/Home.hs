@@ -5,7 +5,6 @@
 
 module Handler.Home (getHomeR) where
 
-import Data.Text (Text)
 import Database.Persist (Entity(Entity))
 import Foundation
     ( Handler
@@ -16,13 +15,13 @@ import Foundation
       , MsgUserAccount
       )
     )
-import Text.Hamlet (Html)
+import Model (statusError, AvatarColor(AvatarColorLight))
 import Settings (widgetFile)
 import Settings.StaticFiles ( js_homepage_min_js )
+import Text.Hamlet (Html)
 import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )
 import Yesod.Core.Widget (addScript, setTitleI)
 import Yesod.Core (Yesod(defaultLayout), getMessages)
-import Model (statusError)
 
 
 getHomeR :: Handler Html

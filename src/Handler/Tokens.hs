@@ -11,7 +11,7 @@ module Handler.Tokens
   , getGoogleSecretManagerReadR
   ) where
 
-import Control.Exception.Safe (tryAny, SomeException (SomeException), Exception (fromException))
+import Control.Exception.Safe (tryAny)
 import qualified Control.Lens as L ((^.), (?~))
 import Control.Monad ((<=<), void)
 import Control.Monad.IO.Class (liftIO)
@@ -46,14 +46,15 @@ import Foundation
 import Data.Function ((&))
 import Model
     ( gmailAccessToken, gmailRefreshToken, gmail
-    , StoreType (StoreTypeDatabase, StoreTypeSession, StoreTypeGoogleSecretManager)
+    , StoreType
+      ( StoreTypeDatabase, StoreTypeSession, StoreTypeGoogleSecretManager )
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
     )
 import Network.Wreq
     ( post, FormParam ((:=)), responseBody, defaults, auth, oauth2Bearer
-    , postWith
+    , postWith, getWith
     )
 import Network.Wreq.Lens (statusCode, responseStatus)
 import Settings
@@ -63,10 +64,11 @@ import System.IO (readFile')
 import Text.Blaze.Html (preEscapedToHtml, toHtml)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
-import Text.Shakespeare.Text (st, lt)
+import Text.Shakespeare.Text (st)
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
-    , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn, addMessage, lookupSession
+    , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
+    , addMessage
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
 import Yesod.Core.Widget (setTitleI, addScript)
@@ -80,9 +82,6 @@ import Yesod.Form.Types
     )
 
 import Handler.Material3 (md3radioField, md3emailField)
-import Data.Bifunctor (Bifunctor(first))
-import Network.HTTP.Client (HttpException(HttpExceptionRequest), HttpExceptionContent (StatusCodeException))
-import qualified Network.Wreq.Lens as WL
 
 
 getGoogleSecretManagerReadR :: Handler Html
@@ -209,13 +208,35 @@ postTokensClearR = do
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ AdminR TokensR
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
-          accessToken <- lookupSession gmailAccessToken
-          case accessToken of
-            Just at -> do
-                let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 at)
+          app <- appSettings <$> getYesod
+          -- 1. read refresh token from mounted volume
+          refreshToken <- liftIO $ readFile' "/grt/gmail_refresh_token"
+          
+          -- 2. get access token from googleapi
+          refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
+              [ "refresh_token" := refreshToken
+              , "client_id" := appGoogleClientId app
+              , "client_secret" := appGoogleClientSecret app
+              , "grant_type" := ("refresh_token" :: Text)
+              ]
+
+          let newAccessToken = refreshResponse L.^. responseBody . key "access_token" . _String
+          
+          let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 newAccessToken)
+
+          res <- liftIO $ getWith opts
+              (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}/versions/latest|])
+
+          let ver :: Maybe Int
+              ver = (readMaybe . unpack) <=< (LS.last . splitOn "/") $ res L.^. responseBody . key "name" . _String
+              
+          case ver of
+            Just v -> do
+                
                 void $ liftIO $ tryAny $ postWith opts
-                    (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}/versions/latest:destroy|])
+                    (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}/versions/#{v}:destroy|])
                     (object [])
+
             Nothing -> return ()
           
           deleteSession gmailAccessToken

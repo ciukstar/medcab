@@ -1,20 +1,11 @@
-<header.app-top-app-bar.background>
-  <div #headerStart>
-    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
-          
-    <span.title-large>
-      _{MsgAuthentication}
+
+$if Just (AuthR LoginR) == curr
+  <header.app-top-app-bar.background>
+    <div #headerStart>
+      <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+        <md-icon>arrow_back
+
+      <span.title-large>
+        _{MsgAuthentication}
       
-<main>
-
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
-  
-  ^{w}
-
-
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    #{status}. #{msg}
+^{w}

@@ -15,16 +15,51 @@ module Foundation where
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
-import Data.Aeson.Lens ( key, AsValue(_String) )
 import Control.Monad.Logger (LogSource)
 import Import.NoFoundation
+import Data.Aeson.Lens ( key, AsValue(_String) )
+import qualified Data.CaseInsensitive as CI
+import qualified Data.ByteString.Base64.Lazy as B64L
+import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Function ((&))
 import Data.Kind (Type)
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import qualified Data.Text.Encoding as TE
 import Database.Esqueleto.Experimental
     (selectOne, from, table, val, where_, (^.), Value (unValue))
+import qualified Database.Esqueleto.Experimental as E ((==.))
+import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import qualified Data.Text.Lazy.Encoding
+import qualified Network.Wreq as W (get, responseHeader, responseBody)
+import Network.Wreq (defaults, auth, oauth2Bearer, postWith, post, FormParam ((:=)))
+import qualified Network.Wreq.Lens as WL
+import Network.Mail.Mime
+    ( Part (Part, partHeaders, partContent, partDisposition, partEncoding, partType)
+    , Mail (mailParts, mailHeaders, mailTo), emptyMail, PartContent (PartContent)
+    , Disposition (DefaultDisposition), Encoding (None), Address (Address)
+    , renderMail'
+    )
+import System.IO (readFile')
+import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
+import Text.Printf (printf)
+import Text.Shakespeare.Text (stext)
+
+import Yesod.Auth.Email
+    ( SaltedPass, Identifier, Email, VerKey, VerUrl
+    , authEmail, loginR, registerR, setpassR, forgotPasswordR
+    , YesodAuthEmail
+      ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
+      , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
+      , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler
+      , confirmationEmailSentResponse, setPasswordHandler, forgotPasswordHandler
+      )
+    , EmailCreds
+      ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus
+      , emailCredsVerkey, emailCredsEmail
+      )
+    )
+import qualified Yesod.Auth.Email as A (Email)
 
 import Yesod.Auth.Message
     ( AuthMessage
@@ -36,45 +71,13 @@ import Yesod.Auth.Message
     )
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
+import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
-import qualified Yesod.Core.Unsafe as Unsafe
-import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
-import qualified Database.Esqueleto.Experimental as E ((==.))
-import qualified Network.Wreq as W (get, responseHeader, responseBody)
-import qualified Data.ByteString.Lazy as BSL (toStrict)
-import Yesod.Auth.Email
-    ( authEmail, VerKey, VerUrl
-    , YesodAuthEmail
-      ( AuthEmailId, addUnverified, sendVerifyEmail, getPassword, verifyAccount
-      , setVerifyKey, getVerifyKey, setPassword, getEmailCreds, getEmail
-      , afterPasswordRoute, needOldPassword, emailLoginHandler, registerHandler
-      , confirmationEmailSentResponse, setPasswordHandler, forgotPasswordHandler
-      )
-    , SaltedPass, Identifier
-    , EmailCreds
-      ( EmailCreds, emailCredsId, emailCredsAuthId, emailCredsStatus
-      , emailCredsVerkey, emailCredsEmail
-      ), Email, loginR, registerR, setpassR, forgotPasswordR
-    )
-import Network.Wreq (defaults, auth, oauth2Bearer, postWith)
-import qualified Network.Wreq.Lens as WL
-import Network.Mail.Mime
-    ( Part (Part, partHeaders, partContent, partDisposition, partEncoding, partType)
-    , Mail (mailParts, mailHeaders, mailTo), emptyMail, PartContent (PartContent)
-    , Disposition (DefaultDisposition), Encoding (None), Address (Address)
-    , renderMail'
-    )
-import qualified Data.ByteString.Base64.Lazy as B64L
-import qualified Data.Text.Lazy.Encoding
-import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
-import Text.Printf (printf)
-import Text.Shakespeare.Text (stext)
 import Handler.Material3 (md3emailField, md3passwordField)
 
 
@@ -161,11 +164,11 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-    
+
     isAuthorized (AccountR _) _ = isAuthenticated
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
-    isAuthorized (AccountPhotoR _) _ = isAuthenticated
+    isAuthorized (AccountPhotoR _ _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
 
@@ -177,8 +180,8 @@ instance Yesod App where
     isAuthorized (StaticR _) _ = return Authorized
 
 
-    
-    
+
+
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
     isAuthorized (AdminR TokensClearR) _ = return Authorized
     isAuthorized (AdminR TokensHookR) _ = return Authorized
@@ -248,6 +251,7 @@ instance YesodAuth App where
 
     authLayout :: (MonadHandler m, HandlerSite m ~ App) => WidgetFor App () -> m Html
     authLayout w = liftHandler $ do
+        curr <- getCurrentRoute
         msgs <- getMessages
         defaultLayout $ do
             setTitleI MsgSignIn
@@ -264,7 +268,7 @@ instance YesodAuth App where
 
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer :: App -> Bool
-    redirectToReferer _ = True
+    redirectToReferer _ = False
 
     authenticate :: (MonadHandler m, HandlerSite m ~ App) => Creds App -> m (AuthenticationResult App)
     authenticate (Creds plugin ident extra) = liftHandler $ case plugin of
@@ -327,7 +331,7 @@ instance YesodAuth App where
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]
-    authPlugins app = [ oauth2GoogleScopedWidget googleBrandButton ["email","openid","profile"]
+    authPlugins app = [ oauth2GoogleScopedWidget $(widgetFile "auth/google") ["email","openid","profile"]
                         (appGoogleClientId . appSettings $ app)
                         (appGoogleClientSecret . appSettings $ app)
                       , authEmail
@@ -341,23 +345,11 @@ instance YesodAuthEmail App where
     forgotPasswordHandler = do
         (fw,et) <- liftHandler $ generateFormPost formForgotPassword
         parent <- getRouteToParent
+        msgs <- getMessages
         authLayout $ do
             setTitleI PasswordResetTitle
             idFormForgotPassword <- newIdent
-            toWidget [cassius|
-                             ##{idFormForgotPassword}
-                               align-self: stretch
-                               display: flex
-                               flex-direction: column
-                               gap: 1rem
-                             |]
-            [whamlet|
-                    <h1.body-medium>_{PasswordResetPrompt}
-                    <form method=post action=@{parent forgotPasswordR} enctype=#{et} ##{idFormForgotPassword}>
-                      ^{fw}
-                      <md-filled-button type=submit>
-                        _{SendPasswordResetEmail}
-                    |]
+            $(widgetFile "auth/forgot")
       where
           formForgotPassword :: Html -> MForm Handler (FormResult Text,Widget)
           formForgotPassword extra = do
@@ -373,30 +365,13 @@ instance YesodAuthEmail App where
     setPasswordHandler :: Bool -> AuthHandler App TypedContent
     setPasswordHandler old = do
         parent <- getRouteToParent
+        msgs <- getMessages
         selectRep $ provideRep $ authLayout $ do
             setTitleI SetPassTitle
             idFormSetPassWrapper <- newIdent
             idFormSetPass <- newIdent
             (fw,et) <- liftHandler $ generateFormPost formSetPassword
-            toWidget [cassius|
-                             ##{idFormSetPassWrapper}
-                               align-self: stretch
-                               display: flex
-                               flex-direction: column
-                               gap: 1rem
-                               ##{idFormSetPass}
-                                 display: flex
-                                 flex-direction: column
-                                 gap: 1rem
-                             |]
-            [whamlet|
-                    <h1.title-medium>_{SetPass}
-                    <div ##{idFormSetPassWrapper}>
-                      <form method=post action=@{parent setpassR} enctype=#{et} ##{idFormSetPass}>
-                        ^{fw}
-                        <md-filled-button type=submit>
-                          _{SetPassTitle}
-                    |]
+            $(widgetFile "auth/password")
       where
           formSetPassword :: Html -> MForm Handler (FormResult (Text,Text,Text),Widget)
           formSetPassword extra = do
@@ -439,54 +414,23 @@ instance YesodAuthEmail App where
               return (r,w)
 
 
-    confirmationEmailSentResponse :: Text -> AuthHandler App TypedContent
+    confirmationEmailSentResponse :: A.Email -> AuthHandler App TypedContent
     confirmationEmailSentResponse email = do
+        msgs <- getMessages
         selectRep $ provideRep $ authLayout $ do
             setTitleI ConfirmationEmailSentTitle
-            [whamlet|
-                <h1.title-medium>
-                  _{MsgVerifyEmailPlease}
-
-                <p>
-                  <div.body-medium>
-                    _{MsgJustSentEmailTo} <code>#{email}</code>.
-                  <div.body-medium>
-                    _{MsgClickToVerifyAccount}.
-
-                <button>
-                  Resend email
-
-                <button>
-                  Update email
-            |]
+            $(widgetFile "auth/confirmation")
 
     registerHandler :: AuthHandler App Html
     registerHandler = do
         (fw,et) <- liftHandler $ generateFormPost formRegEmailForm
         parent <- getRouteToParent
+        msgs <- getMessages
         authLayout $ do
             setTitleI RegisterLong
             formRegisterWrapper <- newIdent
             formRegister <- newIdent
-            toWidget [cassius|
-                         ##{formRegisterWrapper}
-                           display: flex
-                           flex-direction: column
-                           gap: 1rem
-                           ##{formRegister}
-                             display: flex
-                             flex-direction: column
-                             gap: 1rem
-                     |]
-            [whamlet|
-                <div ##{formRegisterWrapper}>
-                  <h1.body-medium>
-                    _{EnterEmail}
-                  <form method=post action=@{parent registerR} enctype=#{et} ##{formRegister}>
-                    ^{fw}
-                    <md-filled-button type=submit>
-                      _{Register}
-            |]
+            $(widgetFile "auth/register")
       where
           formRegEmailForm :: Html -> MForm Handler (FormResult Text, Widget)
           formRegEmailForm extra = do
@@ -508,36 +452,8 @@ instance YesodAuthEmail App where
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
-        toWidget [cassius|
-            ##{idFormEmailLoginWarpper}
-              align-self: stretch
-              display: flex
-              flex-direction: column
-              gap: 1rem
-              ##{idFormEmailLogin}
-                display: flex
-                flex-direction: column
-                gap: 1rem
-        |]
-        [whamlet|
-            <div ##{idFormEmailLoginWarpper}>
-              <div style="border-top:1px solid rgba(0,0,0,0.3);position:relative">
-                <div.background.body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
-                  _{MsgOr}
-              <form method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>
-                ^{fw}
-                <div style="text-align:end">
-                  <md-text-button href=@{parent forgotPasswordR}>_{MsgForgotPassword}
-                <md-filled-button type=submit #btnLogin>
-                  _{MsgSignIn}
-
-            <div>
-              <div.body-small>
-                _{MsgDoNotHaveAnAccount}
-              <md-text-button href=@{parent registerR}>
-                _{MsgCreateAccount}
-
-        |]
+        msgs <- getMessages
+        $(widgetFile "auth/login")
       where
           formEmailLogin :: Html -> MForm Handler (FormResult (Text,Text),Widget)
           formEmailLogin extra = do
@@ -570,12 +486,12 @@ instance YesodAuthEmail App where
     afterPasswordRoute _ = HomeR
 
 
-    addUnverified :: Text -> VerKey -> AuthHandler App (AuthEmailId App)
+    addUnverified :: A.Email -> VerKey -> AuthHandler App (AuthEmailId App)
     addUnverified email vk = liftHandler $ runDB $ insert
         (User email UserAuthTypeEmail Nothing (Just vk) False Nothing)
-        
 
-    sendVerifyEmail :: Text -> VerKey -> VerUrl -> AuthHandler App ()
+
+    sendVerifyEmail :: A.Email -> VerKey -> VerUrl -> AuthHandler App ()
     sendVerifyEmail email _ verurl = do
 
         token <- liftHandler $ runDB $ selectOne $ do
@@ -583,33 +499,57 @@ instance YesodAuthEmail App where
             where_ $ x ^. TokenApi E.==. val gmail
             return x
 
-        (atoken,rtoken,sender) <- case token of
+        (atoken,sender) <- case token of
           Just (Entity tid (Token _ StoreTypeDatabase)) -> do
               access <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
                   where_ $ x ^. StoreToken E.==. val tid
                   where_ $ x ^. StoreKey E.==. val gmailAccessToken
                   return $ x ^. StoreVal )
+                  {--
               refresh <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
                   where_ $ x ^. StoreToken E.==. val tid
                   where_ $ x ^. StoreKey E.==. val gmailRefreshToken
                   return $ x ^. StoreVal )
+                  --}
               sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
                   where_ $ x ^. StoreToken E.==. val tid
                   where_ $ x ^. StoreKey E.==. val gmailSender
                   return $ x ^. StoreVal )
-              return (access,refresh,sender)
+              return (access,sender)
           Just (Entity _ (Token _ StoreTypeSession)) -> do
               access <- lookupSession gmailAccessToken
-              refresh <- lookupSession gmailRefreshToken
+              -- refresh <- lookupSession gmailRefreshToken
               sender <- lookupSession gmailSender
-              return (access,refresh,sender)
-          Nothing -> return (Nothing, Nothing, Nothing)
+              return (access,sender)
+          Just (Entity tid (Token _ StoreTypeGoogleSecretManager)) -> do
 
-        case (atoken,rtoken,sender) of
-          (Just at,Just rt,Just sendby) -> do
+              settings <- appSettings <$> getYesod
+
+              refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
+
+              refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
+                  [ "refresh_token" := refresh
+                  , "client_id" := appGoogleClientId settings
+                  , "client_secret" := appGoogleClientSecret settings
+                  , "grant_type" := ("refresh_token" :: Text)
+                  ]
+
+              let access = refreshResponse ^? WL.responseBody . key "access_token" . _String
+
+              sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Store
+                  where_ $ x ^. StoreToken E.==. val tid
+                  where_ $ x ^. StoreKey E.==. val gmailSender
+                  return $ x ^. StoreVal )
+
+              return (access,sender)
+          Nothing -> return (Nothing, Nothing)
+
+        case (atoken,sender) of
+          (Just at,Just sendby) -> do
 
               let mail = (emptyMail $ Address Nothing "noreply")
                       { mailTo = [Address Nothing email]
@@ -663,9 +603,10 @@ instance YesodAuthEmail App where
                       liftIO $ print response
                 Right _ok -> return ()
           _otherwise -> do
+              curr <- getCurrentRoute
               addMessageI statusError MsgGmailAccountNotSet
-              redirectUltDest HomeR
-              
+              redirect $ fromMaybe HomeR curr
+
 
     getVerifyKey :: AuthEmailId App -> AuthHandler App (Maybe VerKey)
     getVerifyKey = liftHandler . runDB . fmap (userVerkey =<<) . get
@@ -712,119 +653,6 @@ gmailApi :: String -> String
 gmailApi = printf "https://gmail.googleapis.com/gmail/v1/users/%s/messages/send"
 
 
-googleBrandButton :: Widget
-googleBrandButton = do
-    toWidget [cassius|
-.gsi-material-button
-  -moz-user-select: none
-  -webkit-user-select: none
-  -ms-user-select: none
-  -webkit-appearance: none
-  background-color: WHITE
-  background-image: none
-  border: 1px solid #747775
-  -webkit-border-radius: 20px
-  border-radius: 20px
-  -webkit-box-sizing: border-box
-  box-sizing: border-box
-  color: #1f1f1f
-  cursor: pointer
-  font-family: 'Roboto', arial, sans-serif
-  font-size: 14px
-  height: 40px
-  letter-spacing: 0.25px
-  outline: none
-  overflow: hidden
-  padding: 0 12px
-  position: relative
-  text-align: center
-  -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s
-  transition: background-color .218s, border-color .218s, box-shadow .218s
-  vertical-align: middle
-  white-space: nowrap
-  width: auto
-  max-width: 400px
-  min-width: min-content
-
-.gsi-material-button .gsi-material-button-icon
-  height: 20px
-  margin-right: 12px
-  min-width: 20px
-  width: 20px
-
-.gsi-material-button .gsi-material-button-content-wrapper
-  -webkit-align-items: center
-  align-items: center
-  display: flex
-  -webkit-flex-direction: row
-  flex-direction: row
-  -webkit-flex-wrap: nowrap
-  flex-wrap: nowrap
-  height: 100%
-  justify-content: space-between
-  position: relative
-  width: 100%
-
-.gsi-material-button .gsi-material-button-contents
-  -webkit-flex-grow: 1
-  flex-grow: 1
-  font-family: 'Roboto', arial, sans-serif
-  font-weight: 500
-  overflow: hidden
-  text-overflow: ellipsis
-  vertical-align: top
-
-.gsi-material-button .gsi-material-button-state
-  -webkit-transition: opacity .218s
-  transition: opacity .218s
-  bottom: 0
-  left: 0
-  opacity: 0
-  position: absolute
-  right: 0
-  top: 0
-
-.gsi-material-button:disabled
-  cursor: default
-  background-color: #ffffff61
-  border-color: #1f1f1f1f
-
-.gsi-material-button:disabled .gsi-material-button-contents
-  opacity: 38%
-
-.gsi-material-button:disabled .gsi-material-button-icon
-  opacity: 38%
-
-.gsi-material-button:not(:disabled):active .gsi-material-button-state,
-.gsi-material-button:not(:disabled):focus .gsi-material-button-state
-  background-color: #303030
-  opacity: 12%
-
-.gsi-material-button:not(:disabled):hover
-  -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15)
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15)
-
-.gsi-material-button:not(:disabled):hover .gsi-material-button-state
-  background-color: #303030
-  opacity: 8%
-
-|]
-    [whamlet|
-<button class="gsi-material-button">
-  <div class="gsi-material-button-state">
-  <div class="gsi-material-button-content-wrapper">
-    <div class="gsi-material-button-icon">
-      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
-        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
-        <path fill="none" d="M0 0h48v48H0z">
-    <span class="gsi-material-button-contents">_{MsgSignInWithGoogle}
-    <span style="display: none">_{MsgSignInWithGoogle}
-|]
-
-
 -- | Access function to determine if a user is logged in.
 isAuthenticated :: Handler AuthResult
 isAuthenticated = do
@@ -833,7 +661,7 @@ isAuthenticated = do
         Nothing -> unauthorizedI MsgOtherProfileChangeRestricted
         Just _ -> return Authorized
 
-        
+
 isAuthenticatedSelf :: UserId -> Handler AuthResult
 isAuthenticatedSelf uid = do
     muid <- maybeAuthId

@@ -1,0 +1,10 @@
+
+##{idFormEmailLoginWarpper}
+  align-self: stretch
+  display: flex
+  flex-direction: column
+  gap: 1rem
+  ##{idFormEmailLogin}
+    display: flex
+    flex-direction: column
+    gap: 1rem

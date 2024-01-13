@@ -21,9 +21,9 @@ import Database.Esqueleto.Experimental
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Model
-    ( UserId, UserPhoto (UserPhoto)
+    ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField (UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId)
-    , User (User, userName), statusSuccess
+    , User (User, userName), AvatarColor (AvatarColorDark, AvatarColorLight)
     )
 import Foundation
     ( Handler, Widget
@@ -131,13 +131,16 @@ formAccount user extra = do
            )
       
 
-getAccountPhotoR :: UserId -> Handler TypedContent
-getAccountPhotoR uid = do
+getAccountPhotoR :: UserId -> AvatarColor -> Handler TypedContent
+getAccountPhotoR uid color = do
     photo <- runDB $ selectOne $ do
         x <- from $ table @UserPhoto
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
     case photo of
       Just (Entity _ (UserPhoto _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
-      Nothing -> redirect $ StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg
+      Nothing -> redirect $ case color of
+        AvatarColorDark -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg
+        AvatarColorLight -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg
+        
 

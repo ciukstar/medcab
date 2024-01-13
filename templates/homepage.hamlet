@@ -25,7 +25,8 @@
     <span style="position:relaive">
       <md-filled-icon-button type=button aria-label=_{MsgUserAccount} #btnUserAccount
         onclick="document.getElementById('menuUserAccount').open = !document.getElementById('menuUserAccount').open">
-        <img src=@{AccountPhotoR uid} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
+        <img src=@{AccountPhotoR uid AvatarColorLight} width=24 height=24 alt=_{MsgPhoto}
+             loading=lazy style="clip-path:circle(50%)">
       <md-menu anchor=btnUserAccount x-offset=16 y-offset=16 #menuUserAccount>
         <md-menu-item href=@{AccountR uid}>
           <div slot=headline>_{MsgUserAccount}

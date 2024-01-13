@@ -13,7 +13,7 @@
 <main>
 
   <figure>
-    <img src=@{AccountPhotoR uid} width=96 height=auto loading=lazy alt=_{MsgPhoto}>
+    <img src=@{AccountPhotoR uid AvatarColorDark} width=96 height=auto loading=lazy alt=_{MsgPhoto}>
     <figcation>
       $maybe Entity _ (User email _ _ _ _ name) <- user
         $maybe name <- name

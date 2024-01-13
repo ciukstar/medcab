@@ -17,10 +17,27 @@
 module Model where
 
 import ClassyPrelude.Yesod
-    ( Eq, Ord, Read, Show, Typeable, Bool, ByteString, Text, derivePersistField
+    ( Eq, Ord, Read, Typeable, Bool, ByteString, Text, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
+import Data.Function ((.))
+import Data.Maybe (Maybe)
+import Data.Text (unpack, pack)
 import Database.Persist.Quasi ( lowerCaseSettings )
+import Text.Read (readMaybe)
+import Text.Show (Show (show))
+import Yesod.Core.Dispatch (PathPiece (fromPathPiece, toPathPiece))
+
+
+data AvatarColor = AvatarColorLight | AvatarColorDark
+    deriving (Show, Read, Eq)
+
+instance PathPiece AvatarColor where
+    fromPathPiece :: Text -> Maybe AvatarColor
+    fromPathPiece = readMaybe . unpack
+
+    toPathPiece :: AvatarColor -> Text
+    toPathPiece = pack . show
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager
