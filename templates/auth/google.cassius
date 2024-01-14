@@ -1,8 +1,4 @@
 
-a:has(> .gsi-material-button)
-  display: block
-  text-align: center
-
 .gsi-material-button
   -moz-user-select: none
   -webkit-user-select: none

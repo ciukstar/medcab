@@ -65,7 +65,7 @@ import Yesod.Auth.Message
     ( AuthMessage
       ( InvalidLogin, EnterEmail, Register, RegisterLong, SetPassTitle, SetPass
       , ConfirmationEmailSentTitle, CurrentPassword, NewPass, ConfirmPass
-      , PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail
+      , PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail, LoginTitle
       )
     , englishMessage, frenchMessage, russianMessage
     )
@@ -79,6 +79,7 @@ import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
 import Handler.Material3 (md3emailField, md3passwordField)
+import System.Directory (doesFileExist)
 
 
 
@@ -120,6 +121,52 @@ type DB a = forall (m :: Type -> Type).
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
+
+    errorHandler :: ErrorResponse -> HandlerFor App TypedContent
+    errorHandler (PermissionDenied msg) = selectRep $ do
+        provideRep $ defaultLayout $ do
+            addScript (StaticR js_error_min_js)
+            setTitleI MsgPermissionDenied
+            idHeader <- newIdent
+            idHeaderStart <- newIdent
+            toWidget [cassius|
+                             ##{idHeader}
+                               display: flex
+                               flex-direction: row
+                               justify-content: flex-start
+                               align-items: center
+                               gap: 1rem
+                               padding: 0.5rem 1rem
+                               ##{idHeaderStart}
+                                 display: flex
+                                 flex-direction: row
+                                 justify-content: flex-start
+                                 align-items: center
+                                 gap: 1rem
+                             main
+                               margin: 1rem 2rem
+                               display: flex
+                               flex-direction: column
+                               align-items: center
+                             |]
+            [whamlet|
+                    <header.app-top-app-bar.background ##{idHeader}>
+                      <div ##{idHeaderStart}>
+                        <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+                          <md-icon>arrow_back
+
+                        <h1.title-large>
+                          _{MsgPermissionDenied}
+
+                    <main>
+                      <h1.headline-large>_{MsgPermissionDenied}
+                      <p.body-medium>#{msg}
+                      <md-filled-button type=button href=@{AuthR LoginR}>_{MsgSignIn}
+                    |]
+        provideRep $ return $ object ["message" .= ("Permission Denied. " <> msg)]
+        provideRep $ return $ "Permission Denied. " <> msg
+    errorHandler x = defaultErrorHandler x
+    
     -- Controls the base of generated URLs. For more information on modifying,
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot :: Approot App
@@ -165,7 +212,7 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
 
-    isAuthorized (AccountR _) _ = isAuthenticated
+    isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _ _) _ = isAuthenticated
@@ -249,10 +296,17 @@ instance YesodAuth App where
     renderAuthMessage _ ("ru":_) = russianMessage
     renderAuthMessage app (_:xs) = renderAuthMessage app xs
 
+    loginHandler :: AuthHandler App Html
+    loginHandler = do
+        app <- getYesod
+        tp <- getRouteToParent
+        authLayout $ do
+            setTitleI LoginTitle
+            $(widgetFile "auth/login")            
+            
+
     authLayout :: (MonadHandler m, HandlerSite m ~ App) => WidgetFor App () -> m Html
     authLayout w = liftHandler $ do
-        curr <- getCurrentRoute
-        msgs <- getMessages
         defaultLayout $ do
             setTitleI MsgSignIn
             addScript (StaticR js_auth_min_js)
@@ -416,6 +470,7 @@ instance YesodAuthEmail App where
 
     confirmationEmailSentResponse :: A.Email -> AuthHandler App TypedContent
     confirmationEmailSentResponse email = do
+        parent <- getRouteToParent
         msgs <- getMessages
         selectRep $ provideRep $ authLayout $ do
             setTitleI ConfirmationEmailSentTitle
@@ -453,7 +508,7 @@ instance YesodAuthEmail App where
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
         msgs <- getMessages
-        $(widgetFile "auth/login")
+        $(widgetFile "auth/email")
       where
           formEmailLogin :: Html -> MForm Handler (FormResult (Text,Text),Widget)
           formEmailLogin extra = do
@@ -494,59 +549,63 @@ instance YesodAuthEmail App where
     sendVerifyEmail :: A.Email -> VerKey -> VerUrl -> AuthHandler App ()
     sendVerifyEmail email _ verurl = do
 
-        token <- liftHandler $ runDB $ selectOne $ do
+        tokenInfo <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
             where_ $ x ^. TokenApi E.==. val gmail
             return x
 
-        (atoken,sender) <- case token of
-          Just (Entity tid (Token _ StoreTypeDatabase)) -> do
-              access <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
-                  x <- from $ table @Store
-                  where_ $ x ^. StoreToken E.==. val tid
-                  where_ $ x ^. StoreKey E.==. val gmailAccessToken
-                  return $ x ^. StoreVal )
-                  {--
+        secretExists <- liftIO $ doesFileExist "/grt/gmail_refresh_token"
+
+        (rtoken,sender) <- case (tokenInfo,secretExists) of
+          (Just (Entity tid (Token _ StoreTypeDatabase)),_) -> do
               refresh <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
                   where_ $ x ^. StoreToken E.==. val tid
                   where_ $ x ^. StoreKey E.==. val gmailRefreshToken
                   return $ x ^. StoreVal )
-                  --}
               sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
                   where_ $ x ^. StoreToken E.==. val tid
                   where_ $ x ^. StoreKey E.==. val gmailSender
                   return $ x ^. StoreVal )
-              return (access,sender)
-          Just (Entity _ (Token _ StoreTypeSession)) -> do
-              access <- lookupSession gmailAccessToken
-              -- refresh <- lookupSession gmailRefreshToken
-              sender <- lookupSession gmailSender
-              return (access,sender)
-          Just (Entity tid (Token _ StoreTypeGoogleSecretManager)) -> do
-
-              settings <- appSettings <$> getYesod
+              return (refresh,sender)
+              
+          (Just (Entity _ (Token _ StoreTypeSession)),_) -> do
+                refresh <- lookupSession gmailRefreshToken
+                sender <- lookupSession gmailSender
+                return (refresh,sender)
+                
+          (Just (Entity tid (Token _ StoreTypeGoogleSecretManager)),True) -> do
 
               refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
 
-              refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
+              sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Store
+                  where_ $ x ^. StoreToken E.==. val tid
+                  where_ $ x ^. StoreKey E.==. val gmailSender
+                  return $ x ^. StoreVal )
+
+              return (Just (pack refresh),sender)
+              
+          (_,True) -> do
+              refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
+              return (Just (pack refresh),Just "me")
+
+          _otherwise -> return (Nothing,Nothing)
+
+        atoken <- case rtoken of
+          Just refresh -> do 
+              settings <- appSettings <$> getYesod
+
+              r <- liftIO $ post "https://oauth2.googleapis.com/token"
                   [ "refresh_token" := refresh
                   , "client_id" := appGoogleClientId settings
                   , "client_secret" := appGoogleClientSecret settings
                   , "grant_type" := ("refresh_token" :: Text)
                   ]
 
-              let access = refreshResponse ^? WL.responseBody . key "access_token" . _String
-
-              sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
-                  x <- from $ table @Store
-                  where_ $ x ^. StoreToken E.==. val tid
-                  where_ $ x ^. StoreKey E.==. val gmailSender
-                  return $ x ^. StoreVal )
-
-              return (access,sender)
-          Nothing -> return (Nothing, Nothing)
+              return $ r ^? WL.responseBody . key "access_token" . _String
+          Nothing -> return Nothing
 
         case (atoken,sender) of
           (Just at,Just sendby) -> do
@@ -658,7 +717,7 @@ isAuthenticated :: Handler AuthResult
 isAuthenticated = do
     muid <- maybeAuthId
     case muid of
-        Nothing -> unauthorizedI MsgOtherProfileChangeRestricted
+        Nothing -> unauthorizedI MsgAnotherAccountAccessProhibited
         Just _ -> return Authorized
 
 
@@ -667,7 +726,7 @@ isAuthenticatedSelf uid = do
     muid <- maybeAuthId
     case muid of
         Just uid' | uid == uid' -> return Authorized
-                  | otherwise -> unauthorizedI MsgOtherProfileChangeRestricted
+                  | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
         Nothing -> unauthorizedI MsgLoginRequired
 
 

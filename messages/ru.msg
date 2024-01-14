@@ -1,8 +1,19 @@
+HomePage: Домашняя страница
+PermissionDenied: Доступ запрещен
+DidNotGetEmail: Не получили письмо?
+CreatePassword: Создание пароля
+EmailVerification: Проверка электронной почты
+Verification: Проверка
+Registration: Регистрация
+ResendEmail: Отправить письмо повторно
 LoginRequired: Вы должны авторизоваться, чтобы получить доступ к этой странице
+AnotherAccountAccessProhibited: Доступ к учетной записи другого пользователя запрещен
 OtherProfileChangeRestricted: Изменение профиля другого пользователя ограничено
 GmailAccountNotSet: Аккаунт Gmail не установлен. Инициализируйте токены.
 Authentication: Аутентификация
-ForgotPassword: Забыли пароль?
+PasswordRecovery: Восстановление пароля
+ForgotPassword: Forgot password
+ForgotYourPassword: Забыли пароль?
 DoNotHaveAnAccount: У вас нет учетной записи?
 CreateAccount: Зарегистрироваться
 GmailAccount: Учетная запись Gmail

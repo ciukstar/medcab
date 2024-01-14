@@ -1,8 +1,19 @@
+HomePage: Page d'accueil
+PermissionDenied: Permission refusée
+DidNotGetEmail: Vous n'avez pas reçu l'e-mail ?
+CreatePassword: Créer un mot de passe
+EmailVerification: Vérification de l'E-mail
+Verification: Vérification
+Registration: Enregistrement
+ResendEmail: Ré-envoyer l'email
 LoginRequired: Vous devez vous connecter pour accéder à cette page
+AnotherAccountAccessProhibited: L'accès au compte d'un autre utilisateur est interdit
 OtherProfileChangeRestricted: La modification du profil d'un autre utilisateur est restreinte
 GmailAccountNotSet: Le compte Gmail n'est pas défini. Initialisez les jetons.
 Authentication: Authentification
-ForgotPassword: Mot de passe oublié?
+PasswordRecovery: Récupération de mot de passe
+ForgotPassword: Forgot password
+ForgotYourPassword: Mot de passe oublié?
 DoNotHaveAnAccount: Vous n'avez pas de compte ?
 CreateAccount: Créer un compte
 GmailAccount: Compte Gmail

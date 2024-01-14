@@ -18,7 +18,7 @@
         <md-filled-tonal-button href=@{AdminR TokensR}>
           _{MsgTokens}
 
-    <span.title-large>
+    <h1.title-large>
       _{MsgWelcome}
 
   $maybe Entity uid _ <- user

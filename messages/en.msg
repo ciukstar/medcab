@@ -1,8 +1,19 @@
+HomePage: Home page
+PermissionDenied: Permission denied
+DidNotGetEmail: Didn't receive the email?
+CreatePassword: Create password
+EmailVerification: Email verification
+Verification: Verification
+Registration: Registration
+ResendEmail: Resend email
 LoginRequired: You must login to access this page
+AnotherAccountAccessProhibited: Access to another user's account is prohibited
 OtherProfileChangeRestricted: Changing another user's profile is restricted
 GmailAccountNotSet: Gmail account is not set. Initialize tokens.
 Authentication: Authentication
-ForgotPassword: Forgot your password?
+PasswordRecovery: Password recovery
+ForgotPassword: Forgot password
+ForgotYourPassword: Forgot your password?
 DoNotHaveAnAccount: Don't have an account?
 CreateAccount: Create account
 GmailAccount: Gmail account

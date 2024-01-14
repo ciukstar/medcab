@@ -1,8 +1,19 @@
+HomePage: Pagina principală
+PermissionDenied: Acces refuzat
+DidNotGetEmail: Nu aţi primit e-mailul?
+CreatePassword: Creează parolă
+EmailVerification: Verificare a email-ului
+Verification: Verificare
+Registration: Înregistrare
+ResendEmail: Retrimiteți e-mailul
 LoginRequired: Trebuie să vă autentificați pentru a accesa această pagină
+AnotherAccountAccessProhibited: Accesul la contul altui utilizator este interzis
 OtherProfileChangeRestricted: Modificarea profilului altui utilizator este restricționată
 GmailAccountNotSet: Contul Gmail nu este setat. Inițializați jetoanele.
 Authentication: Autentificare
-ForgotPassword: Ați uitat parola?
+PasswordRecovery: Recuperarea parolei
+ForgotPassword: Forgot password
+ForgotYourPassword: Ați uitat parola?
 DoNotHaveAnAccount: Nu aveți cont?
 CreateAccount: Creează-ți un cont
 GmailAccount: Cont Gmail
