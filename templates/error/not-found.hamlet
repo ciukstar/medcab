@@ -1,0 +1,16 @@
+
+<header.app-top-app-bar.background ##{idHeader}>
+  <div ##{idHeaderStart}>
+    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgPageNotFound}
+
+<main>
+  <h2.headline-large>404
+  <h2.headline-large>_{MsgPageNotFound}
+  <p.body-medium>_{MsgInvalidUrlOrRemoved}.
+  <md-filled-button type=button href=@{HomeR} has-icon=true>
+    <md-icon slot=icon>home
+    _{MsgHome}

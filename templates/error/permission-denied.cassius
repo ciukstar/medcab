@@ -1,0 +1,19 @@
+
+##{idHeader}
+  display: flex
+  flex-direction: row
+  justify-content: flex-start
+  align-items: center
+  gap: 1rem
+  padding: 0.5rem 1rem
+  ##{idHeaderStart}
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    gap: 1rem
+main
+  margin: 1rem 2rem
+  display: flex
+  flex-direction: column
+  align-items: center

@@ -32,15 +32,17 @@ import Database.Persist
     , PersistUniqueWrite (upsert)
     )
 import qualified Database.Persist as P ((=.))
+import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, App (appSettings)
-    , Route (HomeR, StaticR, AdminR)
+    , Route (StaticR, AdminR, AuthR, AccountR, AccountPhotoR)
     , AdminR (TokensR, TokensHookR, TokensClearR)
     , AppMessage
-      ( MsgTokens, MsgBack, MsgInitialize, MsgUserSession, MsgDatabase
+      ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
       , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
-      , MsgGmailAccount, MsgGoogleSecretManager
+      , MsgGmailAccount, MsgGoogleSecretManager, MsgSignIn, MsgSignOut
+      , MsgUserAccount, MsgPhoto
       )
     )
 import Data.Function ((&))
@@ -51,6 +53,7 @@ import Model
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
+    , AvatarColor (AvatarColorLight)
     )
 import Network.Wreq
     ( post, FormParam ((:=)), responseBody, defaults, auth, oauth2Bearer
@@ -65,6 +68,7 @@ import Text.Blaze.Html (preEscapedToHtml, toHtml)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (st)
+import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
@@ -95,8 +99,8 @@ projects = "https://secretmanager.googleapis.com/v1/projects" :: Text
 
 
 project :: Text
-project = "medcab-410214" :: Text        
-        
+project = "medcab-410214" :: Text
+
 
 getTokensHookR :: Handler Html
 getTokensHookR = do
@@ -153,7 +157,7 @@ getTokensHookR = do
           -- destroy previous version
           case response of
             Right res -> do
-                
+
                 let prev :: Maybe Int
                     prev = (fmap (\y -> y - 1) . readMaybe . unpack) <=< (LS.last . splitOn "/")
                         $ res L.^. responseBody . key "name" . _String
@@ -165,12 +169,12 @@ getTokensHookR = do
                                    (object [])
                          | otherwise -> return ()
                   Nothing -> return ()
-            
+
             Left e -> do
                 let msg = pack $ show e
                 addMessage statusError (toHtml msg)
                 $(logWarn) msg
-                    
+
           Entity tid _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
 
@@ -211,7 +215,7 @@ postTokensClearR = do
           app <- appSettings <$> getYesod
           -- 1. read refresh token from mounted volume
           refreshToken <- liftIO $ readFile' "/grt/gmail_refresh_token"
-          
+
           -- 2. get access token from googleapi
           refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
               [ "refresh_token" := refreshToken
@@ -221,7 +225,7 @@ postTokensClearR = do
               ]
 
           let newAccessToken = refreshResponse L.^. responseBody . key "access_token" . _String
-          
+
           let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 newAccessToken)
 
           res <- liftIO $ getWith opts
@@ -229,25 +233,25 @@ postTokensClearR = do
 
           let ver :: Maybe Int
               ver = (readMaybe . unpack) <=< (LS.last . splitOn "/") $ res L.^. responseBody . key "name" . _String
-              
+
           case ver of
             Just v -> do
-                
+
                 void $ liftIO $ tryAny $ postWith opts
                     (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}/versions/#{v}:destroy|])
                     (object [])
 
             Nothing -> return ()
-          
+
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
-          
+
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ AdminR TokensR
-          
+
       (FormSuccess (),Nothing) -> do
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
@@ -256,6 +260,7 @@ postTokensClearR = do
           addMessageI statusSuccess MsgCleared
           redirect $ AdminR TokensR
       _otherwise -> do
+          user <- maybeAuth
           (fw,et) <- generateFormPost $ formStoreOptions token
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
@@ -298,6 +303,7 @@ postTokensR = do
           return $ preEscapedToHtml $ decodeUtf8 $ toStrict (r L.^. responseBody)
 
       _otherwise -> do
+          user <- maybeAuth
           (fw2,et2) <- generateFormPost formTokensClear
           msgs <- getMessages
           defaultLayout $ do
@@ -308,7 +314,7 @@ postTokensR = do
 
 getTokensR :: Handler Html
 getTokensR = do
-
+    user <- maybeAuth
     token <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val gmail

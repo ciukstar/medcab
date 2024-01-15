@@ -15,18 +15,8 @@ $doctype 5
     <link rel=icon type="image/x-icon" href=@{FaviconR}>
     <link rel=manifest href=@{WebAppManifestR}>
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
-    <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
-    
-
-    
-    <link rel=stylesheet media=print onload="this.media = 'all'"
-      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
-    <noscript>
-      <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
     
     ^{pageHead pc}
 

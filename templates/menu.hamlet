@@ -11,10 +11,11 @@
       <md-icon-button type=button onclick="document.querySelector('details.app-nav-drawer').open = false">
         <md-icon>close
 
-    <md-menu-item href=@{HomeR}>
+    <md-menu-item href=@{HomeR} :curr == Just HomeR:selected>
       _{MsgWelcome}
 
     <details.app-submenu #idDetailsData
+      :elem curr [Just (AdminR DoctorsR), Just (AdminR TokensR)]:open
       ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
       <summary>
         <md-menu-item>
@@ -22,13 +23,14 @@
             _{MsgData}
             <md-icon.app-expand-icon slot=icon>expand_more
           
-      <md-menu-item type=button>
+      <md-menu-item href=@{AdminR DoctorsR} :curr == Just (AdminR DoctorsR):selected>
         _{MsgDoctors}
           
-      <md-menu-item href=@{AdminR TokensR}>
+      <md-menu-item href=@{AdminR TokensR} :curr == Just (AdminR TokensR):selected>
         _{MsgTokens}
 
     <details.app-submenu #idDetailsResources
+      :elem curr [Just DocsR]:open
       ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
       <summary>
         <md-menu-item>
@@ -36,7 +38,7 @@
             _{MsgResources}
             <md-icon.app-expand-icon slot=icon>expand_more
           
-      <md-menu-item type=button href=@{DocsR}>
+      <md-menu-item href=@{DocsR} :curr == Just DocsR:selected>
         _{MsgDocumentation}
           
       <md-menu-item type=button href="https://github.com/ciukstar/medcab">

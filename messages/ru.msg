@@ -1,3 +1,5 @@
+InvalidUrlOrRemoved: Неверный URL-адрес или ресурс удален
+PageNotFound: Страница не найдена
 Resources: Ресурсы
 SourceCode: Исходный код
 Documentation: Документация
@@ -12,6 +14,7 @@ Gender: Пол
 Edit: Редактировать
 PersonalInfo: Персональные данные
 Account: Учетная запись
+Home: Главная
 HomePage: Домашняя страница
 PermissionDenied: Доступ запрещен
 DidNotGetEmail: Не получили письмо?

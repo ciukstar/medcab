@@ -1,3 +1,5 @@
+InvalidUrlOrRemoved: Invalid URL or resource removed
+PageNotFound: Page not found
 Resources: Resources
 SourceCode: Source code
 Documentation: Documentation
@@ -12,6 +14,7 @@ Gender: Gender
 Edit: Edit
 PersonalInfo: Personal info
 Account: Account
+Home: Home
 HomePage: Home page
 PermissionDenied: Permission denied
 DidNotGetEmail: Didn't receive the email?

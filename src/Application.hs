@@ -68,6 +68,8 @@ import Handler.Common
 
 import Handler.Resources (getDocsR)
 
+import Handler.Doctors (getDoctorsR)
+
 import Handler.Tokens
     (getTokensR, postTokensR, getTokensHookR, postTokensClearR
     , getGoogleSecretManagerReadR

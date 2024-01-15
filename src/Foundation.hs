@@ -123,50 +123,27 @@ type DB a = forall (m :: Type -> Type).
 instance Yesod App where
 
     errorHandler :: ErrorResponse -> HandlerFor App TypedContent
+    errorHandler NotFound = selectRep $ do
+        provideRep $ defaultLayout $ do
+            addScript (StaticR js_error_min_js)
+            setTitleI MsgPageNotFound
+            idHeader <- newIdent
+            idHeaderStart <- newIdent
+            $(widgetFile "error/not-found")
+        provideRep $ return $ object ["message" .= ("Page not found." :: Text)]
+        provideRep $ return ("Page not found." :: Text)
+
     errorHandler (PermissionDenied msg) = selectRep $ do
         provideRep $ defaultLayout $ do
             addScript (StaticR js_error_min_js)
             setTitleI MsgPermissionDenied
             idHeader <- newIdent
             idHeaderStart <- newIdent
-            toWidget [cassius|
-                             ##{idHeader}
-                               display: flex
-                               flex-direction: row
-                               justify-content: flex-start
-                               align-items: center
-                               gap: 1rem
-                               padding: 0.5rem 1rem
-                               ##{idHeaderStart}
-                                 display: flex
-                                 flex-direction: row
-                                 justify-content: flex-start
-                                 align-items: center
-                                 gap: 1rem
-                             main
-                               margin: 1rem 2rem
-                               display: flex
-                               flex-direction: column
-                               align-items: center
-                             |]
-            [whamlet|
-                    <header.app-top-app-bar.background ##{idHeader}>
-                      <div ##{idHeaderStart}>
-                        <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-                          <md-icon>arrow_back
-
-                        <h1.title-large>
-                          _{MsgPermissionDenied}
-
-                    <main>
-                      <h1.headline-large>_{MsgPermissionDenied}
-                      <p.body-medium>#{msg}
-                      <md-filled-button type=button href=@{AuthR LoginR}>_{MsgSignIn}
-                    |]
+            $(widgetFile "error/permission-denied")
         provideRep $ return $ object ["message" .= ("Permission Denied. " <> msg)]
         provideRep $ return $ "Permission Denied. " <> msg
     errorHandler x = defaultErrorHandler x
-    
+
     -- Controls the base of generated URLs. For more information on modifying,
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot :: Approot App
@@ -211,7 +188,7 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-    
+
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
@@ -220,7 +197,7 @@ instance Yesod App where
     isAuthorized (AccountPhotoR _ _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
-    
+
     isAuthorized DocsR _ = return Authorized
     isAuthorized WebAppManifestR _ = return Authorized
     isAuthorized SitemapR _ = return Authorized
@@ -234,6 +211,7 @@ instance Yesod App where
 
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
     
+    isAuthorized (AdminR DoctorsR) _ = return Authorized
     isAuthorized (AdminR TokensClearR) _ = return Authorized
     isAuthorized (AdminR TokensHookR) _ = return Authorized
     isAuthorized (AdminR TokensR) _ = return Authorized
@@ -306,8 +284,8 @@ instance YesodAuth App where
         tp <- getRouteToParent
         authLayout $ do
             setTitleI LoginTitle
-            $(widgetFile "auth/login")            
-            
+            $(widgetFile "auth/login")
+
 
     authLayout :: (MonadHandler m, HandlerSite m ~ App) => WidgetFor App () -> m Html
     authLayout w = liftHandler $ do
@@ -573,12 +551,12 @@ instance YesodAuthEmail App where
                   where_ $ x ^. StoreKey E.==. val gmailSender
                   return $ x ^. StoreVal )
               return (refresh,sender)
-              
+
           (Just (Entity _ (Token _ StoreTypeSession)),_) -> do
                 refresh <- lookupSession gmailRefreshToken
                 sender <- lookupSession gmailSender
                 return (refresh,sender)
-                
+
           (Just (Entity tid (Token _ StoreTypeGoogleSecretManager)),True) -> do
 
               refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
@@ -590,7 +568,7 @@ instance YesodAuthEmail App where
                   return $ x ^. StoreVal )
 
               return (Just (pack refresh),sender)
-              
+
           (_,True) -> do
               refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
               return (Just (pack refresh),Just "me")
@@ -598,7 +576,7 @@ instance YesodAuthEmail App where
           _otherwise -> return (Nothing,Nothing)
 
         atoken <- case rtoken of
-          Just refresh -> do 
+          Just refresh -> do
               settings <- appSettings <$> getYesod
 
               r <- liftIO $ post "https://oauth2.googleapis.com/token"

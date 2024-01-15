@@ -1,3 +1,5 @@
+InvalidUrlOrRemoved: Adresă URL nevalidă sau resursă eliminată
+PageNotFound: Pagina nu a fost găsită
 Resources: Resurse
 SourceCode: Codul sursă
 Documentation: Documentație
@@ -12,6 +14,7 @@ Gender: Gen
 Edit: Editează
 PersonalInfo: Date personale
 Account: Contul
+Home: Pagina de start
 HomePage: Pagina principală
 PermissionDenied: Acces refuzat
 DidNotGetEmail: Nu aţi primit e-mailul?

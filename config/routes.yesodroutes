@@ -22,6 +22,9 @@
 /resources/docs DocsR GET
 
 /admin AdminR:
+
+    /doctors DoctorsR GET
+
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET
     /tokens 	  TokensR      GET POST
