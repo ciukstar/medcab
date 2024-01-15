@@ -55,6 +55,9 @@ import Handler.Accounts
     , getAccountsR
     , getAccountR
     , postAccountR
+    , getAccountInfoR
+    , getAccountInfoEditR
+    , postAccountInfoR
     )
     
 import Handler.Video ( getVideoR )
@@ -62,6 +65,8 @@ import Handler.Home ( getHomeR )
 
 import Handler.Common
     ( getRobotsR, getFaviconR, getSitemapR, getWebAppManifestR )
+
+import Handler.Resources (getDocsR)
 
 import Handler.Tokens
     (getTokensR, postTokensR, getTokensHookR, postTokensClearR

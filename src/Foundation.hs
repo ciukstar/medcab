@@ -19,7 +19,7 @@ import Control.Monad.Logger (LogSource)
 import Import.NoFoundation
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import qualified Data.CaseInsensitive as CI
-import qualified Data.ByteString.Base64.Lazy as B64L
+import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Function ((&))
 import Data.Kind (Type)
@@ -211,14 +211,17 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-
+    
+    isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _ _) _ = isAuthenticated
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
-
+    
+    isAuthorized DocsR _ = return Authorized
     isAuthorized WebAppManifestR _ = return Authorized
     isAuthorized SitemapR _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
@@ -230,6 +233,7 @@ instance Yesod App where
 
 
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
+    
     isAuthorized (AdminR TokensClearR) _ = return Authorized
     isAuthorized (AdminR TokensHookR) _ = return Authorized
     isAuthorized (AdminR TokensR) _ = return Authorized

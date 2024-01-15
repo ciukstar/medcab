@@ -23,10 +23,16 @@ import ClassyPrelude.Yesod
 import Data.Function ((.))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
+import Data.Time.Calendar (Day)
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Text.Read (readMaybe)
 import Text.Show (Show (show))
 import Yesod.Core.Dispatch (PathPiece (fromPathPiece, toPathPiece))
+
+
+data Gender = GenderFemale | GenderMale | GenderOther
+    deriving (Show, Read, Eq, Ord)
+derivePersistField "Gender"
 
 
 data AvatarColor = AvatarColorLight | AvatarColorDark

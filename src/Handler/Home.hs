@@ -6,13 +6,12 @@
 module Handler.Home (getHomeR) where
 
 import Database.Persist (Entity(Entity))
+import Handler.Menu (menu)
 import Foundation
     ( Handler
-    , Route (StaticR, AuthR, HomeR, VideoR, AccountPhotoR, AdminR, AccountR)
-    , AdminR (TokensR)
+    , Route (StaticR, AuthR, HomeR, VideoR, AccountPhotoR, AccountR)
     , AppMessage
-      ( MsgWelcome, MsgMainMenu, MsgSignIn, MsgPhoto, MsgTokens, MsgSignOut
-      , MsgUserAccount
+      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount
       )
     )
 import Model (statusError, AvatarColor(AvatarColorLight))

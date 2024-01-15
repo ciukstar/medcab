@@ -9,8 +9,12 @@ module Handler.Accounts
   , getAccountsR
   , getAccountR
   , postAccountR
+  , getAccountInfoR
+  , getAccountInfoEditR
+  , postAccountInfoR
   ) where
 
+import Control.Monad (void)
 import Database.Persist
     ( Entity(Entity, entityVal), PersistUniqueWrite (upsert))
 import qualified Database.Persist as P ((=.))
@@ -20,35 +24,46 @@ import Database.Esqueleto.Experimental
     )
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+import Handler.Material3
+    ( md3textField, md3radioField )
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
-    , EntityField (UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId)
+    , EntityField
+      ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
+      , UserInfoUser, UserInfoBirthDate, UserInfoGender
+      )
     , User (User, userName), AvatarColor (AvatarColorDark, AvatarColorLight)
+    , UserInfo (UserInfo, userInfoBirthDate, userInfoGender)
+    , Gender (GenderFemale, GenderMale, GenderOther)
     )
 import Foundation
     ( Handler, Widget
     , Route
-      ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR)
+      ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
+      , AccountInfoR, AccountInfoEditR
+      )
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
-      , MsgSave, MsgRecordEdited
+      , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
+      , MsgFemale, MsgMale, MsgOther, MsgGender, MsgBirthday, MsgNotIndicated
       )
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( js_account_min_js, img_person_FILL0_wght400_GRAD0_opsz24_white_svg
-    , img_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_person_FILL0_wght400_GRAD0_opsz24_svg, js_personal_info_min_js
     )
 import Text.Hamlet (Html)
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
     , MonadHandler (liftHandler), redirect, FileInfo (fileContentType)
-    , newIdent, fileSourceByteString, addMessageI
+    , newIdent, fileSourceByteString, addMessageI, whamlet
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Core.Widget (setTitleI, addScript)
+import Yesod.Form.Fields (fileField, dayField, optionsPairs)
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess), FieldView (fvInput, fvId)
@@ -56,10 +71,86 @@ import Yesod.Form.Types
     )
 import Yesod.Persist (YesodPersist(runDB))
 
-import Handler.Material3
-    ( md3textField )
-import Yesod.Form.Fields (fileField)
-import Control.Monad (void)
+
+postAccountInfoR :: UserId -> Handler Html
+postAccountInfoR uid = do
+    ((fr,fw),et) <- runFormPost $ formUserInfo uid Nothing
+    case fr of
+      FormSuccess r@(UserInfo _ bday gender) -> do
+          void $ runDB $ upsert r [ UserInfoBirthDate P.=. bday
+                                  , UserInfoGender P.=. gender
+                                  ]
+          addMessageI statusSuccess MsgRecordEdited
+          redirect $ AccountInfoR uid
+      _otherwise -> do
+          defaultLayout $ do
+              setTitleI MsgPersonalInfo
+              $(widgetFile "accounts/info/edit")
+
+
+getAccountInfoEditR :: UserId -> Handler Html
+getAccountInfoEditR uid = do
+    info <- runDB $ selectOne $ do
+        x <- from $ table @UserInfo
+        where_ $ x ^. UserInfoUser ==. val uid
+        return x
+    (fw,et) <- generateFormPost $ formUserInfo uid info
+    defaultLayout $ do
+        setTitleI MsgPersonalInfo
+        addScript (StaticR js_personal_info_min_js)
+        $(widgetFile "accounts/info/edit")
+
+
+formUserInfo :: UserId -> Maybe (Entity UserInfo)
+             -> Html -> MForm Handler (FormResult UserInfo, Widget)
+formUserInfo uid info extra = do
+    rndr <- getMessageRender
+    (bdayR,bdayV) <- mopt dayField FieldSettings
+        { fsLabel = SomeMessage MsgBirthday
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgBirthday)]
+        } (userInfoBirthDate . entityVal <$> info)
+    (genderR,genderV) <- mopt (md3radioField (optionsPairs options)) FieldSettings
+        { fsLabel = SomeMessage MsgGender
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [ ("class", "app-gender-options")
+                    , ("label", rndr MsgGender)
+                    ]
+        } (userInfoGender . entityVal <$> info)
+
+    let r = UserInfo uid <$> bdayR <*> genderR
+    let w = [whamlet|
+                    #{extra}
+                    <div.app-form-field>
+                      <label.label-large for=#{fvId bdayV}>_{MsgBirthday}
+                      ^{fvInput bdayV}
+                    <fieldset.shape-medium.label-large>
+                      <legend>_{MsgGender}
+                      ^{fvInput genderV}
+                    |]
+    return (r,w)
+  where
+      options = [ (MsgFemale, GenderFemale)
+                , (MsgMale, GenderMale)
+                , (MsgOther, GenderOther)
+                ]
+
+
+getAccountInfoR :: UserId -> Handler Html
+getAccountInfoR uid = do
+
+    info <- runDB $ selectOne $ do
+        x <- from $ table @UserInfo
+        where_ $ x ^. UserInfoUser ==. val uid
+        return x
+
+    (fw,et) <- generateFormPost $ formUserInfo uid info
+
+    defaultLayout $ do
+        setTitleI MsgPersonalInfo
+        addScript (StaticR js_personal_info_min_js)
+        idPanelInfo <- newIdent
+        $(widgetFile "accounts/info/info")
 
 
 postAccountR :: UserId -> Handler Html
@@ -89,6 +180,7 @@ getAccountR uid = do
     defaultLayout $ do
         setTitleI MsgUserAccount
         addScript (StaticR js_account_min_js)
+        idPanelAccount <- newIdent
         $(widgetFile "accounts/account")
 
 
@@ -129,7 +221,7 @@ formAccount user extra = do
     return ( (,) <$> nameR <*> photoR
            , $(widgetFile "accounts/form")
            )
-      
+
 
 getAccountPhotoR :: UserId -> AvatarColor -> Handler TypedContent
 getAccountPhotoR uid color = do
@@ -142,5 +234,3 @@ getAccountPhotoR uid color = do
       Nothing -> redirect $ case color of
         AvatarColorDark -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg
         AvatarColorLight -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg
-        
-

@@ -1,22 +1,7 @@
 
 <header.primary>
   <div #headerStart>
-    <details.app-nav-drawer>
-      <summary>
-        <md-filled-icon-button type=button aria-label=_{MsgMainMenu}
-          onclick="document.querySelector('details.app-nav-drawer').open = true">
-          <md-icon>menu
-
-      <aside.app-nav-drawer.surface.large-end.elevation-5>
-        <div.app-header>
-          <md-icon-button onclick="document.querySelector('details.app-nav-drawer').open = false">
-            <md-icon>close
-
-        <md-filled-tonal-button href=@{HomeR}>
-          _{MsgWelcome}
-
-        <md-filled-tonal-button href=@{AdminR TokensR}>
-          _{MsgTokens}
+    ^{menu}
 
     <h1.title-large>
       _{MsgWelcome}
@@ -81,4 +66,6 @@
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    #{status}. #{msg}
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

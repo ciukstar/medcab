@@ -1,0 +1,56 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgUserAccount}
+
+  $maybe _ <- info
+    <div #headerEnd>
+      <md-icon-button type=button href=@{AccountInfoEditR uid} aria-label=_{MsgEdit}>
+        <md-icon>edit
+      
+<main>
+
+  <md-tabs aria-label=Tabs
+    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{AccountR uid}' : '@{AccountInfoR uid}'">
+    <md-primary-tab #tabAccount aria-controls=panelAccount>
+      _{MsgAccount}
+    <md-primary-tab #tabInfo aria-controls=#{idPanelInfo} active=true>
+      _{MsgPersonalInfo}
+
+  <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
+
+  <div ##{idPanelInfo} role=tabpanel aria-labelledby=tabInfo>
+    $maybe Entity _ (UserInfo _ bday gender) <- info
+      <p>
+        <label.label-large>
+          _{MsgBirthday}: #
+          <span.body-medium>
+            $maybe bday <- bday
+              #{show bday}
+            $nothing
+              _{MsgNotIndicated}
+      <p>
+        <label.label-large>
+          _{MsgGender}: #
+          <span.body-medium>
+          
+            $maybe gender <- gender
+              $case gender
+                $of GenderFemale
+                  _{MsgFemale}
+                $of GenderMale
+                  _{MsgMale}
+                $of _
+                  _{MsgOther}
+                  
+            $nothing
+              _{MsgNotIndicated}
+    $nothing
+      <form method=post action=@{AccountInfoR uid} enctype=#{et}>
+        ^{fw}
+        <div.app-form-actions>
+          <md-text-button type=button href=@{HomeR}>_{MsgCancel}
+          <md-filled-button type=submit>_{MsgSave}

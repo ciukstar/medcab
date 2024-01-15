@@ -8,10 +8,11 @@ $doctype 5
     <meta name=description content="MedCab Healthcare App">
     <meta name=author content="Sergiu Starciuc, ciukstar@gmail.com">
     <meta name="theme-color" content="rgb(101 85 143)">
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="light">
     <meta name=viewport content="width=device-width,initial-scale=1">
-    
-    <link href=@{WebAppManifestR} rel=manifest>
+
+    <link rel=icon type="image/x-icon" href=@{FaviconR}>
+    <link rel=manifest href=@{WebAppManifestR}>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"

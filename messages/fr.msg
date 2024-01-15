@@ -1,3 +1,17 @@
+Resources: Ressources
+SourceCode: Code source
+Documentation: Documentation
+Doctors: Médecins
+Data: Donnés
+NotIndicated: Non indiqué
+Birthday: Date de naissance
+Other: Autre
+Male: Masculin
+Female: Féminin
+Gender: Genre
+Edit: Modifier
+PersonalInfo: Données personnelles
+Account: Compte
 HomePage: Page d'accueil
 PermissionDenied: Permission refusée
 DidNotGetEmail: Vous n'avez pas reçu l'e-mail ?

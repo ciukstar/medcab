@@ -1,3 +1,17 @@
+Resources: Resurse
+SourceCode: Codul sursă
+Documentation: Documentație
+Doctors: Doctori
+Data: Date
+NotIndicated: Nu este indicat
+Birthday: Ziua de naștere
+Other: Altul
+Male: Masculin
+Female: Feminin
+Gender: Gen
+Edit: Editează
+PersonalInfo: Date personale
+Account: Contul
 HomePage: Pagina principală
 PermissionDenied: Acces refuzat
 DidNotGetEmail: Nu aţi primit e-mailul?

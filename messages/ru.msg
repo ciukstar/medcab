@@ -1,3 +1,17 @@
+Resources: Ресурсы
+SourceCode: Исходный код
+Documentation: Документация
+Doctors: Врачи
+Data: Данные
+NotIndicated: Не указано
+Birthday: День рождения
+Other: Другой
+Male: Мужской
+Female: Женский
+Gender: Пол
+Edit: Редактировать
+PersonalInfo: Персональные данные
+Account: Учетная запись
 HomePage: Домашняя страница
 PermissionDenied: Доступ запрещен
 DidNotGetEmail: Не получили письмо?

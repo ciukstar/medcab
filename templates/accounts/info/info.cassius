@@ -1,0 +1,35 @@
+
+header
+  position: sticky
+  top: 0
+  z-index: 2
+  padding: 0.5rem 1rem
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  align-items: center
+  #headerStart
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    gap: 1rem
+    
+main
+  ##{idPanelInfo}
+    margin: 2rem
+    form
+      display: flex
+      flex-direction: column
+      gap: 1rem
+      .app-gender-options
+        display: flex
+        flex-direction: column
+        gap: 1rem
+        > div > label
+          margin-left: 0.5rem
+      .app-form-actions
+        display: flex
+        flex-direction: row
+        justify-content: flex-end
+        gap: 0.5rem

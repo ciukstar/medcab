@@ -1,10 +1,12 @@
 
 /gsm/read GoogleSecretManagerReadR GET
 
-/accounts/#UserId/edit               AccountEditR  GET
-/accounts/#UserId/photo/#AvatarColor AccountPhotoR GET
-/accounts/#UserId       	     AccountR      GET POST
-/accounts               	     AccountsR     GET
+/accounts/#UserId/info/edit          AccountInfoEditR GET
+/accounts/#UserId/info		     AccountInfoR     GET POST
+/accounts/#UserId/edit               AccountEditR     GET
+/accounts/#UserId/photo/#AvatarColor AccountPhotoR    GET
+/accounts/#UserId       	     AccountR         GET POST
+/accounts               	     AccountsR        GET
 
 /video VideoR GET
 /      HomeR  GET
@@ -16,6 +18,8 @@
 /sitemap.xml   SitemapR        GET
 /favicon.ico   FaviconR        GET
 /robots.txt    RobotsR         GET
+
+/resources/docs DocsR GET
 
 /admin AdminR:
     /tokens/clear TokensClearR POST

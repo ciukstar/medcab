@@ -2,6 +2,7 @@
 
 module Handler.Video (getVideoR) where
 
+import Handler.Menu (menu)
 import Foundation
     ( Handler
     , Route (StaticR, HomeR, VideoR, AuthR)

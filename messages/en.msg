@@ -1,3 +1,17 @@
+Resources: Resources
+SourceCode: Source code
+Documentation: Documentation
+Doctors: Doctors
+Data: Data
+NotIndicated: Not indicated
+Birthday: Birthday
+Other: Other
+Male: Male
+Female: Female
+Gender: Gender
+Edit: Edit
+PersonalInfo: Personal info
+Account: Account
 HomePage: Home page
 PermissionDenied: Permission denied
 DidNotGetEmail: Didn't receive the email?
