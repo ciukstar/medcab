@@ -1,0 +1,20 @@
+
+#{extra}
+  
+<label for=#{fvId photoV} ##{idLabelPhoto}>
+  <figure ##{idFigurePhoto}>
+    $maybe Entity did _ <- doctor
+      <img src=@{DataR $ DoctorPhotoR did} width=56 height=auto
+           ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
+    $nothing
+      <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=56 height=auto
+           ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
+    <figcaption.body-medium>
+      _{MsgPhoto}
+
+^{fvInput photoV}
+
+^{fvInput nameV}
+^{fvInput mobileV}
+^{fvInput emailV}
+^{fvInput specV}

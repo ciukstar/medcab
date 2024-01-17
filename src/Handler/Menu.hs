@@ -4,8 +4,8 @@ module Handler.Menu (menu) where
 
 import Foundation
     ( Widget
-    , Route (HomeR, AdminR, DocsR)
-    , AdminR (TokensR, DoctorsR)
+    , Route (HomeR, DataR, DocsR)
+    , DataR (TokensR, DoctorsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors
       , MsgDocumentation, MsgSourceCode, MsgResources

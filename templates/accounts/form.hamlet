@@ -14,6 +14,7 @@ $maybe Entity _ (User email _ _ _ _ _) <- user
            ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
     <figcaption.body-medium>
       _{MsgPhoto}
+      
 ^{fvInput photoV}
 
 ^{fvInput nameV}

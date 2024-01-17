@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgDoctors}
+      _{MsgTokens}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -24,5 +24,26 @@
 
 <main>
 
-  <md-fab ##{idFabAdd} aria-label=_{MsgEdit}>
-    <md-icon slot=icon>add
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  <div.app-card.shape-large.outline>
+    <div.app-card-title.headline-medium>
+      Gmail
+    <div.app-card-content>
+    
+      <form method=post action=@{DataR TokensR} enctype=#{et} #formStoreType>
+        ^{fw}
+          
+    <div.app-card-actions>
+      <form method=post action=@{DataR TokensClearR} enctype=#{et2} #formTokensClear>
+        ^{fw2}
+      <md-text-button type=submit form=formTokensClear>
+        _{MsgClearSettings}
+      <md-filled-button type=submit form=formStoreType>
+        _{MsgInitialize}
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    #{status}. #{msg}

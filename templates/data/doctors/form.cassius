@@ -1,0 +1,27 @@
+
+form
+  width: 100%
+  display: flex
+  flex-direction: column
+  justify-content: center
+  align-items: center
+  gap: 1rem
+  > *
+    align-self: stretch
+  .app-form-actions
+    display: flex
+    flex-direction: row
+    justify-content: flex-end
+    gap: 0.5rem
+
+
+##{idFigurePhoto}
+  figcaption
+    text-transform: lowercase
+
+##{idLabelPhoto}
+  text-align: center
+  align-self: center
+  
+##{idImgPhoto}
+  clip-path: circle(50%)

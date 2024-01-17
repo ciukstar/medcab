@@ -1,0 +1,35 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DataR DoctorsR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgDoctor}
+
+  <div #headerEnd>
+    <md-icon-button href=# aria-label=_{MsgDele}>
+      <md-icon>delete
+    <md-icon-button href=# aria-label=_{MsgEdit}>
+      <md-icon>edit
+    
+      
+<main>
+  $maybe Entity did (Doctor name mobile email spec) <- doctor
+    <figure>
+      <img src=@{DataR $ DoctorPhotoR did} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-medium>
+        _{MsgPhoto}
+    <table>
+      <tbody>
+        <tr>
+          <th.label-large scope=row>_{MsgFullName}
+          <td.body-medium>#{name}
+        <tr>
+          <th.label-large scope=row>_{MsgMobile}
+          <td.body-medium>#{mobile}
+        <tr>
+          <th.label-medium scope=row>_{MsgEmailAddress}
+          <td.body-medium>#{email}
+        <tr>
+          <th.label-medium scope=row>_{MsgSpecialization}
+          <td.body-medium>#{spec}

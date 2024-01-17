@@ -1,3 +1,9 @@
+Dele: Delete
+RecordCreated: Record created
+Doctor: Doctor
+Specialization: Specialization
+Mobile: Mobile
+NoDoctorsYet: There are no doctors yet
 InvalidUrlOrRemoved: Invalid URL or resource removed
 PageNotFound: Page not found
 Resources: Resources

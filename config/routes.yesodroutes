@@ -21,9 +21,12 @@
 
 /resources/docs DocsR GET
 
-/admin AdminR:
-
-    /doctors DoctorsR GET
+/data DataR:
+    
+    /doctors/#DoctorId/photo DoctorPhotoR  GET
+    /doctors/form/create     DoctorCreateR GET
+    /doctors/#DoctorId 	     DoctorR       GET
+    /doctors        	     DoctorsR      GET POST
 
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET

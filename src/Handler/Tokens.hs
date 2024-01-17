@@ -35,8 +35,8 @@ import qualified Database.Persist as P ((=.))
 import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, App (appSettings)
-    , Route (StaticR, AdminR, AuthR, AccountR, AccountPhotoR)
-    , AdminR (TokensR, TokensHookR, TokensClearR)
+    , Route (StaticR, DataR, AuthR, AccountR, AccountPhotoR)
+    , DataR (TokensR, TokensHookR, TokensClearR)
     , AppMessage
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
@@ -114,7 +114,7 @@ getTokensHookR = do
 
     r <- liftIO $ post "https://oauth2.googleapis.com/token"
          [ "code" := code
-         , "redirect_uri" := rndr (AdminR TokensHookR)
+         , "redirect_uri" := rndr (DataR TokensHookR)
          , "client_id" := googleClientId
          , "client_secret" := googleClientSecret
          , "grant_type" := ("authorization_code" :: Text)
@@ -137,7 +137,7 @@ getTokensHookR = do
           setSession gmailSender email
           _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       Just (email,x@StoreTypeDatabase) -> do
           setSession gmailSender email
           Entity tid _ <- runDB $ upsert (Token gmail x) [TokenStore P.=. x]
@@ -145,7 +145,7 @@ getTokensHookR = do
           _ <- runDB $ upsert (Store tid gmailRefreshToken refreshToken) [StoreVal P.=. refreshToken]
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       Just (email,x@StoreTypeGoogleSecretManager) -> do
           setSession gmailSender email
 
@@ -179,10 +179,10 @@ getTokensHookR = do
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
 
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       Nothing -> do
           addMessageI statusError MsgInvalidStoreType
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
 
 
 postTokensClearR :: Handler Html
@@ -202,7 +202,7 @@ postTokensClearR = do
           deleteSession gmailSender
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
@@ -210,7 +210,7 @@ postTokensClearR = do
           deleteSession gmailSender
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
           app <- appSettings <$> getYesod
           -- 1. read refresh token from mounted volume
@@ -250,7 +250,7 @@ postTokensClearR = do
 
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
 
       (FormSuccess (),Nothing) -> do
           deleteSession gmailAccessToken
@@ -258,7 +258,7 @@ postTokensClearR = do
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
           addMessageI statusSuccess MsgCleared
-          redirect $ AdminR TokensR
+          redirect $ DataR TokensR
       _otherwise -> do
           user <- maybeAuth
           (fw,et) <- generateFormPost $ formStoreOptions token
@@ -266,7 +266,7 @@ postTokensClearR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
-              $(widgetFile "admin/tokens/tokens")
+              $(widgetFile "data/tokens/tokens")
 
 
 formTokensClear :: Html -> MForm Handler (FormResult (),Widget)
@@ -291,7 +291,7 @@ postTokensR = do
               scope = "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/cloud-platform"
 
           r <- liftIO $ post "https://accounts.google.com/o/oauth2/v2/auth"
-              [ "redirect_uri" := urlRender (AdminR TokensHookR)
+              [ "redirect_uri" := urlRender (DataR TokensHookR)
               , "response_type" := ("code" :: Text)
               , "prompt" := ("consent" :: Text)
               , "client_id" := appGoogleClientId app
@@ -309,7 +309,7 @@ postTokensR = do
           defaultLayout $ do
               setTitleI MsgTokens
               addScript (StaticR js_tokens_min_js)
-              $(widgetFile "admin/tokens/tokens")
+              $(widgetFile "data/tokens/tokens")
 
 
 getTokensR :: Handler Html
@@ -326,7 +326,7 @@ getTokensR = do
     defaultLayout $ do
         setTitleI MsgTokens
         addScript (StaticR js_tokens_min_js)
-        $(widgetFile "admin/tokens/tokens")
+        $(widgetFile "data/tokens/tokens")
 
 
 formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult (Text,StoreType), Widget)

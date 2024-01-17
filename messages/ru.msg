@@ -1,3 +1,9 @@
+Dele: Удалить
+RecordCreated: Запись создана
+Doctor: Врач
+Specialization: Специализация
+Mobile: Мобильный 
+NoDoctorsYet: Врачей пока нет
 InvalidUrlOrRemoved: Неверный URL-адрес или ресурс удален
 PageNotFound: Страница не найдена
 Resources: Ресурсы

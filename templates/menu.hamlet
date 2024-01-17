@@ -15,7 +15,7 @@
       _{MsgWelcome}
 
     <details.app-submenu #idDetailsData
-      :elem curr [Just (AdminR DoctorsR), Just (AdminR TokensR)]:open
+      :elem curr [Just (DataR DoctorsR), Just (DataR TokensR)]:open
       ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
       <summary>
         <md-menu-item>
@@ -23,10 +23,10 @@
             _{MsgData}
             <md-icon.app-expand-icon slot=icon>expand_more
           
-      <md-menu-item href=@{AdminR DoctorsR} :curr == Just (AdminR DoctorsR):selected>
+      <md-menu-item href=@{DataR DoctorsR} :curr == Just (DataR DoctorsR):selected>
         _{MsgDoctors}
           
-      <md-menu-item href=@{AdminR TokensR} :curr == Just (AdminR TokensR):selected>
+      <md-menu-item href=@{DataR TokensR} :curr == Just (DataR TokensR):selected>
         _{MsgTokens}
 
     <details.app-submenu #idDetailsResources

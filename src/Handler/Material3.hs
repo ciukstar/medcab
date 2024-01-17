@@ -4,8 +4,9 @@
 module Handler.Material3
   ( md3emailField
   , md3passwordField
-  , md3textField
   , md3radioField
+  , md3telField
+  , md3textField
   ) where
 
 import Data.Text (Text)
@@ -31,6 +32,12 @@ md3radioField options = (radioField options)
     <div>
       <md-radio ##{theId}-#{i} name=#{name} :isReq:required=true value=#{optionExternalValue opt} :sel x opt:checked>
       <label.label-large for=#{theId}-#{i}>#{optionDisplay opt}
+|] }
+
+
+md3telField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
+md3telField = textField { fieldView = \theId name attrs eval isReq -> [whamlet|
+<md-filled-text-field ##{theId} type=tel name=#{name} :isReq:required=true value=#{either id id eval} *{attrs}>
 |] }
 
 

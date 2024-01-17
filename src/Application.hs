@@ -68,7 +68,10 @@ import Handler.Common
 
 import Handler.Resources (getDocsR)
 
-import Handler.Doctors (getDoctorsR)
+import Handler.Doctors
+    ( getDoctorsR, getDoctorCreateR, getDoctorPhotoR, postDoctorsR
+    , getDoctorR
+    )
 
 import Handler.Tokens
     (getTokensR, postTokensR, getTokensHookR, postTokensClearR

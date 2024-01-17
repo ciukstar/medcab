@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgTokens}
+      _{MsgDoctors}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -24,26 +24,21 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  $if null doctors
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoDoctorsYet}
+  $else
+    $forall Entity did (Doctor name _ email _) <- doctors
+      <md-list>
+        <md-list-item interactive href=@{DataR $ DoctorR did}>
+          <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 style="clip-path:circle(50%)">
+          <div slot=headline>#{name}
+          <div slot=supporting-text>#{email}
+          <md-icon slot=end>arrow_forward_ios
+        <md-divider>
 
-  <div.app-card.shape-large.outline>
-    <div.app-card-title.headline-medium>
-      Gmail
-    <div.app-card-content>
-    
-      <form method=post action=@{AdminR TokensR} enctype=#{et} #formStoreType>
-        ^{fw}
-          
-    <div.app-card-actions>
-      <form method=post action=@{AdminR TokensClearR} enctype=#{et2} #formTokensClear>
-        ^{fw2}
-      <md-text-button type=submit form=formTokensClear>
-        _{MsgClearSettings}
-      <md-filled-button type=submit form=formStoreType>
-        _{MsgInitialize}
-
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    #{status}. #{msg}
+  <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{DataR DoctorCreateR}>
+    <md-icon slot=icon>add

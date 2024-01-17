@@ -210,11 +210,16 @@ instance Yesod App where
 
 
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
+
     
-    isAuthorized (AdminR DoctorsR) _ = return Authorized
-    isAuthorized (AdminR TokensClearR) _ = return Authorized
-    isAuthorized (AdminR TokensHookR) _ = return Authorized
-    isAuthorized (AdminR TokensR) _ = return Authorized
+    isAuthorized (DataR DoctorCreateR) _ = return Authorized
+    isAuthorized (DataR (DoctorPhotoR _)) _ = return Authorized
+    isAuthorized (DataR (DoctorR _)) _ = return Authorized
+    isAuthorized (DataR DoctorsR) _ = return Authorized
+    
+    isAuthorized (DataR TokensClearR) _ = return Authorized
+    isAuthorized (DataR TokensHookR) _ = return Authorized
+    isAuthorized (DataR TokensR) _ = return Authorized
 
 
     -- This function creates static content files in the static folder

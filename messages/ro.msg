@@ -1,3 +1,9 @@
+Dele: Șterge
+RecordCreated: Înregistrarea creată
+Doctor: Doctor
+Specialization: Specializare
+Mobile: Mobil
+NoDoctorsYet: Nu există doctori încă
 InvalidUrlOrRemoved: Adresă URL nevalidă sau resursă eliminată
 PageNotFound: Pagina nu a fost găsită
 Resources: Resurse

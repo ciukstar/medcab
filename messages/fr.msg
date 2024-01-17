@@ -1,3 +1,9 @@
+Dele: Supprimer
+RecordCreated: Enregistrement créé
+Doctor: Médecin
+Specialization: Spécialisation
+Mobile: Mobile
+NoDoctorsYet: Il n'y a pas encore de médecins
 InvalidUrlOrRemoved: URL invalide ou ressource supprimée
 PageNotFound: Page non trouvée
 Resources: Ressources
