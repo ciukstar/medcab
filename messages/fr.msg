@@ -1,3 +1,12 @@
+ConfirmPlease: Veuillez confirmer
+DeleteAreYouSure: Etes-vous sûr que vous voulez supprimer?
+ErDiagram: Diagramme ER
+Name: Nom
+Code: Code
+Description: Description
+NoSpecialtiesYet: Il n'y a pas encore de spécialités
+Specialties: Spécialités
+Specialty: Spécialité
 Dele: Supprimer
 RecordCreated: Enregistrement créé
 Doctor: Médecin

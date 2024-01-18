@@ -1,3 +1,12 @@
+ConfirmPlease: Пожалуйста подтвердите
+DeleteAreYouSure: Вы уверены, что хотите удалить?
+ErDiagram: ER-диаграмма
+Name: Имя
+Code: Код
+Description: Описание
+NoSpecialtiesYet: Специальностей пока нет
+Specialties: Специальности
+Specialty: Специальность
 Dele: Удалить
 RecordCreated: Запись создана
 Doctor: Врач

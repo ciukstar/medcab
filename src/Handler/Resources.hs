@@ -9,11 +9,12 @@ import Foundation
     , Route (AuthR, AccountR, AccountPhotoR, StaticR)
     , AppMessage
       ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
+      , MsgErDiagram
       )
     )
 import Model (AvatarColor (AvatarColorLight))
 import Settings (widgetFile)
-import Settings.StaticFiles (js_resources_min_js)
+import Settings.StaticFiles (js_resources_min_js, img_ERD_MedCab_svg)
 import Text.Hamlet (Html)
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core (Yesod(defaultLayout))

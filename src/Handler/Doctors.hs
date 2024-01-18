@@ -14,7 +14,7 @@ module Handler.Doctors
 import Control.Monad (void)
 import Data.Text.Encoding (encodeUtf8)
 import Database.Persist
-    ( Entity (Entity), PersistStoreWrite(insert), PersistUniqueWrite (upsert)
+    ( Entity (Entity), PersistStoreWrite (insert), PersistUniqueWrite (upsert)
     )
 import qualified Database.Persist as P ((=.))
 import Database.Esqueleto.Experimental
@@ -37,7 +37,7 @@ import Foundation
     )
 import Model
     ( AvatarColor (AvatarColorLight)
-    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorSpecialization)
+    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorSpecialty)
     , DoctorId, DoctorPhoto (DoctorPhoto)
     , EntityField (DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId)
     , statusSuccess
@@ -130,7 +130,7 @@ formDoctor doctor extra = do
         { fsLabel = SomeMessage MsgSpecialization
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgSpecialization)]
-        } (doctorSpecialization . entityVal <$> doctor)
+        } (doctorSpecialty . entityVal <$> doctor)
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing

@@ -2,7 +2,7 @@
 header
   position: sticky
   top: 0
-  z-index: 2
+  z-index: 1
   padding: 0.5rem 1rem
   display: flex
   flex-direction: row
@@ -14,11 +14,11 @@ header
     justify-content: flex-start
     align-items: center
     gap: 1rem
-  
+    
 main
-  margin: 1rem 2rem
+  padding: 1rem 2rem
   display: flex
   flex-direction: column
+  justify-content: center
+  align-items: center
   gap: 1rem
-  #idImgErdDiagram
-    width: 100%

@@ -5,10 +5,10 @@ module Handler.Menu (menu) where
 import Foundation
     ( Widget
     , Route (HomeR, DataR, DocsR)
-    , DataR (TokensR, DoctorsR)
+    , DataR (TokensR, DoctorsR, SpecialtiesR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors
-      , MsgDocumentation, MsgSourceCode, MsgResources
+      , MsgDocumentation, MsgSourceCode, MsgResources, MsgSpecialties
       )
     )
 import Settings (widgetFile)

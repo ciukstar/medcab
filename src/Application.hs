@@ -73,8 +73,13 @@ import Handler.Doctors
     , getDoctorR
     )
 
+import Handler.Specialties
+    ( getSpecialtiesR, postSpecialtiesR, getSpecialtyCreateR, getSpecialtyR
+    , getSpecialtyEditR, postSpecialtyR, postSpecialtyDeleR
+    )
+
 import Handler.Tokens
-    (getTokensR, postTokensR, getTokensHookR, postTokensClearR
+    ( getTokensR, postTokensR, getTokensHookR, postTokensClearR
     , getGoogleSecretManagerReadR
     )
 

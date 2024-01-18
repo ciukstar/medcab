@@ -1,3 +1,12 @@
+ConfirmPlease: Vă rugăm să confirmați
+DeleteAreYouSure: Sigur doriți să ștergeți?
+ErDiagram: Diagrama ER
+Name: Nume
+Code: Cod
+Description: Descriere
+NoSpecialtiesYet: Nu există încă specialități
+Specialties: Specialități
+Specialty: Specialitatea
 Dele: Șterge
 RecordCreated: Înregistrarea creată
 Doctor: Doctor

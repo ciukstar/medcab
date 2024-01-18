@@ -28,6 +28,12 @@
     /doctors/#DoctorId 	     DoctorR       GET
     /doctors        	     DoctorsR      GET POST
 
+    /specialties/form/create       SpecialtyCreateR GET
+    /specialties/#SpecialtyId/dele SpecialtyDeleR   POST
+    /specialties/#SpecialtyId/edit SpecialtyEditR   GET
+    /specialties/#SpecialtyId 	   SpecialtyR 	    GET POST
+    /specialties 	      	   SpecialtiesR	    GET POST
+
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET
     /tokens 	  TokensR      GET POST

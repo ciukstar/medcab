@@ -28,6 +28,7 @@ import Database.Persist.Quasi ( lowerCaseSettings )
 import Text.Read (readMaybe)
 import Text.Show (Show (show))
 import Yesod.Core.Dispatch (PathPiece (fromPathPiece, toPathPiece))
+import Yesod.Form (Textarea)
 
 
 data Gender = GenderFemale | GenderMale | GenderOther

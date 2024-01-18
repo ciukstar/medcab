@@ -11,7 +11,14 @@ Doctor
     name Text
     mobile Text
     email Text
-    specialization Text
+    specialty Text
+
+Specialty
+    name Text
+    code Text Maybe
+    descr Textarea Maybe
+    group SpecialtyId Maybe OnDeleteCascade
+    UniqueSpecialtyName name
 
 UserPhoto
     user UserId OnDeleteCascade

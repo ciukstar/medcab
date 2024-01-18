@@ -26,3 +26,6 @@
   <h4.display-medium>App MedCab
   <p.body-large>This application is under development...
   
+  <h4.display-medium>
+      _{MsgErDiagram}
+    <img #idImgErdDiagram src=@{StaticR img_ERD_MedCab_svg} alt=_{MsgErDiagram} loading=lazy>

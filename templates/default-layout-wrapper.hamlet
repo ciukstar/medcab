@@ -13,6 +13,7 @@ $doctype 5
     <meta name="google-site-verification" content="a5AUtJixuZ1_hbHg7AbmclYAYk5AkZylPeIFRsesEXI" />
 
     <link rel=icon type="image/x-icon" href=@{FaviconR}>
+    <link rel=icon type="image/svg+xml" href=@{StaticR img_medcab_120x120_svg}>
     <link rel=manifest href=@{WebAppManifestR}>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
