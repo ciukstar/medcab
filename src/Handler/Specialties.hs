@@ -11,19 +11,21 @@ module Handler.Specialties
   , getSpecialtyEditR
   , postSpecialtyR
   , postSpecialtyDeleR
+  , getSubspecialtiesR
+  , getSubspecialtyCreateR
   ) where
 
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
     , (^.), (==.)
-    , selectOne
+    , selectOne, isNothing_, just
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
 import Handler.Material3 (md3textField, md3textareaField)
 import Handler.Menu (menu) 
 import Model
     ( Specialty(Specialty, specialtyName, specialtyCode, specialtyDescr)
-    , EntityField (SpecialtyName, SpecialtyId)
+    , EntityField (SpecialtyName, SpecialtyId, SpecialtyGroup)
     , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
     )
 import Foundation
@@ -31,20 +33,21 @@ import Foundation
     , Route (DataR, AuthR, AccountR, AccountPhotoR, StaticR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
-      , SpecialtyDeleR
+      , SpecialtyDeleR, SubspecialtiesR, SubspecialtyCreateR
       )
     , AppMessage
       ( MsgSpecialties, MsgUserAccount, MsgNoSpecialtiesYet, MsgSignIn
       , MsgSignOut, MsgPhoto, MsgEdit, MsgSpecialty, MsgDescription
-      , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated
+      , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
-      , MsgDeleteAreYouSure, MsgConfirmPlease
+      , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
+      , MsgNoSubspecialtiesYet, MsgSubspecialty
       )
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( js_specialties_specialties_min_js, js_specialties_create_min_js
-    , js_specialties_specialty_min_js
+    , js_specialties_specialty_min_js, js_specialties_subspecialties_min_js
     )
 import Text.Hamlet (Html)
 import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth) 
@@ -60,6 +63,31 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput)
     )
+
+
+getSubspecialtyCreateR :: SpecialtyId -> Handler Html
+getSubspecialtyCreateR sid = do
+    (fw,et) <- generateFormPost $ formSpecialty (Just sid) Nothing
+    defaultLayout $ do
+        setTitleI MsgSubspecialty
+        addScript (StaticR js_specialties_create_min_js)
+        $(widgetFile "data/specialties/create")
+
+
+getSubspecialtiesR :: SpecialtyId -> Handler Html
+getSubspecialtiesR sid = do
+    specialties <- runDB $ select $ do
+        x <- from $ table @Specialty
+        where_ $ x ^. SpecialtyGroup ==. just (val sid)
+        orderBy [asc (x ^. SpecialtyName)]
+        return x
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSpecialties
+        idFabAdd <- newIdent
+        addScript (StaticR js_specialties_subspecialties_min_js)
+        idPanelSubspecialties <- newIdent
+        $(widgetFile "data/specialties/subspecialties")
 
 
 postSpecialtyDeleR :: SpecialtyId -> Handler Html
@@ -81,6 +109,7 @@ postSpecialtyDeleR sid = do
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
           addScript (StaticR js_specialties_specialty_min_js)
+          idPanelDetails <- newIdent
           $(widgetFile "data/specialties/specialty")
 
 
@@ -96,7 +125,7 @@ postSpecialtyR sid = do
         where_ $ x ^. SpecialtyId ==. val sid
         return x
         
-    ((fr,fw),et) <- runFormPost $ formSpecialty specialty
+    ((fr,fw),et) <- runFormPost $ formSpecialty Nothing specialty
     case fr of
       FormSuccess r -> do
           runDB $ replace sid r
@@ -116,7 +145,7 @@ getSpecialtyEditR sid = do
         where_ $ x ^. SpecialtyId ==. val sid
         return x
 
-    (fw,et) <- generateFormPost $ formSpecialty specialty
+    (fw,et) <- generateFormPost $ formSpecialty Nothing specialty
     defaultLayout $ do
         setTitleI MsgSpecialty
         addScript (StaticR js_specialties_create_min_js)
@@ -125,16 +154,16 @@ getSpecialtyEditR sid = do
 
 getSpecialtyCreateR :: Handler Html
 getSpecialtyCreateR = do
-    (fw,et) <- generateFormPost $ formSpecialty Nothing
+    (fw,et) <- generateFormPost $ formSpecialty Nothing Nothing
     defaultLayout $ do
         setTitleI MsgSpecialty
         addScript (StaticR js_specialties_create_min_js)
         $(widgetFile "data/specialties/create")
 
 
-formSpecialty :: Maybe (Entity Specialty)
+formSpecialty :: Maybe SpecialtyId -> Maybe (Entity Specialty)
               -> Html -> MForm Handler (FormResult Specialty, Widget)
-formSpecialty specialty extra = do
+formSpecialty group specialty extra = do
     rndr <- getMessageRender
     (nameR,nameV) <- mreq md3textField FieldSettings
         { fsLabel = SomeMessage MsgName
@@ -152,7 +181,7 @@ formSpecialty specialty extra = do
         , fsAttrs = [("label",rndr MsgDescription)]
         } (specialtyDescr . entityVal <$> specialty)
 
-    let r = Specialty <$> nameR <*> codeR <*> descrR <*> pure Nothing
+    let r = Specialty <$> nameR <*> codeR <*> descrR <*> pure group
     let w = $(widgetFile "data/specialties/form")
     return (r,w)
 
@@ -171,12 +200,13 @@ getSpecialtyR sid = do
     defaultLayout $ do
         setTitleI MsgSpecialty
         addScript (StaticR js_specialties_specialty_min_js)
+        idPanelDetails <- newIdent
         $(widgetFile "data/specialties/specialty")
 
 
 postSpecialtiesR :: Handler Html
 postSpecialtiesR = do
-    ((fr,fw),et) <- runFormPost $ formSpecialty Nothing
+    ((fr,fw),et) <- runFormPost $ formSpecialty Nothing Nothing
     case fr of
       FormSuccess r -> do
           runDB $ insert_ r
@@ -192,6 +222,7 @@ getSpecialtiesR = do
     user <- maybeAuth
     specialties <- runDB $ select $ do
         x <- from $ table @Specialty
+        where_ $ isNothing_ $ x ^. SpecialtyGroup
         orderBy [asc (x ^. SpecialtyName)]
         return x
     msgs <- getMessages

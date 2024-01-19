@@ -1,3 +1,8 @@
+Subspecialty: Surspécialité
+NoSubspecialtiesYet: Il n'y a pas encore de sous-spécialités
+Details: Détails
+Subspecialties: Sous-spécialités
+Tabs: Onglets
 ConfirmPlease: Veuillez confirmer
 DeleteAreYouSure: Etes-vous sûr que vous voulez supprimer?
 ErDiagram: Diagramme ER

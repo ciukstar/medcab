@@ -1,3 +1,8 @@
+Subspecialty: Subspecialitatea
+NoSubspecialtiesYet: Nu există încă subspecialități
+Details: Detalii
+Subspecialties: Subspecialități
+Tabs: File
 ConfirmPlease: Vă rugăm să confirmați
 DeleteAreYouSure: Sigur doriți să ștergeți?
 ErDiagram: Diagrama ER

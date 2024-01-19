@@ -1,3 +1,8 @@
+Subspecialty: Subspecialty
+NoSubspecialtiesYet: There are no subspecialties yet
+Details: Details
+Subspecialties: Subspecialties
+Tabs: Tabs
 ConfirmPlease: Please confirm
 DeleteAreYouSure: Are you sure you want to delete?
 ErDiagram: ER Diagram

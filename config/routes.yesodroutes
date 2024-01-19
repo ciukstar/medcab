@@ -28,6 +28,9 @@
     /doctors/#DoctorId 	     DoctorR       GET
     /doctors        	     DoctorsR      GET POST
 
+    /specialties/#SpecialtyId/form/create    SubspecialtyCreateR GET
+    /specialties/#SpecialtyId/subspecialties SubspecialtiesR     GET
+    
     /specialties/form/create       SpecialtyCreateR GET
     /specialties/#SpecialtyId/dele SpecialtyDeleR   POST
     /specialties/#SpecialtyId/edit SpecialtyEditR   GET

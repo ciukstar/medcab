@@ -28,26 +28,37 @@
         _{MsgDele}
       
 <main>
+  
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ SpecialtyR sid}' : '@{DataR $ SubspecialtiesR sid}'">
+    <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      _{MsgDetails}
+    <md-primary-tab #tabSubspecialties aria-controls=panelSubspecialties>
+      _{MsgSubspecialties}
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
-      
-  $maybe Entity sid (Specialty name code descr _) <- specialty
-    <dl>
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
+  <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-      <dt.label-large>_{MsgCode}
-      <dd.body-medium>
-        $maybe code <- code
-          #{code}
-          
-      <dt.label-large>_{MsgDescription}
-      <dd.body-medium>
-        $maybe descr <- descr 
-          #{descr}
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    #{status}. #{msg}
+    $maybe Entity _ (Specialty name code descr _) <- specialty
+      <dl>
+        <dt.label-large>_{MsgName}
+        <dd.body-medium>#{name}
+
+        <dt.label-large>_{MsgCode}
+        <dd.body-medium>
+          $maybe code <- code
+            #{code}
+
+        <dt.label-large>_{MsgDescription}
+        <dd.body-medium>
+          $maybe descr <- descr 
+            #{descr}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        #{status}. #{msg}
+
+  <div #panelSubspecialties role=tabpanel aria-labelledby=tabSubspecialties hidden>

@@ -1,3 +1,8 @@
+Subspecialty: Специализация
+NoSubspecialtiesYet: Специализаций пока нет
+Details: Подробности
+Subspecialties: Специализации
+Tabs: Вкладки
 ConfirmPlease: Пожалуйста подтвердите
 DeleteAreYouSure: Вы уверены, что хотите удалить?
 ErDiagram: ER-диаграмма

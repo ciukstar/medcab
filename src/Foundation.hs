@@ -217,7 +217,10 @@ instance Yesod App where
     isAuthorized (DataR (DoctorR _)) _ = return Authorized
     isAuthorized (DataR DoctorsR) _ = return Authorized
 
+
     
+    isAuthorized (DataR (SubspecialtyCreateR _)) _ = return Authorized
+    isAuthorized (DataR (SubspecialtiesR _)) _ = return Authorized
     isAuthorized (DataR (SpecialtyDeleR _)) _ = return Authorized
     isAuthorized (DataR (SpecialtyEditR _)) _ = return Authorized
     isAuthorized (DataR (SpecialtyR _)) _ = return Authorized

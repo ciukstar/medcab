@@ -75,7 +75,8 @@ import Handler.Doctors
 
 import Handler.Specialties
     ( getSpecialtiesR, postSpecialtiesR, getSpecialtyCreateR, getSpecialtyR
-    , getSpecialtyEditR, postSpecialtyR, postSpecialtyDeleR
+    , getSpecialtyEditR, postSpecialtyR, postSpecialtyDeleR, getSubspecialtiesR
+    , getSubspecialtyCreateR
     )
 
 import Handler.Tokens
