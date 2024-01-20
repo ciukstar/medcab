@@ -11,6 +11,7 @@ import Foundation
       , MsgDocumentation, MsgSourceCode, MsgResources, MsgSpecialties
       )
     )
+import Model (Specialties (Specialties))
 import Settings (widgetFile)
 import Yesod.Core.Handler (getCurrentRoute)
 

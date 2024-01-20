@@ -17,18 +17,25 @@
 module Model where
 
 import ClassyPrelude.Yesod
-    ( Eq, Ord, Read, Typeable, Bool, ByteString, Text, derivePersistField
+    ( Ord, Read, Typeable, Bool, ByteString, Text, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
+import Control.Monad (mapM)
+import Data.Eq (Eq)
 import Data.Function ((.))
+import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
 import Data.Time.Calendar (Day)
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Text.Read (readMaybe)
 import Text.Show (Show (show))
-import Yesod.Core.Dispatch (PathPiece (fromPathPiece, toPathPiece))
+import Yesod.Core.Dispatch
+    ( PathPiece (fromPathPiece, toPathPiece)
+    , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
+    )
 import Yesod.Form (Textarea)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
 
 data Gender = GenderFemale | GenderMale | GenderOther
@@ -64,6 +71,17 @@ derivePersistField "AuthenticationType"
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
+
+
+newtype Specialties = Specialties { unSpecialties :: [SpecialtyId] }
+    deriving (Show, Read, Eq)
+
+instance PathMultiPiece Specialties where
+    toPathMultiPiece :: Specialties -> [Text]
+    toPathMultiPiece (Specialties xs) = pack . show . fromSqlKey <$> xs
+
+    fromPathMultiPiece :: [Text] -> Maybe Specialties
+    fromPathMultiPiece xs = Specialties <$> mapM ((toSqlKey <$>) . readMaybe . unpack) xs
 
 
 gmailSender :: Text

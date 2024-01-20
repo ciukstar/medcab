@@ -1,22 +1,18 @@
 
 <header.app-top-app-bar.background>
   <div #headerStart>
-    $if null sids
-      <md-icon-button href=@{DataR $ SpecialtiesR (Specialties [])} aria-label=_{MsgBack}>
-        <md-icon>arrow_back
-    $else
-      <md-icon-button href=@{DataR $ SpecialtyR (last sids) (Specialties sids)} aria-label=_{MsgBack}>
-        <md-icon>arrow_back
+    <md-icon-button href=@{DataR SpecialtiesR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
           
     <h1.title-large>
-      _{MsgSpecialty}
+      _{MsgSubspecialty}
 
   <div #headerEnd>
       
 <main>
   
   <md-tabs aria-label=_{MsgTabs}
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ SpecialtyR (last sids) (Specialties (init sids))}' : '@{DataR $ SpecialtiesR ps}'">
+    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ SpecialtyR gid}' : '@{DataR $ SubspecialtiesR gid}'">
     <md-primary-tab #tabDetails aria-controls=idPanelDetails>
       _{MsgDetails}
     <md-primary-tab #tabSubspecialties aria-controls=#{idPanelSubspecialties} active=true>
@@ -36,12 +32,12 @@
         <figcaption.body-large>
           _{MsgNoSubspecialtiesYet}
     $else
-      <md-list>
-        $forall Entity sid (Specialty name code _ _) <- specialties
-          <md-list-item interactive href=@{DataR $ SpecialtyR sid ps}>
+      $forall Entity sid (Specialty name code _ _) <- specialties
+        <md-list>
+          <md-list-item interactive href=@{DataR $ SpecialtyR sid}>
             <div slot=headline>#{name}
             <div slot=supporting-text>
-              $maybe code <- code 
+              $maybe code <- code
                 #{code}
             <md-icon slot=end>arrow_forward_ios
           <md-divider>
@@ -53,5 +49,5 @@
         <span.body-medium>#{msg}
 
     <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-      <a href=@{DataR $ SpecialtyCreateR ps}>
+      <a href=@{DataR $ SubspecialtyCreateR gid}>
       <md-icon slot=icon>add

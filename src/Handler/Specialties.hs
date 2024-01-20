@@ -11,10 +11,9 @@ module Handler.Specialties
   , getSpecialtyEditR
   , postSpecialtyR
   , postSpecialtyDeleR
-  , getSubspecialtiesR
-  , getSubspecialtyCreateR
   ) where
 
+import Control.Monad (when, unless)
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
     , (^.), (==.)
@@ -24,16 +23,18 @@ import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
 import Handler.Material3 (md3textField, md3textareaField)
 import Handler.Menu (menu) 
 import Model
-    ( Specialty(Specialty, specialtyName, specialtyCode, specialtyDescr)
+    ( Specialty
+      (Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup)
     , EntityField (SpecialtyName, SpecialtyId, SpecialtyGroup)
     , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
+    , Specialties (Specialties)
     )
 import Foundation
     ( Handler, Widget
     , Route (DataR, AuthR, AccountR, AccountPhotoR, StaticR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
-      , SpecialtyDeleR, SubspecialtiesR, SubspecialtyCreateR
+      , SpecialtyDeleR
       )
     , AppMessage
       ( MsgSpecialties, MsgUserAccount, MsgNoSpecialtiesYet, MsgSignIn
@@ -63,35 +64,11 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput)
     )
+import qualified Data.List.Safe as LS
 
 
-getSubspecialtyCreateR :: SpecialtyId -> Handler Html
-getSubspecialtyCreateR sid = do
-    (fw,et) <- generateFormPost $ formSpecialty (Just sid) Nothing
-    defaultLayout $ do
-        setTitleI MsgSubspecialty
-        addScript (StaticR js_specialties_create_min_js)
-        $(widgetFile "data/specialties/create")
-
-
-getSubspecialtiesR :: SpecialtyId -> Handler Html
-getSubspecialtiesR sid = do
-    specialties <- runDB $ select $ do
-        x <- from $ table @Specialty
-        where_ $ x ^. SpecialtyGroup ==. just (val sid)
-        orderBy [asc (x ^. SpecialtyName)]
-        return x
-    msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgSpecialties
-        idFabAdd <- newIdent
-        addScript (StaticR js_specialties_subspecialties_min_js)
-        idPanelSubspecialties <- newIdent
-        $(widgetFile "data/specialties/subspecialties")
-
-
-postSpecialtyDeleR :: SpecialtyId -> Handler Html
-postSpecialtyDeleR sid = do
+postSpecialtyDeleR :: SpecialtyId -> Specialties -> Handler Html
+postSpecialtyDeleR sid ps@(Specialties sids) = do
     
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
@@ -103,7 +80,7 @@ postSpecialtyDeleR sid = do
       FormSuccess () -> do
           runDB $ delete sid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR SpecialtiesR
+          redirect $ DataR $ SpecialtiesR ps
       _otherwise -> defaultLayout $ do
           setTitleI MsgSpecialty
           addMessageI statusError MsgInvalidFormData
@@ -117,8 +94,8 @@ formDelete :: Html -> MForm Handler (FormResult (), Widget)
 formDelete extra = return (pure (),[whamlet|#{extra}|])
 
 
-postSpecialtyR :: SpecialtyId -> Handler Html
-postSpecialtyR sid = do
+postSpecialtyR :: SpecialtyId -> Specialties -> Handler Html
+postSpecialtyR sid ps@(Specialties sids) = do
     
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
@@ -126,19 +103,20 @@ postSpecialtyR sid = do
         return x
         
     ((fr,fw),et) <- runFormPost $ formSpecialty Nothing specialty
+    
     case fr of
       FormSuccess r -> do
-          runDB $ replace sid r
+          runDB $ replace sid r { specialtyGroup = LS.last sids }
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR (SpecialtyR sid)
+          redirect $ DataR (SpecialtyR sid ps)
       _otherwise -> defaultLayout $ do
           setTitleI MsgSpecialty
           addScript (StaticR js_specialties_create_min_js)
           $(widgetFile "data/specialties/edit")
     
 
-getSpecialtyEditR :: SpecialtyId -> Handler Html
-getSpecialtyEditR sid = do
+getSpecialtyEditR :: SpecialtyId -> Specialties -> Handler Html
+getSpecialtyEditR sid ps@(Specialties sids) = do
     
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
@@ -152,8 +130,8 @@ getSpecialtyEditR sid = do
         $(widgetFile "data/specialties/edit")
 
 
-getSpecialtyCreateR :: Handler Html
-getSpecialtyCreateR = do
+getSpecialtyCreateR :: Specialties -> Handler Html
+getSpecialtyCreateR ps@(Specialties sids) = do
     (fw,et) <- generateFormPost $ formSpecialty Nothing Nothing
     defaultLayout $ do
         setTitleI MsgSpecialty
@@ -186,8 +164,8 @@ formSpecialty group specialty extra = do
     return (r,w)
 
 
-getSpecialtyR :: SpecialtyId -> Handler Html
-getSpecialtyR sid = do
+getSpecialtyR :: SpecialtyId -> Specialties -> Handler Html
+getSpecialtyR sid ps@(Specialties sids) = do
     
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
@@ -204,30 +182,38 @@ getSpecialtyR sid = do
         $(widgetFile "data/specialties/specialty")
 
 
-postSpecialtiesR :: Handler Html
-postSpecialtiesR = do
+postSpecialtiesR :: Specialties -> Handler Html
+postSpecialtiesR ps@(Specialties sids) = do
     ((fr,fw),et) <- runFormPost $ formSpecialty Nothing Nothing
     case fr of
       FormSuccess r -> do
-          runDB $ insert_ r
+          when (null sids) $ runDB $ insert_ r
+          unless (null sids) $ runDB $ insert_ r { specialtyGroup = Just (last sids) }
           addMessageI statusSuccess MsgRecordCreated
-          redirect $ DataR SpecialtiesR 
+          redirect $ DataR $ SpecialtiesR ps
       _otherwise -> defaultLayout $ do
           setTitleI MsgSpecialty
           $(widgetFile "data/specialties/create")
 
 
-getSpecialtiesR :: Handler Html
-getSpecialtiesR = do
+getSpecialtiesR :: Specialties -> Handler Html
+getSpecialtiesR ps@(Specialties sids) = do
     user <- maybeAuth
     specialties <- runDB $ select $ do
         x <- from $ table @Specialty
-        where_ $ isNothing_ $ x ^. SpecialtyGroup
+        unless (null sids) $ where_ $ x ^. SpecialtyGroup ==. just (val (last sids))
+        when (null sids) $ where_ $ isNothing_ $ x ^. SpecialtyGroup
         orderBy [asc (x ^. SpecialtyName)]
         return x
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSpecialties
         idFabAdd <- newIdent
-        addScript (StaticR js_specialties_specialties_min_js)
-        $(widgetFile "data/specialties/specialties")
+        when (null sids) $ do
+            addScript (StaticR js_specialties_specialties_min_js)
+            $(widgetFile "data/specialties/specialties")
+        unless (null sids) $ do
+            setTitleI MsgSpecialties
+            addScript (StaticR js_specialties_subspecialties_min_js)
+            idPanelSubspecialties <- newIdent
+            $(widgetFile "data/specialties/subspecialties")

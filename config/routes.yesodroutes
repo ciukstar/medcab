@@ -27,15 +27,12 @@
     /doctors/form/create     DoctorCreateR GET
     /doctors/#DoctorId 	     DoctorR       GET
     /doctors        	     DoctorsR      GET POST
-
-    /specialties/#SpecialtyId/form/create    SubspecialtyCreateR GET
-    /specialties/#SpecialtyId/subspecialties SubspecialtiesR     GET
     
-    /specialties/form/create       SpecialtyCreateR GET
-    /specialties/#SpecialtyId/dele SpecialtyDeleR   POST
-    /specialties/#SpecialtyId/edit SpecialtyEditR   GET
-    /specialties/#SpecialtyId 	   SpecialtyR 	    GET POST
-    /specialties 	      	   SpecialtiesR	    GET POST
+    /form/specialties/create/+Specialties     SpecialtyCreateR GET
+    /dele/specialty/#SpecialtyId/+Specialties SpecialtyDeleR   POST
+    /edit/specialty/#SpecialtyId/+Specialties SpecialtyEditR   GET
+    /specialty/#SpecialtyId/+Specialties      SpecialtyR       GET POST
+    /specialties/+Specialties 	              SpecialtiesR     GET POST
 
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET

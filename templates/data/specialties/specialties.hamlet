@@ -34,9 +34,9 @@
       <figcaption.body-large>
         _{MsgNoSpecialtiesYet}
   $else
-    $forall Entity sid (Specialty name code _ _) <- specialties
-      <md-list>
-        <md-list-item interactive href=@{DataR $ SpecialtyR sid}>
+    <md-list>
+      $forall Entity sid (Specialty name code _ _) <- specialties
+        <md-list-item interactive href=@{DataR $ SpecialtyR sid ps}>
           <div slot=headline>#{name}
           <div slot=supporting-text>
             $maybe code <- code 
@@ -45,7 +45,7 @@
         <md-divider>
 
   <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{DataR SpecialtyCreateR}>
+    <a href=@{DataR $ SpecialtyCreateR ps}>
     <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
