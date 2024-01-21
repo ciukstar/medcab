@@ -19,6 +19,8 @@ main
   display: flex
   flex-direction: column
   gap: 1rem
+  md-tabs
+    z-index: 0
   ##{idPanelDetails}
     margin: 0 2rem
     .error

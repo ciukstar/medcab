@@ -8,17 +8,33 @@ module Handler.Material3
   , md3telField
   , md3textField
   , md3textareaField
+  , md3selectField
   ) where
 
 import Data.Text (Text)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
-    ( emailField, passwordField, textField, OptionList (olOptions)
-    , radioField, Option (optionExternalValue, optionDisplay, optionInternalValue), textareaField, Textarea (Textarea)
+    ( emailField, passwordField, textField, OptionList (olOptions), radioField
+    , Option (optionExternalValue, optionDisplay, optionInternalValue)
+    , textareaField, Textarea (Textarea), selectField
     )
 import Yesod.Form.Types (Field (fieldView), FormMessage)
 import Yesod.Core.Handler (HandlerFor)
 import Text.Shakespeare.I18N (RenderMessage)
+
+
+md3selectField :: (Eq a, RenderMessage m FormMessage) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
+md3selectField options = (selectField options)
+    { fieldView = \theId name attrs x isReq -> do
+          opts <- olOptions <$> handlerToWidget options
+          let sel (Left _) _ = False
+              sel (Right y) opt = optionInternalValue opt == y
+          [whamlet|
+<md-filled-select ##{theId} *{attrs} :isReq:required name=#{name}>
+  $forall opt<- opts
+    <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
+      <div slot="headline">#{optionDisplay opt}
+|] }
 
 
 md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a

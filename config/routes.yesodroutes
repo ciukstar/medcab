@@ -25,7 +25,9 @@
     
     /doctors/#DoctorId/photo DoctorPhotoR  GET
     /doctors/form/create     DoctorCreateR GET
-    /doctors/#DoctorId 	     DoctorR       GET
+    /doctors/#DoctorId/dele  DoctorDeleR   POST
+    /doctors/#DoctorId/edit  DoctorEditR   GET
+    /doctors/#DoctorId 	     DoctorR       GET POST
     /doctors        	     DoctorsR      GET POST
     
     /form/specialties/create/+Specialties     SpecialtyCreateR GET

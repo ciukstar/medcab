@@ -11,7 +11,7 @@ Doctor
     name Text
     mobile Text
     email Text
-    specialty Text
+    specialty SpecialtyId
 
 Specialty
     name Text

@@ -70,6 +70,7 @@ import Yesod.Auth.Message
     , englishMessage, frenchMessage, russianMessage
     )
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
+import Yesod.Core.Handler (lookupSession)
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
@@ -212,6 +213,9 @@ instance Yesod App where
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
 
     
+    isAuthorized (DataR (DoctorDeleR _)) _ = return Authorized
+    
+    isAuthorized (DataR (DoctorEditR _)) _ = return Authorized
     isAuthorized (DataR DoctorCreateR) _ = return Authorized
     isAuthorized (DataR (DoctorPhotoR _)) _ = return Authorized
     isAuthorized (DataR (DoctorR _)) _ = return Authorized
@@ -294,6 +298,8 @@ instance YesodAuth App where
     loginHandler = do
         app <- getYesod
         tp <- getRouteToParent
+        rndr <- getUrlRender
+        ult <- fromMaybe (rndr HomeR) <$> lookupSession ultDestKey
         authLayout $ do
             setTitleI LoginTitle
             $(widgetFile "auth/login")

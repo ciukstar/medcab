@@ -20,7 +20,7 @@ import Settings.StaticFiles ( js_homepage_min_js )
 import Text.Hamlet (Html)
 import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )
 import Yesod.Core.Widget (addScript, setTitleI)
-import Yesod.Core (Yesod(defaultLayout), getMessages)
+import Yesod.Core (Yesod(defaultLayout), getMessages, setUltDestCurrent)
 
 
 getHomeR :: Handler Html
@@ -28,7 +28,7 @@ getHomeR = do
     user <- maybeAuth
     msgs <- getMessages
     defaultLayout $ do
+        setUltDestCurrent
         setTitleI MsgWelcome
         addScript (StaticR js_homepage_min_js)
         $(widgetFile "homepage")
-

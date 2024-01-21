@@ -7,29 +7,52 @@
       _{MsgDoctor}
 
   <div #headerEnd>
-    <md-icon-button href=# aria-label=_{MsgDele}>
+    <md-icon-button type=button aria-label=_{MsgDele}
+      onclick="document.getElementById('idDialogDelete').open = true">
       <md-icon>delete
-    <md-icon-button href=# aria-label=_{MsgEdit}>
+    <md-icon-button href=@{DataR $ DoctorEditR did} aria-label=_{MsgEdit}>
       <md-icon>edit
+
+<md-dialog #idDialogDelete>
+  <div slot=headline>
+    _{MsgConfirmPlease}
+  <div slot=content>
+    _{MsgDeleteAreYouSure}
+  <div slot=actions>
+    <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
+      _{MsgCancel}
+    <form slot=content method=post action=@{DataR $ DoctorDeleR did} enctype=#{et}>
+      ^{fw}
+      <md-filled-button type=submit>
+        _{MsgDele}
     
       
 <main>
-  $maybe Entity did (Doctor name mobile email spec) <- doctor
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+      
+  $maybe (Entity did (Doctor name mobile email _), spec) <- doctor
     <figure>
       <img src=@{DataR $ DoctorPhotoR did} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
         _{MsgPhoto}
-    <table>
-      <tbody>
-        <tr>
-          <th.label-large scope=row>_{MsgFullName}
-          <td.body-medium>#{name}
-        <tr>
-          <th.label-large scope=row>_{MsgMobile}
-          <td.body-medium>#{mobile}
-        <tr>
-          <th.label-medium scope=row>_{MsgEmailAddress}
-          <td.body-medium>#{email}
-        <tr>
-          <th.label-medium scope=row>_{MsgSpecialization}
-          <td.body-medium>#{spec}
+    <dl>        
+      <dt.label-large scope=row>_{MsgFullName}
+      <dd.body-medium>#{name}
+      
+      <dt.label-large scope=row>_{MsgMobile}
+      <dd.body-medium>#{mobile}
+      
+      <dt.label-large scope=row>_{MsgEmailAddress}
+      <dd.body-medium>#{email}
+        
+      <dt.label-large scope=row>_{MsgSpecialization}
+      <dd.body-medium>#{spec}
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

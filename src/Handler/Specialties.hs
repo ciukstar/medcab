@@ -21,7 +21,7 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
 import Handler.Material3 (md3textField, md3textareaField)
-import Handler.Menu (menu) 
+import Handler.Menu (menu)
 import Model
     ( Specialty
       (Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup)
@@ -51,10 +51,10 @@ import Settings.StaticFiles
     , js_specialties_specialty_min_js, js_specialties_subspecialties_min_js
     )
 import Text.Hamlet (Html)
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth) 
+import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod (defaultLayout), newIdent, addScript, SomeMessage (SomeMessage)
-    , getMessageRender, addMessageI, redirect, getMessages, whamlet
+    , getMessageRender, addMessageI, redirect, getMessages, whamlet, setUltDestCurrent
     )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist (runDB), PersistStoreWrite (insert_))
@@ -69,12 +69,12 @@ import qualified Data.List.Safe as LS
 
 postSpecialtyDeleR :: SpecialtyId -> Specialties -> Handler Html
 postSpecialtyDeleR sid ps@(Specialties sids) = do
-    
+
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
         where_ $ x ^. SpecialtyId ==. val sid
         return x
-        
+
     ((fr,fw),et) <- runFormPost formDelete
     case fr of
       FormSuccess () -> do
@@ -96,14 +96,14 @@ formDelete extra = return (pure (),[whamlet|#{extra}|])
 
 postSpecialtyR :: SpecialtyId -> Specialties -> Handler Html
 postSpecialtyR sid ps@(Specialties sids) = do
-    
+
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
         where_ $ x ^. SpecialtyId ==. val sid
         return x
-        
+
     ((fr,fw),et) <- runFormPost $ formSpecialty Nothing specialty
-    
+
     case fr of
       FormSuccess r -> do
           runDB $ replace sid r { specialtyGroup = LS.last sids }
@@ -113,11 +113,11 @@ postSpecialtyR sid ps@(Specialties sids) = do
           setTitleI MsgSpecialty
           addScript (StaticR js_specialties_create_min_js)
           $(widgetFile "data/specialties/edit")
-    
+
 
 getSpecialtyEditR :: SpecialtyId -> Specialties -> Handler Html
 getSpecialtyEditR sid ps@(Specialties sids) = do
-    
+
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
         where_ $ x ^. SpecialtyId ==. val sid
@@ -166,14 +166,14 @@ formSpecialty group specialty extra = do
 
 getSpecialtyR :: SpecialtyId -> Specialties -> Handler Html
 getSpecialtyR sid ps@(Specialties sids) = do
-    
+
     specialty <- runDB $ selectOne $ do
         x <- from $ table @Specialty
         where_ $ x ^. SpecialtyId ==. val sid
         return x
 
     (fw,et) <- generateFormPost formDelete
-        
+
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSpecialty
@@ -209,6 +209,7 @@ getSpecialtiesR ps@(Specialties sids) = do
     defaultLayout $ do
         setTitleI MsgSpecialties
         idFabAdd <- newIdent
+        setUltDestCurrent
         when (null sids) $ do
             addScript (StaticR js_specialties_specialties_min_js)
             $(widgetFile "data/specialties/specialties")

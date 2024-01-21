@@ -72,7 +72,7 @@ import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
-    , addMessage
+    , addMessage, setUltDestCurrent
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
 import Yesod.Core.Widget (setTitleI, addScript)
@@ -324,12 +324,14 @@ getTokensR = do
     (fw,et) <- generateFormPost $ formStoreOptions token
     msgs <- getMessages
     defaultLayout $ do
+        setUltDestCurrent
         setTitleI MsgTokens
         addScript (StaticR js_tokens_min_js)
         $(widgetFile "data/tokens/tokens")
 
 
-formStoreOptions :: Maybe (Entity Token) -> Html -> MForm Handler (FormResult (Text,StoreType), Widget)
+formStoreOptions :: Maybe (Entity Token)
+                 -> Html -> MForm Handler (FormResult (Text,StoreType), Widget)
 formStoreOptions token extra = do
     msg <- getMessageRender
     let storeOptions = [ (MsgUserSession, StoreTypeSession)

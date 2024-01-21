@@ -24,6 +24,10 @@
 
 <main>
 
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
   $if null doctors
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
@@ -42,3 +46,9 @@
   <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
     <a href=@{DataR DoctorCreateR}>
     <md-icon slot=icon>add
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

@@ -105,3 +105,6 @@ statusSuccess = "success"
 
 statusError :: Text
 statusError = "error"
+
+ultDestKey :: Text
+ultDestKey = "_ULT"

@@ -9,50 +9,68 @@ module Handler.Doctors
   , getDoctorPhotoR
   , postDoctorsR
   , getDoctorR
+  , postDoctorDeleR
+  , getDoctorEditR
+  , postDoctorR
   ) where
 
 import Control.Monad (void)
+import Data.Bifunctor (Bifunctor(second))
 import Data.Text.Encoding (encodeUtf8)
 import Database.Persist
-    ( Entity (Entity), PersistStoreWrite (insert), PersistUniqueWrite (upsert)
+    ( Entity (Entity, entityKey), PersistStoreWrite (insert, delete, replace)
+    , PersistUniqueWrite (upsert)
     )
 import qualified Database.Persist as P ((=.))
 import Database.Esqueleto.Experimental
-    ( select, from, table, selectOne, Entity (entityVal), val
-    , (^.), (==.)
-    , where_
+    ( select, from, table, selectOne, Entity (entityVal), val, innerJoin, on
+    , (^.), (==.), (:&)((:&))
+    , where_, orderBy, asc, Value (unValue)
     )
-import Handler.Material3 (md3textField, md3telField, md3emailField)
+import Handler.Material3
+    ( md3textField, md3telField, md3emailField, md3selectField )
 import Handler.Menu (menu)
 import Foundation
     (Handler, Widget
     , Route (StaticR, AuthR, AccountR, AccountPhotoR, DataR)
-    , DataR (DoctorCreateR, DoctorsR, DoctorPhotoR, DoctorR)
+    , DataR
+      ( DoctorCreateR, DoctorsR, DoctorPhotoR, DoctorR, DoctorDeleR
+      , DoctorEditR
+      )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgEdit
       , MsgNoDoctorsYet, MsgSave, MsgCancel, MsgFullName, MsgMobile
       , MsgEmailAddress, MsgSpecialization, MsgDoctor, MsgBack, MsgRecordCreated
-      , MsgEdit, MsgDele
+      , MsgEdit, MsgDele, MsgRecordDeleted, MsgDeleteAreYouSure, MsgConfirmPlease
+      , MsgRecordEdited
       )
     )
 import Model
     ( AvatarColor (AvatarColorLight)
     , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorSpecialty)
     , DoctorId, DoctorPhoto (DoctorPhoto)
-    , EntityField (DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId)
-    , statusSuccess
+    , EntityField
+      ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
+      , SpecialtyName, DoctorSpecialty, SpecialtyId
+      )
+    , statusSuccess, Specialty (specialtyName), statusError
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( js_doctors_doctors_min_js, js_doctors_create_min_js, js_doctors_doctor_min_js
-    , img_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_person_FILL0_wght400_GRAD0_opsz24_svg, js_doctors_edit_min_js
     )
 import Text.Hamlet (Html)
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
-    ( Yesod(defaultLayout), setTitleI, addScript, newIdent, FileInfo (fileContentType)
-    , SomeMessage (SomeMessage), getMessageRender, addMessageI, fileSourceByteString
+    ( Yesod(defaultLayout), setTitleI, addScript, newIdent, fileSourceByteString
+    , FileInfo (fileContentType), SomeMessage (SomeMessage), getMessageRender
+    , addMessageI, setUltDestCurrent, MonadHandler (liftHandler), getMessages
+    , whamlet
     )
+import Yesod.Core.Handler (redirect)
+import Yesod.Core.Content (TypedContent (TypedContent), ToContent (toContent))
+import Yesod.Form.Fields (fileField, optionsPairs)
 import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
@@ -60,19 +78,83 @@ import Yesod.Form.Types
     , FieldView (fvInput, fvId)
     )
 import Yesod.Persist (YesodPersist (runDB))
-import Yesod.Core.Handler (redirect)
-import Yesod.Core.Content (TypedContent (TypedContent), ToContent (toContent))
-import Yesod.Form.Fields (fileField)
 
 
-getDoctorR :: DoctorId -> Handler Html
-getDoctorR did = do
-    
+postDoctorDeleR :: DoctorId -> Handler Html
+postDoctorDeleR did = do
+    ((fr,fw),et) <- runFormPost formDelete
+    case fr of
+      FormSuccess () -> do
+          runDB $ delete did
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ DataR DoctorsR
+      _otherwise -> do
+
+          doctor <- (second unValue <$>) <$> runDB ( selectOne $ do
+              x :& s <- from $ table @Doctor
+                  `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. DoctorSpecialty ==. s ^. SpecialtyId)
+              where_ $ x ^. DoctorId ==. val did
+              return (x, s ^. SpecialtyName) )
+              
+          msgs <- getMessages              
+          defaultLayout $ do
+              setTitleI MsgDoctor
+              addScript (StaticR js_doctors_doctor_min_js)
+              $(widgetFile "data/doctors/doctor")
+
+
+formDelete :: Html -> MForm Handler (FormResult (),Widget)
+formDelete extra = return (pure (), [whamlet|#{extra}|])
+
+
+getDoctorEditR :: DoctorId -> Handler Html
+getDoctorEditR did = do
+
     doctor <- runDB $ selectOne $ do
         x <- from $ table @Doctor
         where_ $ x ^. DoctorId ==. val did
         return x
         
+    (fw,et) <- generateFormPost $ formDoctor doctor
+
+    defaultLayout $ do
+          setTitleI MsgDoctor
+          addScript (StaticR js_doctors_edit_min_js)
+          $(widgetFile "data/doctors/edit")   
+
+
+postDoctorR :: DoctorId -> Handler Html
+postDoctorR did = do
+    ((fr,fw),et) <- runFormPost $ formDoctor Nothing
+    case fr of
+      FormSuccess (r,mfi) -> do
+          runDB $ replace did r
+          case mfi of
+            Just fi -> do
+                bs <- fileSourceByteString fi
+                void $ runDB $ upsert (DoctorPhoto did (fileContentType fi) bs)
+                    [DoctorPhotoMime P.=. fileContentType fi, DoctorPhotoPhoto P.=. bs]
+            Nothing -> return ()
+          addMessageI statusSuccess MsgRecordEdited
+          redirect $ DataR $ DoctorR did
+      _otherwise -> do
+          defaultLayout $ do
+              setTitleI MsgDoctor
+              addScript (StaticR js_doctors_edit_min_js)
+              $(widgetFile "data/doctors/create")
+
+
+getDoctorR :: DoctorId -> Handler Html
+getDoctorR did = do
+    
+    doctor <- (second unValue <$>) <$> runDB ( selectOne $ do
+        x :& s <- from $ table @Doctor
+            `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. DoctorSpecialty ==. s ^. SpecialtyId)
+        where_ $ x ^. DoctorId ==. val did
+        return (x, s ^. SpecialtyName) )
+
+    (fw,et) <- generateFormPost formDelete
+    msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgDoctor
         addScript (StaticR js_doctors_doctor_min_js)
@@ -95,6 +177,7 @@ postDoctorsR = do
           redirect $ DataR DoctorsR
       _otherwise -> defaultLayout $ do
           setTitleI MsgDoctor
+          addScript (StaticR js_doctors_create_min_js)
           $(widgetFile "data/doctors/create")
 
 
@@ -111,6 +194,12 @@ formDoctor :: Maybe (Entity Doctor)
            -> Html -> MForm Handler (FormResult (Doctor,Maybe FileInfo), Widget)
 formDoctor doctor extra = do
     rndr <- getMessageRender
+
+    specs <- liftHandler $ ((\s -> (specialtyName . entityVal $ s,entityKey s)) <$>) <$> runDB ( select $ do
+        x <- from $ table @Specialty
+        orderBy [asc (x ^. SpecialtyName)]
+        return x )
+    
     (nameR,nameV) <- mreq md3textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -126,11 +215,13 @@ formDoctor doctor extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgEmailAddress)]
         } (doctorEmail . entityVal <$> doctor)
-    (specR,specV) <- mreq md3textField FieldSettings
+        
+    (specR,specV) <- mreq (md3selectField (optionsPairs specs)) FieldSettings
         { fsLabel = SomeMessage MsgSpecialization
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgSpecialization)]
         } (doctorSpecialty . entityVal <$> doctor)
+        
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -152,8 +243,10 @@ getDoctorsR = do
     user <- maybeAuth
 
     doctors <- runDB $ select $ from $ table @Doctor
-    
+
+    msgs <- getMessages
     defaultLayout $ do
+        setUltDestCurrent
         setTitleI MsgDoctors
         addScript (StaticR js_doctors_doctors_min_js)
         idFabAdd <- newIdent
