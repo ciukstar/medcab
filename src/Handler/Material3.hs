@@ -9,6 +9,7 @@ module Handler.Material3
   , md3textField
   , md3textareaField
   , md3selectField
+  , md3switchField
   ) where
 
 import Data.Text (Text)
@@ -16,11 +17,20 @@ import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
-    , textareaField, Textarea (Textarea), selectField
+    , textareaField, Textarea (Textarea), selectField, checkBoxField
     )
 import Yesod.Form.Types (Field (fieldView), FormMessage)
 import Yesod.Core.Handler (HandlerFor)
 import Text.Shakespeare.I18N (RenderMessage)
+
+
+md3switchField :: Monad m => Field m Bool
+md3switchField = checkBoxField
+    { fieldView = \theId name attrs x isReq -> [whamlet|
+<md-switch ##{theId} *{attrs} name=#{name} value=yes :showVal id x:selected :isReq:required>
+|] }
+    where
+      showVal = either (const False)
 
 
 md3selectField :: (Eq a, RenderMessage m FormMessage) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a

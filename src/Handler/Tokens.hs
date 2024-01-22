@@ -35,7 +35,7 @@ import qualified Database.Persist as P ((=.))
 import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, App (appSettings)
-    , Route (StaticR, DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR, AuthR, AccountR, AccountPhotoR)
     , DataR (TokensR, TokensHookR, TokensClearR)
     , AppMessage
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
@@ -62,7 +62,6 @@ import Network.Wreq
 import Network.Wreq.Lens (statusCode, responseStatus)
 import Settings
     ( widgetFile, AppSettings (appGoogleClientId, appGoogleClientSecret) )
-import Settings.StaticFiles (js_tokens_min_js)
 import System.IO (readFile')
 import Text.Blaze.Html (preEscapedToHtml, toHtml)
 import Text.Hamlet (Html)
@@ -75,7 +74,7 @@ import Yesod.Core
     , addMessage, setUltDestCurrent
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
-import Yesod.Core.Widget (setTitleI, addScript)
+import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist(runDB))
 import Yesod.Form.Input (ireq, runInputGet)
 import Yesod.Form.Fields (optionsPairs, textField)
@@ -308,7 +307,6 @@ postTokensR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
-              addScript (StaticR js_tokens_min_js)
               $(widgetFile "data/tokens/tokens")
 
 
@@ -326,7 +324,6 @@ getTokensR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgTokens
-        addScript (StaticR js_tokens_min_js)
         $(widgetFile "data/tokens/tokens")
 
 

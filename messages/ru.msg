@@ -1,3 +1,13 @@
+No: Нет
+Yes: Да
+Email: Электронная почта
+Google: Google
+Verified: Проверено
+VerificationKey: Ключ проверки
+User: Пользователь
+NoUsersYet: Пользователей пока нет
+Add: Добавить
+Users: Пользователи
 Subspecialty: Специализация
 NoSubspecialtiesYet: Специализаций пока нет
 Details: Подробности

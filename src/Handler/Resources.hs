@@ -14,11 +14,11 @@ import Foundation
     )
 import Model (AvatarColor (AvatarColorLight))
 import Settings (widgetFile)
-import Settings.StaticFiles (js_resources_min_js, img_ERD_MedCab_svg)
+import Settings.StaticFiles (img_ERD_MedCab_svg)
 import Text.Hamlet (Html)
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core (Yesod(defaultLayout), setUltDestCurrent)
-import Yesod.Core.Widget (setTitleI, addScript)
+import Yesod.Core.Widget (setTitleI)
 
 
 getDocsR :: Handler Html
@@ -27,5 +27,4 @@ getDocsR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgDocumentation
-        addScript (StaticR js_resources_min_js)
         $(widgetFile "resources/docs")

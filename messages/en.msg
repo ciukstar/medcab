@@ -1,3 +1,13 @@
+No: No
+Yes: Yes
+Email: Email
+Google: Google
+Verified: Verified
+VerificationKey: Verification key
+User: User
+NoUsersYet: There are no users yet
+Add: Add
+Users: Users
 Subspecialty: Subspecialty
 NoSubspecialtiesYet: There are no subspecialties yet
 Details: Details

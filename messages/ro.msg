@@ -1,3 +1,13 @@
+No: Nu
+Yes: Da
+Email: E-mail
+Google: Google
+Verified: Verificat
+VerificationKey: Cheia de verificare
+User: Utilizator
+NoUsersYet: Nu există încă utilizatori
+Add: Adaugă
+Users: Utilizatori
 Subspecialty: Subspecialitatea
 NoSubspecialtiesYet: Nu există încă subspecialități
 Details: Detalii

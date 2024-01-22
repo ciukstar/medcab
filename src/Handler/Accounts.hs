@@ -50,8 +50,8 @@ import Foundation
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
-    ( js_account_min_js, img_person_FILL0_wght400_GRAD0_opsz24_white_svg
-    , img_person_FILL0_wght400_GRAD0_opsz24_svg, js_personal_info_min_js
+    ( img_person_FILL0_wght400_GRAD0_opsz24_white_svg
+    , img_person_FILL0_wght400_GRAD0_opsz24_svg
     )
 import Text.Hamlet (Html)
 import Yesod.Auth (Route (LogoutR), maybeAuth)
@@ -62,7 +62,7 @@ import Yesod.Core
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
-import Yesod.Core.Widget (setTitleI, addScript)
+import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields (fileField, dayField, optionsPairs)
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
@@ -97,7 +97,6 @@ getAccountInfoEditR uid = do
     (fw,et) <- generateFormPost $ formUserInfo uid info
     defaultLayout $ do
         setTitleI MsgPersonalInfo
-        addScript (StaticR js_personal_info_min_js)
         $(widgetFile "accounts/info/edit")
 
 
@@ -148,7 +147,6 @@ getAccountInfoR uid = do
 
     defaultLayout $ do
         setTitleI MsgPersonalInfo
-        addScript (StaticR js_personal_info_min_js)
         idPanelInfo <- newIdent
         $(widgetFile "accounts/info/info")
 
@@ -179,7 +177,6 @@ getAccountR uid = do
     user <- maybeAuth
     defaultLayout $ do
         setTitleI MsgUserAccount
-        addScript (StaticR js_account_min_js)
         idPanelAccount <- newIdent
         $(widgetFile "accounts/account")
 
@@ -194,7 +191,6 @@ getAccountEditR uid = do
     (fw,et) <- generateFormPost $ formAccount user
     defaultLayout $ do
         setTitleI MsgUserAccount
-        addScript (StaticR js_account_min_js)
         $(widgetFile "accounts/edit")
 
 

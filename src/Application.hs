@@ -82,6 +82,10 @@ import Handler.Tokens
     ( getTokensR, postTokensR, getTokensHookR, postTokensClearR
     , getGoogleSecretManagerReadR
     )
+
+import Handler.Users
+    ( getUsersR, getUserR, getUserCreateR, postUserDeleR, getUserEditR )
+    
 import Demo.DemoEn (fillDemoEn)
 
 -- This line actually creates our YesodDispatch instance. It is the second half

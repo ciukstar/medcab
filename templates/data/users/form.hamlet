@@ -1,0 +1,26 @@
+
+#{extra}
+  
+<label for=#{fvId photoV} ##{idLabelPhoto}>
+  <figure ##{idFigurePhoto}>
+    $maybe Entity uid _ <- user
+      <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=auto
+           ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
+    $nothing
+      <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=56 height=auto
+           ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
+    <figcaption.body-medium>
+      _{MsgPhoto}
+^{fvInput photoV}
+
+^{fvInput emailV}
+^{fvInput authV}
+^{fvInput passV}
+^{fvInput verkeyV}
+
+<div style="display:flex;align-items:center;gap:1rem">
+  ^{fvInput verifiedV}
+  <label.body-large for=#{fvId verifiedV}>
+    #{fvLabel verifiedV}
+
+^{fvInput nameV}

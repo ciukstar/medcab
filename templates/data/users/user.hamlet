@@ -1,0 +1,70 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DataR UsersR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgUser}
+
+  <div #headerEnd>
+    <md-icon-button type=button aria-label=_{MsgDele}
+      onclick="document.getElementById('idDialogDelete').open = true">
+      <md-icon>delete
+    <md-icon-button href=@{DataR $ UserEditR uid} aria-label=_{MsgEdit}>
+      <md-icon>edit
+
+<md-dialog #idDialogDelete>
+  <div slot=headline>
+    _{MsgConfirmPlease}
+  <div slot=content>
+    _{MsgDeleteAreYouSure}
+  <div slot=actions>
+    <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
+      _{MsgCancel}
+    <form slot=content method=post action=@{DataR $ UserDeleR uid} enctype=#{et}>
+      ^{fw}
+      <md-filled-button type=submit>
+        _{MsgDele}
+    
+      
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+      
+  $maybe Entity uid (User email authType _ verkey verified name) <- user
+    <figure>
+      <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-medium>
+        _{MsgPhoto}
+    <dl>
+      
+      <dt.label-large scope=row>_{MsgEmailAddress}
+      <dd.body-medium>#{email}
+      
+      <dt.label-large scope=row>_{MsgFullName}
+      <dd.body-medium>
+        $maybe name <- name
+          #{name}
+      
+      <dt.label-large scope=row>_{MsgAuthentication}
+      <dd.body-medium>#{show authType}
+        
+      <dt.label-large scope=row>_{MsgVerificationKey}
+      <dd.body-medium>
+        $maybe verkey <- verkey
+          #{verkey}
+        
+      <dt.label-large scope=row>_{MsgVerified}
+      <dd.body-medium>
+        $if verified
+          _{MsgYes}
+        $else
+          _{MsgNo}
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

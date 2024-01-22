@@ -31,7 +31,7 @@ import Model
     )
 import Foundation
     ( Handler, Widget
-    , Route (DataR, AuthR, AccountR, AccountPhotoR, StaticR)
+    , Route (DataR, AuthR, AccountR, AccountPhotoR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
       , SpecialtyDeleR
@@ -42,18 +42,14 @@ import Foundation
       , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
-      , MsgNoSubspecialtiesYet, MsgSubspecialty
+      , MsgNoSubspecialtiesYet
       )
     )
 import Settings (widgetFile)
-import Settings.StaticFiles
-    ( js_specialties_specialties_min_js, js_specialties_create_min_js
-    , js_specialties_specialty_min_js, js_specialties_subspecialties_min_js
-    )
 import Text.Hamlet (Html)
 import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
-    ( Yesod (defaultLayout), newIdent, addScript, SomeMessage (SomeMessage)
+    ( Yesod (defaultLayout), newIdent, SomeMessage (SomeMessage)
     , getMessageRender, addMessageI, redirect, getMessages, whamlet, setUltDestCurrent
     )
 import Yesod.Core.Widget (setTitleI)
@@ -85,7 +81,6 @@ postSpecialtyDeleR sid ps@(Specialties sids) = do
           setTitleI MsgSpecialty
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
-          addScript (StaticR js_specialties_specialty_min_js)
           idPanelDetails <- newIdent
           $(widgetFile "data/specialties/specialty")
 
@@ -111,7 +106,6 @@ postSpecialtyR sid ps@(Specialties sids) = do
           redirect $ DataR (SpecialtyR sid ps)
       _otherwise -> defaultLayout $ do
           setTitleI MsgSpecialty
-          addScript (StaticR js_specialties_create_min_js)
           $(widgetFile "data/specialties/edit")
 
 
@@ -126,7 +120,6 @@ getSpecialtyEditR sid ps@(Specialties sids) = do
     (fw,et) <- generateFormPost $ formSpecialty Nothing specialty
     defaultLayout $ do
         setTitleI MsgSpecialty
-        addScript (StaticR js_specialties_create_min_js)
         $(widgetFile "data/specialties/edit")
 
 
@@ -135,7 +128,6 @@ getSpecialtyCreateR ps@(Specialties sids) = do
     (fw,et) <- generateFormPost $ formSpecialty Nothing Nothing
     defaultLayout $ do
         setTitleI MsgSpecialty
-        addScript (StaticR js_specialties_create_min_js)
         $(widgetFile "data/specialties/create")
 
 
@@ -177,7 +169,6 @@ getSpecialtyR sid ps@(Specialties sids) = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSpecialty
-        addScript (StaticR js_specialties_specialty_min_js)
         idPanelDetails <- newIdent
         $(widgetFile "data/specialties/specialty")
 
@@ -211,10 +202,8 @@ getSpecialtiesR ps@(Specialties sids) = do
         idFabAdd <- newIdent
         setUltDestCurrent
         when (null sids) $ do
-            addScript (StaticR js_specialties_specialties_min_js)
             $(widgetFile "data/specialties/specialties")
         unless (null sids) $ do
             setTitleI MsgSpecialties
-            addScript (StaticR js_specialties_subspecialties_min_js)
             idPanelSubspecialties <- newIdent
             $(widgetFile "data/specialties/subspecialties")

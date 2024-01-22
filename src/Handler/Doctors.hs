@@ -57,13 +57,11 @@ import Model
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
-    ( js_doctors_doctors_min_js, js_doctors_create_min_js, js_doctors_doctor_min_js
-    , img_person_FILL0_wght400_GRAD0_opsz24_svg, js_doctors_edit_min_js
-    )
+    ( img_person_FILL0_wght400_GRAD0_opsz24_svg )
 import Text.Hamlet (Html)
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
-    ( Yesod(defaultLayout), setTitleI, addScript, newIdent, fileSourceByteString
+    ( Yesod(defaultLayout), setTitleI, newIdent, fileSourceByteString
     , FileInfo (fileContentType), SomeMessage (SomeMessage), getMessageRender
     , addMessageI, setUltDestCurrent, MonadHandler (liftHandler), getMessages
     , whamlet
@@ -99,7 +97,6 @@ postDoctorDeleR did = do
           msgs <- getMessages              
           defaultLayout $ do
               setTitleI MsgDoctor
-              addScript (StaticR js_doctors_doctor_min_js)
               $(widgetFile "data/doctors/doctor")
 
 
@@ -119,7 +116,6 @@ getDoctorEditR did = do
 
     defaultLayout $ do
           setTitleI MsgDoctor
-          addScript (StaticR js_doctors_edit_min_js)
           $(widgetFile "data/doctors/edit")   
 
 
@@ -140,7 +136,6 @@ postDoctorR did = do
       _otherwise -> do
           defaultLayout $ do
               setTitleI MsgDoctor
-              addScript (StaticR js_doctors_edit_min_js)
               $(widgetFile "data/doctors/create")
 
 
@@ -157,7 +152,6 @@ getDoctorR did = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgDoctor
-        addScript (StaticR js_doctors_doctor_min_js)
         $(widgetFile "data/doctors/doctor")
 
 
@@ -177,7 +171,6 @@ postDoctorsR = do
           redirect $ DataR DoctorsR
       _otherwise -> defaultLayout $ do
           setTitleI MsgDoctor
-          addScript (StaticR js_doctors_create_min_js)
           $(widgetFile "data/doctors/create")
 
 
@@ -186,7 +179,6 @@ getDoctorCreateR = do
     (fw,et) <- generateFormPost $ formDoctor Nothing
     defaultLayout $ do
         setTitleI MsgDoctor
-        addScript (StaticR js_doctors_create_min_js)
         $(widgetFile "data/doctors/create")
 
 
@@ -248,7 +240,6 @@ getDoctorsR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgDoctors
-        addScript (StaticR js_doctors_doctors_min_js)
         idFabAdd <- newIdent
         $(widgetFile "data/doctors/doctors")
 

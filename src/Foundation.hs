@@ -126,7 +126,6 @@ instance Yesod App where
     errorHandler :: ErrorResponse -> HandlerFor App TypedContent
     errorHandler NotFound = selectRep $ do
         provideRep $ defaultLayout $ do
-            addScript (StaticR js_error_min_js)
             setTitleI MsgPageNotFound
             idHeader <- newIdent
             idHeaderStart <- newIdent
@@ -136,7 +135,6 @@ instance Yesod App where
 
     errorHandler (PermissionDenied msg) = selectRep $ do
         provideRep $ defaultLayout $ do
-            addScript (StaticR js_error_min_js)
             setTitleI MsgPermissionDenied
             idHeader <- newIdent
             idHeaderStart <- newIdent
@@ -180,6 +178,7 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
+            addScript $ StaticR js_md3_min_js
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -231,6 +230,13 @@ instance Yesod App where
     isAuthorized (DataR TokensClearR) _ = return Authorized
     isAuthorized (DataR TokensHookR) _ = return Authorized
     isAuthorized (DataR TokensR) _ = return Authorized
+
+    
+    isAuthorized (DataR UserCreateR) _ = return Authorized
+    isAuthorized (DataR (UserDeleR _)) _ = return Authorized
+    isAuthorized (DataR (UserEditR _)) _ = return Authorized
+    isAuthorized (DataR (UserR _)) _ = return Authorized
+    isAuthorized (DataR UsersR) _ = return Authorized
 
 
     -- This function creates static content files in the static folder
@@ -309,7 +315,6 @@ instance YesodAuth App where
     authLayout w = liftHandler $ do
         defaultLayout $ do
             setTitleI MsgSignIn
-            addScript (StaticR js_auth_min_js)
             $(widgetFile "auth/layout")
 
     -- Where to send a user after successful login
