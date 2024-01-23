@@ -20,7 +20,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set
-    , (^.), (==.), (=.)
+    , (^.), (==.), (=.), Value (unValue)
     )
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
@@ -30,7 +30,7 @@ import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
-      , UserInfoUser, UserInfoBirthDate, UserInfoGender
+      , UserInfoUser, UserInfoBirthDate, UserInfoGender, UserSuperuser
       )
     , User (User, userName), AvatarColor (AvatarColorDark, AvatarColorLight)
     , UserInfo (UserInfo, userInfoBirthDate, userInfoGender)
@@ -52,6 +52,8 @@ import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_white_svg
     , img_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_shield_person_FILL0_wght400_GRAD0_opsz24_white_svg
     )
 import Text.Hamlet (Html)
 import Yesod.Auth (Route (LogoutR), maybeAuth)
@@ -227,6 +229,15 @@ getAccountPhotoR uid color = do
         return x
     case photo of
       Just (Entity _ (UserPhoto _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
-      Nothing -> redirect $ case color of
-        AvatarColorDark -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg
-        AvatarColorLight -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg
+      Nothing -> do
+          superuser <- maybe False unValue <$> runDB ( selectOne $ do
+              x <- from $ table @User
+              where_ $ x ^. UserId ==. val uid
+              return $ x ^. UserSuperuser )
+          redirect $ if superuser
+              then case color of
+                     AvatarColorDark -> StaticR img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
+                     AvatarColorLight -> StaticR img_shield_person_FILL0_wght400_GRAD0_opsz24_white_svg
+              else case color of
+                     AvatarColorDark -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg
+                     AvatarColorLight -> StaticR img_person_FILL0_wght400_GRAD0_opsz24_white_svg

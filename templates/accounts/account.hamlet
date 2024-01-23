@@ -23,7 +23,7 @@
     <figure>
       <img src=@{AccountPhotoR uid AvatarColorDark} width=96 height=auto loading=lazy alt=_{MsgPhoto}>
       <figcation>
-        $maybe Entity _ (User email _ _ _ _ name) <- user
+        $maybe Entity _ (User email _ _ _ _ name _ _) <- user
           $maybe name <- name
             <div.body-large>#{name}
           <div.body-medium>#{email}

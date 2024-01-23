@@ -23,9 +23,34 @@
 
 
 <main>
-  <h4.display-medium>App MedCab
-  <p.body-large>This application is under development...
-  
-  <h4.display-medium>
-      _{MsgErDiagram}
+  <section>
+    <h2.headline-medium>App MedCab
+    <p.body-large>
+      This application is under development...
+
+  <section>
+    <h2.headline-medium>_{MsgDoc001}
+    <ul>
+      <li.body-large>
+        _{MsgEmail}:
+        <a href="https://developers.google.com/gmail/api/guides">Gmail API
+        <p>
+          <small>
+            <code>
+              &dollar;YESOD_GOOGLE_CLIENT_ID
+              &dollar;YESOD_GOOGLE_CLIENT_SECRET
+  <section>
+    <h2.headline-medium>_{MsgSuperuser}
+    <dl>
+    
+      <dt.label-large>_{MsgUsername}
+      <dd>
+        <code>&dollar;YESOD_SUPERUSER_USERNAME
+        
+      <dt.label-large>_{MsgPassword}
+      <dd>
+        <code>&dollar;YESOD_SUPERUSER_PASSWORD
+    
+  <section>
+    <h2.headline-medium>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_MedCab_svg} alt=_{MsgErDiagram} loading=lazy>

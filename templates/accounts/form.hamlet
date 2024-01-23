@@ -1,7 +1,7 @@
 
 #{extra}
 
-$maybe Entity _ (User email _ _ _ _ _) <- user
+$maybe Entity _ (User email _ _ _ _ _ _ _) <- user
   <div.label-large ##{idUserIdent}>#{email}
   
 <label for=#{fvId photoV} ##{idLabelPhotoUser}>

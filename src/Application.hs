@@ -84,9 +84,12 @@ import Handler.Tokens
     )
 
 import Handler.Users
-    ( getUsersR, getUserR, getUserCreateR, postUserDeleR, getUserEditR )
+    ( getUsersR, getUserR, getUserCreateR, postUserDeleR, getUserEditR
+    , getUserPhotoR, postUserR
+    )
     
 import Demo.DemoEn (fillDemoEn)
+import Yesod.Auth.Email (saltPass)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -130,6 +133,17 @@ makeFoundation appSettings = do
     -- Perform database migration using our application's logging settings.
     flip runLoggingT logFunc $ flip runSqlPool pool $ do
         runMigration migrateAll
+        
+        superpass <- liftIO $ saltPass (appSuperuserPassword appSettings)
+        insert_ User { userEmail = appSuperuserUsername appSettings
+                     , userAuthType = UserAuthTypePassword
+                     , userPassword = Just superpass
+                     , userVerkey = Nothing
+                     , userVerified = True
+                     , userName = Just "Super User"
+                     , userSuperuser = True
+                     , userAdmin = True
+                     }
         fillDemoEn
 
     -- Return the foundation

@@ -66,6 +66,8 @@ data AppSettings = AppSettings
     , appIdleTimeout :: NominalDiffTime
     , appGoogleClientId :: Text
     , appGoogleClientSecret :: Text
+    , appSuperuserUsername :: Text
+    , appSuperuserPassword :: Text
     }
 
 instance FromJSON AppSettings where
@@ -95,9 +97,11 @@ instance FromJSON AppSettings where
         appAnalytics              <- o .:? "analytics"
 
         appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
-        appIdleTimeout            <- o .: "idle-timeout"
+        appIdleTimeout            <- o .:  "idle-timeout"
         appGoogleClientId         <- o .:  "google-client-id"
         appGoogleClientSecret     <- o .:  "google-client-secret"
+        appSuperuserUsername      <- o .:  "superuser-username"
+        appSuperuserPassword      <- o .:  "superuser-password"
                                      
         return AppSettings {..}
 

@@ -1,3 +1,9 @@
+None: Aucune
+SuperuserCannotBeDeleted: Le superutilisateur ne peut pas être supprimé
+Administrator: Administrateur
+Username: Nom d'utilisateur
+Superuser: Superutilisateur
+NotSpecified: Not specified
 No: Non
 Yes: Oui
 Email: E-mail
@@ -100,3 +106,5 @@ MainMenu: Menu principal
 Welcome: Bienvenu
 AppDescription: Cabinet Médical
 AppName: MedCab
+
+Doc001: Intégration avec des API externes

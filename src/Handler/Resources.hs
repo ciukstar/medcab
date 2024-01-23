@@ -9,7 +9,8 @@ import Foundation
     , Route (AuthR, AccountR, AccountPhotoR, StaticR)
     , AppMessage
       ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
-      , MsgErDiagram
+      , MsgErDiagram, MsgEmail, MsgSuperuser, MsgUsername, MsgPassword
+      , MsgDoc001
       )
     )
 import Model (AvatarColor (AvatarColorLight))

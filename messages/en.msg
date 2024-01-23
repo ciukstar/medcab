@@ -1,3 +1,9 @@
+None: None
+SuperuserCannotBeDeleted: Superuser cannot be deleted
+Administrator: Administrator
+Username: Username
+Superuser: Superuser
+NotSpecified: Not specified
 No: No
 Yes: Yes
 Email: Email
@@ -100,3 +106,5 @@ MainMenu: Main menu
 Welcome: Welcome
 AppDescription: Medical Cabinet 
 AppName: MedCab
+
+Doc001: Integration with external APIs

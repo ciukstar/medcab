@@ -41,8 +41,9 @@
     /tokens 	  TokensR      GET POST
 
 
-    /users/form/create  UserCreateR GET
-    /users/#UserId/dele UserDeleR   POST
-    /users/#UserId/edit UserEditR   GET
-    /users/#UserId      UserR  	    GET
-    /users              UsersR 	    GET
+    /users/form/create   UserCreateR GET
+    /users/#UserId/photo UserPhotoR  GET
+    /users/#UserId/dele  UserDeleR   POST
+    /users/#UserId/edit  UserEditR   GET
+    /users/#UserId       UserR 	     GET POST
+    /users               UsersR      GET

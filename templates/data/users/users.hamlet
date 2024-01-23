@@ -34,10 +34,10 @@
       <figcaption.body-large>
         _{MsgNoUsersYet}
   $else
-    $forall Entity uid (User email _ _ _ _ name) <- users
+    $forall Entity uid (User email _ _ _ _ name _ _) <- users
       <md-list>
         <md-list-item interactive href=@{DataR $ UserR uid}>
-          <img slot=start src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 style="clip-path:circle(50%)">
+          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 style="clip-path:circle(50%)">
           <div slot=headline>
             $maybe name <- name
               #{name}

@@ -47,6 +47,8 @@ User
     verkey Text Maybe
     verified Bool
     name Text Maybe
+    superuser Bool
+    admin Bool
     UniqueUser email
     deriving Typeable
 

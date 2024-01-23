@@ -1,3 +1,9 @@
+None: Niciuna
+SuperuserCannotBeDeleted: Superutilizatorul nu poate fi șters
+Administrator: Administrator
+Username: Nume de utilizator
+Superuser: Superutilizator
+NotSpecified: Non précisé
 No: Nu
 Yes: Da
 Email: E-mail
@@ -100,3 +106,5 @@ MainMenu: Meniu principal
 Welcome: Bine ați venit
 AppDescription: Cabinet medical
 AppName: MedCab
+
+Doc001: Integrare cu API-uri externe

@@ -33,11 +33,13 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
       
-  $maybe Entity uid (User email authType _ verkey verified name) <- user
+  $maybe Entity uid (User email authType _ verkey verified name super admin) <- user
+    
     <figure>
-      <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
+      <img src=@{DataR $ UserPhotoR uid} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
         _{MsgPhoto}
+        
     <dl>
       
       <dt.label-large scope=row>_{MsgEmailAddress}
@@ -47,18 +49,43 @@
       <dd.body-medium>
         $maybe name <- name
           #{name}
+        $nothing
+          <i>_{MsgNotSpecified}
       
       <dt.label-large scope=row>_{MsgAuthentication}
-      <dd.body-medium>#{show authType}
+      <dd.body-medium>
+        $case authType
+          $of UserAuthTypePassword
+            _{MsgPassword}
+          $of UserAuthTypeEmail
+            _{MsgEmail}
+          $of UserAuthTypeGoogle
+            _{MsgGoogle}
         
       <dt.label-large scope=row>_{MsgVerificationKey}
       <dd.body-medium>
         $maybe verkey <- verkey
           #{verkey}
+        $nothing
+          <i>_{MsgNotSpecified}
         
       <dt.label-large scope=row>_{MsgVerified}
       <dd.body-medium>
         $if verified
+          _{MsgYes}
+        $else
+          _{MsgNo}
+        
+      <dt.label-large scope=row>_{MsgSuperuser}
+      <dd.body-medium>
+        $if super
+          _{MsgYes}
+        $else
+          _{MsgNo}
+        
+      <dt.label-large scope=row>_{MsgAdministrator}
+      <dd.body-medium>
+        $if admin
           _{MsgYes}
         $else
           _{MsgNo}

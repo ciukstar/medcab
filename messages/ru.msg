@@ -1,3 +1,9 @@
+None: Ни одно
+SuperuserCannotBeDeleted: Суперпользователя нельзя удалить
+Administrator: Администратор
+Username: Имя пользователя
+Superuser: Суперпользователь
+NotSpecified: Не указано
 No: Нет
 Yes: Да
 Email: Электронная почта
@@ -100,3 +106,5 @@ MainMenu: Главное меню
 Welcome: Добро пожаловать
 AppDescription: Медицинский кабинет
 AppName: MedCab
+
+Doc001: Интеграция с внешними API

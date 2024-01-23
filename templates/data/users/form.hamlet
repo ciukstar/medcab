@@ -13,14 +13,9 @@
       _{MsgPhoto}
 ^{fvInput photoV}
 
-^{fvInput emailV}
-^{fvInput authV}
-^{fvInput passV}
-^{fvInput verkeyV}
+^{fvInput nameV}
 
 <div style="display:flex;align-items:center;gap:1rem">
-  ^{fvInput verifiedV}
-  <label.body-large for=#{fvId verifiedV}>
-    #{fvLabel verifiedV}
-
-^{fvInput nameV}
+  ^{fvInput adminV}
+  <label.body-large for=#{fvId adminV}>
+    #{fvLabel adminV}

@@ -70,7 +70,6 @@ import Yesod.Auth.Message
     , englishMessage, frenchMessage, russianMessage
     )
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
-import Yesod.Core.Handler (lookupSession)
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
@@ -188,7 +187,6 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
@@ -205,9 +203,6 @@ instance Yesod App where
     isAuthorized RobotsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
-
-
-
 
     isAuthorized GoogleSecretManagerReadR _ = return Authorized
 
@@ -233,6 +228,8 @@ instance Yesod App where
 
     
     isAuthorized (DataR UserCreateR) _ = return Authorized
+    
+    isAuthorized (DataR (UserPhotoR _)) _ = return Authorized
     isAuthorized (DataR (UserDeleR _)) _ = return Authorized
     isAuthorized (DataR (UserEditR _)) _ = return Authorized
     isAuthorized (DataR (UserR _)) _ = return Authorized
@@ -351,6 +348,8 @@ instance YesodAuth App where
                                                       , userVerkey = Nothing
                                                       , userVerified = True
                                                       , userName = name
+                                                      , userSuperuser = False
+                                                      , userAdmin = False
                                                       }
                                   [UserEmail =. em]
                   _ <- runDB $ upsert UserCred { userCredUser = uid
@@ -548,7 +547,7 @@ instance YesodAuthEmail App where
 
     addUnverified :: A.Email -> VerKey -> AuthHandler App (AuthEmailId App)
     addUnverified email vk = liftHandler $ runDB $ insert
-        (User email UserAuthTypeEmail Nothing (Just vk) False Nothing)
+        (User email UserAuthTypeEmail Nothing (Just vk) False Nothing False False)
 
 
     sendVerifyEmail :: A.Email -> VerKey -> VerUrl -> AuthHandler App ()
