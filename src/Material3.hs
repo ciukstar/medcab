@@ -1,7 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Handler.Material3
+module Material3
   ( md3emailField
   , md3passwordField
   , md3radioField
@@ -10,24 +10,30 @@ module Handler.Material3
   , md3textareaField
   , md3selectField
   , md3switchField
+  , md3htmlField
   ) where
 
-import Data.Text (Text)
+import Data.Text (Text, pack)
+
+import Text.Blaze.Html.Renderer.String (renderHtml)
+import Text.Hamlet (Html)
+import Text.Shakespeare.I18N (RenderMessage)
+
+import Yesod.Core (MonadHandler(HandlerSite))
+import Yesod.Core.Handler (HandlerFor)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
-    , textareaField, Textarea (Textarea), selectField, checkBoxField
+    , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
     )
 import Yesod.Form.Types (Field (fieldView), FormMessage)
-import Yesod.Core.Handler (HandlerFor)
-import Text.Shakespeare.I18N (RenderMessage)
 
 
 md3switchField :: Monad m => Field m Bool
 md3switchField = checkBoxField
-    { fieldView = \theId name attrs x isReq -> [whamlet|
-<md-switch ##{theId} *{attrs} name=#{name} value=yes :showVal id x:selected :isReq:required>
+    { fieldView = \theId name attrs x _ -> [whamlet|
+<md-switch ##{theId} *{attrs} name=#{name} :showVal id x:value=yes :showVal id x:selected>
 |] }
     where
       showVal = either (const False)
@@ -90,3 +96,11 @@ md3textareaField :: RenderMessage m FormMessage => Field (HandlerFor m) Textarea
 md3textareaField = textareaField { fieldView = \theId name attrs eval isReq -> [whamlet|
 <md-filled-text-field ##{theId} type=textarea name=#{name} :isReq:required=true value=#{either Textarea id eval} *{attrs}>
 |] }
+
+
+md3htmlField ::  Monad m => RenderMessage (HandlerSite m) FormMessage => Field m Html
+md3htmlField = htmlField { fieldView = \theId name attrs x isReq -> [whamlet|
+<md-filled-text-field ##{theId} type=textarea name=#{name} :isReq:required=true value=#{showVal x} *{attrs}>
+|] }
+    where
+      showVal = either id (pack . renderHtml)

@@ -33,12 +33,16 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
       
-  $maybe Entity uid (User email authType _ verkey verified name super admin) <- user
+  $maybe (Entity uid (User email authType _ verkey verified name super admin),attrib) <- user
     
     <figure>
-      <img src=@{DataR $ UserPhotoR uid} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
+      <img src=@{DataR $ UserPhotoR uid} width=auto height=56 height= loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
-        _{MsgPhoto}
+        $maybe attrib <- attrib
+          <small.app-attribution.body-small>
+            #{attrib}
+        $nothing
+          _{MsgPhoto}
         
     <dl>
       

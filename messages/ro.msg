@@ -1,3 +1,4 @@
+Attribution: Atribuire
 None: Niciuna
 SuperuserCannotBeDeleted: Superutilizatorul nu poate fi șters
 Administrator: Administrator

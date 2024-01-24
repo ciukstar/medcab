@@ -20,8 +20,8 @@ import Database.Esqueleto.Experimental
     , selectOne, isNothing_, just
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
-import Handler.Material3 (md3textField, md3textareaField)
 import Handler.Menu (menu)
+import Material3 (md3textField, md3textareaField)
 import Model
     ( Specialty
       (Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup)

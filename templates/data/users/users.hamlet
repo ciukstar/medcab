@@ -34,20 +34,19 @@
       <figcaption.body-large>
         _{MsgNoUsersYet}
   $else
-    $forall Entity uid (User email _ _ _ _ name _ _) <- users
-      <md-list>
-        <md-list-item interactive href=@{DataR $ UserR uid}>
-          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 style="clip-path:circle(50%)">
+    <md-list>
+      $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- users
+        <md-list-item type=link href=@{DataR $ UserR uid}>
+          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 style="clip-path:circle(50%)">              
           <div slot=headline>
             $maybe name <- name
               #{name}
           <div slot=supporting-text>#{email}
           <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <small.app-attribution.body-small>
+            #{attrib}
         <md-divider>
-
-  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{DataR UserCreateR}>
-    <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

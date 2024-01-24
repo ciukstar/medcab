@@ -1,3 +1,4 @@
+Attribution: Атрибуция
 None: Ни одно
 SuperuserCannotBeDeleted: Суперпользователя нельзя удалить
 Administrator: Администратор

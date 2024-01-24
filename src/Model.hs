@@ -16,26 +16,31 @@
 
 module Model where
 
+import Control.Monad (mapM)
 import ClassyPrelude.Yesod
     ( Ord, Read, Typeable, Bool, ByteString, Text, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
-import Control.Monad (mapM)
+
 import Data.Eq (Eq)
 import Data.Function ((.))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
 import Data.Time.Calendar (Day)
+
 import Database.Persist.Quasi ( lowerCaseSettings )
-import Text.Read (readMaybe)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
+
+import Text.Hamlet (Html)
 import Text.Show (Show (show))
+import Text.Read (readMaybe)
+
 import Yesod.Core.Dispatch
     ( PathPiece (fromPathPiece, toPathPiece)
     , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
     )
 import Yesod.Form (Textarea)
-import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
 
 data Gender = GenderFemale | GenderMale | GenderOther

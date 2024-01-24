@@ -27,7 +27,7 @@ import Database.Esqueleto.Experimental
     , (^.), (==.), (:&)((:&))
     , where_, orderBy, asc, Value (unValue)
     )
-import Handler.Material3
+import Material3
     ( md3textField, md3telField, md3emailField, md3selectField )
 import Handler.Menu (menu)
 import Foundation

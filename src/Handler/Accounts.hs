@@ -24,8 +24,7 @@ import Database.Esqueleto.Experimental
     )
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Handler.Material3
-    ( md3textField, md3radioField )
+import Material3 ( md3textField, md3radioField )
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
@@ -164,7 +163,7 @@ postAccountR uid = do
           case mfi of
             Just fi -> do
                 bs <- fileSourceByteString fi
-                void $ runDB $ upsert (UserPhoto uid (fileContentType fi) bs)
+                void $ runDB $ upsert (UserPhoto uid (fileContentType fi) bs Nothing)
                     [UserPhotoMime P.=. fileContentType fi, UserPhotoPhoto P.=. bs]
             Nothing -> return ()
           addMessageI statusSuccess MsgRecordEdited
@@ -228,7 +227,7 @@ getAccountPhotoR uid color = do
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
     case photo of
-      Just (Entity _ (UserPhoto _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      Just (Entity _ (UserPhoto _ mime bs _)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
       Nothing -> do
           superuser <- maybe False unValue <$> runDB ( selectOne $ do
               x <- from $ table @User

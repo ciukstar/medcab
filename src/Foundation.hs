@@ -29,6 +29,7 @@ import Database.Esqueleto.Experimental
 import qualified Database.Esqueleto.Experimental as E ((==.))
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import qualified Data.Text.Lazy.Encoding
+import Material3 (md3emailField, md3passwordField)
 import qualified Network.Wreq as W (get, responseHeader, responseBody)
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith, post, FormParam ((:=)))
 import qualified Network.Wreq.Lens as WL
@@ -38,6 +39,8 @@ import Network.Mail.Mime
     , Disposition (DefaultDisposition), Encoding (None), Address (Address)
     , renderMail'
     )
+
+import System.Directory (doesFileExist)
 import System.IO (readFile')
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 import Text.Hamlet (hamletFile)
@@ -77,9 +80,6 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
-
-import Handler.Material3 (md3emailField, md3passwordField)
-import System.Directory (doesFileExist)
 
 
 
@@ -226,9 +226,7 @@ instance Yesod App where
     isAuthorized (DataR TokensHookR) _ = return Authorized
     isAuthorized (DataR TokensR) _ = return Authorized
 
-    
-    isAuthorized (DataR UserCreateR) _ = return Authorized
-    
+        
     isAuthorized (DataR (UserPhotoR _)) _ = return Authorized
     isAuthorized (DataR (UserDeleR _)) _ = return Authorized
     isAuthorized (DataR (UserEditR _)) _ = return Authorized
@@ -369,6 +367,7 @@ instance YesodAuth App where
                                 _ <- runDB $ upsert UserPhoto { userPhotoUser = uid
                                                               , userPhotoMime = mime
                                                               , userPhotoPhoto = bs
+                                                              , userPhotoAttribution = Nothing
                                                               }
                                      [UserPhotoMime =. mime, UserPhotoPhoto =. bs]
                                 return ()

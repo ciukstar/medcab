@@ -35,7 +35,7 @@
       
   $maybe (Entity did (Doctor name mobile email _), spec) <- doctor
     <figure>
-      <img src=@{DataR $ DoctorPhotoR did} width=56 height=auto loading=lazy alt=_{MsgPhoto}>
+      <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
         _{MsgPhoto}
     <dl>        

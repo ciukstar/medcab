@@ -6,7 +6,6 @@
 module Handler.Users
   ( getUsersR
   , getUserR
-  , getUserCreateR
   , postUserDeleR
   , getUserEditR
   , getUserPhotoR
@@ -14,9 +13,9 @@ module Handler.Users
   ) where
 
 import Database.Esqueleto.Experimental
-    ( select, from, table, orderBy, asc, Entity (entityVal), selectOne, where_
-    , (^.), (==.), (=.)
-    , val, update, set, Value (unValue)
+    ( select, from, table, orderBy, desc, Entity (entityVal), selectOne
+    , (^.), (==.), (=.), (:&)((:&)), (?.)
+    , where_, val, update, set, Value (unValue), leftJoin, on, just
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (delete), PersistUniqueWrite (upsert) )
@@ -24,27 +23,27 @@ import qualified Database.Persist as P ((=.))
 import Foundation
     ( Handler, Widget, Form
     , Route (AuthR, DataR, AccountPhotoR, AccountR, StaticR)
-    , DataR (UserR, UserCreateR, UsersR, UserDeleR, UserEditR, UserPhotoR)
+    , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage
-      ( MsgUsers, MsgAdd, MsgNoUsersYet, MsgSignIn, MsgSignOut, MsgUserAccount
+      ( MsgUsers, MsgNoUsersYet, MsgSignIn, MsgSignOut, MsgUserAccount
       , MsgPhoto, MsgUser, MsgSave, MsgBack, MsgCancel, MsgEmailAddress, MsgYes
       , MsgAuthentication, MsgPassword, MsgVerificationKey, MsgVerified, MsgNo
       , MsgFullName, MsgGoogle, MsgEmail, MsgEdit, MsgDele, MsgConfirmPlease
       , MsgDeleteAreYouSure, MsgInvalidFormData, MsgRecordDeleted, MsgNotSpecified
       , MsgRecordEdited, MsgSuperuser, MsgAdministrator, MsgSuperuserCannotBeDeleted
+      , MsgAttribution
       )
     )
-import Handler.Material3
-    ( md3textField, md3switchField )
 import Handler.Menu (menu)
+import Material3 ( md3textField, md3switchField, md3htmlField )
 import Model
-    ( AvatarColor (AvatarColorLight, AvatarColorDark), statusError, statusSuccess
+    ( AvatarColor (AvatarColorLight), statusError, statusSuccess
     , UserId
     , User
-      ( User, userEmail, userAuthType, userPassword, userVerkey, userVerified, userName )
+      ( User, userName, userAdmin )
     , EntityField
-      ( UserId, UserPhotoUser, UserEmail, UserAuthType, UserVerkey, UserVerified
-      , UserName, UserPhotoMime, UserPhotoPhoto, UserAdmin, UserSuperuser
+      ( UserId, UserPhotoUser, UserName, UserPhotoMime, UserPhotoPhoto
+      , UserAdmin, UserSuperuser, UserPhotoAttribution
       )
     , AuthenticationType
       ( UserAuthTypeGoogle, UserAuthTypeEmail, UserAuthTypePassword)
@@ -60,8 +59,9 @@ import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core
     ( defaultLayout, newIdent, getMessages, setUltDestCurrent
-    , SomeMessage (SomeMessage), getMessageRender, FileInfo (fileContentType), addMessageI
-    , redirect, TypedContent (TypedContent), ToContent (toContent), fileSourceByteString
+    , SomeMessage (SomeMessage), getMessageRender, FileInfo (fileContentType)
+    , addMessageI, redirect, TypedContent (TypedContent), ToContent (toContent)
+    , fileSourceByteString, MonadHandler (liftHandler)
     )
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost)
@@ -72,8 +72,9 @@ import Yesod.Form.Types
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Data.Text.Encoding (encodeUtf8)
-import Control.Monad (void)
+import Control.Monad (void, join)
 import Data.Text (Text)
+import Data.Bifunctor (Bifunctor(second))
 
 
 postUserDeleR :: UserId -> Handler Html
@@ -95,10 +96,11 @@ postUserDeleR uid = do
           redirect $ DataR $ UserR uid
       _otherwise -> do
 
-          user <- runDB $ selectOne $ do
-              x <- from $ table @User
+          user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+              x :& h <- from $ table @User
+                  `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
               where_ $ x ^. UserId ==. val uid
-              return x
+              return (x, h ?. UserPhotoAttribution) )
               
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
@@ -127,7 +129,7 @@ postUserR :: UserId -> Handler Html
 postUserR uid = do
     ((fr,fw),et) <- runFormPost $ formUser Nothing
     case fr of
-      FormSuccess (UserData name admin mfi) -> do
+      FormSuccess (UserData name admin mfi attrib) -> do
           runDB $ update $ \x -> do
               set x [ UserName =. val name, UserAdmin =. val admin ]
               where_ $ x ^. UserId ==. val uid
@@ -135,9 +137,14 @@ postUserR uid = do
           case mfi of
             Just fi -> do
                 bs <- fileSourceByteString fi
-                void $ runDB $ upsert (UserPhoto uid (fileContentType fi) bs)
-                    [UserPhotoMime P.=. fileContentType fi, UserPhotoPhoto P.=. bs]
-            Nothing -> return ()
+                void $ runDB $ upsert (UserPhoto uid (fileContentType fi) bs attrib)
+                    [ UserPhotoMime P.=. fileContentType fi
+                    , UserPhotoPhoto P.=. bs
+                    , UserPhotoAttribution P.=. attrib
+                    ]
+            Nothing -> runDB $ update $ \x -> do
+                set x [ UserPhotoAttribution =. val attrib ]
+                where_ $ x ^. UserPhotoUser ==. val uid
               
           addMessageI statusSuccess MsgRecordEdited
           redirect $ DataR $ UserR uid
@@ -150,10 +157,11 @@ postUserR uid = do
 getUserR :: UserId -> Handler Html
 getUserR uid = do
 
-    user <- runDB $ selectOne $ do
-        x <- from $ table @User
+    user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+        x :& h <- from $ table @User
+            `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. UserId ==. val uid
-        return x
+        return (x, h ?. UserPhotoAttribution) )
     
     (fw,et) <- generateFormPost formDelete
     msgs <- getMessages
@@ -166,18 +174,11 @@ formDelete :: Form ()
 formDelete extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 
-getUserCreateR :: Handler Html
-getUserCreateR = do
-    (fw,et) <- generateFormPost $ formUser Nothing
-    defaultLayout $ do
-        setTitleI MsgUser
-        $(widgetFile "data/users/create")
-
-
 data UserData = UserData
     { userDataName :: Maybe Text
     , userDataAdmin :: Bool
     , userDataPhoto :: Maybe FileInfo
+    , userDataPhotoAttribution :: Maybe Html
     }
 
 
@@ -192,11 +193,12 @@ formUser user extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgFullName)]
         } (userName . entityVal <$> user)
+        
     (adminR,adminV) <- mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgAdministrator
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
-        } (userVerified . entityVal <$> user)
+        } (userAdmin . entityVal <$> user)
 
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
@@ -204,11 +206,25 @@ formUser user extra = do
         , fsAttrs = [("style","display:none")]
         } Nothing
 
-    let r = UserData <$> nameR <*> adminR <*> photoR
+    attrib <- (unValue =<<) <$> case user of
+      Just (Entity uid _) -> liftHandler $ runDB $ selectOne $ do
+          x <- from $ table @UserPhoto
+          where_ $ x ^. UserPhotoUser ==. val uid
+          return $ x ^. UserPhotoAttribution
+      Nothing -> return Nothing
+    
+    (attribR,attribV) <- mopt md3htmlField FieldSettings
+        { fsLabel = SomeMessage MsgAttribution
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgAttribution)]
+        } (Just attrib)
+
+    let r = UserData <$> nameR <*> adminR <*> photoR <*> attribR
 
     idLabelPhoto <- newIdent
     idFigurePhoto <- newIdent
     idImgPhoto <- newIdent
+    
     let w = $(widgetFile "data/users/form")
 
     return (r,w)
@@ -219,16 +235,16 @@ getUsersR = do
 
     user <- maybeAuth
 
-    users <- runDB $ select $ do
-        x <- from $ table @User
-        orderBy [asc (x ^. UserId)]
-        return x
+    users <- (second (join . unValue) <$>) <$> runDB ( select $ do
+        x :& h <- from $ table @User
+            `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
+        orderBy [desc (x ^. UserId)]
+        return (x, h ?. UserPhotoAttribution) )
 
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgUsers
-        idFabAdd <- newIdent
         $(widgetFile "data/users/users")
 
 
@@ -239,7 +255,7 @@ getUserPhotoR uid = do
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
     case photo of
-      Just (Entity _ (UserPhoto _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      Just (Entity _ (UserPhoto _ mime bs _)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
       Nothing -> do
           superuser <- maybe False unValue <$> runDB ( selectOne $ do
               x <- from $ table @User

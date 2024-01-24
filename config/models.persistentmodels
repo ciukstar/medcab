@@ -24,6 +24,7 @@ UserPhoto
     user UserId OnDeleteCascade
     mime Text
     photo ByteString
+    attribution Html Maybe
     UniqueUserPhoto user
 
 UserCred

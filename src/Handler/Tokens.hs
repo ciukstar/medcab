@@ -15,6 +15,7 @@ import Control.Exception.Safe (tryAny)
 import qualified Control.Lens as L ((^.), (?~))
 import Control.Monad ((<=<), void)
 import Control.Monad.IO.Class (liftIO)
+
 import Data.Aeson (object, (.=))
 import Data.Aeson.Lens (key, AsValue (_String))
 import qualified Data.ByteString.Base64 as B64 (encode)
@@ -22,6 +23,7 @@ import Data.ByteString.Lazy (toStrict)
 import qualified Data.List.Safe as LS (last)
 import Data.Text (Text, pack, unpack, splitOn)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val
     , (^.), (==.)
@@ -32,6 +34,7 @@ import Database.Persist
     , PersistUniqueWrite (upsert)
     )
 import qualified Database.Persist as P ((=.))
+
 import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, App (appSettings)
@@ -46,6 +49,8 @@ import Foundation
       )
     )
 import Data.Function ((&))
+
+import Material3 (md3radioField, md3emailField)
 import Model
     ( gmailAccessToken, gmailRefreshToken, gmail
     , StoreType
@@ -55,19 +60,23 @@ import Model
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
     , AvatarColor (AvatarColorLight)
     )
+    
 import Network.Wreq
     ( post, FormParam ((:=)), responseBody, defaults, auth, oauth2Bearer
     , postWith, getWith
     )
 import Network.Wreq.Lens (statusCode, responseStatus)
+
 import Settings
     ( widgetFile, AppSettings (appGoogleClientId, appGoogleClientSecret) )
 import System.IO (readFile')
+
 import Text.Blaze.Html (preEscapedToHtml, toHtml)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (st)
 import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
@@ -83,8 +92,6 @@ import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess), FieldView (fvInput)
     , FieldSettings (FieldSettings, fsLabel, fsId, fsName, fsTooltip, fsAttrs)
     )
-
-import Handler.Material3 (md3radioField, md3emailField)
 
 
 getGoogleSecretManagerReadR :: Handler Html

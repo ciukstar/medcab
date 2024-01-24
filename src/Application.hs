@@ -84,7 +84,7 @@ import Handler.Tokens
     )
 
 import Handler.Users
-    ( getUsersR, getUserR, getUserCreateR, postUserDeleR, getUserEditR
+    ( getUsersR, getUserR, postUserDeleR, getUserEditR
     , getUserPhotoR, postUserR
     )
     
