@@ -1,6 +1,4 @@
 
-/gsm/read GoogleSecretManagerReadR GET
-
 /accounts/#UserId/info/edit          AccountInfoEditR GET
 /accounts/#UserId/info		     AccountInfoR     GET POST
 /accounts/#UserId/edit               AccountEditR     GET

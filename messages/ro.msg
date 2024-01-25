@@ -1,3 +1,9 @@
+ThankYou: Vă mulțumim
+ConfirmEmailPlease: Vă rugăm să confirmați adresa dvs. de e-mail făcând clic pe link-ul de mai jos
+VerifyYourEmailAddress: Verifică-ți adresa de email
+AccessDeniedAdminsOnly: Doar administratorii au acces la această pagină. Vă rugăm să vă conectați cu un cont de administrator.
+ClientSecret: Secretul clientului
+ClientId: Id-ul clientului
 Attribution: Atribuire
 None: Niciuna
 SuperuserCannotBeDeleted: Superutilizatorul nu poate fi șters
@@ -109,3 +115,5 @@ AppDescription: Cabinet medical
 AppName: MedCab
 
 Doc001: Integrare cu API-uri externe
+
+Doc002: Un cont de superutilizator este definit în momentul implementării. Superutilizatorul gestionează alți utilizatori și acordă sau revocă privilegii de administrator anumitor utilizatori.

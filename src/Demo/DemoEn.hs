@@ -14,10 +14,14 @@ import Model
     , User
       ( User, userEmail, userAuthType, userPassword, userVerkey, userVerified
       , userName, userSuperuser, userAdmin
-      ), UserPhoto (UserPhoto, userPhotoMime, userPhotoPhoto, userPhotoUser, userPhotoAttribution)
+      )
+    , UserPhoto
+      ( UserPhoto, userPhotoMime, userPhotoPhoto, userPhotoUser
+      , userPhotoAttribution
+      )
     )
 
-import Text.Hamlet (shamlet, ihamlet)
+import Text.Hamlet (shamlet)
 import Text.Shakespeare.Text (st)
 
 import Yesod.Auth.Email (saltPass)
@@ -60,7 +64,7 @@ fillDemoEn = do
                      , userVerified = True
                      , userName = Just "John Johnson"
                      , userSuperuser = False
-                     , userAdmin = True
+                     , userAdmin = False
                      }
 
     u2 <- insert user2
@@ -73,9 +77,9 @@ fillDemoEn = do
                                                             <a href="https://www.freepik.com/" target=_blank>
                                                               Freepik
                                                             |]
-                            
+
                       }
-    
+
     let specialty1 = Specialty { specialtyName = "Allergists/Immunologists"
                                , specialtyCode = Just "ALLI"
                                , specialtyDescr = Just $ Textarea [st|They treat immune system disorders such as asthma, eczema, food allergies, insect sting allergies, and some autoimmune diseases.|]
@@ -83,7 +87,7 @@ fillDemoEn = do
                                }
 
     s1 <- insert specialty1
-    
+
     let specialty2 = Specialty { specialtyName = "Anesthesiologists"
                                , specialtyCode = Just "ANES"
                                , specialtyDescr = Just $ Textarea [st|These doctors give you drugs to numb your pain or to put you under during surgery, childbirth, or other procedures. They monitor your vital signs while you’re under anesthesia.|]
@@ -91,5 +95,5 @@ fillDemoEn = do
                                }
 
     s2 <- insert specialty2
-             
+
     return ()

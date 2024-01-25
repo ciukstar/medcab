@@ -1,3 +1,9 @@
+ThankYou: Merci
+ConfirmEmailPlease: Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous
+VerifyYourEmailAddress: Vérifiez votre adresse e-mail
+AccessDeniedAdminsOnly: Seuls les administrateurs ont accès à cette page. Veuillez vous connecter avec un compte administrateur.
+ClientSecret: Secret client
+ClientId: Identifiant client
 Attribution: Attribution
 None: Aucune
 SuperuserCannotBeDeleted: Le superutilisateur ne peut pas être supprimé
@@ -109,3 +115,5 @@ AppDescription: Cabinet Médical
 AppName: MedCab
 
 Doc001: Intégration avec des API externes
+
+Doc002: Un compte superutilisateur est défini au moment du déploiement. Le superutilisateur gère les autres utilisateurs et accorde ou révoque les privilèges d'administrateur à des utilisateurs spécifiques.

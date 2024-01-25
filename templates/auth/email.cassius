@@ -1,10 +1,15 @@
 
 ##{idFormEmailLoginWarpper}
-  align-self: stretch
-  display: flex
-  flex-direction: column
-  gap: 1rem
-  ##{idFormEmailLogin}
+    align-self: stretch
     display: flex
     flex-direction: column
     gap: 1rem
+    ##{idFormEmailLogin}
+        display: flex
+        flex-direction: column
+        gap: 1rem
+
+.app-prompt-create-account
+    display: flex
+    flex-direction: column
+  

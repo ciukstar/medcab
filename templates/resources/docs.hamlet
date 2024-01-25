@@ -34,22 +34,29 @@
       <li.body-large>
         _{MsgEmail}:
         <a href="https://developers.google.com/gmail/api/guides">Gmail API
-        <p>
-          <small>
-            <code>
-              &dollar;YESOD_GOOGLE_CLIENT_ID
-              &dollar;YESOD_GOOGLE_CLIENT_SECRET
+        <dl>
+          <dt.label-large>
+            _{MsgClientId}
+          <dd.body-small>
+            <code>&dollar;YESOD_GOOGLE_CLIENT_ID
+            
+          <dt.label-large>
+            _{MsgClientSecret}
+          <dd.body-small>
+            <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
   <section>
     <h2.headline-medium>_{MsgSuperuser}
     <dl>
     
       <dt.label-large>_{MsgUsername}
-      <dd>
+      <dd.body-small>
         <code>&dollar;YESOD_SUPERUSER_USERNAME
         
       <dt.label-large>_{MsgPassword}
-      <dd>
+      <dd.body-small>
         <code>&dollar;YESOD_SUPERUSER_PASSWORD
+
+    <p.body-medium>_{MsgDoc002}
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

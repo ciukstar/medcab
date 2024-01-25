@@ -8,7 +8,6 @@ module Handler.Tokens
   , postTokensR
   , getTokensHookR
   , postTokensClearR
-  , getGoogleSecretManagerReadR
   ) where
 
 import Control.Exception.Safe (tryAny)
@@ -92,12 +91,6 @@ import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess), FieldView (fvInput)
     , FieldSettings (FieldSettings, fsLabel, fsId, fsName, fsTooltip, fsAttrs)
     )
-
-
-getGoogleSecretManagerReadR :: Handler Html
-getGoogleSecretManagerReadR = do
-    secret <- liftIO $ readFile' "/grt/gmail_refresh_token"
-    defaultLayout [whamlet|<p>Secret: #{secret}|]
 
 
 projects :: Text

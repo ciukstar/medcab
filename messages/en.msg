@@ -1,3 +1,9 @@
+ThankYou: Thank you
+ConfirmEmailPlease: Please confirm your email address by clicking on the link below
+VerifyYourEmailAddress: Verify your email address
+AccessDeniedAdminsOnly: Only administrators have access to this page. Please log in with an administrator account.
+ClientSecret: Client secret
+ClientId: Client id
 Attribution: Attribution
 None: None
 SuperuserCannotBeDeleted: Superuser cannot be deleted
@@ -109,3 +115,5 @@ AppDescription: Medical Cabinet
 AppName: MedCab
 
 Doc001: Integration with external APIs
+
+Doc002: A superuser account is defined at deployment time. The superuser manages other users and grants or revokes administrator privileges to specific users.

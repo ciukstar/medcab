@@ -80,7 +80,6 @@ import Handler.Specialties
 
 import Handler.Tokens
     ( getTokensR, postTokensR, getTokensHookR, postTokensClearR
-    , getGoogleSecretManagerReadR
     )
 
 import Handler.Users

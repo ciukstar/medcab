@@ -43,7 +43,7 @@ import Network.Mail.Mime
 import System.Directory (doesFileExist)
 import System.IO (readFile')
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
-import Text.Hamlet (hamletFile)
+import Text.Hamlet (hamletFile, ihamlet)
 import Text.Jasmine (minifym)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
@@ -204,34 +204,31 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-    isAuthorized GoogleSecretManagerReadR _ = return Authorized
-
     
-    isAuthorized (DataR (DoctorDeleR _)) _ = return Authorized
-    
-    isAuthorized (DataR (DoctorEditR _)) _ = return Authorized
-    isAuthorized (DataR DoctorCreateR) _ = return Authorized
-    isAuthorized (DataR (DoctorPhotoR _)) _ = return Authorized
-    isAuthorized (DataR (DoctorR _)) _ = return Authorized
-    isAuthorized (DataR DoctorsR) _ = return Authorized
+    isAuthorized (DataR (DoctorDeleR _)) _ = isAdmin
+    isAuthorized (DataR (DoctorEditR _)) _ = isAdmin
+    isAuthorized (DataR DoctorCreateR) _ = isAdmin
+    isAuthorized (DataR (DoctorPhotoR _)) _ = isAdmin
+    isAuthorized (DataR (DoctorR _)) _ = isAdmin
+    isAuthorized r@(DataR DoctorsR) _ = setUltDest r >> isAdmin
 
 
-    isAuthorized (DataR (SpecialtyDeleR _ _)) _ = return Authorized
-    isAuthorized (DataR (SpecialtyEditR _ _)) _ = return Authorized
-    isAuthorized (DataR (SpecialtyR _ _)) _ = return Authorized
-    isAuthorized (DataR (SpecialtyCreateR _)) _ = return Authorized
-    isAuthorized (DataR (SpecialtiesR _)) _ = return Authorized
+    isAuthorized (DataR (SpecialtyDeleR _ _)) _ = isAdmin
+    isAuthorized (DataR (SpecialtyEditR _ _)) _ = isAdmin
+    isAuthorized (DataR (SpecialtyR _ _)) _ = isAdmin
+    isAuthorized (DataR (SpecialtyCreateR _)) _ = isAdmin
+    isAuthorized r@(DataR (SpecialtiesR _)) _ = setUltDest r >> isAdmin
     
-    isAuthorized (DataR TokensClearR) _ = return Authorized
-    isAuthorized (DataR TokensHookR) _ = return Authorized
-    isAuthorized (DataR TokensR) _ = return Authorized
+    isAuthorized (DataR TokensClearR) _ = isAdmin
+    isAuthorized (DataR TokensHookR) _ = isAdmin
+    isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
         
-    isAuthorized (DataR (UserPhotoR _)) _ = return Authorized
-    isAuthorized (DataR (UserDeleR _)) _ = return Authorized
-    isAuthorized (DataR (UserEditR _)) _ = return Authorized
-    isAuthorized (DataR (UserR _)) _ = return Authorized
-    isAuthorized (DataR UsersR) _ = return Authorized
+    isAuthorized (DataR (UserPhotoR _)) _ = isAdmin
+    isAuthorized (DataR (UserDeleR _)) _ = isAdmin
+    isAuthorized (DataR (UserEditR _)) _ = isAdmin
+    isAuthorized (DataR (UserR _)) _ = isAdmin
+    isAuthorized r@(DataR UsersR) _ = setUltDest r >> isAdmin
 
 
     -- This function creates static content files in the static folder
@@ -552,6 +549,8 @@ instance YesodAuthEmail App where
     sendVerifyEmail :: A.Email -> VerKey -> VerUrl -> AuthHandler App ()
     sendVerifyEmail email _ verurl = do
 
+        renderMsg <- getMessageRender
+        
         tokenInfo <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
             where_ $ x ^. TokenApi E.==. val gmail
@@ -615,7 +614,7 @@ instance YesodAuthEmail App where
 
               let mail = (emptyMail $ Address Nothing "noreply")
                       { mailTo = [Address Nothing email]
-                      , mailHeaders = [("Subject", "Verify your email address")]
+                      , mailHeaders = [("Subject", renderMsg MsgVerifyYourEmailAddress)]
                       , mailParts = [[textPart, htmlPart]]
                       }
                     where
@@ -624,11 +623,11 @@ instance YesodAuthEmail App where
                           , partEncoding = None
                           , partDisposition = DefaultDisposition
                           , partContent = PartContent $ Data.Text.Lazy.Encoding.encodeUtf8 [stext|
-                              Please confirm your email address by clicking on the link below.
+                              _{MsgConfirmEmailPlease}.
 
                               #{verurl}
 
-                              Thank you
+                              _{MsgThankYou}.
                               |]
                           , partHeaders = []
                           }
@@ -637,10 +636,12 @@ instance YesodAuthEmail App where
                           , partEncoding = None
                           , partDisposition = DefaultDisposition
                           , partContent = PartContent $ renderHtml [shamlet|
-                              <p>Please confirm your email address by clicking on the link below.
                               <p>
-                                  <a href=#{verurl}>#{verurl}
-                              <p>Thank you
+                                #{renderMsg MsgConfirmEmailPlease}.
+                              <p>
+                                <a href=#{verurl}>#{verurl}
+                              <p>
+                                #{renderMsg MsgThankYou}.
                               |]
                           , partHeaders = []
                           }
@@ -730,6 +731,16 @@ isAuthenticatedSelf uid = do
     case muid of
         Just uid' | uid == uid' -> return Authorized
                   | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
+        Nothing -> unauthorizedI MsgLoginRequired
+
+
+isAdmin :: Handler AuthResult
+isAdmin = do
+    user <- maybeAuth
+    case user of
+        Just (Entity _ (User _ _ _ _ _ _ True _)) -> return Authorized
+        Just (Entity _ (User _ _ _ _ _ _ _ True)) -> return Authorized
+        Just (Entity _ (User _ _ _ _ _ _ _ False)) -> unauthorizedI MsgAccessDeniedAdminsOnly
         Nothing -> unauthorizedI MsgLoginRequired
 
 

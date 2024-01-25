@@ -10,7 +10,8 @@ import Foundation
     , AppMessage
       ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
       , MsgErDiagram, MsgEmail, MsgSuperuser, MsgUsername, MsgPassword
-      , MsgDoc001
+      , MsgClientId, MsgClientSecret
+      , MsgDoc001, MsgDoc002
       )
     )
 import Model (AvatarColor (AvatarColorLight))

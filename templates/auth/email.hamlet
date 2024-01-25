@@ -14,7 +14,7 @@ $forall (status,msg) <- filter ((==) statusError . fst) msgs
     <md-filled-button type=submit #btnLogin>
       _{MsgSignIn}
 
-<div>
+<div.app-prompt-create-account>
   <div.body-small>
     _{MsgDoNotHaveAnAccount}
   <md-text-button href=@{parent registerR}>
