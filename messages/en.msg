@@ -1,3 +1,4 @@
+DemoUserAccounts: Demo user accounts
 ThankYou: Thank you
 ConfirmEmailPlease: Please confirm your email address by clicking on the link below
 VerifyYourEmailAddress: Verify your email address

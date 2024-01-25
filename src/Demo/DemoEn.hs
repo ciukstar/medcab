@@ -80,20 +80,36 @@ fillDemoEn = do
 
                       }
 
-    let specialty1 = Specialty { specialtyName = "Allergists/Immunologists"
+    let specialty1 = Specialty { specialtyName = "Allergy and immunology"
                                , specialtyCode = Just "ALLI"
-                               , specialtyDescr = Just $ Textarea [st|They treat immune system disorders such as asthma, eczema, food allergies, insect sting allergies, and some autoimmune diseases.|]
+                               , specialtyDescr = Just $ Textarea [st|Immunology is a branch of medicine that covers the study of immune systems in all organisms.|]
                                , specialtyGroup = Nothing
                                }
 
     s1 <- insert specialty1
 
-    let specialty2 = Specialty { specialtyName = "Anesthesiologists"
+    let specialty2 = Specialty { specialtyName = "Anesthesiology"
                                , specialtyCode = Just "ANES"
-                               , specialtyDescr = Just $ Textarea [st|These doctors give you drugs to numb your pain or to put you under during surgery, childbirth, or other procedures. They monitor your vital signs while you’re under anesthesia.|]
+                               , specialtyDescr = Just $ Textarea [st|Anesthesiology, anaesthesiology, or anaesthesia is the medical specialty concerned with the total perioperative care of patients before, during and after surgery.|]
                                , specialtyGroup = Nothing
                                }
 
     s2 <- insert specialty2
+
+    let specialty3 = Specialty { specialtyName = "Cardiology"
+                               , specialtyCode = Just "CARD"
+                               , specialtyDescr = Just $ Textarea [st|Cardiology is a branch of medicine that deals with disorders of the heart and the cardiovascular system.|]
+                               , specialtyGroup = Nothing
+                               }
+
+    s3 <- insert specialty3
+
+    let specialty4 = Specialty { specialtyName = "Dermatology"
+                               , specialtyCode = Just "DERMA"
+                               , specialtyDescr = Just $ Textarea [st|Dermatology is the branch of medicine dealing with the skin. It is a speciality with both medical and surgical aspects. A dermatologist is a specialist medical doctor who manages diseases related to skin, hair, nails, and some cosmetic problems.|]
+                               , specialtyGroup = Nothing
+                               }
+
+    s4 <- insert specialty4
 
     return ()

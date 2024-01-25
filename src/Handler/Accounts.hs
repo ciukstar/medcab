@@ -45,6 +45,7 @@ import Foundation
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
       , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
       , MsgFemale, MsgMale, MsgOther, MsgGender, MsgBirthday, MsgNotIndicated
+      , MsgSuperuser, MsgAdministrator
       )
     )
 import Settings (widgetFile)

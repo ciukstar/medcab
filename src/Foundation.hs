@@ -25,7 +25,10 @@ import Data.Function ((&))
 import Data.Kind (Type)
 import qualified Data.Text.Encoding as TE
 import Database.Esqueleto.Experimental
-    (selectOne, from, table, val, where_, (^.), Value (unValue))
+    ( selectOne, from, table, val, where_
+    , (^.)
+    , Value (unValue), select, orderBy, desc, in_, valList
+    )
 import qualified Database.Esqueleto.Experimental as E ((==.))
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import qualified Data.Text.Lazy.Encoding
@@ -43,7 +46,8 @@ import Network.Mail.Mime
 import System.Directory (doesFileExist)
 import System.IO (readFile')
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
-import Text.Hamlet (hamletFile, ihamlet)
+import Text.Email.Validate (emailAddress, localPart)
+import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
@@ -192,7 +196,7 @@ instance Yesod App where
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
-    isAuthorized (AccountPhotoR _ _) _ = isAuthenticated
+    isAuthorized (AccountPhotoR _ _) _ = return Authorized
     isAuthorized VideoR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
 
@@ -525,16 +529,51 @@ instance YesodAuthEmail App where
                   } Nothing
               let r = (,) <$> emailR <*> passR
                   w = do
+                      
+                      accounts <- liftHandler $ runDB $ select $ do
+                          x <- from $ table @User
+                          where_ $  x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
+                          orderBy [desc (x ^. UserId)]
+                          return x
+                      
                       toWidget [cassius|
                           ##{fvId emailV}, ##{fvId passV}
                             align-self: stretch
                       |]
                       [whamlet|
-                          #{extra}
-                          ^{fvInput emailV}
-                          ^{fvInput passV}
+<span style="position:relative;align-self:flex-end">
+  <md-text-button.body-small type=button #anchorDemoAccounts trailing-icon
+    onclick="document.getElementById('menuDemoAccounts').open = !document.getElementById('menuDemoAccounts').open">
+    _{MsgDemoUserAccounts}
+    <md-icon slot=icon>arrow_drop_down
+  <md-menu #menuDemoAccounts anchor=anchorDemoAccounts>
+    $with n <- length accounts 
+      $forall (i,Entity uid (User email _ _ _ _ name super admin)) <- zip (irange 1) accounts
+        $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
+          <md-menu-item onclick="document.getElementById('#{fvId emailV}').value = '#{email}';document.getElementById('#{fvId passV}').value = '#{pass}'">
+            <md-icon slot=start>
+              <img src=@{AccountPhotoR uid AvatarColorDark} loading=lazy alt=_{MsgPhoto} style="clip-path:circle(50%)">
+            <div slot=headline>
+              #{email}
+            <div slot=supporting-text>
+              $maybe name <- name
+                #{name}
+            <div slot=supporting-text style="text-transform:uppercase">
+              $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator)]
+                $if not (null roles)
+                  $forall role <- roles
+                    _{role} #
+          $if i /= n
+            <md-divider role=separator tabindex=-1>
+      
+#{extra}
+
+^{fvInput emailV}
+^{fvInput passV}
                       |]
               return (r,w)
+            where
+                irange x = [x :: Int ..]
 
 
     afterPasswordRoute :: App -> Route App

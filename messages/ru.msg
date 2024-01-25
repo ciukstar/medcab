@@ -1,3 +1,4 @@
+DemoUserAccounts: Демо-аккаунты
 ThankYou: Спасибо
 ConfirmEmailPlease: Пожалуйста, подтвердите свой адрес электронной почты, нажав на ссылку ниже
 VerifyYourEmailAddress: Проверьте свой адрес электронной почты

@@ -16,7 +16,7 @@ import Data.Maybe (Maybe (Nothing, Just))
 import Prelude ((*))
 import Foundation
     ( Handler
-    , Route (HomeR, StaticR)
+    , Route (HomeR, StaticR, FaviconR)
     , AppMessage (MsgAppName, MsgAppDescription)
     )
 import Settings.StaticFiles (img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
@@ -58,6 +58,7 @@ getWebAppManifestR = do
 getSitemapR :: Handler TypedContent
 getSitemapR = sitemap $ do
     yield $ SitemapUrl HomeR Nothing (Just Monthly) (Just 1.0)
+    yield $ SitemapUrl FaviconR Nothing (Just Monthly) (Just 0.5)
 
 
 getRobotsR :: Handler TypedContent

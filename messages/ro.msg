@@ -1,3 +1,4 @@
+DemoUserAccounts: Conturi de utilizator Demo
 ThankYou: Vă mulțumim
 ConfirmEmailPlease: Vă rugăm să confirmați adresa dvs. de e-mail făcând clic pe link-ul de mai jos
 VerifyYourEmailAddress: Verifică-ți adresa de email

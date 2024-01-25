@@ -47,11 +47,11 @@ import Foundation
     )
 import Model
     ( AvatarColor (AvatarColorLight)
-    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorSpecialty)
+    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail)
     , DoctorId, DoctorPhoto (DoctorPhoto)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
-      , SpecialtyName, DoctorSpecialty, SpecialtyId
+      , SpecialtyName, SpecialtyId
       )
     , statusSuccess, Specialty (specialtyName), statusError
     )
@@ -88,11 +88,10 @@ postDoctorDeleR did = do
           redirect $ DataR DoctorsR
       _otherwise -> do
 
-          doctor <- (second unValue <$>) <$> runDB ( selectOne $ do
-              x :& s <- from $ table @Doctor
-                  `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. DoctorSpecialty ==. s ^. SpecialtyId)
+          doctor <- runDB $ selectOne $ do
+              x <- from $ table @Doctor
               where_ $ x ^. DoctorId ==. val did
-              return (x, s ^. SpecialtyName) )
+              return x
               
           msgs <- getMessages              
           defaultLayout $ do
@@ -142,11 +141,10 @@ postDoctorR did = do
 getDoctorR :: DoctorId -> Handler Html
 getDoctorR did = do
     
-    doctor <- (second unValue <$>) <$> runDB ( selectOne $ do
-        x :& s <- from $ table @Doctor
-            `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. DoctorSpecialty ==. s ^. SpecialtyId)
+    doctor <- runDB $ selectOne $ do
+        x <- from $ table @Doctor
         where_ $ x ^. DoctorId ==. val did
-        return (x, s ^. SpecialtyName) )
+        return x
 
     (fw,et) <- generateFormPost formDelete
     msgs <- getMessages
@@ -207,20 +205,14 @@ formDoctor doctor extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgEmailAddress)]
         } (doctorEmail . entityVal <$> doctor)
-        
-    (specR,specV) <- mreq (md3selectField (optionsPairs specs)) FieldSettings
-        { fsLabel = SomeMessage MsgSpecialization
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label",rndr MsgSpecialization)]
-        } (doctorSpecialty . entityVal <$> doctor)
-        
+                
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("style","display:none")]
         } Nothing
 
-    let r = (,) <$> (Doctor <$> nameR <*> mobileR <*> emailR <*> specR) <*> photoR
+    let r = (,) <$> (Doctor <$> nameR <*> mobileR <*> emailR) <*> photoR
 
     idLabelPhoto <- newIdent
     idFigurePhoto <- newIdent

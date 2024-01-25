@@ -34,7 +34,7 @@
       <figcaption.body-large>
         _{MsgNoDoctorsYet}
   $else
-    $forall Entity did (Doctor name _ email _) <- doctors
+    $forall Entity did (Doctor name _ email) <- doctors
       <md-list>
         <md-list-item interactive href=@{DataR $ DoctorR did}>
           <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 style="clip-path:circle(50%)">

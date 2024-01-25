@@ -33,7 +33,7 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
       
-  $maybe (Entity did (Doctor name mobile email _), spec) <- doctor
+  $maybe Entity did (Doctor name mobile email) <- doctor
     <figure>
       <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
@@ -49,7 +49,7 @@
       <dd.body-medium>#{email}
         
       <dt.label-large scope=row>_{MsgSpecialization}
-      <dd.body-medium>#{spec}
+      <dd.body-medium>???
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>
