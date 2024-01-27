@@ -13,4 +13,4 @@
   <p.body-medium>_{MsgInvalidUrlOrRemoved}.
   <md-filled-button type=button href=@{HomeR} has-icon=true>
     <md-icon slot=icon>home
-    _{MsgHome}
+    _{MsgBackToHomepage}

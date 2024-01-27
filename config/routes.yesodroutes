@@ -20,7 +20,13 @@
 /resources/docs DocsR GET
 
 /data DataR:
-    
+
+    /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/dele SpecialistDeleR        POST
+    /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/edit SpecialistEditR        GET
+    /spacialists/#DoctorId/#SpecialtyId/#SpecialistId 	   SpecialistR            GET POST
+    /doctors/#DoctorId/specialties/form/create        	   DoctorSpecialtyCreateR GET
+    /doctors/#DoctorId/specialties                    	   DoctorSpecialtiesR     GET POST
+
     /doctors/#DoctorId/photo DoctorPhotoR  GET
     /doctors/form/create     DoctorCreateR GET
     /doctors/#DoctorId/dele  DoctorDeleR   POST

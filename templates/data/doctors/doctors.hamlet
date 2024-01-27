@@ -34,13 +34,16 @@
       <figcaption.body-large>
         _{MsgNoDoctorsYet}
   $else
-    $forall Entity did (Doctor name _ email) <- doctors
-      <md-list>
+    <md-list>
+      $forall (Entity did (Doctor name _ email),attrib) <- doctors
         <md-list-item interactive href=@{DataR $ DoctorR did}>
           <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 style="clip-path:circle(50%)">
           <div slot=headline>#{name}
           <div slot=supporting-text>#{email}
           <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <small.app-attribution.body-small>
+            #{attrib}
         <md-divider>
 
   <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">

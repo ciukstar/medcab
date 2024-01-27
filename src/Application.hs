@@ -71,6 +71,8 @@ import Handler.Resources (getDocsR)
 import Handler.Doctors
     ( getDoctorsR, getDoctorCreateR, getDoctorPhotoR, postDoctorsR
     , getDoctorR, postDoctorDeleR, getDoctorEditR, postDoctorR
+    , getDoctorSpecialtiesR, getDoctorSpecialtyCreateR, postDoctorSpecialtiesR
+    , getSpecialistR, getSpecialistEditR, postSpecialistDeleR, postSpecialistR
     )
 
 import Handler.Specialties

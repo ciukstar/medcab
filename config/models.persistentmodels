@@ -5,12 +5,15 @@
 Specialist
     doctor DoctorId OnDeleteCascade
     specialty SpecialtyId OnDeleteCascade
+    title Text
     certDate Day
+    UniqueSpecialist doctor specialty title
 
 DoctorPhoto
     doctor DoctorId OnDeleteCascade
     mime Text
     photo ByteString
+    attribution Html Maybe
     UniqueDoctorPhoto doctor
 
 Doctor

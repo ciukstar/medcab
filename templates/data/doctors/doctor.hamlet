@@ -32,27 +32,40 @@
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
-      
-  $maybe Entity did (Doctor name mobile email) <- doctor
+
+  $maybe (Entity did (Doctor name mobile email),attrib) <- doctor
+
     <figure>
       <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
-        _{MsgPhoto}
-    <dl>        
-      <dt.label-large scope=row>_{MsgFullName}
-      <dd.body-medium>#{name}
-      
-      <dt.label-large scope=row>_{MsgMobile}
-      <dd.body-medium>#{mobile}
-      
-      <dt.label-large scope=row>_{MsgEmailAddress}
-      <dd.body-medium>#{email}
-        
-      <dt.label-large scope=row>_{MsgSpecialization}
-      <dd.body-medium>???
+        $maybe attrib <- attrib
+          <small.app-attribution.body-small>
+            #{attrib}
+        $nothing
+          _{MsgPhoto}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+    <md-tabs aria-label=_{MsgTabs}
+      onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ DoctorR did}' : '@{DataR $ DoctorSpecialtiesR did}'">
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+        _{MsgDetails}
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
+        _{MsgSpecializations}
+
+    <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
+      <dl>        
+        <dt.label-large scope=row>_{MsgFullName}
+        <dd.body-medium>#{name}
+
+        <dt.label-large scope=row>_{MsgMobile}
+        <dd.body-medium>#{mobile}
+
+        <dt.label-large scope=row>_{MsgEmailAddress}
+        <dd.body-medium>#{email}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
+
+  <div #panelSpecialties role=tabpanel aria-labelledby=tabpecialties hidden>

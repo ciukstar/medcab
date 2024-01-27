@@ -8,6 +8,17 @@
       _{MsgPermissionDenied}
 
 <main>
-  <h1.headline-large>_{MsgPermissionDenied}
-  <p.body-medium>#{msg}
-  <md-filled-button type=button href=@{AuthR LoginR}>_{MsgSignIn}
+
+  <h1.headline-large>
+    _{MsgPermissionDenied}.
+
+  <p.body-medium>
+    #{msg}.
+  
+  <md-filled-button type=button href=@{AuthR LoginR}>
+    _{MsgSignIn}
+
+  <div.body-large>_{MsgOr}
+
+  <md-text-button type=button href=@{HomeR}>
+    _{MsgBackToHomepage}

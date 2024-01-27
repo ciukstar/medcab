@@ -26,7 +26,37 @@
   <section>
     <h2.headline-medium>App MedCab
     <p.body-large>
-      This application is under development...
+      <a href=@{HomeR}>This application #
+      is under development...
+
+  <section>
+    <h2.headline-medium>_{MsgBasicEntities}
+    
+    <section>
+      <h3.headline-small>_{MsgUser}
+      ...
+    
+    <section>
+      <h3.headline-small>_{MsgDoctor}
+      ...
+    
+    <section>
+      <h3.headline-small>_{MsgSpecialty}
+      ...
+    
+  <section>
+    <h2.headline-medium>_{MsgSuperuser}
+    <dl>
+    
+      <dt.label-large>_{MsgUsername}
+      <dd.body-small>
+        <code>&dollar;YESOD_SUPERUSER_USERNAME
+        
+      <dt.label-large>_{MsgPassword}
+      <dd.body-small>
+        <code>&dollar;YESOD_SUPERUSER_PASSWORD
+
+    <p.body-medium>_{MsgDoc002}
 
   <section>
     <h2.headline-medium>_{MsgDoc001}
@@ -44,19 +74,6 @@
             _{MsgClientSecret}
           <dd.body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
-  <section>
-    <h2.headline-medium>_{MsgSuperuser}
-    <dl>
-    
-      <dt.label-large>_{MsgUsername}
-      <dd.body-small>
-        <code>&dollar;YESOD_SUPERUSER_USERNAME
-        
-      <dt.label-large>_{MsgPassword}
-      <dd.body-small>
-        <code>&dollar;YESOD_SUPERUSER_PASSWORD
-
-    <p.body-medium>_{MsgDoc002}
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

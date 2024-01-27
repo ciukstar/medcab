@@ -6,11 +6,12 @@ import Database.Persist (Entity (Entity))
 import Handler.Menu (menu)
 import Foundation
     ( Handler
-    , Route (AuthR, AccountR, AccountPhotoR, StaticR)
+    , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR)
     , AppMessage
       ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
       , MsgErDiagram, MsgEmail, MsgSuperuser, MsgUsername, MsgPassword
-      , MsgClientId, MsgClientSecret
+      , MsgClientId, MsgClientSecret, MsgBasicEntities, MsgUser, MsgDoctor
+      , MsgSpecialty
       , MsgDoc001, MsgDoc002
       )
     )

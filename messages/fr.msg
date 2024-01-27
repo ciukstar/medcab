@@ -1,3 +1,8 @@
+BasicEntities: Entités de base
+CertificateDate: Date du certificat
+Specializations: Spécialisations
+SpecialtyTitle: Titre de spécialité
+BackToHomepage: Retournez à la page d'accueil
 DemoUserAccounts: Comptes d'utilisateurs démo
 ThankYou: Merci
 ConfirmEmailPlease: Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous

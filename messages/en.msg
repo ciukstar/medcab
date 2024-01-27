@@ -1,3 +1,8 @@
+BasicEntities: Basic entities
+CertificateDate: Certificate date
+Specializations: Specializations
+SpecialtyTitle: Specialty title
+BackToHomepage: Go back to homepage
 DemoUserAccounts: Demo user accounts
 ThankYou: Thank you
 ConfirmEmailPlease: Please confirm your email address by clicking on the link below

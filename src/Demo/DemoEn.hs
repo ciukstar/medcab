@@ -18,6 +18,14 @@ import Model
     , UserPhoto
       ( UserPhoto, userPhotoMime, userPhotoPhoto, userPhotoUser
       , userPhotoAttribution
+      ), Doctor (doctorName, Doctor, doctorMobile, doctorEmail)
+    , DoctorPhoto
+      ( DoctorPhoto, doctorPhotoDoctor, doctorPhotoMime, doctorPhotoPhoto
+      , doctorPhotoAttribution
+      )
+    , Specialist
+      ( Specialist, specialistDoctor, specialistSpecialty, specialistCertDate
+      , specialistTitle
       )
     )
 
@@ -28,10 +36,15 @@ import Yesod.Auth.Email (saltPass)
 import Yesod.Form.Fields (Textarea(Textarea))
 import Yesod.Persist(PersistStoreWrite (insert, insert_))
 import Data.FileEmbed (embedFile)
+import Data.Time.Calendar (addGregorianYearsClip)
+import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 
 fillDemoEn :: MonadIO m => ReaderT SqlBackend m ()
 fillDemoEn = do
+
+    today <- liftIO $ utctDay <$> getCurrentTime
+
 
     pass1 <- liftIO $ saltPass "marylopez"
     let user1 = User { userEmail = "marylopez@gmail.com"
@@ -111,5 +124,94 @@ fillDemoEn = do
                                }
 
     s4 <- insert specialty4
+
+    let doctor1 = Doctor { doctorName = "Dr. Julian Maulsby"
+                         , doctorMobile = "+18056594960"
+                         , doctorEmail = "jmaulsby@gmail.com"
+                         }
+    d1 <- insert doctor1
+
+    insert_ DoctorPhoto { doctorPhotoDoctor = d1
+                        , doctorPhotoMime = "image/avif"
+                        , doctorPhotoPhoto = $(embedFile "demo/doctor-smiling-offering-hand_23-2148075683.avif")
+                        , doctorPhotoAttribution = Just [shamlet|
+                                                                Designed by #
+                                                                <a href="https://www.freepik.com/" target=_blank>
+                                                                  Freepik
+                                                                |]
+                        }
+    insert_ Specialist { specialistDoctor = d1
+                       , specialistSpecialty = s1
+                       , specialistTitle = "Allergists"
+                       , specialistCertDate = addGregorianYearsClip (-11) today
+                       }
+    insert_ Specialist { specialistDoctor = d1
+                       , specialistSpecialty = s1
+                       , specialistTitle = "Immunologist"
+                       , specialistCertDate = addGregorianYearsClip (-10) today
+                       }
+
+    let doctor2 = Doctor { doctorName = "Dr. Valentina Schoen"
+                         , doctorMobile = "+12258813837"
+                         , doctorEmail = "vschoen@gmail.com"
+                         }
+    d2 <- insert doctor2
+
+    insert_ DoctorPhoto { doctorPhotoDoctor = d2
+                        , doctorPhotoMime = "image/avif"
+                        , doctorPhotoPhoto = $(embedFile "demo/doctor-office-looking-camera_23-2147796576.avif")
+                        , doctorPhotoAttribution = Just [shamlet|
+                                                                Designed by #
+                                                                <a href="https://www.freepik.com/" target=_blank>
+                                                                  Freepik
+                                                                |]
+                        }
+    insert_ Specialist { specialistDoctor = d2
+                       , specialistSpecialty = s2
+                       , specialistTitle = "Anesthesiologist"
+                       , specialistCertDate = addGregorianYearsClip (-9) today
+                       }
+
+    let doctor3 = Doctor { doctorName = "Dr. Steve Stefano"
+                         , doctorMobile = "+13029222541"
+                         , doctorEmail = "sstefano@gmail.com"
+                         }
+    d3 <- insert doctor3
+
+    insert_ DoctorPhoto { doctorPhotoDoctor = d3
+                        , doctorPhotoMime = "image/avif"
+                        , doctorPhotoPhoto = $(embedFile "demo/cheerful-medic-standing-with-arms-crossed_23-2147767252.avif")
+                        , doctorPhotoAttribution = Just [shamlet|
+                                                                Designed by #
+                                                                <a href="https://www.freepik.com/" target=_blank>
+                                                                  Freepik
+                                                                |]
+                        }
+    insert_ Specialist { specialistDoctor = d3
+                       , specialistSpecialty = s3
+                       , specialistTitle = "Cardiologist"
+                       , specialistCertDate = addGregorianYearsClip (-5) today
+                       }
+
+    let doctor4 = Doctor { doctorName = "Dr. Jocelyn Frascone"
+                         , doctorMobile = "+17743753179"
+                         , doctorEmail = "jfrascone@gmail.com"
+                         }
+    d4 <- insert doctor4
+
+    insert_ DoctorPhoto { doctorPhotoDoctor = d4
+                        , doctorPhotoMime = "image/avif"
+                        , doctorPhotoPhoto = $(embedFile "demo/cheerful-pretty-doctor_23-2147648677.avif")
+                        , doctorPhotoAttribution = Just [shamlet|
+                                                                Designed by #
+                                                                <a href="https://www.freepik.com/" target=_blank>
+                                                                  Freepik
+                                                                |]
+                        }
+    insert_ Specialist { specialistDoctor = d4
+                       , specialistSpecialty = s4
+                       , specialistTitle = "Dermatologist"
+                       , specialistCertDate = addGregorianYearsClip (-5) today
+                       }
 
     return ()

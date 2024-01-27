@@ -1,0 +1,17 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DataR $ SpecialistR did sid xid} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgSpecialty}
+      
+<main>
+
+  <form method=post action=@{DataR $ SpecialistR did sid xid} enctype=#{et}>
+    ^{fw}
+    <div.app-form-actions>
+      <md-text-button type=button href=@{DataR $ SpecialistR did sid xid}>
+        _{MsgCancel}
+      <md-filled-button type=submit>
+        _{MsgSave}

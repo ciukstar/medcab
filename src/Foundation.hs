@@ -208,7 +208,13 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
+
     
+    isAuthorized (DataR (SpecialistDeleR {})) _ = isAdmin
+    isAuthorized (DataR (SpecialistEditR {})) _ = isAdmin
+    isAuthorized (DataR (SpecialistR {})) _ = isAdmin
+    isAuthorized (DataR (DoctorSpecialtyCreateR _)) _ = isAdmin
+    isAuthorized (DataR (DoctorSpecialtiesR _)) _ = isAdmin
     isAuthorized (DataR (DoctorDeleR _)) _ = isAdmin
     isAuthorized (DataR (DoctorEditR _)) _ = isAdmin
     isAuthorized (DataR DoctorCreateR) _ = isAdmin
