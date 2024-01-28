@@ -1,5 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Material3
   ( md3emailField
@@ -26,8 +27,9 @@ import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
+    , FormMessage
     )
-import Yesod.Form.Types (Field (fieldView), FormMessage)
+import Yesod.Form.Types (Field (fieldView))
 
 
 md3switchField :: Monad m => Field m Bool
@@ -87,8 +89,8 @@ md3emailField = emailField { fieldView = \theId name attrs eval isReq -> [whamle
 
 
 md3textField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
-md3textField = textField { fieldView = \theId name attrs eval isReq -> [whamlet|
-<md-filled-text-field ##{theId} type=text name=#{name} :isReq:required=true value=#{either id id eval} *{attrs}>
+md3textField = textField { fieldView = \theId name attrs ex req -> [whamlet|
+<md-filled-text-field ##{theId} type=text name=#{name} :req:required value=#{either id id ex} *{attrs}>
 |] }
 
 

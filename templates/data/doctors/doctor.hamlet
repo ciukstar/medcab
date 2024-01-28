@@ -2,7 +2,7 @@
   <div #headerStart>
     <md-icon-button href=@{DataR DoctorsR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
-          
+
     <h1.title-large>
       _{MsgDoctor}
 
@@ -25,8 +25,8 @@
       ^{fw}
       <md-filled-button type=submit>
         _{MsgDele}
-    
-      
+
+
 <main>
 
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
@@ -37,22 +37,21 @@
 
     <figure>
       <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-      <figcaption.body-medium>
+      <figcaption.body-small>
         $maybe attrib <- attrib
-          <small.app-attribution.body-small>
-            #{attrib}
+          #{attrib}
         $nothing
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}
-      onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ DoctorR did}' : '@{DataR $ DoctorSpecialtiesR did}'">
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ DoctorR did}' : '@{DataR $ DoctorSpecialtiesR did}'">
       <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
         _{MsgDetails}
       <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
         _{MsgSpecializations}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
-      <dl>        
+      <dl>
         <dt.label-large scope=row>_{MsgFullName}
         <dd.body-medium>#{name}
 

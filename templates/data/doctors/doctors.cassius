@@ -20,9 +20,11 @@ main
     align-self: stretch
     padding: 1rem
   .app-attribution
+    position: relative
+    margin: 0 0 0.5rem 0.5rem
+    padding: 0    
     font-size: 0.5rem
     line-height: 0
-    transform: translate( 0.5rem, -0.5rem )
   ##{idFabAdd}
     position: fixed
     right: 1rem

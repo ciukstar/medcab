@@ -12,10 +12,9 @@
 
   <figure>
     <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-medium>
+    <figcaption.body-small>
       $maybe attrib <- attrib
-        <small.app-attribution.body-small>
-          #{attrib}
+        #{attrib}
       $nothing
         _{MsgPhoto}
   

@@ -14,6 +14,7 @@ module Handler.Specialties
   ) where
 
 import Control.Monad (when, unless)
+import Data.Text (Text)
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
     , (^.), (==.)
@@ -42,8 +43,8 @@ import Foundation
       , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
-      , MsgNoSubspecialtiesYet
-      )
+      , MsgNoSubspecialtiesYet, MsgAlreadyExists
+      ), Form
     )
 import Settings (widgetFile)
 import Text.Hamlet (Html)
@@ -54,13 +55,15 @@ import Yesod.Core
     )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist (runDB), PersistStoreWrite (insert_))
-import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost)
+import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost, checkM)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
-    , FieldView (fvInput)
+    , FieldView (fvInput, fvErrors, fvId), Field (Field)
     )
 import qualified Data.List.Safe as LS
+import Data.Maybe (fromMaybe, isJust)
+import Text.Julius (RawJS(rawJS))
 
 
 postSpecialtyDeleR :: SpecialtyId -> Specialties -> Handler Html
@@ -131,15 +134,16 @@ getSpecialtyCreateR ps@(Specialties sids) = do
         $(widgetFile "data/specialties/create")
 
 
-formSpecialty :: Maybe SpecialtyId -> Maybe (Entity Specialty)
-              -> Html -> MForm Handler (FormResult Specialty, Widget)
+formSpecialty :: Maybe SpecialtyId -> Maybe (Entity Specialty) -> Form Specialty
 formSpecialty group specialty extra = do
     rndr <- getMessageRender
-    (nameR,nameV) <- mreq md3textField FieldSettings
+    
+    (nameR,nameV) <- mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgName)]
         } (specialtyName . entityVal <$> specialty)
+        
     (codeR,codeV) <- mopt md3textField FieldSettings
         { fsLabel = SomeMessage MsgCode
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -154,6 +158,22 @@ formSpecialty group specialty extra = do
     let r = Specialty <$> nameR <*> codeR <*> descrR <*> pure group
     let w = $(widgetFile "data/specialties/form")
     return (r,w)
+  where
+      uniqueNameField :: Field Handler Text
+      uniqueNameField = checkM uniqueName md3textField
+
+      uniqueName :: Text -> Handler (Either AppMessage Text)
+      uniqueName name = do
+          mx <- runDB $ selectOne $ do
+              x <- from $ table @Specialty
+              where_ $ x ^. SpecialtyName ==. val name
+              return x
+          return $ case mx of
+            Nothing -> Right name
+            Just (Entity sid _) -> case specialty of
+              Nothing -> Left MsgAlreadyExists
+              Just (Entity sid' _) | sid == sid' -> Right name
+                                   | otherwise -> Left MsgAlreadyExists
 
 
 getSpecialtyR :: SpecialtyId -> Specialties -> Handler Html

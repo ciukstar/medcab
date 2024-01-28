@@ -1,7 +1,8 @@
+AlreadyExists: Уже существует
 BasicEntities: Основные сущности
 CertificateDate: Дата сертификата
 Specializations: Специализации
-SpecialtyTitle: Название специальности
+SpecialtyTitle: Должность
 BackToHomepage: Вернуться на домашнюю страницу
 DemoUserAccounts: Демо-аккаунты
 ThankYou: Спасибо

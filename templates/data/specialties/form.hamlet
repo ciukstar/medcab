@@ -1,5 +1,12 @@
 
 #{extra}
-^{fvInput nameV}
+
+<div.app-form-field :isJust (fvErrors nameV):.app-form-field-error
+  :isJust (fvErrors nameV):data-error-text=#{fromMaybe "" (fvErrors nameV)}>
+  ^{fvInput nameV}
+  $maybe errs <- fvErrors nameV
+    <div.app-error-line.body-small.on-error>
+      ^{errs}
+
 ^{fvInput codeV}
 ^{fvInput descrV}

@@ -1,0 +1,9 @@
+
+Array.from(
+  document.querySelectorAll('.app-form-field-error')
+).map(x => [x.querySelector('md-filled-text-field'),x.dataset.error-text]).map(function (x) {
+  x[0].setAttribute("error", "");
+  x[0].setAttribute("error-text", x[1]);
+  x[0].reportValidity();
+});
+

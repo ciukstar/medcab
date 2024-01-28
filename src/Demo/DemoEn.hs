@@ -47,7 +47,7 @@ fillDemoEn = do
 
 
     pass1 <- liftIO $ saltPass "marylopez"
-    let user1 = User { userEmail = "marylopez@gmail.com"
+    let user1 = User { userEmail = "marylopez@xmail.edu"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass1
                      , userVerkey = Just "xxxYYYzzz"
@@ -70,7 +70,7 @@ fillDemoEn = do
                       }
 
     pass2 <- liftIO $ saltPass "jjohnson"
-    let user2 = User { userEmail = "jjohnson@gmail.com"
+    let user2 = User { userEmail = "jjohnson@xmail.edu"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass2
                      , userVerkey = Just "xxxYYYzzz"
@@ -127,7 +127,7 @@ fillDemoEn = do
 
     let doctor1 = Doctor { doctorName = "Dr. Julian Maulsby"
                          , doctorMobile = "+18056594960"
-                         , doctorEmail = "jmaulsby@gmail.com"
+                         , doctorEmail = "jmaulsby@xmail.edu"
                          }
     d1 <- insert doctor1
 
@@ -153,7 +153,7 @@ fillDemoEn = do
 
     let doctor2 = Doctor { doctorName = "Dr. Valentina Schoen"
                          , doctorMobile = "+12258813837"
-                         , doctorEmail = "vschoen@gmail.com"
+                         , doctorEmail = "vschoen@xmail.edu"
                          }
     d2 <- insert doctor2
 
@@ -174,7 +174,7 @@ fillDemoEn = do
 
     let doctor3 = Doctor { doctorName = "Dr. Steve Stefano"
                          , doctorMobile = "+13029222541"
-                         , doctorEmail = "sstefano@gmail.com"
+                         , doctorEmail = "sstefano@xmail.edu"
                          }
     d3 <- insert doctor3
 
@@ -195,7 +195,7 @@ fillDemoEn = do
 
     let doctor4 = Doctor { doctorName = "Dr. Jocelyn Frascone"
                          , doctorMobile = "+17743753179"
-                         , doctorEmail = "jfrascone@gmail.com"
+                         , doctorEmail = "jfrascone@xmail.edu"
                          }
     d4 <- insert doctor4
 

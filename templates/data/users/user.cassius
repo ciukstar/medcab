@@ -26,6 +26,8 @@ main
     text-align: center
   dl
     margin: 0 2rem
+    dt + dd
+      margin-bottom: 1rem
 
 aside.app-snackbar
   box-sizing: border-box

@@ -1,7 +1,8 @@
+AlreadyExists: Existe déjà
 BasicEntities: Entités de base
 CertificateDate: Date du certificat
 Specializations: Spécialisations
-SpecialtyTitle: Titre de spécialité
+SpecialtyTitle: Titre
 BackToHomepage: Retournez à la page d'accueil
 DemoUserAccounts: Comptes d'utilisateurs démo
 ThankYou: Merci

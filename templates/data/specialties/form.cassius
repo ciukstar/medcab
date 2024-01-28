@@ -6,6 +6,9 @@ form
   justify-content: center
   align-items: center
   gap: 1rem
+  .app-form-field
+    display: flex
+    flex-direction: column
   > *
     align-self: stretch
   .app-form-actions

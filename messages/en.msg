@@ -1,7 +1,8 @@
+AlreadyExists: Already exists
 BasicEntities: Basic entities
 CertificateDate: Certificate date
 Specializations: Specializations
-SpecialtyTitle: Specialty title
+SpecialtyTitle: Title
 BackToHomepage: Go back to homepage
 DemoUserAccounts: Demo user accounts
 ThankYou: Thank you

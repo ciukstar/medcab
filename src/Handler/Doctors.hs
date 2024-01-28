@@ -144,7 +144,7 @@ getSpecialistR did sid xid = do
         x <- from $ table @DoctorPhoto
         where_ $ x ^. DoctorPhotoDoctor ==. val did
         return (x ^. DoctorPhotoAttribution) )
-    
+
     specialst <- runDB $ selectOne $ do
         x :& d :& s <- from $ table @Specialist
             `innerJoin` table @Doctor `on` (\(x :& d) -> x ^. SpecialistDoctor ==. d ^. DoctorId)
@@ -179,17 +179,16 @@ getDoctorSpecialtyCreateR did = do
     defaultLayout $ do
         setTitleI MsgSpecialty
         $(widgetFile "data/doctors/specialties/create")
-        
 
-formSpecialty :: DoctorId -> Maybe (Entity Specialist)
-              -> Form Specialist
+
+formSpecialty :: DoctorId -> Maybe (Entity Specialist) -> Form Specialist
 formSpecialty did specialist extra = do
     rndr <- getMessageRender
     specs <- liftHandler $ ((\s -> (specialtyName . entityVal $ s,entityKey s)) <$>) <$> runDB ( select $ do
         x <- from $ table @Specialty
         orderBy [asc (x ^. SpecialtyName)]
         return x )
-        
+
     (specR,specV) <- mreq (md3selectField (optionsPairs specs)) FieldSettings
         { fsLabel = SomeMessage MsgSpecialty
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -215,18 +214,18 @@ formSpecialty did specialist extra = do
 
 getDoctorSpecialtiesR :: DoctorId -> Handler Html
 getDoctorSpecialtiesR did = do
-    
+
     attrib <- (unValue =<<) <$> runDB ( selectOne $ do
         x <- from $ table @DoctorPhoto
         where_ $ x ^. DoctorPhotoDoctor ==. val did
         return (x ^. DoctorPhotoAttribution) )
-    
+
     specialties <- runDB $ select $ do
         x :& s <- from $ table @Specialist
             `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. SpecialistSpecialty ==. s ^. SpecialtyId)
         where_ $ x ^. SpecialistDoctor ==. val did
         return (x,s)
-    
+
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSpecialties
@@ -251,8 +250,8 @@ postDoctorDeleR did = do
                   `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
               where_ $ x ^. DoctorId ==. val did
               return (x,h ?. DoctorPhotoAttribution) )
-              
-          msgs <- getMessages              
+
+          msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgDoctor
               idPanelDetails <- newIdent
@@ -270,12 +269,12 @@ getDoctorEditR did = do
         x <- from $ table @Doctor
         where_ $ x ^. DoctorId ==. val did
         return x
-        
+
     (fw,et) <- generateFormPost $ formDoctor doctor
 
     defaultLayout $ do
           setTitleI MsgDoctor
-          $(widgetFile "data/doctors/edit")   
+          $(widgetFile "data/doctors/edit")
 
 
 postDoctorR :: DoctorId -> Handler Html
@@ -305,7 +304,7 @@ postDoctorR did = do
 
 getDoctorR :: DoctorId -> Handler Html
 getDoctorR did = do
-    
+
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -326,7 +325,7 @@ postDoctorsR = do
     case fr of
       FormSuccess (r,mfi,attrib) -> do
           did <- runDB $ insert r
-          
+
           case mfi of
             Just fi -> do
                 bs <- fileSourceByteString fi
@@ -338,7 +337,7 @@ postDoctorsR = do
             Nothing -> runDB $ update $ \x -> do
                 set x [DoctorPhotoAttribution =. val attrib]
                 where_ $ x ^. DoctorPhotoDoctor ==. val did
-                
+
           addMessageI statusSuccess MsgRecordCreated
           redirect $ DataR DoctorsR
       _otherwise -> defaultLayout $ do
@@ -358,7 +357,7 @@ formDoctor :: Maybe (Entity Doctor)
            -> Html -> MForm Handler (FormResult (Doctor,Maybe FileInfo, Maybe Html), Widget)
 formDoctor doctor extra = do
     rndr <- getMessageRender
-    
+
     (nameR,nameV) <- mreq md3textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -374,7 +373,7 @@ formDoctor doctor extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgEmailAddress)]
         } (doctorEmail . entityVal <$> doctor)
-                
+
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -387,7 +386,7 @@ formDoctor doctor extra = do
         where_ $ x ^. DoctorPhotoDoctor ==. val did
         return $ x ^. DoctorPhotoAttribution
       Nothing -> return Nothing
-        
+
     (attribR,attribV) <- mopt md3htmlField FieldSettings
         { fsLabel = SomeMessage MsgAttribution
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -400,7 +399,7 @@ formDoctor doctor extra = do
     idFigurePhoto <- newIdent
     idImgPhoto <- newIdent
     let w = $(widgetFile "data/doctors/form")
-    
+
     return (r,w)
 
 

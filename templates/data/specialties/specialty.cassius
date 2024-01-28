@@ -26,6 +26,9 @@ main
     .error
       align-self: stretch
       padding: 1rem
+    dl
+      dt + dd
+        margin-bottom: 1rem
 
     aside.app-snackbar
       box-sizing: border-box

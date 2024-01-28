@@ -2,7 +2,7 @@
   <div #headerStart>
     <md-icon-button href=@{DataR $ DoctorSpecialtiesR did} aria-label=_{MsgBack}>
       <md-icon>arrow_back
-          
+
     <h1.title-large>
       _{MsgSpecialization}
 
@@ -25,8 +25,8 @@
       ^{fw}
       <md-filled-button type=submit>
         _{MsgDele}
-    
-      
+
+
 <main>
 
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
@@ -35,17 +35,17 @@
 
   <figure>
     <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-medium>
+    <figcaption.body-small>
       $maybe attrib <- attrib
         #{attrib}
       $nothing
         _{MsgPhoto}
 
   $maybe (Entity _ (Specialist _ _ title cert),Entity _ (Doctor dname _ _),Entity _ (Specialty sname _ _ _)) <- specialst
-    <dl>        
+    <dl>
       <dt.label-large scope=row>_{MsgSpecialtyTitle}
       <dd.body-medium>#{title}
-      
+
       <dt.label-large scope=row>_{MsgCertificateDate}
       <dd.body-medium>#{show cert}
 
