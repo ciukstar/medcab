@@ -1,3 +1,4 @@
+SearchEngineOptimization: Search Engine Optimization
 AlreadyExists: Already exists
 BasicEntities: Basic entities
 CertificateDate: Certificate date
@@ -118,8 +119,9 @@ SignUp: Sign up
 Login: Login
 MainMenu: Main menu
 Welcome: Welcome
-AppDescription: Medical Cabinet 
 AppName: MedCab
+MetaKeywords: healthcare, progressive, web, app, pwa
+MetaDescription: Healthcare Progressive Web App
 
 Doc001: Integration with external APIs
 

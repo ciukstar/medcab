@@ -64,6 +64,7 @@ data AppSettings = AppSettings
     -- ^ Indicate if auth dummy login should be enabled.
 
     , appIdleTimeout :: NominalDiffTime
+    , appGoogleSiteVerification :: Maybe Text
     , appGoogleClientId :: Text
     , appGoogleClientSecret :: Text
     , appSuperuserUsername :: Text
@@ -98,6 +99,7 @@ instance FromJSON AppSettings where
 
         appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
         appIdleTimeout            <- o .:  "idle-timeout"
+        appGoogleSiteVerification <- o .: "google-site-verification"
         appGoogleClientId         <- o .:  "google-client-id"
         appGoogleClientSecret     <- o .:  "google-client-secret"
         appSuperuserUsername      <- o .:  "superuser-username"

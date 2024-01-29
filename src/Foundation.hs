@@ -16,6 +16,7 @@ module Foundation where
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
+
 import Import.NoFoundation
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import qualified Data.CaseInsensitive as CI
@@ -23,7 +24,10 @@ import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Function ((&))
 import Data.Kind (Type)
+import qualified Data.List.Safe as LS (head) 
 import qualified Data.Text.Encoding as TE
+import qualified Data.Text.Lazy.Encoding
+
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, val, where_
     , (^.)
@@ -31,8 +35,9 @@ import Database.Esqueleto.Experimental
     )
 import qualified Database.Esqueleto.Experimental as E ((==.))
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import qualified Data.Text.Lazy.Encoding
+
 import Material3 (md3emailField, md3passwordField)
+
 import qualified Network.Wreq as W (get, responseHeader, responseBody)
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith, post, FormParam ((:=)))
 import qualified Network.Wreq.Lens as WL
@@ -45,6 +50,7 @@ import Network.Mail.Mime
 
 import System.Directory (doesFileExist)
 import System.IO (readFile')
+
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
 import Text.Email.Validate (emailAddress, localPart)
 import Text.Hamlet (hamletFile)
@@ -172,7 +178,8 @@ instance Yesod App where
     defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
         master <- getYesod
-
+        lang <- fromMaybe "en" . LS.head <$> languages
+        rndrMsg <- getMessageRender
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
         -- default-layout-wrapper is the entire page. Since the final

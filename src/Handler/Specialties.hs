@@ -14,15 +14,19 @@ module Handler.Specialties
   ) where
 
 import Control.Monad (when, unless)
+import qualified Data.List.Safe as LS (last)
 import Data.Text (Text)
+
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
     , (^.), (==.)
     , selectOne, isNothing_, just
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
+
 import Handler.Menu (menu)
-import Material3 (md3textField, md3textareaField)
+
+import Material3 (md3textField, md3textareaField, md3mreq, md3mopt)
 import Model
     ( Specialty
       (Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup)
@@ -30,6 +34,7 @@ import Model
     , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
     , Specialties (Specialties)
     )
+
 import Foundation
     ( Handler, Widget
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
@@ -47,7 +52,9 @@ import Foundation
       ), Form
     )
 import Settings (widgetFile)
+
 import Text.Hamlet (Html)
+
 import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod (defaultLayout), newIdent, SomeMessage (SomeMessage)
@@ -55,15 +62,12 @@ import Yesod.Core
     )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist (runDB), PersistStoreWrite (insert_))
-import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost, checkM)
+import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
-    , FieldView (fvInput, fvErrors, fvId), Field (Field)
+    , FieldView (fvInput), Field
     )
-import qualified Data.List.Safe as LS
-import Data.Maybe (fromMaybe, isJust)
-import Text.Julius (RawJS(rawJS))
 
 
 postSpecialtyDeleR :: SpecialtyId -> Specialties -> Handler Html
@@ -138,18 +142,19 @@ formSpecialty :: Maybe SpecialtyId -> Maybe (Entity Specialty) -> Form Specialty
 formSpecialty group specialty extra = do
     rndr <- getMessageRender
     
-    (nameR,nameV) <- mreq uniqueNameField FieldSettings
+    (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgName)]
         } (specialtyName . entityVal <$> specialty)
         
-    (codeR,codeV) <- mopt md3textField FieldSettings
+    (codeR,codeV) <- md3mopt md3textField FieldSettings
         { fsLabel = SomeMessage MsgCode
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgCode)]
         } (specialtyCode . entityVal <$> specialty)
-    (descrR,descrV) <- mopt md3textareaField FieldSettings
+        
+    (descrR,descrV) <- md3mopt md3textareaField FieldSettings
         { fsLabel = SomeMessage MsgDescription
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgDescription)]

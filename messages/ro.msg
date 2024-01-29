@@ -1,3 +1,4 @@
+SearchEngineOptimization: Optimizare motor de căutare
 AlreadyExists: Deja exista
 BasicEntities: Entități de bază
 CertificateDate: Data certificatului
@@ -118,8 +119,9 @@ SignUp: Înregistrați-vă
 Login: Autentificare
 MainMenu: Meniu principal
 Welcome: Bine ați venit
-AppDescription: Cabinet medical
 AppName: MedCab
+MetaKeywords: asistență medicală, progresiv, web, aplicație, pwa
+MetaDescription: Aplicație web progresivă pentru asistență medicală
 
 Doc001: Integrare cu API-uri externe
 

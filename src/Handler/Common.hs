@@ -17,7 +17,7 @@ import Prelude ((*))
 import Foundation
     ( Handler
     , Route (HomeR, StaticR, FaviconR)
-    , AppMessage (MsgAppName, MsgAppDescription)
+    , AppMessage (MsgAppName, MsgMetaDescription)
     )
 import Settings.StaticFiles (img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
 import Yesod.Core.Content
@@ -36,7 +36,7 @@ getWebAppManifestR = do
     selectRep $ provideJson $ object
         [ "name" .= msgRender MsgAppName
         , "short_name" .= msgRender MsgAppName
-        , "description" .= msgRender MsgAppDescription
+        , "description" .= msgRender MsgMetaDescription
         , "categories" .= array [String "medical"]
         , "start_url" .= urlRender HomeR
         , "theme_color" .= String "#FFFFFF"

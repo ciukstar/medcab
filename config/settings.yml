@@ -38,6 +38,8 @@ database:
 
 idle-timeout: "_env:YESOD_SQLITE_IDLETIMEOUT:1200"
 
+google-site-verification: "_env:YESOD_GOOGLE_SITE_VERIFICATION"
+
 google-client-id: "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
 google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
 

@@ -1,17 +1,19 @@
 $newline never
 $doctype 5
-<html class="no-js" lang="en">
+<html class="no-js" lang=#{lang}>
   <head>
     <meta charset="UTF-8">
 
     <title>#{pageTitle pc}
-    <meta name=description content="MedCab Healthcare App">
+    <meta name=description content=#{rndrMsg MsgMetaDescription}>
+    <meta name=keywords content=#{rndrMsg MsgMetaKeywords}>
     <meta name=author content="Sergiu Starciuc, ciukstar@gmail.com">
     <meta name="theme-color" content="rgb(101 85 143)">
     <meta name="color-scheme" content="light dark">
     <meta name=viewport content="width=device-width,initial-scale=1">
 
-    <meta name="google-site-verification" content="a5AUtJixuZ1_hbHg7AbmclYAYk5AkZylPeIFRsesEXI">
+    $maybe gsv <- appGoogleSiteVerification $ appSettings master
+      <meta name="google-site-verification" content=#{gsv}>
 
     <link rel=icon type="image/x-icon" href=@{FaviconR}>
     <link rel=icon type="image/svg+xml" href=@{StaticR img_medcab_120x120_svg}>

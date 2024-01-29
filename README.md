@@ -34,6 +34,12 @@ A superuser account is defined at deployment time. The superuser manages other u
   * Client secret  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
 
+## Search Engine Optimization
+
+* [Google SEO](https://search.google.com/search-console)
+
+  ```$YESOD_GOOGLE_SITE_VERIFICATION```
+
 ## ER Diagram
 
 ![Entity Relationship Diagram](static/img/ERD_MedCab.svg)

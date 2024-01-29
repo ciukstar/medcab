@@ -11,7 +11,7 @@ import Foundation
       ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
       , MsgErDiagram, MsgEmail, MsgSuperuser, MsgUsername, MsgPassword
       , MsgClientId, MsgClientSecret, MsgBasicEntities, MsgUser, MsgDoctor
-      , MsgSpecialty
+      , MsgSpecialty, MsgSearchEngineOptimization
       , MsgDoc001, MsgDoc002
       )
     )

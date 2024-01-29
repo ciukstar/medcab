@@ -63,7 +63,7 @@
     <ul>
       <li.body-large>
         _{MsgEmail}:
-        <a href="https://developers.google.com/gmail/api/guides">Gmail API
+        <a href="https://developers.google.com/gmail/api/guides" target=_blank>Gmail API
         <dl>
           <dt.label-large>
             _{MsgClientId}
@@ -74,6 +74,14 @@
             _{MsgClientSecret}
           <dd.body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
+
+  <section>
+    <h2.headline-medium>_{MsgSearchEngineOptimization}
+    <ul>
+      <li.body-large>
+        <a href="https://search.google.com/search-console" target=_blank>Google SEO
+        <div>
+          <code.body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

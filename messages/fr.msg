@@ -1,3 +1,4 @@
+SearchEngineOptimization: Optimisation du moteur de recherche
 AlreadyExists: Existe déjà
 BasicEntities: Entités de base
 CertificateDate: Date du certificat
@@ -118,8 +119,9 @@ SignUp: S'inscrire
 Login: Connexion
 MainMenu: Menu principal
 Welcome: Bienvenu
-AppDescription: Cabinet Médical
 AppName: MedCab
+MetaKeywords: soins de santé, progressif, web, application, pwa
+MetaDescription: Application Web progressive pour les soins de santé
 
 Doc001: Intégration avec des API externes
 
