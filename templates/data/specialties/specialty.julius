@@ -1,0 +1,9 @@
+
+document.getElementById(#{idTabs}).addEventListener('change',function (e) {
+  window.location.href =
+    event.target.activeTabIndex === 1 ? '@{DataR $ SpecialtyDoctorsR sid ps}'
+  : ( event.target.activeTabIndex === 2
+      ? '@{DataR $ SpecialtiesR (Specialties (sids <> [sid]))}'
+      : '@{DataR $ SpecialtyR sid ps}'
+    );
+});

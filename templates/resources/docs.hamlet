@@ -24,9 +24,10 @@
 
 <main>
   <section>
-    <h2.headline-medium>App MedCab
+    <h2.headline-medium>_{MsgAppDescription}
     <p.body-large>
-      <a href=@{HomeR}>This application #
+      The app #
+      <a href=@{HomeR}>_{MsgAppName} #
       is under development...
 
   <section>

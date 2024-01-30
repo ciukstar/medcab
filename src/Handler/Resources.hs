@@ -8,10 +8,10 @@ import Foundation
     ( Handler
     , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR)
     , AppMessage
-      ( MsgDocumentation, MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
-      , MsgErDiagram, MsgEmail, MsgSuperuser, MsgUsername, MsgPassword
-      , MsgClientId, MsgClientSecret, MsgBasicEntities, MsgUser, MsgDoctor
-      , MsgSpecialty, MsgSearchEngineOptimization
+      ( MsgDocumentation, MsgAppName, MsgAppDescription, MsgSignIn, MsgSignOut
+      , MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail, MsgSuperuser
+      , MsgUsername, MsgPassword, MsgClientId, MsgClientSecret, MsgBasicEntities
+      , MsgUser, MsgDoctor, MsgSpecialty, MsgSearchEngineOptimization
       , MsgDoc001, MsgDoc002
       )
     )

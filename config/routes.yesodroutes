@@ -33,12 +33,13 @@
     /doctors/#DoctorId/edit  DoctorEditR   GET
     /doctors/#DoctorId 	     DoctorR       GET POST
     /doctors        	     DoctorsR      GET POST
-    
-    /form/specialties/create/+Specialties     SpecialtyCreateR GET
-    /dele/specialty/#SpecialtyId/+Specialties SpecialtyDeleR   POST
-    /edit/specialty/#SpecialtyId/+Specialties SpecialtyEditR   GET
-    /specialty/#SpecialtyId/+Specialties      SpecialtyR       GET POST
-    /specialties/+Specialties 	              SpecialtiesR     GET POST
+
+    /candidates/#SpecialtyId/+Specialties          SpecialtyDoctorsR GET
+    /form/specialties/create/+Specialties     	   SpecialtyCreateR  GET
+    /dele/specialty/#SpecialtyId/+Specialties 	   SpecialtyDeleR    POST
+    /edit/specialty/#SpecialtyId/+Specialties 	   SpecialtyEditR    GET
+    /specialty/#SpecialtyId/+Specialties      	   SpecialtyR        GET POST
+    /specialties/+Specialties 	              	   SpecialtiesR      GET POST
 
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET

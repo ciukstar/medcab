@@ -1,3 +1,4 @@
+SinceDate: С
 SearchEngineOptimization: Поисковая оптимизация
 AlreadyExists: Уже существует
 BasicEntities: Основные сущности
@@ -119,6 +120,7 @@ SignUp: Зарегистрироваться
 Login: Вход
 MainMenu: Главное меню
 Welcome: Добро пожаловать
+AppDescription: Прогрессивное веб-приложение для здравоохранения
 AppName: MedCab
 MetaKeywords: здравоохранение, прогрессивное, веб, приложение, pwa
 MetaDescription: Прогрессивное веб-приложение для здравоохранения

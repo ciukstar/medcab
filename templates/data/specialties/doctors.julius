@@ -1,0 +1,21 @@
+
+Array.from(
+  document.body.querySelectorAll('time[datetime]')
+).forEach(function (x) {
+  x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
+    navigator.language,
+    { year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }
+  );
+});
+
+document.getElementById(#{idTabs}).addEventListener('change',function (e) {
+  window.location.href =
+    event.target.activeTabIndex === 1 ? '@{DataR $ SpecialtyDoctorsR sid ps}'
+  : ( event.target.activeTabIndex === 2
+      ? '@{DataR $ SpecialtiesR (Specialties (sids <> [sid]))}'
+      : '@{DataR $ SpecialtyR sid ps}'
+    );
+});

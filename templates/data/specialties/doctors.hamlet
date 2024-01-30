@@ -15,39 +15,43 @@
       
 <main>
   
-  <md-tabs ##{idTabs} aria-label=_{MsgTabs}>
-    <md-primary-tab #tabDetails aria-controls=idPanelDetails>
+  <md-tabs aria-label=_{MsgTabs} ##{idTabs}>
+    <md-primary-tab #tabDetails aria-controls=panelDetails>
       _{MsgDetails}
-    <md-primary-tab #tabDoctors aria-controls=panelDoctors>
+    <md-primary-tab #tabDoctors aria-controls=#{idPanelDoctors} active=true>
       _{MsgDoctors}
-    <md-primary-tab #tabSubspecialties aria-controls=#{idPanelSubspecialties} active=true>
+    <md-primary-tab #tabSubspecialties aria-controls=panelSubspecialties>
       _{MsgSubspecialties}
 
-  <div #idPanelDetails role=tabpanel aria-labelledby=tabDetails hidden>
-
-  <div #panelDoctors role=tabpanel aria-labelledby=tabDoctors hidden>
-
-  <div ##{idPanelSubspecialties} role=tabpanel aria-labelledby=tabSubspecialties>
-
+  <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+  
+  <div ##{idPanelDoctors} role=tabpanel aria-labelledby=tabDoctors>
     $forall (status,msg) <- filter ((==) statusError . fst) msgs
       <div.app-banner.error.body-medium>
         #{status}. #{msg}
 
-    $if null specialties
+    $if null doctors
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;
         <figcaption.body-large>
-          _{MsgNoSubspecialtiesYet}
+          _{MsgNoDoctorsYet}
     $else
       <md-list>
-        $forall Entity sid (Specialty name code _ _) <- specialties
-          <md-list-item interactive href=@{DataR $ SpecialtyR sid ps}>
+        $forall (Entity did (Doctor name mobile email),Entity _ (Specialist _ _ title cert)) <- doctors
+          <md-list-item type=link href=@{DataR $ SpecialtyR sid ps}>
+            <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto}>
             <div slot=headline>#{name}
+            <div slot=supporting-text>#{title}
             <div slot=supporting-text>
-              $maybe code <- code 
-                #{code}
+              $with dt <- show cert
+                _{MsgSinceDate} #
+                <time datetime=#{dt}>#{dt}
             <md-icon slot=end>arrow_forward_ios
           <md-divider>
+
+    <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{DataR $ SpecialtyCreateR ps}>
+      <md-icon slot=icon>add
 
     $forall (status,msg) <- filter ((/=) statusError . fst) msgs
       <aside.app-snackbar.shape-small.elevation-1.primary-container>
@@ -55,6 +59,4 @@
         <span.body-medium>#{status}. #
         <span.body-medium>#{msg}
 
-    <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-      <a href=@{DataR $ SpecialtyCreateR ps}>
-      <md-icon slot=icon>add
+  <div #panelSubspecialties role=tabpanel aria-labelledby=tabSubspecialties hidden>

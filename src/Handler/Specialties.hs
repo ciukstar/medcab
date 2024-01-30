@@ -11,6 +11,7 @@ module Handler.Specialties
   , getSpecialtyEditR
   , postSpecialtyR
   , postSpecialtyDeleR
+  , getSpecialtyDoctorsR
   ) where
 
 import Control.Monad (when, unless)
@@ -19,8 +20,8 @@ import Data.Text (Text)
 
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
-    , (^.), (==.)
-    , selectOne, isNothing_, just
+    , (^.), (==.), (:&)((:&))
+    , selectOne, isNothing_, just, innerJoin, on
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (replace, delete))
 
@@ -30,17 +31,17 @@ import Material3 (md3textField, md3textareaField, md3mreq, md3mopt)
 import Model
     ( Specialty
       (Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup)
-    , EntityField (SpecialtyName, SpecialtyId, SpecialtyGroup)
+    , EntityField (SpecialtyName, SpecialtyId, SpecialtyGroup, SpecialistDoctor, SpecialistSpecialty, DoctorId)
     , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
-    , Specialties (Specialties)
+    , Specialties (Specialties), Doctor (Doctor), Specialist (Specialist)
     )
 
 import Foundation
-    ( Handler, Widget
+    ( Handler, Widget, Form
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
-      , SpecialtyDeleR
+      , SpecialtyDeleR, SpecialtyDoctorsR, DoctorPhotoR
       )
     , AppMessage
       ( MsgSpecialties, MsgUserAccount, MsgNoSpecialtiesYet, MsgSignIn
@@ -48,8 +49,8 @@ import Foundation
       , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
-      , MsgNoSubspecialtiesYet, MsgAlreadyExists
-      ), Form
+      , MsgNoSubspecialtiesYet, MsgAlreadyExists, MsgDoctors, MsgNoDoctorsYet, MsgSinceDate
+      )
     )
 import Settings (widgetFile)
 
@@ -58,7 +59,8 @@ import Text.Hamlet (Html)
 import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod (defaultLayout), newIdent, SomeMessage (SomeMessage)
-    , getMessageRender, addMessageI, redirect, getMessages, whamlet, setUltDestCurrent
+    , getMessageRender, addMessageI, redirect, getMessages, whamlet
+    , setUltDestCurrent
     )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist (runDB), PersistStoreWrite (insert_))
@@ -68,6 +70,24 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), Field
     )
+
+
+getSpecialtyDoctorsR :: SpecialtyId -> Specialties -> Handler Html
+getSpecialtyDoctorsR sid ps@(Specialties sids) = do
+    
+    doctors <- runDB $ select $ do
+        x :& s <- from $ table @Doctor
+            `innerJoin` table @Specialist `on` (\(x :& s) -> x ^. DoctorId ==. s ^. SpecialistDoctor)
+        where_ $ s ^. SpecialistSpecialty ==. val sid
+        return (x,s)
+        
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgDoctors
+        idTabs <- newIdent
+        idPanelDoctors <- newIdent
+        idFabAdd <- newIdent
+        $(widgetFile "data/specialties/doctors")
 
 
 postSpecialtyDeleR :: SpecialtyId -> Specialties -> Handler Html
@@ -88,6 +108,7 @@ postSpecialtyDeleR sid ps@(Specialties sids) = do
           setTitleI MsgSpecialty
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
+          idTabs <- newIdent
           idPanelDetails <- newIdent
           $(widgetFile "data/specialties/specialty")
 
@@ -141,19 +162,19 @@ getSpecialtyCreateR ps@(Specialties sids) = do
 formSpecialty :: Maybe SpecialtyId -> Maybe (Entity Specialty) -> Form Specialty
 formSpecialty group specialty extra = do
     rndr <- getMessageRender
-    
+
     (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgName)]
         } (specialtyName . entityVal <$> specialty)
-        
+
     (codeR,codeV) <- md3mopt md3textField FieldSettings
         { fsLabel = SomeMessage MsgCode
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgCode)]
         } (specialtyCode . entityVal <$> specialty)
-        
+
     (descrR,descrV) <- md3mopt md3textareaField FieldSettings
         { fsLabel = SomeMessage MsgDescription
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -194,6 +215,7 @@ getSpecialtyR sid ps@(Specialties sids) = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSpecialty
+        idTabs <- newIdent
         idPanelDetails <- newIdent
         $(widgetFile "data/specialties/specialty")
 
@@ -230,5 +252,6 @@ getSpecialtiesR ps@(Specialties sids) = do
             $(widgetFile "data/specialties/specialties")
         unless (null sids) $ do
             setTitleI MsgSpecialties
+            idTabs <- newIdent
             idPanelSubspecialties <- newIdent
             $(widgetFile "data/specialties/subspecialties")

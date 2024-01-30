@@ -33,10 +33,11 @@
       
 <main>
   
-  <md-tabs aria-label=_{MsgTabs}
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{DataR $ SpecialtyR sid ps}' : '@{DataR $ SpecialtiesR (Specialties (sids <> [sid]))}'">
+  <md-tabs aria-label=_{MsgTabs} ##{idTabs}>
     <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
       _{MsgDetails}
+    <md-primary-tab #tabDoctors aria-controls=panelDoctors>
+      _{MsgDoctors}
     <md-primary-tab #tabSubspecialties aria-controls=panelSubspecialties>
       _{MsgSubspecialties}
 
@@ -64,5 +65,7 @@
     $forall (status,msg) <- filter ((/=) statusError . fst) msgs
       <aside.app-snackbar.shape-small.elevation-1.primary-container>
         #{status}. #{msg}
+
+  <div #panelDoctors role=tabpanel aria-labelledby=tabDoctors hidden>
 
   <div #panelSubspecialties role=tabpanel aria-labelledby=tabSubspecialties hidden>

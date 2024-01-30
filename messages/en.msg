@@ -1,3 +1,4 @@
+SinceDate: Since
 SearchEngineOptimization: Search Engine Optimization
 AlreadyExists: Already exists
 BasicEntities: Basic entities
@@ -119,9 +120,10 @@ SignUp: Sign up
 Login: Login
 MainMenu: Main menu
 Welcome: Welcome
+AppDescription: Progressive Web App for Healthcare
 AppName: MedCab
 MetaKeywords: healthcare, progressive, web, app, pwa
-MetaDescription: Healthcare Progressive Web App
+MetaDescription: Progressive Web App for Healthcare
 
 Doc001: Integration with external APIs
 

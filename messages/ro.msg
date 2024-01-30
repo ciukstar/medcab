@@ -1,3 +1,4 @@
+SinceDate: Începând cu
 SearchEngineOptimization: Optimizare motor de căutare
 AlreadyExists: Deja exista
 BasicEntities: Entități de bază
@@ -119,6 +120,7 @@ SignUp: Înregistrați-vă
 Login: Autentificare
 MainMenu: Meniu principal
 Welcome: Bine ați venit
+AppDescription: Aplicație web progresivă pentru asistență medicală
 AppName: MedCab
 MetaKeywords: asistență medicală, progresiv, web, aplicație, pwa
 MetaDescription: Aplicație web progresivă pentru asistență medicală
