@@ -22,6 +22,7 @@ module Handler.Doctors
   ) where
 
 import Control.Monad (void, join)
+import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Database.Persist
     ( Entity (Entity, entityKey)
@@ -35,7 +36,9 @@ import Database.Esqueleto.Experimental
     , where_, orderBy, asc, Value (unValue), update, set, just, leftJoin, desc
     )
 import Material3
-    ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField )
+    ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField
+    , md3mreq, md3mopt
+    )
 import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, Form
@@ -52,7 +55,7 @@ import Foundation
       , MsgEdit, MsgDele, MsgRecordDeleted, MsgDeleteAreYouSure, MsgConfirmPlease
       , MsgRecordEdited, MsgSpecialties, MsgTabs, MsgSpecialty, MsgNoSpecialtiesYet
       , MsgAttribution, MsgSpecialtyTitle, MsgSpecializations, MsgCertificateDate
-      , MsgInvalidFormData
+      , MsgInvalidFormData, MsgAlreadyExists
       )
     )
 import Model
@@ -62,7 +65,7 @@ import Model
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
       , SpecialtyName, SpecialtyId, SpecialistDoctor, SpecialistSpecialty
-      , DoctorPhotoAttribution, SpecialistId
+      , DoctorPhotoAttribution, SpecialistId, SpecialistTitle
       )
     , statusSuccess, statusError
     , SpecialtyId, Specialty (specialtyName, Specialty)
@@ -84,11 +87,11 @@ import Yesod.Core
 import Yesod.Core.Handler (redirect)
 import Yesod.Core.Content (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Form.Fields (fileField, optionsPairs, dayField)
-import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost)
+import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
-    , FieldView (fvInput, fvId)
+    , FieldView (fvInput, fvId), Field
     )
 import Yesod.Persist (YesodPersist (runDB))
 import Data.Bifunctor (Bifunctor(second))
@@ -113,7 +116,11 @@ formSpecialistDele extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 postSpecialistR :: DoctorId -> SpecialtyId -> SpecialistId -> Handler Html
 postSpecialistR did sid xid = do
-    ((fr,fw),et) <- runFormPost $ formSpecialty did Nothing
+    specialist <- runDB $ selectOne $ do
+        x <- from $ table @Specialist
+        where_ $ x ^. SpecialistId ==. val xid
+        return x
+    ((fr,fw),et) <- runFormPost $ formSpecialty did specialist
     case fr of
       FormSuccess r -> do
           runDB $ replace xid r
@@ -184,24 +191,29 @@ getDoctorSpecialtyCreateR did = do
 formSpecialty :: DoctorId -> Maybe (Entity Specialist) -> Form Specialist
 formSpecialty did specialist extra = do
     rndr <- getMessageRender
+
     specs <- liftHandler $ ((\s -> (specialtyName . entityVal $ s,entityKey s)) <$>) <$> runDB ( select $ do
         x <- from $ table @Specialty
         orderBy [asc (x ^. SpecialtyName)]
         return x )
 
-    (specR,specV) <- mreq (md3selectField (optionsPairs specs)) FieldSettings
+    (specR,specV) <- md3mreq (md3selectField (optionsPairs specs)) FieldSettings
         { fsLabel = SomeMessage MsgSpecialty
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgSpecialty)]
         } (specialistSpecialty . entityVal <$> specialist)
 
-    (titleR,titleV) <- mreq md3textField FieldSettings
+    let spec = case specR of
+          FormSuccess r -> Just r
+          _oterwise -> Nothing
+
+    (titleR,titleV) <- md3mreq (uniqueTitleField spec) FieldSettings
         { fsLabel = SomeMessage MsgSpecialtyTitle
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgSpecialtyTitle)]
         } (specialistTitle . entityVal <$> specialist)
 
-    (certR,certV) <- mreq dayField FieldSettings
+    (certR,certV) <- md3mreq dayField FieldSettings
         { fsLabel = SomeMessage MsgSpecialty
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgSpecialty)]
@@ -210,6 +222,25 @@ formSpecialty did specialist extra = do
     let r = Specialist did <$> specR <*> titleR <*> certR
     let w = $(widgetFile "data/doctors/specialties/form")
     return (r,w)
+  where
+      uniqueTitleField :: Maybe SpecialtyId -> Field Handler Text
+      uniqueTitleField msid = checkM (uniqueTitle msid) md3textField
+
+      uniqueTitle :: Maybe SpecialtyId -> Text -> Handler (Either AppMessage Text)
+      uniqueTitle msid title = do
+          mx <- runDB $ selectOne $ do
+              x <- from $ table @Specialist
+              where_ $ x ^. SpecialistTitle ==. val title
+              where_ $ x ^. SpecialistDoctor ==. val did
+              case msid of
+                Just sid -> where_ $ x ^. SpecialistSpecialty ==. val sid
+                Nothing -> return ()
+              return x
+          return $ case (mx,specialist) of
+            (Nothing,_) -> Right title
+            (Just (Entity xid' _), Just (Entity xid _)) | xid' == xid -> Right title
+                                                        | otherwise -> Left MsgAlreadyExists
+            _otherwise -> Left MsgAlreadyExists
 
 
 getDoctorSpecialtiesR :: DoctorId -> Handler Html
@@ -358,23 +389,23 @@ formDoctor :: Maybe (Entity Doctor)
 formDoctor doctor extra = do
     rndr <- getMessageRender
 
-    (nameR,nameV) <- mreq md3textField FieldSettings
+    (nameR,nameV) <- md3mreq md3textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgFullName)]
         } (doctorName . entityVal <$> doctor)
-    (mobileR,mobileV) <- mreq md3telField FieldSettings
+    (mobileR,mobileV) <- md3mreq md3telField FieldSettings
         { fsLabel = SomeMessage MsgMobile
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgMobile)]
         } (doctorMobile . entityVal <$> doctor)
-    (emailR,emailV) <- mreq md3emailField FieldSettings
+    (emailR,emailV) <- md3mreq md3emailField FieldSettings
         { fsLabel = SomeMessage MsgEmailAddress
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgEmailAddress)]
         } (doctorEmail . entityVal <$> doctor)
 
-    (photoR,photoV) <- mopt fileField FieldSettings
+    (photoR,photoV) <- md3mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("style","display:none")]
@@ -387,7 +418,7 @@ formDoctor doctor extra = do
         return $ x ^. DoctorPhotoAttribution
       Nothing -> return Nothing
 
-    (attribR,attribV) <- mopt md3htmlField FieldSettings
+    (attribR,attribV) <- md3mopt md3htmlField FieldSettings
         { fsLabel = SomeMessage MsgAttribution
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgAttribution)]

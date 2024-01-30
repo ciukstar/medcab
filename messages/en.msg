@@ -9,7 +9,7 @@ DemoUserAccounts: Demo user accounts
 ThankYou: Thank you
 ConfirmEmailPlease: Please confirm your email address by clicking on the link below
 VerifyYourEmailAddress: Verify your email address
-AccessDeniedAdminsOnly: Only administrators have access to this page. Please log in with an administrator account.
+AccessDeniedAdminsOnly: Only administrators have access to this page. Please log in with an administrator account
 ClientSecret: Client secret
 ClientId: Client id
 Attribution: Attribution

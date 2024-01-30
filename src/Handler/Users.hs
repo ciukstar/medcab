@@ -35,7 +35,7 @@ import Foundation
       )
     )
 import Handler.Menu (menu)
-import Material3 ( md3textField, md3switchField, md3htmlField )
+import Material3 ( md3textField, md3switchField, md3htmlField, md3mopt, md3mreq )
 import Model
     ( AvatarColor (AvatarColorLight), statusError, statusSuccess
     , UserId
@@ -64,7 +64,7 @@ import Yesod.Core
     , fileSourceByteString, MonadHandler (liftHandler)
     )
 import Yesod.Form.Fields (fileField)
-import Yesod.Form.Functions (generateFormPost, mreq, mopt, runFormPost)
+import Yesod.Form.Functions (generateFormPost, runFormPost)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsName, fsAttrs, fsId)
@@ -188,19 +188,19 @@ formUser user extra = do
 
     rndr <- getMessageRender
     
-    (nameR,nameV) <- mopt md3textField FieldSettings
+    (nameR,nameV) <- md3mopt md3textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgFullName)]
         } (userName . entityVal <$> user)
         
-    (adminR,adminV) <- mreq md3switchField FieldSettings
+    (adminR,adminV) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgAdministrator
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
         } (userAdmin . entityVal <$> user)
 
-    (photoR,photoV) <- mopt fileField FieldSettings
+    (photoR,photoV) <- md3mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("style","display:none")]
@@ -213,7 +213,7 @@ formUser user extra = do
           return $ x ^. UserPhotoAttribution
       Nothing -> return Nothing
     
-    (attribR,attribV) <- mopt md3htmlField FieldSettings
+    (attribR,attribV) <- md3mopt md3htmlField FieldSettings
         { fsLabel = SomeMessage MsgAttribution
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgAttribution)]

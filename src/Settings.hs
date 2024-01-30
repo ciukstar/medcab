@@ -63,12 +63,13 @@ data AppSettings = AppSettings
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
 
-    , appIdleTimeout :: NominalDiffTime
+    , appIdleTimeout            :: NominalDiffTime
     , appGoogleSiteVerification :: Maybe Text
-    , appGoogleClientId :: Text
-    , appGoogleClientSecret :: Text
-    , appSuperuserUsername :: Text
-    , appSuperuserPassword :: Text
+    , appGoogleClientId         :: Text
+    , appGoogleClientSecret     :: Text
+    , appSuperuserUsername      :: Text
+    , appSuperuserPassword      :: Text
+    , appMsValidate             :: Maybe Text
     }
 
 instance FromJSON AppSettings where
@@ -104,6 +105,7 @@ instance FromJSON AppSettings where
         appGoogleClientSecret     <- o .:  "google-client-secret"
         appSuperuserUsername      <- o .:  "superuser-username"
         appSuperuserPassword      <- o .:  "superuser-password"
+        appMsValidate             <- o .:  "msvalidate"
                                      
         return AppSettings {..}
 

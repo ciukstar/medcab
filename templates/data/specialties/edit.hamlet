@@ -8,7 +8,7 @@
       _{MsgSpecialty}
       
 <main>
-  <form method=post action=@{DataR $ SpecialtyR sid ps} enctype=#{et}>
+  <form method=post action=@{DataR $ SpecialtyR sid ps} enctype=#{et} novalidate>
     ^{fw}
     <div.app-form-actions>
       <md-text-button type=button href=@{DataR $ SpecialtyR sid ps}>_{MsgCancel}

@@ -39,6 +39,10 @@ A superuser account is defined at deployment time. The superuser manages other u
 * [Google SEO](https://search.google.com/search-console)
 
   ```$YESOD_GOOGLE_SITE_VERIFICATION```
+  
+* [Bing SEO](https://www.bing.com/webmasters)
+
+  ```$YESOD_MS_VALIDATE```
 
 ## ER Diagram
 

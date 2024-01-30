@@ -41,10 +41,11 @@
     $else
       <md-list>
         $forall (Entity xid (Specialist did sid title certday),Entity _ (Specialty name _ _ _)) <- specialties
-          <md-list-item interactive href=@{DataR $ SpecialistR did sid xid}>
+          <md-list-item type=link href=@{DataR $ SpecialistR did sid xid}>
             <div slot=headline>#{title}
             <div slot=supporting-text>#{name}
-            <div slot=supporting-text>#{show certday}
+            $with dt <- show certday
+              <time slot=supporting-text datetime=#{dt}>#{dt}
             <md-icon slot=end>arrow_forward_ios
           <md-divider>
 

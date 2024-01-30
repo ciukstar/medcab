@@ -9,7 +9,7 @@ DemoUserAccounts: Conturi de utilizator Demo
 ThankYou: Vă mulțumim
 ConfirmEmailPlease: Vă rugăm să confirmați adresa dvs. de e-mail făcând clic pe link-ul de mai jos
 VerifyYourEmailAddress: Verifică-ți adresa de email
-AccessDeniedAdminsOnly: Doar administratorii au acces la această pagină. Vă rugăm să vă conectați cu un cont de administrator.
+AccessDeniedAdminsOnly: Doar administratorii au acces la această pagină. Vă rugăm să vă conectați cu un cont de administrator
 ClientSecret: Secretul clientului
 ClientId: Id-ul clientului
 Attribution: Atribuire

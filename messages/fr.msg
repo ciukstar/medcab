@@ -9,7 +9,7 @@ DemoUserAccounts: Comptes d'utilisateurs démo
 ThankYou: Merci
 ConfirmEmailPlease: Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous
 VerifyYourEmailAddress: Vérifiez votre adresse e-mail
-AccessDeniedAdminsOnly: Seuls les administrateurs ont accès à cette page. Veuillez vous connecter avec un compte administrateur.
+AccessDeniedAdminsOnly: Seuls les administrateurs ont accès à cette page. Veuillez vous connecter avec un compte administrateur
 ClientSecret: Secret client
 ClientId: Identifiant client
 Attribution: Attribution

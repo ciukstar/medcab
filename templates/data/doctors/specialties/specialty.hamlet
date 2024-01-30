@@ -47,7 +47,9 @@
       <dd.body-medium>#{title}
 
       <dt.label-large scope=row>_{MsgCertificateDate}
-      <dd.body-medium>#{show cert}
+      <dd.body-medium>
+        $with dt <- show cert
+          <time datetime=#{dt}>#{dt}
 
       <dt.label-large scope=row>_{MsgDoctor}
       <dd.body-medium>#{dname}

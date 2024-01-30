@@ -46,5 +46,7 @@ google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
 superuser-username: "_env:YESOD_SUPERUSER_USERNAME:superuser@gmail.com"
 superuser-password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
 
+msvalidate: "_env:YESOD_MS_VALIDATE"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

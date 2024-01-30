@@ -14,6 +14,8 @@ $doctype 5
 
     $maybe gsv <- appGoogleSiteVerification $ appSettings master
       <meta name="google-site-verification" content=#{gsv}>
+    $maybe msv <- appMsValidate $ appSettings master
+      <meta name="msvalidate.01" content=#{msv}>
 
     <link rel=icon type="image/x-icon" href=@{FaviconR}>
     <link rel=icon type="image/svg+xml" href=@{StaticR img_medcab_120x120_svg}>

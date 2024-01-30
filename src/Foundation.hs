@@ -422,7 +422,7 @@ instance YesodAuthEmail App where
             idFormForgotPassword <- newIdent
             $(widgetFile "auth/forgot")
       where
-          formForgotPassword :: Html -> MForm Handler (FormResult Text,Widget)
+          formForgotPassword :: Form Text
           formForgotPassword extra = do
               rndr <- getMessageRender
               (r,v) <- mreq md3emailField FieldSettings
@@ -444,7 +444,7 @@ instance YesodAuthEmail App where
             (fw,et) <- liftHandler $ generateFormPost formSetPassword
             $(widgetFile "auth/password")
       where
-          formSetPassword :: Html -> MForm Handler (FormResult (Text,Text,Text),Widget)
+          formSetPassword :: Form (Text,Text,Text)
           formSetPassword extra = do
               rndr <- getMessageRender
               (currR,currV) <- mreq md3passwordField FieldSettings
@@ -504,7 +504,7 @@ instance YesodAuthEmail App where
             formRegister <- newIdent
             $(widgetFile "auth/register")
       where
-          formRegEmailForm :: Html -> MForm Handler (FormResult Text, Widget)
+          formRegEmailForm :: Form Text
           formRegEmailForm extra = do
               renderMsg <- getMessageRender
               (emailR,emailV) <- mreq md3emailField FieldSettings
@@ -527,7 +527,7 @@ instance YesodAuthEmail App where
         msgs <- getMessages
         $(widgetFile "auth/email")
       where
-          formEmailLogin :: Html -> MForm Handler (FormResult (Text,Text),Widget)
+          formEmailLogin :: Form (Text,Text)
           formEmailLogin extra = do
               msgRender <- liftHandler getMessageRender
               (emailR,emailV) <- mreq md3emailField FieldSettings

@@ -82,6 +82,10 @@
         <a href="https://search.google.com/search-console" target=_blank>Google SEO
         <div>
           <code.body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
+      <li.body-large>
+        <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
+        <div>
+          <code.body-small>&dollar;YESOD_MS_VALIDATE
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

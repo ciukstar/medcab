@@ -8,7 +8,7 @@
       
 <main>
 
-  <form method=post action=@{DataR UsersR} enctype=#{et}>
+  <form method=post action=@{DataR UsersR} enctype=#{et} novalidate>
     ^{fw}
     <div.app-form-actions>
       <md-text-button type=button href=@{DataR UsersR}>

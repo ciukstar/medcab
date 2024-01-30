@@ -44,8 +44,9 @@
           <div slot=supporting-text>#{email}
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
-          <small.app-attribution.body-small>
-            #{attrib}
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
         <md-divider>
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
