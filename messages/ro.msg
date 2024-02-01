@@ -1,9 +1,11 @@
+Remove: Eliminați
 SinceDate: Începând cu
 SearchEngineOptimization: Optimizare motor de căutare
 AlreadyExists: Deja exista
 BasicEntities: Entități de bază
 CertificateDate: Data certificatului
 Specializations: Specializări
+JobTitle: Titlul postului
 SpecialtyTitle: Titlul
 BackToHomepage: Reveniți la pagina de pornire
 DemoUserAccounts: Conturi de utilizator Demo

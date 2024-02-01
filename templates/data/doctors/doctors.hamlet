@@ -37,7 +37,7 @@
     <md-list>
       $forall (Entity did (Doctor name _ email),attrib) <- doctors
         <md-list-item type=link href=@{DataR $ DoctorR did}>
-          <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto}>
+          <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
           <div slot=headline>#{name}
           <div slot=supporting-text>#{email}
           <md-icon slot=end>arrow_forward_ios

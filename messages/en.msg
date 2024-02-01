@@ -1,9 +1,11 @@
+Remove: Remove
 SinceDate: Since
 SearchEngineOptimization: Search Engine Optimization
 AlreadyExists: Already exists
 BasicEntities: Basic entities
 CertificateDate: Certificate date
 Specializations: Specializations
+JobTitle: Job title
 SpecialtyTitle: Title
 BackToHomepage: Go back to homepage
 DemoUserAccounts: Demo user accounts

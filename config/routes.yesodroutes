@@ -34,12 +34,16 @@
     /doctors/#DoctorId 	     DoctorR       GET POST
     /doctors        	     DoctorsR      GET POST
 
-    /candidates/#SpecialtyId/+Specialties          SpecialtyDoctorsR GET
-    /form/specialties/create/+Specialties     	   SpecialtyCreateR  GET
-    /dele/specialty/#SpecialtyId/+Specialties 	   SpecialtyDeleR    POST
-    /edit/specialty/#SpecialtyId/+Specialties 	   SpecialtyEditR    GET
-    /specialty/#SpecialtyId/+Specialties      	   SpecialtyR        GET POST
-    /specialties/+Specialties 	              	   SpecialtiesR      GET POST
+    /dele/experts/#SpecialistId/#SpecialtyId/doctors/#DoctorId/+Specialties SpecialtyDoctorDeleR   POST
+    /edit/experts/#SpecialistId/#SpecialtyId/doctors/#DoctorId/+Specialties SpecialtyDoctorEditR   GET
+    /create/experts/#SpecialtyId/+Specialties             		    SpecialtyDoctorCreateR GET
+    /experts/#SpecialistId/#SpecialtyId/doctors/#DoctorId/+Specialties	    SpecialtyDoctorR       GET POST
+    /candidates/#SpecialtyId/+Specialties           	      		    SpecialtyDoctorsR      GET POST
+    /form/specialties/create/+Specialties     	    	      		    SpecialtyCreateR       GET
+    /dele/specialty/#SpecialtyId/+Specialties 	    	      		    SpecialtyDeleR         POST
+    /edit/specialty/#SpecialtyId/+Specialties 	    	      		    SpecialtyEditR         GET
+    /specialty/#SpecialtyId/+Specialties      	    	      		    SpecialtyR             GET POST
+    /specialties/+Specialties 	              	    	      		    SpecialtiesR           GET POST
 
     /tokens/clear TokensClearR POST
     /tokens/hook  TokensHookR  GET

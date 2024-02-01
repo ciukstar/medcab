@@ -1,9 +1,9 @@
 
 document.getElementById(#{idTabs}).addEventListener('change',function (e) {
   window.location.href =
-    event.target.activeTabIndex === 1 ? '@{DataR $ SpecialtyDoctorsR (last sids) ps}'
+    event.target.activeTabIndex === 1 ? '@{DataR $ SpecialtyDoctorsR (last sids) (Specialties (init sids))}'
   : ( event.target.activeTabIndex === 2
-      ? '@{DataR $ SpecialtiesR ps}'
+      ? '@{DataR $ SpecialtiesR (Specialties (init sids))}'
       : '@{DataR $ SpecialtyR (last sids) (Specialties (init sids))}'
     );
 });

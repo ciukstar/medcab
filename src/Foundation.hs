@@ -230,6 +230,10 @@ instance Yesod App where
     isAuthorized r@(DataR DoctorsR) _ = setUltDest r >> isAdmin
 
     
+    isAuthorized (DataR (SpecialtyDoctorDeleR {})) _ = isAdmin
+    isAuthorized (DataR (SpecialtyDoctorEditR {})) _ = isAdmin
+    isAuthorized (DataR (SpecialtyDoctorCreateR _ _)) _ = isAdmin
+    isAuthorized (DataR (SpecialtyDoctorR {})) _ = isAdmin
     isAuthorized (DataR (SpecialtyDoctorsR _ _)) _ = isAdmin
     isAuthorized (DataR (SpecialtyDeleR _ _)) _ = isAdmin
     isAuthorized (DataR (SpecialtyEditR _ _)) _ = isAdmin

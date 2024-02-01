@@ -1,9 +1,11 @@
+Remove: Retirer
 SinceDate: Depuis le
 SearchEngineOptimization: Optimisation du moteur de recherche
 AlreadyExists: Existe déjà
 BasicEntities: Entités de base
 CertificateDate: Date du certificat
 Specializations: Spécialisations
+JobTitle: Titre d'emploi
 SpecialtyTitle: Titre
 BackToHomepage: Retournez à la page d'accueil
 DemoUserAccounts: Comptes d'utilisateurs démo

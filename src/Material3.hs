@@ -61,7 +61,7 @@ md3selectField options = (selectField options)
 <md-filled-select ##{theId} *{attrs} :req:required name=#{name}>
   $forall opt<- opts
     <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
-      <div slot="headline">#{optionDisplay opt}
+      <div slot=headline>#{optionDisplay opt}
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }

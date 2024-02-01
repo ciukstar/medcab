@@ -5,7 +5,7 @@
       <md-icon-button href=@{DataR $ SpecialtiesR (Specialties [])} aria-label=_{MsgBack}>
         <md-icon>arrow_back
     $else
-      <md-icon-button href=@{DataR $ SpecialtyR (last sids) (Specialties sids)} aria-label=_{MsgBack}>
+      <md-icon-button href=@{DataR $ SpecialtiesR ps} aria-label=_{MsgBack}>
         <md-icon>arrow_back
           
     <h1.title-large>
@@ -37,9 +37,9 @@
           _{MsgNoDoctorsYet}
     $else
       <md-list>
-        $forall (Entity did (Doctor name mobile email),Entity _ (Specialist _ _ title cert)) <- doctors
-          <md-list-item type=link href=@{DataR $ SpecialtyR sid ps}>
-            <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto}>
+        $forall (Entity did (Doctor name _ _),Entity xid (Specialist _ _ title cert)) <- doctors
+          <md-list-item type=link href=@{DataR $ SpecialtyDoctorR xid sid did ps}>
+            <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
             <div slot=headline>#{name}
             <div slot=supporting-text>#{title}
             <div slot=supporting-text>
@@ -50,7 +50,7 @@
           <md-divider>
 
     <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-      <a href=@{DataR $ SpecialtyCreateR ps}>
+      <a href=@{DataR $ SpecialtyDoctorCreateR sid ps}>
       <md-icon slot=icon>add
 
     $forall (status,msg) <- filter ((/=) statusError . fst) msgs

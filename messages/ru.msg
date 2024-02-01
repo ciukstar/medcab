@@ -1,9 +1,11 @@
+Remove: Убрать
 SinceDate: С
 SearchEngineOptimization: Поисковая оптимизация
 AlreadyExists: Уже существует
 BasicEntities: Основные сущности
 CertificateDate: Дата сертификата
 Specializations: Специализации
+JobTitle: Должность
 SpecialtyTitle: Должность
 BackToHomepage: Вернуться на домашнюю страницу
 DemoUserAccounts: Демо-аккаунты
