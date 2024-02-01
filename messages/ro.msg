@@ -1,3 +1,4 @@
+IssueTracking: Raportarea erorilor
 Remove: Eliminați
 SinceDate: Începând cu
 SearchEngineOptimization: Optimizare motor de căutare
@@ -130,3 +131,13 @@ MetaDescription: Aplicație web progresivă pentru asistență medicală
 Doc001: Integrare cu API-uri externe
 
 Doc002: Un cont de superutilizator este definit în momentul implementării. Superutilizatorul gestionează alți utilizatori și acordă sau revocă privilegii de administrator anumitor utilizatori.
+
+Doc003 href: <a href=#{href} target=_blank>Depozitul de proiect</a> pe GitHub.
+
+Doc004 href: Vă rugăm să rețineți că aplicația care rulează în prezent este o aplicație demonstrativă. Orice acțiune este permisă și încurajată. <a href=#{href} target=_blank>Raportați erori</a> pe GitHub.
+
+Doc005 href: Un utilizator nou se poate înscrie folosind un cont Google sau creând un cont nou pe <a href=#{href}>pagina de autentificare</a>.
+
+Doc006: Pentru a crea un cont nou, este necesar să furnizați o adresă de e-mail. Adresa de e-mail va fi folosită pentru a verifica contul și pentru a seta sau recupera parola.
+
+Doc007: Un superutilizator (vezi mai jos) poate acorda privilegii de administrator oricărui utilizator înregistrat. Un utilizator cu rol de administrator poate, la rândul său, să acorde sau să revoce rolul de administrator altor utilizatori înregistrați. Privilegiile de administrator sunt necesare pentru a gestiona datele la nivel de sistem.

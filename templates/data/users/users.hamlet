@@ -37,7 +37,7 @@
     <md-list>
       $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- users
         <md-list-item type=link href=@{DataR $ UserR uid}>
-          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 style="clip-path:circle(50%)">              
+          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
           <div slot=headline>
             $maybe name <- name
               #{name}

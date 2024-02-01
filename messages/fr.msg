@@ -1,3 +1,4 @@
+IssueTracking: Signalement de bogues
 Remove: Retirer
 SinceDate: Depuis le
 SearchEngineOptimization: Optimisation du moteur de recherche
@@ -130,3 +131,13 @@ MetaDescription: Application Web progressive pour les soins de santé
 Doc001: Intégration avec des API externes
 
 Doc002: Un compte superutilisateur est défini au moment du déploiement. Le superutilisateur gère les autres utilisateurs et accorde ou révoque les privilèges d'administrateur à des utilisateurs spécifiques.
+
+Doc003 href: <a href=#{href} target=_blank>Le référentiel du projet</a> sur GitHub.
+
+Doc004 href: Veuillez noter que l'application actuellement en cours d'exécution est une application de démonstration. Toutes les actions sont autorisées et encouragées. <a href=#{href} target=_blank>Signalez les bugs</a> sur GitHub.
+
+Doc005 href: Un nouvel utilisateur peut s'inscrire en utilisant un compte Google ou en créant un nouveau compte sur la <a href=#{href}>page d'authentification</a>.
+
+Doc006: Pour créer un nouveau compte, il est nécessaire de fournir une adresse email. L'adresse e-mail sera utilisée pour vérifier le compte et pour définir ou récupérer le mot de passe.
+
+Doc007: Un superutilisateur (voir ci-dessous) peut accorder des privilèges d'administrateur à tout utilisateur enregistré. Un utilisateur doté du rôle d'administrateur peut à son tour accorder ou révoquer le rôle d'administrateur à d'autres utilisateurs enregistrés. Des privilèges d'administrateur sont requis pour gérer les données à l'échelle du système.

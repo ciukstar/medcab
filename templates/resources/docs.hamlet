@@ -32,27 +32,29 @@
 
   <section>
     <h2.headline-medium>_{MsgBasicEntities}
-    
+
     <section>
       <h3.headline-small>_{MsgUser}
-      ...
-    
+      <p.body-medium>#{translate $ MsgDoc005 (rndr $ AuthR LoginR)}
+      <p.body-medium>_{MsgDoc006}
+      <p.body-medium>_{MsgDoc007}
+
     <section>
       <h3.headline-small>_{MsgDoctor}
       ...
-    
+
     <section>
       <h3.headline-small>_{MsgSpecialty}
       ...
-    
+
   <section>
     <h2.headline-medium>_{MsgSuperuser}
     <dl>
-    
+
       <dt.label-large>_{MsgUsername}
       <dd.body-small>
         <code>&dollar;YESOD_SUPERUSER_USERNAME
-        
+
       <dt.label-large>_{MsgPassword}
       <dd.body-small>
         <code>&dollar;YESOD_SUPERUSER_PASSWORD
@@ -70,7 +72,7 @@
             _{MsgClientId}
           <dd.body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_ID
-            
+
           <dt.label-large>
             _{MsgClientSecret}
           <dd.body-small>
@@ -87,7 +89,15 @@
         <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
         <div>
           <code.body-small>&dollar;YESOD_MS_VALIDATE
-    
+
   <section>
     <h2.headline-medium>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_MedCab_svg} alt=_{MsgErDiagram} loading=lazy>
+
+  <section>
+    <h2.headline-medium>_{MsgSourceCode}
+    <p.body-medium>#{translate $ MsgDoc003 "https://github.com/ciukstar/medcab"}
+
+  <section>
+    <h2.headline-medium>_{MsgIssueTracking}
+    <p.body-medium>#{translate $ MsgDoc004 "https://github.com/ciukstar/medcab/issues"}

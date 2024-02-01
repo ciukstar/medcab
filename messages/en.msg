@@ -1,3 +1,4 @@
+IssueTracking: Issue tracking
 Remove: Remove
 SinceDate: Since
 SearchEngineOptimization: Search Engine Optimization
@@ -130,3 +131,13 @@ MetaDescription: Progressive Web App for Healthcare
 Doc001: Integration with external APIs
 
 Doc002: A superuser account is defined at deployment time. The superuser manages other users and grants or revokes administrator privileges to specific users.
+
+Doc003 href@Text: <a href=#{href} target=_blank>Project repository</a> on GitHub.
+
+Doc004 href@Text: Please note that the application currently running is a demo application. Any actions are allowed and encouraged. <a href=#{href} target=_blank>Report issues</a> on GitHub.
+
+Doc005 href@Text: A new user can sign up using a Google account or by creating a new account on the <a href=#{href}>authentication page</a>.
+
+Doc006: To create a new account, it is necessary to provide an email address. The email address will be used to verify the account and to set or recover the password.
+
+Doc007: A superuser (see below) can grant administrator privileges to any registered user. A user with the administrator role can in turn grant or revoke the administrator role to other registered users. Administrator privileges are required to manage system-wide data.
