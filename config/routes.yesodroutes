@@ -21,6 +21,13 @@
 
 /data DataR:
 
+    
+    /signs/#MedSignId/dele MedSignDeleR POST
+    /signs/#MedSignId/edit MedSignEditR GET
+    /forms/signs/new  	   MedSignAddR  GET
+    /signs/#MedSignId 	   MedSignR     GET POST
+    /signs	      	   MedSignsR    GET POST
+
     /units/#UnitId/edit UnitEditR GET
     /forms/units/new 	UnitAddR  GET
     /units/#UnitId/dele	UnitDeleR POST

@@ -14,7 +14,7 @@ import Foundation
       , MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail, MsgSuperuser
       , MsgUsername, MsgPassword, MsgClientId, MsgClientSecret, MsgBasicEntities
       , MsgUser, MsgDoctor, MsgSpecialty, MsgSearchEngineOptimization
-      , MsgSourceCode, MsgIssueTracking, MsgUnitOfMeasurement
+      , MsgSourceCode, MsgIssueTracking, MsgUnitOfMeasure
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
       , MsgDoc007, MsgDoc008
       )

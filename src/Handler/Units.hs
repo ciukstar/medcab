@@ -29,7 +29,7 @@ import Foundation
     , DataR (UnitsR, UnitR, UnitAddR, UnitEditR, UnitDeleR)
     , AppMessage
       ( MsgMeasurementUnits, MsgAdd, MsgSignIn, MsgSignOut, MsgPhoto, MsgName
-      , MsgUserAccount, MsgUnitsOfMeasurement, MsgNoDataYet, MsgMeasurementUnit
+      , MsgUserAccount, MsgUnitsOfMeasure, MsgNoDataYet, MsgMeasurementUnit
       , MsgDescription, MsgSymbol, MsgBack, MsgCancel, MsgSave, MsgRecordCreated
       , MsgInvalidFormData, MsgRecordEdited, MsgConfirmPlease, MsgDescription
       , MsgDeleteAreYouSure, MsgEdit, MsgDele, MsgAlreadyExists

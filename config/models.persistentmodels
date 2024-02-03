@@ -4,7 +4,7 @@
 
 Record
     user UserId OnDeleteCascade
-    sign MedicalSignId OnDeleteCascade
+    sign MedSignId OnDeleteCascade
     date Day
     time TimeOfDay
     value Double
@@ -13,13 +13,13 @@ Record
     UniqueRecord user sign date time
 
 
-MedicalSign
+MedSign
     name Text
     code Text Maybe
     unit UnitId Maybe OnDeleteSetNull
     descr Textarea Maybe
-    group MedicalSignId Maybe OnDeleteCascade
-    UniqueMedicalSign name
+    group MedSignId Maybe OnDeleteCascade
+    UniqueMedSign name
 
 
 Unit

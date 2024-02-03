@@ -15,9 +15,12 @@ module Material3
   , md3selectField
   , md3switchField
   , md3htmlField
+  , tsep
   ) where
 
-import Data.Text (Text, pack)
+
+import qualified Data.List.Safe as LS (head, tail)
+import Data.Text (Text, pack, splitOn)
 import Data.Text.Lazy (toStrict)
 
 import qualified Text.Blaze.Html.Renderer.String as S (renderHtml)
@@ -59,9 +62,14 @@ md3selectField options = (selectField options)
               sel (Right y) opt = optionInternalValue opt == y
           [whamlet|
 <md-filled-select ##{theId} *{attrs} :req:required name=#{name}>
-  $forall opt<- opts
-    <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
-      <div slot=headline>#{optionDisplay opt}
+  $forall opt <- opts
+    $with parts <- splitOn tsep $ optionDisplay opt
+      <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
+        $maybe h <- LS.head parts
+          <div slot=headline>#{h}
+        $maybe ts <- LS.tail parts
+          $forall t <- ts
+            <div slot=supporting-text>#{t}
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }
@@ -170,3 +178,7 @@ md3mreq field fs mdef = do
     (_,v') <- mreq field (nameFs { fsAttrs = fsAttrs nameFs <> attributes }) mdef
 
     return (r,v')
+
+
+tsep :: Text
+tsep = "<>"

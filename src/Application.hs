@@ -68,6 +68,11 @@ import Handler.Common
 
 import Handler.Resources (getDocsR)
 
+import Handler.MedSigns
+    ( getMedSignsR, getMedSignR, getMedSignAddR, postMedSignDeleR
+    , getMedSignEditR, postMedSignsR, postMedSignR
+    )
+
 import Handler.Units
     ( getUnitsR, getUnitAddR, getUnitR, postUnitsR, getUnitEditR, postUnitR
     , postUnitDeleR

@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgUnitsOfMeasure}
+      _{MsgMedicalSigns}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -28,22 +28,24 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null units
+  $if null signs
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
       <figcaption.body-large>
         _{MsgNoDataYet}
   $else
     <md-list>
-      $forall Entity uid (Unit name symbol _) <- units
-        <md-list-item type=link href=@{DataR $ UnitR uid}>
+      $forall Entity sid (MedSign name code _ _ _) <- signs
+        <md-list-item type=link href=@{DataR $ MedSignR sid}>
           <div slot=headline>#{name}
-          <div slot=supporting-text>#{symbol}
+          <div slot=supporting-text>
+            $maybe code <- code
+              #{code}
           <md-icon slot=end>arrow_forward_ios
         <md-divider>
 
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{DataR UnitAddR}>
+    <a href=@{DataR MedSignAddR}>
     <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

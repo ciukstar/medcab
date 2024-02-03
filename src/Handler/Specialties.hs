@@ -32,7 +32,6 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_, replace)
-    , entityKey
     )
 
 import Handler.Menu (menu)
@@ -47,7 +46,7 @@ import Model
       , SpecialistTitle, DoctorName, SpecialistId
       )
     , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
-    , Specialties (Specialties), Doctor (Doctor, doctorName)
+    , Specialties (Specialties), Doctor (Doctor)
     , Specialist (Specialist, specialistDoctor, specialistTitle, specialistCertDate)
     , DoctorId, DoctorPhoto, SpecialistId
     )
@@ -93,6 +92,7 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), Field (fieldView)
     )
+import Data.Bifunctor (Bifunctor(bimap))
 
 
 postSpecialtyDoctorDeleR :: SpecialistId -> SpecialtyId -> DoctorId -> Specialties -> Handler Html
@@ -162,10 +162,10 @@ formSpecialist :: SpecialtyId -> Maybe (Entity Specialist) -> Form Specialist
 formSpecialist sid specialist extra = do
     rndr <- getMessageRender
 
-    docs <- liftHandler $ ((\s -> (doctorName . entityVal $ s,entityKey s)) <$>) <$> runDB ( select $ do
+    docs <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( select $ do
         x <- from $ table @Doctor
         orderBy [asc (x ^. DoctorName)]
-        return x )
+        return (x ^. DoctorName, x ^. DoctorId) )
 
     (docR,docV) <- md3mreq (md3selectImgField (optionsPairs docs)) FieldSettings
         { fsLabel = SomeMessage MsgDoctor

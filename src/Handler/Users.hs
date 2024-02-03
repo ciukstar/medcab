@@ -175,11 +175,10 @@ formDelete extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 
 data UserData = UserData
-    { userDataName :: Maybe Text
-    , userDataAdmin :: Bool
-    , userDataPhoto :: Maybe FileInfo
-    , userDataPhotoAttribution :: Maybe Html
-    }
+    (Maybe Text) -- ^ userDataName
+    Bool -- ^ userDataAdmin
+    (Maybe FileInfo) -- ^ userDataPhoto
+    (Maybe Html) -- ^ userDataPhotoAttribution
 
 
 formUser :: Maybe (Entity User)

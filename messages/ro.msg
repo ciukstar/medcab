@@ -1,8 +1,11 @@
-UnitOfMeasurement: Unitate de măsură
+Group: Grupul
+MedicalSign: Semn medical
+MedicalSigns: Semne medicale
+UnitOfMeasure: Unitate de măsură
 Symbol: Simbol
 MeasurementUnit: Unitate de masura
 NoDataYet: Deocamdată nu există date
-UnitsOfMeasurement: Unități de măsură
+UnitsOfMeasure: Unități de măsură
 MeasurementUnits: Unitati de masura
 IssueTracking: Raportarea erorilor
 Remove: Eliminați

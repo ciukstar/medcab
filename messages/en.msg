@@ -1,8 +1,11 @@
-UnitOfMeasurement: Unit of measurement
+Group: Group
+MedicalSign: Medical sign
+MedicalSigns: Medical signs
+UnitOfMeasure: Unit of measure
 Symbol: Symbol
 MeasurementUnit: Measurement unit
 NoDataYet: There are no data yet
-UnitsOfMeasurement: Units of measurement
+UnitsOfMeasure: Units of measure
 MeasurementUnits: Measurement units
 IssueTracking: Issue tracking
 Remove: Remove

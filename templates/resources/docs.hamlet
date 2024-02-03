@@ -40,7 +40,7 @@
       <p.body-medium>_{MsgDoc007}
 
     <section>
-      <h3.headline-small>_{MsgUnitOfMeasurement}
+      <h3.headline-small>_{MsgUnitOfMeasure}
       <p.body-medium>#{translate $ MsgDoc008 (rndr $ DataR UnitsR)}
 
     <section>

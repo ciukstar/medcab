@@ -1,8 +1,11 @@
-UnitOfMeasurement: Единица измерения
+Group: Группа
+MedicalSign: Медицинский признак
+MedicalSigns: Медицинские признаки
+UnitOfMeasure: Единица измерения
 Symbol: Символ
 MeasurementUnit: Единица измерения
 NoDataYet: Данных пока нет
-UnitsOfMeasurement: Единицы измерений
+UnitsOfMeasure: Единицы измерений
 MeasurementUnits: Единицы измерения
 IssueTracking: Отслеживание ошибок
 Remove: Убрать
