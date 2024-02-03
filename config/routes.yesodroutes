@@ -21,6 +21,12 @@
 
 /data DataR:
 
+    /units/#UnitId/edit UnitEditR GET
+    /forms/units/new 	UnitAddR  GET
+    /units/#UnitId/dele	UnitDeleR POST
+    /units/#UnitId   	UnitR     GET  POST
+    /units 	     	UnitsR    GET  POST
+
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/dele SpecialistDeleR        POST
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/edit SpecialistEditR        GET
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId 	   SpecialistR            GET POST

@@ -2,6 +2,33 @@
 -- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
 
+Record
+    user UserId OnDeleteCascade
+    sign MedicalSignId OnDeleteCascade
+    date Day
+    time TimeOfDay
+    value Double
+    unit UnitId Maybe OnDeleteSetNull
+    remarks Textarea Maybe
+    UniqueRecord user sign date time
+
+
+MedicalSign
+    name Text
+    code Text Maybe
+    unit UnitId Maybe OnDeleteSetNull
+    descr Textarea Maybe
+    group MedicalSignId Maybe OnDeleteCascade
+    UniqueMedicalSign name
+
+
+Unit
+    name Text
+    symbol Text
+    descr Textarea Maybe
+    UniqueUnit name
+
+
 Specialist
     doctor DoctorId OnDeleteCascade
     specialty SpecialtyId OnDeleteCascade

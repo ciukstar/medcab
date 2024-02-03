@@ -1,3 +1,9 @@
+UnitOfMeasurement: Unité de mesure
+Symbol: Symbole
+MeasurementUnit: Unité de mesure
+NoDataYet: Il n'y a pas encore de données
+UnitsOfMeasurement: Unités de mesure
+MeasurementUnits: Unités de mesure
 IssueTracking: Signalement de bogues
 Remove: Retirer
 SinceDate: Depuis le
@@ -141,3 +147,5 @@ Doc005 href: Un nouvel utilisateur peut s'inscrire en utilisant un compte Google
 Doc006: Pour créer un nouveau compte, il est nécessaire de fournir une adresse email. L'adresse e-mail sera utilisée pour vérifier le compte et pour définir ou récupérer le mot de passe.
 
 Doc007: Un superutilisateur (voir ci-dessous) peut accorder des privilèges d'administrateur à tout utilisateur enregistré. Un utilisateur doté du rôle d'administrateur peut à son tour accorder ou révoquer le rôle d'administrateur à d'autres utilisateurs enregistrés. Des privilèges d'administrateur sont requis pour gérer les données à l'échelle du système.
+
+Doc008 href: Une unité de mesure est définie en fournissant un nom, un symbole et une description dans la section <a href=#{href}>« Unités de mesure »</a>.

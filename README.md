@@ -6,7 +6,15 @@
 
 ### User
 
-....
+A new user can sign up using a Google account or by creating a new account on the [authentication page](https://medcab-jjgwe5ufda-de.a.run.app/auth/login).
+
+To create a new account, it is necessary to provide an email address. The email address will be used to verify the account and to set or recover the password.
+
+A superuser (see below) can grant administrator privileges to any registered user. A user with the administrator role can in turn grant or revoke the administrator role to other registered users. Administrator privileges are required to manage system-wide data.
+
+### Unit of measurement
+
+A unit of measurement is defined by providing a name, symbol, and description in the section [“Measurement units”](https://medcab-jjgwe5ufda-de.a.run.app/data/units).
 
 ### Doctor
 

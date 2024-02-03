@@ -15,7 +15,7 @@
       _{MsgWelcome}
 
     <details.app-submenu #idDetailsData
-      :elem curr [Just (DataR DoctorsR), Just (DataR $ SpecialtiesR (Specialties [])), Just (DataR UsersR), Just (DataR TokensR)]:open
+      :elem curr [Just (DataR UnitsR), Just (DataR DoctorsR), Just (DataR $ SpecialtiesR (Specialties [])), Just (DataR UsersR), Just (DataR TokensR)]:open
       ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
       <summary>
         <md-menu-item>
@@ -28,6 +28,9 @@
           
       <md-menu-item href=@{DataR $ SpecialtiesR (Specialties [])} :curr == Just (DataR $ SpecialtiesR (Specialties [])):selected>
         _{MsgSpecialties}
+          
+      <md-menu-item href=@{DataR UnitsR} :curr == Just (DataR UnitsR):selected>
+        _{MsgMeasurementUnits}
           
       <md-menu-item href=@{DataR UsersR} :curr == Just (DataR UsersR):selected>
         _{MsgUsers}

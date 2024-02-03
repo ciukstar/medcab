@@ -7,15 +7,16 @@ import Database.Persist (Entity (Entity))
 import Handler.Menu (menu)
 import Foundation
     ( Handler
-    , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR)
+    , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR, DataR)
+    , DataR (UnitsR)
     , AppMessage
       ( MsgDocumentation, MsgAppName, MsgAppDescription, MsgSignIn, MsgSignOut
       , MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail, MsgSuperuser
       , MsgUsername, MsgPassword, MsgClientId, MsgClientSecret, MsgBasicEntities
       , MsgUser, MsgDoctor, MsgSpecialty, MsgSearchEngineOptimization
-      , MsgSourceCode, MsgIssueTracking
+      , MsgSourceCode, MsgIssueTracking, MsgUnitOfMeasurement
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
-      , MsgDoc007
+      , MsgDoc007, MsgDoc008
       )
     )
 import Model (AvatarColor (AvatarColorLight))

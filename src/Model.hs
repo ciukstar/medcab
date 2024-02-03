@@ -18,7 +18,7 @@ module Model where
 
 import Control.Monad (mapM)
 import ClassyPrelude.Yesod
-    ( Ord, Read, Typeable, Bool, ByteString, Text, derivePersistField
+    ( Ord, Read, Typeable, Bool, ByteString, Text, Double, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
@@ -28,6 +28,7 @@ import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
 import Data.Time.Calendar (Day)
+import Data.Time.LocalTime (TimeOfDay)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)

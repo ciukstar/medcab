@@ -1,3 +1,9 @@
+UnitOfMeasurement: Unitate de măsură
+Symbol: Simbol
+MeasurementUnit: Unitate de masura
+NoDataYet: Deocamdată nu există date
+UnitsOfMeasurement: Unități de măsură
+MeasurementUnits: Unitati de masura
 IssueTracking: Raportarea erorilor
 Remove: Eliminați
 SinceDate: Începând cu
@@ -141,3 +147,5 @@ Doc005 href: Un utilizator nou se poate înscrie folosind un cont Google sau cre
 Doc006: Pentru a crea un cont nou, este necesar să furnizați o adresă de e-mail. Adresa de e-mail va fi folosită pentru a verifica contul și pentru a seta sau recupera parola.
 
 Doc007: Un superutilizator (vezi mai jos) poate acorda privilegii de administrator oricărui utilizator înregistrat. Un utilizator cu rol de administrator poate, la rândul său, să acorde sau să revoce rolul de administrator altor utilizatori înregistrați. Privilegiile de administrator sunt necesare pentru a gestiona datele la nivel de sistem.
+
+Doc008 href: O unitate de măsură este definită prin furnizarea unui nume, simbol și descriere în secțiunea <a href=#{href}>„Unități de măsură”</a>.

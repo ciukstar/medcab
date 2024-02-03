@@ -215,7 +215,11 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-
+    isAuthorized (DataR (UnitDeleR _)) _ = isAdmin
+    isAuthorized (DataR (UnitEditR _)) _ = isAdmin
+    isAuthorized (DataR UnitAddR) _ = isAdmin
+    isAuthorized (DataR (UnitR _)) _ = isAdmin
+    isAuthorized r@(DataR UnitsR) _ = setUltDest r >> isAdmin
     
     isAuthorized (DataR (SpecialistDeleR {})) _ = isAdmin
     isAuthorized (DataR (SpecialistEditR {})) _ = isAdmin

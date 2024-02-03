@@ -1,3 +1,9 @@
+UnitOfMeasurement: Unit of measurement
+Symbol: Symbol
+MeasurementUnit: Measurement unit
+NoDataYet: There are no data yet
+UnitsOfMeasurement: Units of measurement
+MeasurementUnits: Measurement units
 IssueTracking: Issue tracking
 Remove: Remove
 SinceDate: Since
@@ -141,3 +147,5 @@ Doc005 href@Text: A new user can sign up using a Google account or by creating a
 Doc006: To create a new account, it is necessary to provide an email address. The email address will be used to verify the account and to set or recover the password.
 
 Doc007: A superuser (see below) can grant administrator privileges to any registered user. A user with the administrator role can in turn grant or revoke the administrator role to other registered users. Administrator privileges are required to manage system-wide data.
+
+Doc008 href@Text: A unit of measurement is defined by providing a name, symbol, and description in the section <a href=#{href}>“Measurement units”</a>.

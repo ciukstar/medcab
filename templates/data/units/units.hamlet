@@ -1,0 +1,53 @@
+
+<header.primary>
+  <div #headerStart>
+    ^{menu}
+
+    <h1.title-large>
+      _{MsgUnitsOfMeasurement}
+
+  $maybe Entity uid _ <- user
+    <span style="position:relaive">
+      <md-filled-icon-button type=button aria-label=_{MsgUserAccount} #btnUserAccount
+        onclick="document.getElementById('menuUserAccount').open = !document.getElementById('menuUserAccount').open">
+        <img src=@{AccountPhotoR uid AvatarColorLight} width=24 height=24 alt=_{MsgPhoto}
+             loading=lazy style="clip-path:circle(50%)">
+      <md-menu anchor=btnUserAccount x-offset=16 y-offset=16 #menuUserAccount>
+        <md-menu-item href=@{AccountR uid}>
+          <div slot=headline>_{MsgUserAccount}
+        <md-menu-item href=@{AuthR LogoutR}>
+          <div slot=headline>_{MsgSignOut}
+  $nothing
+    <md-filled-icon-button href=@{AuthR LoginR} aria-label=_{MsgSignIn}>
+      <md-icon>login
+
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $if null units
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoDataYet}
+  $else
+    <md-list>
+      $forall Entity uid (Unit name symbol _) <- units
+        <md-list-item type=link href=@{DataR $ UnitR uid}>
+          <div slot=headline>#{name}
+          <div slot=supporting-text>#{symbol}
+          <md-icon slot=end>arrow_forward_ios
+        <md-divider>
+
+  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{DataR UnitAddR}>
+    <md-icon slot=icon>add
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}
