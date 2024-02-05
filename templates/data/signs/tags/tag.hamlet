@@ -1,16 +1,16 @@
 <header.app-top-app-bar.background>
   <div #headerStart>
-    <md-icon-button href=@{DataR MedSignsR} aria-label=_{MsgBack}>
+    <md-icon-button href=@{DataR SignTagsR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
     <h1.title-large>
-      _{MsgMedicalSign}
+      _{MsgTag}
 
   <div #headerEnd>
     <md-icon-button type=button aria-label=_{MsgDele}
       onclick="document.getElementById('idDialogDelete').open = true">
       <md-icon>delete
-    <md-icon-button href=@{DataR $ MedSignEditR sid} aria-label=_{MsgEdit}>
+    <md-icon-button href=@{DataR $ SignTagEditR tid} aria-label=_{MsgEdit}>
       <md-icon>edit
 
 <md-dialog #idDialogDelete>
@@ -21,7 +21,7 @@
   <div slot=actions>
     <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
       _{MsgCancel}
-    <form slot=content method=post action=@{DataR $ MedSignDeleR sid} enctype=#{et}>
+    <form slot=content method=post action=@{DataR $ SignTagDeleR tid} enctype=#{et}>
       ^{fw}
       <md-filled-button type=submit>
         _{MsgDele}
@@ -33,29 +33,19 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $maybe (Entity _ (MedSign name code descr _ _),unit,tag) <- sign
+  $maybe (Entity _ (SignTag name descr _),group) <- tag
     <dl>
       <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
-
-      <dt.label-large>_{MsgCode}
-      <dd.body-medium>
-        $maybe code <- code
-          #{code}
-  
-      $maybe Entity _ (Unit uname _ _) <- unit
-        <dt.label-large>_{MsgUnitOfMeasure}
-        <dd.body-medium>#{uname}
-        
+      <dd.body-medium>#{name}        
 
       <dt.label-large>_{MsgDescription}
       <dd.body-medium>
         $maybe descr <- descr
           #{descr}
           
-      $maybe Entity _ (SignTag tname _ _) <- tag
+      $maybe Entity _ (SignTag gname _ _) <- group
         <dt.label-large>_{MsgGroup}
-        <dd.body-medium>#{tname}
+        <dd.body-medium>#{gname}
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

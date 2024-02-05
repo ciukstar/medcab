@@ -1,0 +1,38 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DataR MedSignsR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgTags}
+
+  <div #headerEnd>
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $if null tags
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoDataYet}
+  $else
+    <md-list>
+      $forall Entity tid (SignTag name _ _) <- tags
+        <md-list-item type=link href=@{DataR $ SignTagR tid}>
+          <div slot=headline>#{name}
+          <md-icon slot=end>arrow_forward_ios
+        <md-divider>
+
+  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{DataR SignTagAddR}>
+    <md-icon slot=icon>add
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

@@ -70,7 +70,9 @@ import Handler.Resources (getDocsR)
 
 import Handler.MedSigns
     ( getMedSignsR, getMedSignR, getMedSignAddR, postMedSignDeleR
-    , getMedSignEditR, postMedSignsR, postMedSignR
+    , getMedSignEditR, postMedSignsR, postMedSignR, getSignTagsR, getSignTagR
+    , getSignTagAddR, getSignTagEditR, postSignTagDeleR, postSignTagsR
+    , postSignTagR
     )
 
 import Handler.Units

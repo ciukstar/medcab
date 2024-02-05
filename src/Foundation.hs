@@ -216,6 +216,12 @@ instance Yesod App where
     isAuthorized (StaticR _) _ = return Authorized
 
     
+    isAuthorized (DataR (SignTagDeleR _)) _ = isAdmin
+    isAuthorized (DataR (SignTagEditR _)) _ = isAdmin
+    isAuthorized (DataR SignTagAddR) _ = isAdmin
+    isAuthorized (DataR (SignTagR _)) _ = isAdmin
+    isAuthorized (DataR SignTagsR) _ = isAdmin
+    
     isAuthorized (DataR (MedSignDeleR _)) _ = isAdmin
     isAuthorized (DataR (MedSignEditR _)) _ = isAdmin
     isAuthorized (DataR MedSignAddR) _ = isAdmin

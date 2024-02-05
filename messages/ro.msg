@@ -1,3 +1,5 @@
+Tags: Etichete
+Tag: Etichetă
 Group: Grupul
 MedicalSign: Semn medical
 MedicalSigns: Semne medicale

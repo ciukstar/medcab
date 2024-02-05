@@ -1,3 +1,5 @@
+Tags: Теги
+Tag: Ярлык
 Group: Группа
 MedicalSign: Медицинский признак
 MedicalSigns: Медицинские признаки

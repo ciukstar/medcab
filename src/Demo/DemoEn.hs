@@ -26,7 +26,10 @@ import Model
     , Specialist
       ( Specialist, specialistDoctor, specialistSpecialty, specialistCertDate
       , specialistTitle
-      ), Unit (Unit, unitName, unitSymbol, unitDescr), MedSign (MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignGroup)
+      ), Unit (Unit, unitName, unitSymbol, unitDescr)
+    , MedSign
+      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag )
+    , SignTag (SignTag, signTagName, signTagGroup, signTagDescr)
     )
 
 import Text.Hamlet (shamlet)
@@ -242,22 +245,18 @@ fillDemoEn = do
 
     u4 <- insert unit4
 
-    let sign1 = MedSign { medSignName = "Vital signs"
-                        , medSignCode = Just "VITA"
-                        , medSignUnit = Nothing
-                        , medSignDescr = Just $ Textarea "Vital signs (also known as vitals) are a group of the four to six most crucial medical signs that indicate the status of the body's vital (life-sustaining) functions"
-                        , medSignGroup = Nothing
-                        }
+    let signTag1 = SignTag { signTagName = "Vital signs"
+                           , signTagDescr = Just $ Textarea "Vital signs (also known as vitals) are a group of the four to six most crucial medical signs that indicate the status of the body's vital (life-sustaining) functions"
+                           , signTagGroup = Nothing
+                           }
 
-    g1 <- insert_ sign1
+    st1 <- insert_ signTag1
 
-    let sign2 = MedSign { medSignName = "Symptoms"
-                        , medSignCode = Just "SYMP"
-                        , medSignUnit = Nothing
-                        , medSignDescr = Just $ Textarea "A symptom is something felt or experienced, such as pain or dizziness"
-                        , medSignGroup = Nothing
-                        }
+    let signTag2 = SignTag { signTagName = "Symptoms"
+                           , signTagDescr = Just $ Textarea "A symptom is something felt or experienced, such as pain or dizziness"
+                           , signTagGroup = Nothing
+                           }
 
-    g2 <- insert_ sign2
+    st2 <- insert_ signTag2
 
     return ()

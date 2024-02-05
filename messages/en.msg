@@ -1,10 +1,12 @@
+Tags: Tags
+Tag: Tag
 Group: Group
 MedicalSign: Medical sign
 MedicalSigns: Medical signs
 UnitOfMeasure: Unit of measure
 Symbol: Symbol
 MeasurementUnit: Measurement unit
-NoDataYet: There are no data yet
+NoDataYet: There is no data yet
 UnitsOfMeasure: Units of measure
 MeasurementUnits: Measurement units
 IssueTracking: Issue tracking

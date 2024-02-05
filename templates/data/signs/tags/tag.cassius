@@ -2,7 +2,7 @@
 header
   position: sticky
   top: 0
-  z-index: 2
+  z-index: 1
   padding: 0.5rem 1rem
   display: flex
   flex-direction: row
@@ -14,24 +14,17 @@ header
     justify-content: flex-start
     align-items: center
     gap: 1rem
-
+    
 main
+  display: flex
+  flex-direction: column
   .error
-      align-self: stretch
-      padding: 1rem
-
-  ##{idBarTags}
-      display: flex
-      flex-direction: row
-      justify-content: flex-start
-      align-items: center 
-      md-chip-set
-          margin: 1rem
-        
-  ##{idFabAdd}
-    position: fixed
-    right: 1rem
-    bottom: 1rem
+    align-self: stretch
+    padding: 1rem
+  dl
+    margin: 1rem 2rem
+    dt + dd
+      margin-bottom: 1rem
 
 aside.app-snackbar
   box-sizing: border-box

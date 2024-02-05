@@ -1,3 +1,5 @@
+Tags: Étiquettes
+Tag: Étiquette
 Group: Groupe
 MedicalSign: Signe médical
 MedicalSigns: Signes médicaux

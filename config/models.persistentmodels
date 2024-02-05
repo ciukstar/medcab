@@ -16,11 +16,16 @@ Record
 MedSign
     name Text
     code Text Maybe
-    unit UnitId Maybe OnDeleteSetNull
     descr Textarea Maybe
-    group MedSignId Maybe OnDeleteCascade
+    unit UnitId Maybe OnDeleteSetNull
+    tag SignTagId Maybe OnDeleteSetNull
     UniqueMedSign name
 
+SignTag
+    name Text
+    descr Textarea Maybe
+    group SignTagId Maybe OnDeleteCascade
+    UniqueSignTag name
 
 Unit
     name Text

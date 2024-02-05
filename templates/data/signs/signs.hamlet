@@ -28,6 +28,13 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
+  <div ##{idBarTags}>
+    <md-chip-set>
+      $forall Entity _ (SignTag name _ _) <- tags
+        <md-filter-chip label=#{name}>
+    <md-icon-button type=button href=@{DataR SignTagsR} aria-label=_{MsgEdit}>
+      <md-icon>edit
+
   $if null signs
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
