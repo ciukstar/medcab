@@ -1,3 +1,6 @@
+Configure: Configurer
+Settings: Paramètres
+Manage: Gérer
 Tags: Étiquettes
 Tag: Étiquette
 Group: Groupe

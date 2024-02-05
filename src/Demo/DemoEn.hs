@@ -245,12 +245,33 @@ fillDemoEn = do
 
     u4 <- insert unit4
 
+    let unit5 = Unit { unitName = "Celsius"
+                     , unitSymbol = "°C"
+                     , unitDescr = Just $ Textarea "The degree Celsius is the unit of temperature on the Celsius scale, one of two temperature scales used in the International System of Units (SI), the other being the closely related Kelvin scale"
+                     }
+
+    u5 <- insert unit5
+
+    let unit6 = Unit { unitName = "Fahrenheit"
+                     , unitSymbol = "°F"
+                     , unitDescr = Just $ Textarea "The degree Celsius is the unit of temperature on the Celsius scale, one of two temperature scales used in the International System of Units (SI), the other being the closely related Kelvin scale"
+                     }
+
+    u6 <- insert unit6
+
+    let unit7 = Unit { unitName = "Breaths per minute"
+                     , unitSymbol = "br/min"
+                     , unitDescr = Just $ Textarea "A person's respiratory rate is usually measured in breaths per minute"
+                     }
+
+    u7 <- insert unit7
+
     let signTag1 = SignTag { signTagName = "Vital signs"
                            , signTagDescr = Just $ Textarea "Vital signs (also known as vitals) are a group of the four to six most crucial medical signs that indicate the status of the body's vital (life-sustaining) functions"
                            , signTagGroup = Nothing
                            }
 
-    st1 <- insert_ signTag1
+    st1 <- insert signTag1
 
     let signTag2 = SignTag { signTagName = "Symptoms"
                            , signTagDescr = Just $ Textarea "A symptom is something felt or experienced, such as pain or dizziness"
@@ -258,5 +279,41 @@ fillDemoEn = do
                            }
 
     st2 <- insert_ signTag2
+
+    let sign1 = MedSign { medSignName = "Body temperature"
+                        , medSignCode = Just "BT"
+                        , medSignDescr = Just $ Textarea "Thermoregulation is the ability of an organism to keep its body temperature within certain boundaries, even when the surrounding temperature is very different"
+                        , medSignUnit = Just u5
+                        , medSignTag = Just st1
+                        }
+
+    sgn1 <- insert_ sign1
+
+    let sign2 = MedSign { medSignName = "Blood pressure"
+                        , medSignCode = Just "BP"
+                        , medSignDescr = Just $ Textarea "Blood pressure is the pressure of circulating blood against the walls of blood vessels. Most of this pressure results from the heart pumping blood through the circulatory system"
+                        , medSignUnit = Just u1
+                        , medSignTag = Just st1
+                        }
+
+    sgn2 <- insert_ sign2
+
+    let sign3 = MedSign { medSignName = "Heart rate"
+                        , medSignCode = Just "HR"
+                        , medSignDescr = Just $ Textarea "In medicine, a pulse represents the tactile arterial palpation of the cardiac cycle (heartbeat) by trained fingertips"
+                        , medSignUnit = Just u2
+                        , medSignTag = Just st1
+                        }
+
+    sgn3 <- insert_ sign3
+
+    let sign4 = MedSign { medSignName = "Respiratory rate"
+                        , medSignCode = Just "RR"
+                        , medSignDescr = Just $ Textarea "The respiratory rate is the rate at which breathing occurs; it is set and controlled by the respiratory center of the brain. A person's respiratory rate is usually measured in breaths per minute"
+                        , medSignUnit = Just u7
+                        , medSignTag = Just st1
+                        }
+
+    sgn4 <- insert_ sign4
 
     return ()

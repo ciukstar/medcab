@@ -1,3 +1,6 @@
+Configure: Configurați
+Settings: Setări
+Manage: Gestionează
 Tags: Etichete
 Tag: Etichetă
 Group: Grupul

@@ -1,3 +1,6 @@
+Configure: Настроить
+Settings: Настройка
+Manage: Управление
 Tags: Теги
 Tag: Ярлык
 Group: Группа

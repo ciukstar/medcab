@@ -20,13 +20,8 @@ main
       align-self: stretch
       padding: 1rem
 
-  ##{idBarTags}
-      display: flex
-      flex-direction: row
-      justify-content: flex-start
-      align-items: center 
-      md-chip-set
-          margin: 1rem
+  md-chip-set
+      margin: 1rem
         
   ##{idFabAdd}
     position: fixed

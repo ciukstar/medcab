@@ -1,3 +1,6 @@
+Configure: Configure
+Settings: Settings
+Manage: Manage
 Tags: Tags
 Tag: Tag
 Group: Group
