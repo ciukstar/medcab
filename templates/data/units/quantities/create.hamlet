@@ -1,10 +1,10 @@
 <header.app-top-app-bar.background>
   <div #headerStart>
-    <md-icon-button href=@{DataR $ SignTagsR ps} aria-label=_{MsgBack}>
+    <md-icon-button href=@{DataR QuantitiesR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
     <h1.title-large>
-      _{MsgTag}
+      _{MsgQuantity}
       
 <main>
 
@@ -12,10 +12,10 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  <form method=post action=@{DataR $ SignTagsR ps} enctype=#{et} novalidate>
+  <form method=post action=@{DataR QuantitiesR} enctype=#{et} novalidate>
     ^{fw}
     <div.app-form-actions>
-      <md-text-button type=button href=@{DataR $ SignTagsR ps}>
+      <md-text-button type=button href=@{DataR QuantitiesR}>
         _{MsgCancel}
       <md-filled-button type=submit>
         _{MsgSave}

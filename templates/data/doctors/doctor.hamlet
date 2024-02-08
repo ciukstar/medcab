@@ -67,4 +67,4 @@
         <span.body-medium>#{status}. #
         <span.body-medium>#{msg}
 
-  <div #panelSpecialties role=tabpanel aria-labelledby=tabpecialties hidden>
+  <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>

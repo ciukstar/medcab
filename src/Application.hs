@@ -77,7 +77,8 @@ import Handler.MedSigns
 
 import Handler.Units
     ( getUnitsR, getUnitAddR, getUnitR, postUnitsR, getUnitEditR, postUnitR
-    , postUnitDeleR
+    , postUnitDeleR, getQuantitiesR, getQuantityR, getQuantityAddR
+    , postQuantitiesR, getQuantityEditR, postQuantityDeleR, postQuantityR
     )
 
 import Handler.Doctors

@@ -1,0 +1,55 @@
+
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    $if null tids
+      <md-icon-button href=@{DataR $ SignTagsR (SignTags [])} aria-label=_{MsgBack}>
+        <md-icon>arrow_back
+    $else
+      <md-icon-button href=@{DataR $ SignTagsR (SignTags (init tids))} aria-label=_{MsgBack}>
+        <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgTag}
+
+  <div #headerEnd>
+      
+<main>
+  
+  <md-tabs ##{idTabs} aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ SignTagR (last tids) (SignTags (init tids))}' : '@{DataR $ SignTagsR (SignTags (init tids))}'">
+    <md-primary-tab #tabDetails aria-controls=idPanelDetails>
+      _{MsgDetails}
+    <md-primary-tab #tabSubtags aria-controls=#{idPanelSubtags} active=true>
+      _{MsgSubtags}
+
+  <div #idPanelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+
+  <div ##{idPanelSubtags} role=tabpanel aria-labelledby=tabSubtags>
+
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
+
+    $if null tags
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&varnothing;
+        <figcaption.body-large>
+          _{MsgNoDataYet}
+    $else
+      <md-list>
+        $forall (Value level, Entity tid (SignTag name _ _)) <- tags
+          <md-list-item type=link href=@{DataR $ SignTagR tid ps}>
+            <md-icon slot=start>counter_#{level}
+            <div slot=headline>#{name}
+            <md-icon slot=end>arrow_forward_ios
+          <md-divider>
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
+
+    <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{DataR $ SignTagAddR ps}>
+      <md-icon slot=icon>add

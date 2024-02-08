@@ -1,6 +1,11 @@
+Quantity: Quantity
+Quantities: Quantities
+Categories: Categories
 Configure: Configure
 Settings: Settings
 Manage: Manage
+Subtags: Subtags
+Subtag: Subtag
 Tags: Tags
 Tag: Tag
 Group: Group

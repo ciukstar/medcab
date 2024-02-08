@@ -29,15 +29,25 @@
       #{status}. #{msg}
 
   <md-chip-set>
-    $forall Entity tid (SignTag name _ _) <- tags
+    $forall Entity tid (SignTag name _ _) <- tags0
       $with isSelected <- elem tid selected
         $with theId <- pack $ show $ fromSqlKey tid
           <md-filter-chip label=#{name} :isSelected:selected
             onclick="this.querySelector('a[href]').click()">
             <a :isSelected:href=@?{(DataR MedSignsR,filter (((/=) theId) . snd) itags)}
                :not isSelected:href=@?{(DataR MedSignsR,((:) ("tag",theId) itags))}>
-    <md-assist-chip label=_{MsgConfigure} href=@?{(DataR SignTagsR,stati)}>
+    <md-assist-chip label=_{MsgConfigure} href=@?{(DataR $ SignTagsR (SignTags []),stati)}>
       <md-icon slot=icon>settings
+
+  $if not (null tags1)
+    <md-chip-set>
+      $forall Entity tid (SignTag name _ _) <- tags1
+        $with isSelected <- elem tid selected
+          $with theId <- pack $ show $ fromSqlKey tid
+            <md-filter-chip label=#{name} :isSelected:selected
+              onclick="this.querySelector('a[href]').click()">
+              <a :isSelected:href=@?{(DataR MedSignsR,filter (((/=) theId) . snd) itags)}
+                 :not isSelected:href=@?{(DataR MedSignsR,((:) ("tag",theId) itags))}>
 
   $if null signs
     <figure style="text-align:center">

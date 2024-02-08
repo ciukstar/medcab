@@ -28,6 +28,17 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
+  <md-chip-set>
+    $forall Entity qid (Quantity name _) <- quantities
+      $with isSelected <- elem qid selected
+        $with theId <- pack $ show $ fromSqlKey qid
+          <md-filter-chip label=#{name} :isSelected:selected
+            onclick="this.querySelector('a[href]').click()">
+            <a :isSelected:href=@?{(DataR QuantitiesR,filter (((/=) theId) . snd) iquantities)}
+               :not isSelected:href=@?{(DataR QuantitiesR,((:) ("tag",theId) iquantities))}>
+    <md-assist-chip label=_{MsgConfigure} href=@?{(DataR QuantitiesR,stati)}>
+      <md-icon slot=icon>settings
+
   $if null units
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;

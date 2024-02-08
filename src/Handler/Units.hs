@@ -11,9 +11,17 @@ module Handler.Units
   , getUnitEditR
   , postUnitR
   , postUnitDeleR
+  , getQuantitiesR
+  , getQuantityR
+  , getQuantityAddR
+  , postQuantitiesR
+  , getQuantityEditR
+  , postQuantityDeleR
+  , postQuantityR
   ) where
 
-import Data.Text (Text)
+import Data.Maybe (mapMaybe)
+import Data.Text (Text, unpack, pack)
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy
     , (^.), (==.)
@@ -22,17 +30,22 @@ import Database.Esqueleto.Experimental
 import Database.Persist
     ( Entity (Entity), entityVal, PersistStoreWrite (insert_, delete, replace)
     )
+import Database.Persist.Sql (toSqlKey, fromSqlKey)
 
 import Foundation
     ( Handler, Form
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
-    , DataR (UnitsR, UnitR, UnitAddR, UnitEditR, UnitDeleR)
+    , DataR
+      ( UnitsR, UnitR, UnitAddR, UnitEditR, UnitDeleR, QuantitiesR, QuantityR
+      , QuantityAddR, QuantityEditR, QuantityDeleR
+      )
     , AppMessage
       ( MsgMeasurementUnits, MsgAdd, MsgSignIn, MsgSignOut, MsgPhoto, MsgName
       , MsgUserAccount, MsgUnitsOfMeasure, MsgNoDataYet, MsgMeasurementUnit
       , MsgDescription, MsgSymbol, MsgBack, MsgCancel, MsgSave, MsgRecordCreated
       , MsgInvalidFormData, MsgRecordEdited, MsgConfirmPlease, MsgDescription
-      , MsgDeleteAreYouSure, MsgEdit, MsgDele, MsgAlreadyExists
+      , MsgDeleteAreYouSure, MsgEdit, MsgDele, MsgAlreadyExists, MsgQuantities
+      , MsgConfigure, MsgQuantity, MsgRecordDeleted
       )
     )
 
@@ -40,25 +53,175 @@ import Handler.Menu (menu)
 
 import Material3 (md3mreq, md3textField, md3textareaField, md3mopt)
 import Model
-    ( AvatarColor(AvatarColorLight), Unit(Unit, unitName, unitSymbol, unitDescr)
-    , statusError, EntityField (UnitName, UnitId), UnitId, statusSuccess
+    ( AvatarColor(AvatarColorLight), statusError, statusSuccess
+    , EntityField (UnitName, UnitId, QuantityName, QuantityId)
+    , UnitId, Unit(Unit, unitName, unitSymbol, unitDescr)
+    , QuantityId, Quantity (Quantity, quantityName, quantityDescr)
     )
 
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)
+import Text.Read (readMaybe)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
-    ( Yesod(defaultLayout), setTitleI, newIdent, getMessages, redirect
-    , SomeMessage (SomeMessage), getMessageRender, addMessageI, whamlet
+    ( Yesod(defaultLayout), newIdent, getMessages, redirect
+    , SomeMessage (SomeMessage), getMessageRender, addMessageI
+    , YesodRequest (reqGetParams), getRequest
     )
+import Yesod.Core.Widget (setTitleI, whamlet)
+
 import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
 import Yesod.Form.Types
     ( FieldSettings(FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), FormResult (FormSuccess), Field
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
+
+
+postQuantityDeleR :: QuantityId -> Handler Html
+postQuantityDeleR qid = do
+    ((fr,_),_) <- runFormPost formQuantityDele
+    case fr of
+      FormSuccess () -> do
+          runDB $ delete qid
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ DataR QuantitiesR
+      _otherwise -> do
+          addMessageI statusError MsgInvalidFormData
+          redirect $ DataR $ QuantityR qid
+
+
+formQuantityDele :: Form ()
+formQuantityDele extra = return (FormSuccess (), [whamlet|#{extra}|])
+
+
+postQuantityR :: QuantityId -> Handler Html
+postQuantityR qid = do
+
+    quantity <- runDB $ selectOne $ do
+        x <- from $ table @Quantity
+        where_ $ x ^. QuantityId ==. val qid
+        return x
+
+    ((fr,fw),et) <- runFormPost $ formQuantity quantity
+    case fr of
+      FormSuccess r -> do
+          runDB $ replace qid r
+          addMessageI statusSuccess MsgRecordEdited
+          redirect $ DataR $ QuantityR qid
+      _otherwise -> defaultLayout $ do
+          setTitleI MsgQuantity
+          msgs <- getMessages
+          $(widgetFile "data/units/quantities/edit")
+
+
+getQuantityEditR :: QuantityId -> Handler Html
+getQuantityEditR qid = do
+
+    quantity <- runDB $ selectOne $ do
+        x <- from $ table @Quantity
+        where_ $ x ^. QuantityId ==. val qid
+        return x
+
+    (fw,et) <- generateFormPost $ formQuantity quantity
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgQuantity
+        $(widgetFile "data/units/quantities/edit")
+
+
+getQuantityR :: QuantityId -> Handler Html
+getQuantityR qid = do
+    
+    quantity <- runDB $ selectOne $ do
+        x <- from $ table @Quantity
+        where_ $ x ^. QuantityId ==. val qid
+        return x
+
+    (fw,et) <- generateFormPost formQuantityDele
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgQuantity
+        $(widgetFile "data/units/quantities/quantity")
+
+
+postQuantitiesR :: Handler Html
+postQuantitiesR = do
+    ((fr,fw),et) <- runFormPost $ formQuantity Nothing
+    case fr of
+      FormSuccess r -> do
+          runDB $ insert_ r
+          addMessageI statusSuccess MsgRecordCreated
+          redirect $ DataR QuantitiesR
+      _otherwise -> defaultLayout $ do
+          msgs <- getMessages
+          setTitleI MsgQuantity
+          $(widgetFile "data/units/quantities/create")
+
+
+getQuantityAddR :: Handler Html
+getQuantityAddR = do
+    (fw,et) <- generateFormPost $ formQuantity Nothing
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgQuantity
+        $(widgetFile "data/units/quantities/create")
+
+
+formQuantity :: Maybe (Entity Quantity) -> Form Quantity
+formQuantity quantity extra = do
+    rndr <- getMessageRender
+    
+    (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
+        { fsLabel = SomeMessage MsgName
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgName)]
+        } ( quantityName . entityVal <$> quantity)
+        
+    (descrR,descrV) <- md3mopt md3textareaField FieldSettings
+        { fsLabel = SomeMessage MsgDescription
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgDescription)]
+        } ( quantityDescr . entityVal <$> quantity)
+
+    let r = Quantity <$> nameR <*> descrR
+    let w = $(widgetFile "data/units/quantities/form")
+    return (r,w)
+  where
+      uniqueNameField :: Field Handler Text
+      uniqueNameField = checkM uniqueName md3textField
+
+      uniqueName :: Text -> Handler (Either AppMessage Text)
+      uniqueName name = do
+          mx <- runDB $ selectOne $ do
+              x <- from $ table @Quantity
+              where_ $ x ^. QuantityName ==. val name
+              return x
+          return $ case mx of
+            Nothing -> Right name
+            Just (Entity qid _) -> case quantity of
+              Nothing -> Left MsgAlreadyExists
+              Just (Entity qid' _) | qid == qid' -> Right name
+                                   | otherwise -> Left MsgAlreadyExists
+
+
+getQuantitiesR :: Handler Html
+getQuantitiesR = do
+
+    stati <- reqGetParams <$> getRequest
+    
+    quantities <- runDB $ select $ do
+        x <- from $ table @Quantity
+        orderBy [asc (x ^. QuantityName)]
+        return x
+
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgQuantities
+        idFabAdd <- newIdent
+        $(widgetFile "data/units/quantities/quantities")
 
 
 postUnitDeleR :: UnitId -> Handler Html
@@ -191,6 +354,15 @@ getUnitR uid = do
 getUnitsR :: Handler Html
 getUnitsR = do
     user <- maybeAuth
+
+    stati <- reqGetParams <$> getRequest
+    let iquantities = filter ((== "quantity") . fst) stati
+    let selected = mapMaybe ((toSqlKey <$>) . readMaybe . unpack . snd) iquantities
+    
+    quantities <- runDB $ select $ do
+        x <- from $ table @Quantity
+        orderBy [asc (x ^. QuantityName)]
+        return x
 
     units <- runDB $ select $ do
         x <- from $ table @Unit

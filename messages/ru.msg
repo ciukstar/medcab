@@ -1,6 +1,11 @@
+Quantity: Величина
+Quantities: Величины
+Categories: Категории
 Configure: Настроить
 Settings: Настройка
 Manage: Управление
+Subtags: Подтеги
+Subtag: Подтег
 Tags: Теги
 Tag: Ярлык
 Group: Группа

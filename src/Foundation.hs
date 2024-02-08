@@ -216,17 +216,25 @@ instance Yesod App where
     isAuthorized (StaticR _) _ = return Authorized
 
     
-    isAuthorized (DataR (SignTagDeleR _)) _ = isAdmin
-    isAuthorized (DataR (SignTagEditR _)) _ = isAdmin
-    isAuthorized (DataR SignTagAddR) _ = isAdmin
-    isAuthorized (DataR (SignTagR _)) _ = isAdmin
-    isAuthorized (DataR SignTagsR) _ = isAdmin
+    isAuthorized (DataR (SignTagDeleR _ _)) _ = isAdmin
+    isAuthorized (DataR (SignTagEditR _ _)) _ = isAdmin
+    isAuthorized (DataR (SignTagAddR _)) _ = isAdmin
+    isAuthorized (DataR (SignTagR _ _)) _ = isAdmin
+    isAuthorized (DataR (SignTagsR _)) _ = isAdmin
     
     isAuthorized (DataR (MedSignDeleR _)) _ = isAdmin
     isAuthorized (DataR (MedSignEditR _)) _ = isAdmin
     isAuthorized (DataR MedSignAddR) _ = isAdmin
     isAuthorized (DataR (MedSignR _)) _ = isAdmin
     isAuthorized r@(DataR MedSignsR) _ = setUltDest r >> isAdmin
+
+    
+    
+    isAuthorized (DataR (QuantityDeleR _)) _ = isAdmin
+    isAuthorized (DataR (QuantityEditR _)) _ = isAdmin
+    isAuthorized (DataR QuantityAddR) _ = isAdmin
+    isAuthorized (DataR (QuantityR _)) _ = isAdmin
+    isAuthorized (DataR QuantitiesR) _ = isAdmin
 
     isAuthorized (DataR (UnitDeleR _)) _ = isAdmin
     isAuthorized (DataR (UnitEditR _)) _ = isAdmin

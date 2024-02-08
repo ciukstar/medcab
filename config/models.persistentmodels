@@ -33,6 +33,10 @@ Unit
     descr Textarea Maybe
     UniqueUnit name
 
+Quantity
+    name Text
+    descr Textarea Maybe
+    UniqueQuantity name    
 
 Specialist
     doctor DoctorId OnDeleteCascade

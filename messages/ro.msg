@@ -1,6 +1,11 @@
+Quantity: Mărime
+Quantities: Mărimi
+Categories: Categorii
 Configure: Configurați
 Settings: Setări
 Manage: Gestionează
+Subtags: Subetichete
+Subtag: Subetichetă
 Tags: Etichete
 Tag: Etichetă
 Group: Grupul

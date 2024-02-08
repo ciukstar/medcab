@@ -21,14 +21,16 @@ module Handler.MedSigns
   ) where
 
 
-import Control.Monad (unless)
+import Control.Applicative ((<|>))
+import Control.Monad (unless, when)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Maybe (mapMaybe)
 import Data.Text (Text, pack, unpack)
 import Database.Esqueleto.Experimental
     (select, selectOne, from, table, orderBy, asc, leftJoin, on, val, where_
-    , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), in_, valList, justList
+    , (^.), (?.), (==.), (:&)((:&)), (+.)
+    , Value (unValue, Value), in_, valList, justList, withRecursive, unionAll_
+    , just, isNothing_, innerJoin
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_), entityVal )
@@ -49,6 +51,7 @@ import Model
       )
     , MedSignId, Unit (Unit)
     , SignTagId, SignTag (SignTag, signTagName, signTagDescr, signTagGroup)
+    , SignTags (SignTags)
     )
 
 import Foundation
@@ -59,12 +62,12 @@ import Foundation
       , SignTagR, SignTagAddR, SignTagEditR, SignTagDeleR
       )
     , AppMessage
-      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSignIn, MsgSignOut
+      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSignIn, MsgSignOut, MsgSubtags
       , MsgUserAccount, MsgPhoto, MsgName, MsgDele, MsgDeleteAreYouSure
-      , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack
+      , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack, MsgTabs
       , MsgGroup, MsgDescription, MsgUnitOfMeasure, MsgCode, MsgInvalidFormData
       , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
-      , MsgAlreadyExists, MsgTags, MsgConfigure
+      , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails
       )
     )
 
@@ -89,50 +92,51 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), Field
     )
+import qualified Data.List.Safe as LS
 
 
-postSignTagDeleR :: SignTagId -> Handler Html
-postSignTagDeleR tid = do
+postSignTagDeleR :: SignTagId -> SignTags -> Handler Html
+postSignTagDeleR tid ps = do
     ((fr,_),_) <- runFormPost formDeleSignTag
     case fr of
       FormSuccess () -> do
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR SignTagsR
+          redirect $ DataR $ SignTagsR ps
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
-          redirect $ DataR $ SignTagR tid
+          redirect $ DataR $ SignTagR tid ps
 
 
-postSignTagR :: SignTagId -> Handler Html
-postSignTagR tid = do
+postSignTagR :: SignTagId -> SignTags -> Handler Html
+postSignTagR tid ps = do
 
     tag <- runDB $ selectOne $ do
         x <- from $ table @SignTag
         where_ $ x ^. SignTagId ==. val tid
         return x
 
-    ((fr,fw),et) <- runFormPost $ formSignTag tag
+    ((fr,fw),et) <- runFormPost $ formSignTag Nothing tag
     case fr of
       FormSuccess r -> do
           runDB $ replace tid r
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR $ SignTagR tid
+          redirect $ DataR $ SignTagR tid ps
       _otherwise -> defaultLayout $ do
           msgs <- getMessages
           setTitleI MsgTag
           $(widgetFile "data/signs/tags/edit")
 
 
-getSignTagEditR :: SignTagId -> Handler Html
-getSignTagEditR tid = do
+getSignTagEditR :: SignTagId -> SignTags -> Handler Html
+getSignTagEditR tid ps = do
 
     tag <- runDB $ selectOne $ do
         x <- from $ table @SignTag
         where_ $ x ^. SignTagId ==. val tid
         return x
 
-    (fw,et) <- generateFormPost $ formSignTag tag
+    (fw,et) <- generateFormPost $ formSignTag Nothing tag
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgTag
@@ -140,31 +144,32 @@ getSignTagEditR tid = do
 
 
 
-postSignTagsR :: Handler Html
-postSignTagsR = do
-    ((fr,fw),et) <- runFormPost $ formSignTag Nothing
+postSignTagsR :: SignTags -> Handler Html
+postSignTagsR ps = do
+    ((fr,fw),et) <- runFormPost $ formSignTag Nothing Nothing
     case fr of
       FormSuccess r -> do
           runDB $ insert_ r
           addMessageI statusSuccess MsgRecordCreated
-          redirect $ DataR SignTagsR
+          redirect $ DataR $ SignTagsR ps
       _otherwise -> defaultLayout $ do
           msgs <- getMessages
           setTitleI MsgTag
           $(widgetFile "data/signs/tags/create")
 
 
-getSignTagAddR :: Handler Html
-getSignTagAddR = do
-    (fw,et) <- generateFormPost $ formSignTag Nothing
+getSignTagAddR :: SignTags -> Handler Html
+getSignTagAddR ps@(SignTags tids) = do
+    
+    (fw,et) <- generateFormPost $ formSignTag (LS.last tids) Nothing
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgTag
         $(widgetFile "data/signs/tags/create")
 
 
-formSignTag :: Maybe (Entity SignTag) -> Form SignTag
-formSignTag tag extra = do
+formSignTag :: Maybe SignTagId -> Maybe (Entity SignTag) -> Form SignTag
+formSignTag gid tag extra = do
 
     rndr <- getMessageRender
 
@@ -189,7 +194,7 @@ formSignTag tag extra = do
         { fsLabel = SomeMessage MsgGroup
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgGroup)]
-        } (signTagGroup . entityVal <$> tag)
+        } ((signTagGroup . entityVal <$> tag) <|> pure gid)
 
     let r = SignTag <$> nameR <*> descrR <*> groupR
     let w = $(widgetFile "data/signs/tags/form")
@@ -212,19 +217,20 @@ formSignTag tag extra = do
                                    | otherwise -> Left MsgAlreadyExists
 
 
-getSignTagR :: SignTagId -> Handler Html
-getSignTagR tid = do
+getSignTagR :: SignTagId -> SignTags -> Handler Html
+getSignTagR tid ps@(SignTags tids) = do
 
     tag <- runDB $ selectOne $ do
         x :& g <- from $ table @SignTag
             `leftJoin` table @SignTag `on` (\(x :& g) -> x ^. SignTagGroup ==. g ?. SignTagId)
         where_ $ x ^. SignTagId ==. val tid
         return (x,g)
-        
+
     (fw,et) <- generateFormPost formDeleSignTag
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgTags
+        idPanelDetails <- newIdent
         $(widgetFile "data/signs/tags/tag")
 
 
@@ -232,18 +238,42 @@ formDeleSignTag :: Form ()
 formDeleSignTag extra = return (FormSuccess (), [whamlet|#{extra}|])
 
 
-getSignTagsR :: Handler Html
-getSignTagsR = do
+getSignTagsR :: SignTags -> Handler Html
+getSignTagsR ps@(SignTags tids) = do
 
     stati <- reqGetParams <$> getRequest
 
-    tags <- runDB $ select $ from $ table @SignTag
+    tags <- runDB $ select $ do
+        cte <- withRecursive
+            (do
+                  x <- from $ table @SignTag
+                  
+                  unless (null tids) $ where_ $ x ^. SignTagGroup ==. just (val (last tids))
+                  when (null tids) $ where_ $ isNothing_ $ x ^. SignTagGroup
+                  
+                  let level = val (length tids)
+                  return (level,x)
+            )
+            unionAll_
+            (\parent -> do
+                  (l,_) :& x <- from $ parent
+                      `innerJoin` table @SignTag `on` (\((_, p) :& x) -> just (p ^. SignTagId) ==. x ^. SignTagGroup)
+                  let level = l +. val 1
+                  -- orderBy [desc level]
+                  return (level,x)
+            )
+        from cte
 
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgTags
+        idTabs <- newIdent
+        idPanelSubtags <- newIdent
         idFabAdd <- newIdent
-        $(widgetFile "data/signs/tags/tags")
+        when (null tids) $ do
+            $(widgetFile "data/signs/tags/tags")
+        unless (null tids) $ do
+            $(widgetFile "data/signs/tags/subtags")
 
 
 postMedSignDeleR :: MedSignId -> Handler Html
@@ -388,7 +418,7 @@ getMedSignR :: MedSignId -> Handler Html
 getMedSignR sid = do
 
     stati <- reqGetParams <$> getRequest
-    
+
     sign <- runDB $ selectOne $ do
         x :& u :& t <- from $ table @MedSign
             `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MedSignUnit ==. u ?. UnitId)
@@ -412,11 +442,19 @@ getMedSignsR = do
     user <- maybeAuth
 
     stati <- reqGetParams <$> getRequest
-    let itags = filter ((== "tag") . fst) stati  
+    let itags = filter ((== "tag") . fst) stati
     let selected = mapMaybe ((toSqlKey <$>) . readMaybe . unpack . snd) itags
 
-    tags <- runDB $ select $ do
+    tags0 <- runDB $ select $ do
         x <- from $ table @SignTag
+        where_ $ isNothing_ $ x ^. SignTagGroup
+        orderBy [asc (x ^. SignTagName)]
+        return x
+
+    tags1 <- runDB $ select $ do
+        x <- from $ table @SignTag
+        unless (null selected) $ where_ $ x ^. SignTagGroup `in_` justList (valList selected)
+        when (null selected) $ where_ (val False)
         orderBy [asc (x ^. SignTagName)]
         return x
 

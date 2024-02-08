@@ -79,6 +79,17 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
 
 
+newtype SignTags = SignTags { unTags :: [SignTagId] }
+    deriving (Show, Read, Eq)
+
+instance PathMultiPiece SignTags where
+    toPathMultiPiece :: SignTags -> [Text]
+    toPathMultiPiece (SignTags xs) = pack . show . fromSqlKey <$> xs
+
+    fromPathMultiPiece :: [Text] -> Maybe SignTags
+    fromPathMultiPiece xs = SignTags <$> mapM ((toSqlKey <$>) . readMaybe . unpack) xs
+
+
 newtype Specialties = Specialties { unSpecialties :: [SpecialtyId] }
     deriving (Show, Read, Eq)
 

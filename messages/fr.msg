@@ -1,6 +1,11 @@
+Quantity: Grandeur
+Quantities: Grandeurs
+Categories: Catégories
 Configure: Configurer
 Settings: Paramètres
 Manage: Gérer
+Subtags: Sous-étiquettes
+Subtag: Sous-étiquette
 Tags: Étiquettes
 Tag: Étiquette
 Group: Groupe

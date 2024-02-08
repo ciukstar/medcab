@@ -1,6 +1,6 @@
 <header.app-top-app-bar.background>
   <div #headerStart>
-    <md-icon-button href=@{DataR SignTagsR} aria-label=_{MsgBack}>
+    <md-icon-button href=@{DataR $ SignTagsR ps} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
     <h1.title-large>
@@ -10,7 +10,7 @@
     <md-icon-button type=button aria-label=_{MsgDele}
       onclick="document.getElementById('idDialogDelete').open = true">
       <md-icon>delete
-    <md-icon-button href=@{DataR $ SignTagEditR tid} aria-label=_{MsgEdit}>
+    <md-icon-button href=@{DataR $ SignTagEditR tid ps} aria-label=_{MsgEdit}>
       <md-icon>edit
 
 <md-dialog #idDialogDelete>
@@ -21,7 +21,7 @@
   <div slot=actions>
     <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
       _{MsgCancel}
-    <form slot=content method=post action=@{DataR $ SignTagDeleR tid} enctype=#{et}>
+    <form slot=content method=post action=@{DataR $ SignTagDeleR tid ps} enctype=#{et}>
       ^{fw}
       <md-filled-button type=submit>
         _{MsgDele}
@@ -29,26 +29,37 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+    <md-tabs aria-label=_{MsgTabs}
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ SignTagR tid ps}' : '@{DataR $ SignTagsR (SignTags (tids <> [tid]))}'">
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+        _{MsgDetails}
+      <md-primary-tab #tabSubtags aria-controls=panelSubtags>
+        _{MsgSubtags}
 
-  $maybe (Entity _ (SignTag name descr _),group) <- tag
-    <dl>
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}        
+    <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-      <dt.label-large>_{MsgDescription}
-      <dd.body-medium>
-        $maybe descr <- descr
-          #{descr}
-          
-      $maybe Entity _ (SignTag gname _ _) <- group
-        <dt.label-large>_{MsgGroup}
-        <dd.body-medium>#{gname}
+      $forall (status,msg) <- filter ((==) statusError . fst) msgs
+        <div.app-banner.error.body-medium>
+          #{status}. #{msg}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+      $maybe (Entity _ (SignTag name descr _),group) <- tag
+        <dl>
+          <dt.label-large>_{MsgName}
+          <dd.body-medium>#{name}        
+
+          <dt.label-large>_{MsgDescription}
+          <dd.body-medium>
+            $maybe descr <- descr
+              #{descr}
+
+          $maybe Entity _ (SignTag gname _ _) <- group
+            <dt.label-large>_{MsgGroup}
+            <dd.body-medium>#{gname}
+
+      $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+        <aside.app-snackbar.shape-small.elevation-1.primary-container>
+          <md-elevation>
+          <span.body-medium>#{status}. #
+          <span.body-medium>#{msg}
+
+  <div #panelSubtags role=tabpanel aria-labelledby=tabSubtags hidden>
