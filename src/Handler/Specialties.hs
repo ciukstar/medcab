@@ -21,14 +21,16 @@ module Handler.Specialties
   , postSpecialtyDoctorR
   ) where
 
-import Control.Monad (when, unless)
+import Control.Monad (when, unless, join)
 import qualified Data.List.Safe as LS (last)
+import Data.Bifunctor (Bifunctor(bimap, second))
 import Data.Text (Text)
 
 import Database.Esqueleto.Experimental
     ( Entity (entityVal), select, from, table, orderBy, asc, val, where_
-    , (^.), (==.), (:&)((:&))
+    , (^.), (?.), (==.), (:&)((:&))
     , selectOne, isNothing_, just, innerJoin, on, Value (unValue)
+    , leftJoin
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_, replace)
@@ -92,7 +94,6 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), Field (fieldView)
     )
-import Data.Bifunctor (Bifunctor(bimap))
 
 
 postSpecialtyDoctorDeleR :: SpecialistId -> SpecialtyId -> DoctorId -> Specialties -> Handler Html
@@ -259,11 +260,12 @@ formSpecialtyDoctorDele extra = return (FormSuccess (), [whamlet|#{extra}|])
 getSpecialtyDoctorsR :: SpecialtyId -> Specialties -> Handler Html
 getSpecialtyDoctorsR sid ps@(Specialties sids) = do
 
-    doctors <- runDB $ select $ do
-        x :& s <- from $ table @Doctor
+    doctors <- (second (join . unValue) <$>) <$> runDB ( select $ do
+        x :& s :& h <- from $ table @Doctor
             `innerJoin` table @Specialist `on` (\(x :& s) -> x ^. DoctorId ==. s ^. SpecialistDoctor)
+            `leftJoin` table @DoctorPhoto `on` (\(x :& _ :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ s ^. SpecialistSpecialty ==. val sid
-        return (x,s)
+        return ((x,s),h ?. DoctorPhotoAttribution) )
 
     msgs <- getMessages
     defaultLayout $ do

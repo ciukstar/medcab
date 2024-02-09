@@ -37,7 +37,7 @@
           _{MsgNoDoctorsYet}
     $else
       <md-list>
-        $forall (Entity did (Doctor name _ _),Entity xid (Specialist _ _ title cert)) <- doctors
+        $forall ((Entity did (Doctor name _ _),Entity xid (Specialist _ _ title cert)),attrib) <- doctors
           <md-list-item type=link href=@{DataR $ SpecialtyDoctorR xid sid did ps}>
             <img slot=start src=@{DataR $ DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
             <div slot=headline>#{name}
@@ -47,6 +47,10 @@
                 _{MsgSinceDate} #
                 <time datetime=#{dt}>#{dt}
             <md-icon slot=end>arrow_forward_ios
+          $maybe attrib <- attrib
+            <div.app-attribution>
+              <div.app-attribution-wrapper.body-small>
+                #{attrib}
           <md-divider>
 
     <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">

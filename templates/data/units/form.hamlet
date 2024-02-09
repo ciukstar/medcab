@@ -6,3 +6,5 @@
 ^{fvInput symbolV}
 
 ^{fvInput descrV}
+
+^{fvInput quantityV}

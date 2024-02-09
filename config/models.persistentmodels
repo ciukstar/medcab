@@ -31,6 +31,7 @@ Unit
     name Text
     symbol Text
     descr Textarea Maybe
+    quantity QuantityId Maybe 
     UniqueUnit name
 
 Quantity

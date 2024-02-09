@@ -20,12 +20,13 @@ module Handler.Units
   , postQuantityR
   ) where
 
+import Control.Monad (unless)
 import Data.Maybe (mapMaybe)
 import Data.Text (Text, unpack, pack)
 import Database.Esqueleto.Experimental
-    ( select, from, table, orderBy
-    , (^.), (==.)
-    , asc, selectOne, where_, val
+    ( select, from, table, orderBy, justList, valList, in_
+    , (^.), (?.), (==.), (:&) ((:&))
+    , asc, selectOne, where_, val, Value (unValue), leftJoin, on
     )
 import Database.Persist
     ( Entity (Entity), entityVal, PersistStoreWrite (insert_, delete, replace)
@@ -45,17 +46,17 @@ import Foundation
       , MsgDescription, MsgSymbol, MsgBack, MsgCancel, MsgSave, MsgRecordCreated
       , MsgInvalidFormData, MsgRecordEdited, MsgConfirmPlease, MsgDescription
       , MsgDeleteAreYouSure, MsgEdit, MsgDele, MsgAlreadyExists, MsgQuantities
-      , MsgConfigure, MsgQuantity, MsgRecordDeleted
+      , MsgConfigure, MsgQuantity, MsgRecordDeleted, MsgTabs, MsgDetails
       )
     )
 
 import Handler.Menu (menu)
 
-import Material3 (md3mreq, md3textField, md3textareaField, md3mopt)
+import Material3 (md3mreq, md3textField, md3textareaField, md3mopt, md3selectField)
 import Model
     ( AvatarColor(AvatarColorLight), statusError, statusSuccess
-    , EntityField (UnitName, UnitId, QuantityName, QuantityId)
-    , UnitId, Unit(Unit, unitName, unitSymbol, unitDescr)
+    , EntityField (UnitName, UnitId, QuantityName, QuantityId, UnitQuantity)
+    , UnitId, Unit(Unit, unitName, unitSymbol, unitDescr, unitQuantity)
     , QuantityId, Quantity (Quantity, quantityName, quantityDescr)
     )
 
@@ -68,7 +69,7 @@ import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), newIdent, getMessages, redirect
     , SomeMessage (SomeMessage), getMessageRender, addMessageI
-    , YesodRequest (reqGetParams), getRequest
+    , YesodRequest (reqGetParams), getRequest, MonadHandler (liftHandler)
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
 
@@ -78,6 +79,8 @@ import Yesod.Form.Types
     , FieldView (fvInput), FormResult (FormSuccess), Field
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
+import Yesod.Form.Fields (optionsPairs)
+import ClassyPrelude (Bifunctor(bimap))
 
 
 postQuantityDeleR :: QuantityId -> Handler Html
@@ -144,6 +147,7 @@ getQuantityR qid = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgQuantity
+        idPanelDetails <- newIdent
         $(widgetFile "data/units/quantities/quantity")
 
 
@@ -317,7 +321,18 @@ formUnit unit extra = do
         , fsAttrs = [("label", rndr MsgDescription)]
         } (unitDescr . entityVal <$> unit)
 
-    let r = Unit <$> nameR <*> symbolR <*> descrR
+    quantities <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( select $ do
+        x <- from $ table @Quantity
+        orderBy [asc (x ^. QuantityName)]
+        return (x ^. QuantityName, x ^. QuantityId) )
+
+    (quantityR,quantityV) <- md3mopt (md3selectField (optionsPairs quantities)) FieldSettings
+        { fsLabel = SomeMessage MsgQuantity
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label",rndr MsgQuantity)]
+        } (unitQuantity . entityVal <$> unit)
+
+    let r = Unit <$> nameR <*> symbolR <*> descrR <*> quantityR
     let w = $(widgetFile "data/units/form")
     return (r,w)
   where
@@ -341,9 +356,10 @@ formUnit unit extra = do
 getUnitR :: UnitId -> Handler Html
 getUnitR uid = do
     unit <- runDB $ selectOne $ do
-        x <- from $ table @Unit
+        x :& q <- from $ table @Unit
+            `leftJoin` table @Quantity `on` (\(u :& q) -> u ^. UnitQuantity ==. q ?. QuantityId)
         where_ $ x ^. UnitId ==. val uid
-        return x
+        return (x,q)
     (fw,et) <- generateFormPost formDelete
     defaultLayout $ do
         msgs <- getMessages
@@ -366,6 +382,7 @@ getUnitsR = do
 
     units <- runDB $ select $ do
         x <- from $ table @Unit
+        unless (null selected) $ where_ $ x ^. UnitQuantity `in_` justList (valList selected)
         orderBy [asc (x ^. UnitName)]
         return x
     

@@ -29,22 +29,33 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ QuantityR qid}' : '@{DataR $ QuantityR qid}'">
+    <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      _{MsgDetails}
+    <md-primary-tab #tabUnits aria-controls=panelUnits>
+      _{MsgUnitsOfMeasure}
 
-  $maybe Entity _ (Quantity name descr) <- quantity
-    <dl>
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}        
+  <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-      <dt.label-large>_{MsgDescription}
-      <dd.body-medium>
-        $maybe descr <- descr
-          #{descr}
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+    $maybe Entity _ (Quantity name descr) <- quantity
+      <dl>
+        <dt.label-large>_{MsgName}
+        <dd.body-medium>#{name}        
+
+        <dt.label-large>_{MsgDescription}
+        <dd.body-medium>
+          $maybe descr <- descr
+            #{descr}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
+        
+  <div #panelUnits role=tabpanel aria-labelledby=tabUnits>

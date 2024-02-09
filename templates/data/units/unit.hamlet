@@ -33,7 +33,7 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $maybe Entity _ (Unit name symbol descr) <- unit
+  $maybe (Entity _ (Unit name symbol descr _), quantity) <- unit
     <dl>
       <dt.label-large>_{MsgName}
       <dd.body-medium>#{name}
@@ -45,6 +45,11 @@
       <dd.body-medium>
         $maybe descr <- descr
           #{descr}
+
+      <dt.label-large>_{MsgQuantity}
+      <dd.body-medium>
+        $maybe Entity _ (Quantity qname _) <- quantity
+          #{qname}
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

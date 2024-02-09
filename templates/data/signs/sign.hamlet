@@ -43,7 +43,7 @@
         $maybe code <- code
           #{code}
   
-      $maybe Entity _ (Unit uname symbol _) <- unit
+      $maybe Entity _ (Unit uname symbol _ _) <- unit
         <dt.label-large>_{MsgUnitOfMeasure}
         <dd.body-medium>#{uname} (#{symbol})
         

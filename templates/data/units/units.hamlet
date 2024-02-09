@@ -34,8 +34,8 @@
         $with theId <- pack $ show $ fromSqlKey qid
           <md-filter-chip label=#{name} :isSelected:selected
             onclick="this.querySelector('a[href]').click()">
-            <a :isSelected:href=@?{(DataR QuantitiesR,filter (((/=) theId) . snd) iquantities)}
-               :not isSelected:href=@?{(DataR QuantitiesR,((:) ("tag",theId) iquantities))}>
+            <a :isSelected:href=@?{(DataR UnitsR,filter (((/=) theId) . snd) iquantities)}
+               :not isSelected:href=@?{(DataR UnitsR,((:) ("quantity",theId) iquantities))}>
     <md-assist-chip label=_{MsgConfigure} href=@?{(DataR QuantitiesR,stati)}>
       <md-icon slot=icon>settings
 
@@ -46,7 +46,7 @@
         _{MsgNoDataYet}
   $else
     <md-list>
-      $forall Entity uid (Unit name symbol _) <- units
+      $forall Entity uid (Unit name symbol _ _) <- units
         <md-list-item type=link href=@{DataR $ UnitR uid}>
           <div slot=headline>#{name}
           <div slot=supporting-text>#{symbol}

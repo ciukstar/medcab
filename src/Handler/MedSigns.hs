@@ -30,7 +30,7 @@ import Database.Esqueleto.Experimental
     (select, selectOne, from, table, orderBy, asc, leftJoin, on, val, where_
     , (^.), (?.), (==.), (:&)((:&)), (+.)
     , Value (unValue, Value), in_, valList, justList, withRecursive, unionAll_
-    , just, isNothing_, innerJoin
+    , just, isNothing_, innerJoin, desc
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_), entityVal )
@@ -259,7 +259,7 @@ getSignTagsR ps@(SignTags tids) = do
                   (l,_) :& x <- from $ parent
                       `innerJoin` table @SignTag `on` (\((_, p) :& x) -> just (p ^. SignTagId) ==. x ^. SignTagGroup)
                   let level = l +. val 1
-                  -- orderBy [desc level]
+                  -- orderBy [desc l]
                   return (level,x)
             )
         from cte
