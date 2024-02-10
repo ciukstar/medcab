@@ -79,6 +79,9 @@ import Handler.Units
     ( getUnitsR, getUnitAddR, getUnitR, postUnitsR, getUnitEditR, postUnitR
     , postUnitDeleR, getQuantitiesR, getQuantityR, getQuantityAddR
     , postQuantitiesR, getQuantityEditR, postQuantityDeleR, postQuantityR
+    , getQuantityUnitsR, getQuantityUnitCreateR, postQuantityUnitsR
+    , getQuantityUnitR, getQuantityUnitEditR, postQuantityUnitDeleR
+    , postQuantityUnitR
     )
 
 import Handler.Doctors

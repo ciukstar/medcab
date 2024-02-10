@@ -24,16 +24,19 @@ module Handler.MedSigns
 import Control.Applicative ((<|>))
 import Control.Monad (unless, when)
 import Data.Bifunctor (Bifunctor(bimap))
+import qualified Data.List.Safe as LS (last)
 import Data.Maybe (mapMaybe)
 import Data.Text (Text, pack, unpack)
 import Database.Esqueleto.Experimental
     (select, selectOne, from, table, orderBy, asc, leftJoin, on, val, where_
     , (^.), (?.), (==.), (:&)((:&)), (+.)
     , Value (unValue, Value), in_, valList, justList, withRecursive, unionAll_
-    , just, isNothing_, innerJoin, desc
+    , just, isNothing_, innerJoin, subSelectList, not_
     )
 import Database.Persist
-    ( Entity (Entity), PersistStoreWrite (replace, delete, insert_), entityVal )
+    ( Entity (Entity), PersistStoreWrite (replace, delete, insert_)
+    , entityVal
+    )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
 import Handler.Menu (menu)
@@ -92,7 +95,6 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), Field
     )
-import qualified Data.List.Safe as LS
 
 
 postSignTagDeleR :: SignTagId -> SignTags -> Handler Html
@@ -259,7 +261,7 @@ getSignTagsR ps@(SignTags tids) = do
                   (l,_) :& x <- from $ parent
                       `innerJoin` table @SignTag `on` (\((_, p) :& x) -> just (p ^. SignTagId) ==. x ^. SignTagGroup)
                   let level = l +. val 1
-                  -- orderBy [desc l]
+                  -- orderBy [desc level]
                   return (level,x)
             )
         from cte
@@ -453,14 +455,39 @@ getMedSignsR = do
 
     tags1 <- runDB $ select $ do
         x <- from $ table @SignTag
+        where_ $ not_ $ isNothing_ $ x ^. SignTagGroup
         unless (null selected) $ where_ $ x ^. SignTagGroup `in_` justList (valList selected)
         when (null selected) $ where_ (val False)
         orderBy [asc (x ^. SignTagName)]
         return x
 
+    parents <- mapMaybe unValue <$> runDB ( select $ do
+        x <- from $ table @SignTag
+        where_ $ not_ $ isNothing_ $ x ^. SignTagGroup
+        where_ $ (x ^. SignTagId) `in_` valList selected
+        where_ $ x ^. SignTagGroup `in_` justList ( valList selected )
+        return $ x ^. SignTagGroup )
+
+    
+    
     signs <- runDB $ select $ do
         x <- from $ table @MedSign
-        unless (null selected) $ where_ $ (x ^. MedSignTag) `in_` justList (valList selected)
+        unless (null selected) $ where_ $ (x ^. MedSignTag) `in_` justList ( subSelectList
+            ( do
+                  cte <- withRecursive
+                      ( do
+                            p <- from $ table @SignTag
+                            where_ $ p ^. SignTagId `in_` valList (filter (`notElem` parents) selected)
+                            return p
+                      )
+                      unionAll_
+                      (\parent -> do
+                        (c :& _) <- from $ table @SignTag `innerJoin` parent
+                            `on` (\(c :& p) -> c ^. SignTagGroup ==. just (p ^. SignTagId))
+                        return c
+                      )
+                  ( ^. SignTagId) <$> from cte
+            ) )
         orderBy [asc (x ^. MedSignName)]
         return x
 

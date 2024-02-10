@@ -30,7 +30,7 @@
 <main>
 
   <md-tabs aria-label=_{MsgTabs}
-    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ QuantityR qid}' : '@{DataR $ QuantityR qid}'">
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ QuantityR qid}' : '@{DataR $ QuantityUnitsR qid}'">
     <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
       _{MsgDetails}
     <md-primary-tab #tabUnits aria-controls=panelUnits>

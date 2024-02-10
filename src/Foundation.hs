@@ -229,6 +229,11 @@ instance Yesod App where
     isAuthorized r@(DataR MedSignsR) _ = setUltDest r >> isAdmin
 
     
+    isAuthorized (DataR (QuantityUnitEditR _ _)) _ = isAdmin
+    isAuthorized (DataR (QuantityUnitDeleR _ _)) _ = isAdmin
+    isAuthorized (DataR (QuantityUnitR _ _)) _ = isAdmin
+    isAuthorized (DataR (QuantityUnitCreateR _)) _ = isAdmin
+    isAuthorized (DataR (QuantityUnitsR _)) _ = isAdmin
     
     isAuthorized (DataR (QuantityDeleR _)) _ = isAdmin
     isAuthorized (DataR (QuantityEditR _)) _ = isAdmin

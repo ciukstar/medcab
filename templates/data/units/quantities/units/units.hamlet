@@ -1,0 +1,50 @@
+
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DataR QuantitiesR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgQuantity}
+
+  <div #headerEnd>
+      
+<main>
+
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ QuantityR qid}' : '@{DataR $ QuantityUnitsR qid}'">
+    <md-primary-tab #tabDetails aria-controls=panelDetails>
+      _{MsgDetails}
+    <md-primary-tab #tabUnits aria-controls=#{idPanelUnits} active=true>
+      _{MsgUnitsOfMeasure}
+
+  <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+  
+  <div ##{idPanelUnits} role=tabpanel aria-labelledby=tabUnits>
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
+
+    $if null units
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&varnothing;
+        <figcaption.body-large>
+          _{MsgNoDataYet}
+    $else
+      <md-list>
+        $forall Entity uid (Unit name symbol _ _) <- units
+          <md-list-item type=link href=@{DataR $ QuantityUnitR qid uid}>
+            <div slot=headline>#{name}
+            <div slot=supporting-text>#{symbol}
+            <md-icon slot=end>arrow_forward_ios
+          <md-divider>
+
+    <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{DataR $ QuantityUnitCreateR qid}>
+      <md-icon slot=icon>add
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}

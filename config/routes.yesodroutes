@@ -33,6 +33,12 @@
     /signs/#MedSignId 	   MedSignR     GET POST
     /signs	      	   MedSignsR    GET POST
 
+    /dele/qunits/#QuantityId/#UnitId QuantityUnitDeleR   POST
+    /edit/qunits/#QuantityId/#UnitId QuantityUnitEditR   GET
+    /form/qunits/#QuantityId/new     QuantityUnitCreateR GET
+    /qunit/#QuantityId/#UnitId 	     QuantityUnitR       GET POST
+    /qunits/#QuantityId 	     QuantityUnitsR      GET POST
+
     /units/#UnitId/edit UnitEditR GET
     /forms/units/new 	UnitAddR  GET
     /units/#UnitId/dele	UnitDeleR POST
