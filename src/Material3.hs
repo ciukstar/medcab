@@ -15,6 +15,7 @@ module Material3
   , md3selectField
   , md3switchField
   , md3htmlField
+  , md3doubleField
   , tsep
   ) where
 
@@ -35,7 +36,7 @@ import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
-    , FormMessage
+    , FormMessage, doubleField
     )
 import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
@@ -138,6 +139,14 @@ md3htmlField = htmlField { fieldView = \theId name attrs x req -> [whamlet|
 |] }
     where
       showVal = either id (pack . S.renderHtml)
+
+
+md3doubleField :: RenderMessage m FormMessage => Field (HandlerFor m) Double
+md3doubleField = doubleField { fieldView = \theId name attrs ex req -> [whamlet|
+<md-filled-text-field ##{theId} type=number name=#{name} :req:required value=#{either id (pack . show) ex} *{attrs}>
+  $if elem "error" (fst <$> attrs)
+    <md-icon slot=trailing-icon>error
+|] }
 
 
 md3mopt :: (RenderMessage site FormMessage, HandlerSite m ~ site, MonadHandler m)

@@ -1,3 +1,10 @@
+Remarks: Remarks
+Value: Value
+Time: Time
+Date: Date
+Record: Record
+Records: Records
+ElectronicHealthRecord: Electronic health record
 Quantity: Quantity
 Quantities: Quantities
 Categories: Categories
@@ -76,6 +83,7 @@ InvalidUrlOrRemoved: Invalid URL or resource removed
 PageNotFound: Page not found
 Resources: Resources
 SourceCode: Source code
+AppDocumentation: App documentation
 Documentation: Documentation
 Doctors: Doctors
 Data: Data

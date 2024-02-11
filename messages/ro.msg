@@ -1,3 +1,10 @@
+Remarks: Observații
+Value: Valoare
+Time: Ora
+Date: Data
+Record: Înregistrare
+Records: Înregistrări
+ElectronicHealthRecord: Fișa electronică de sănătate
 Quantity: Mărime
 Quantities: Mărimi
 Categories: Categorii
@@ -76,6 +83,7 @@ InvalidUrlOrRemoved: Adresă URL nevalidă sau resursă eliminată
 PageNotFound: Pagina nu a fost găsită
 Resources: Resurse
 SourceCode: Codul sursă
+AppDocumentation: Documentația aplicației
 Documentation: Documentație
 Doctors: Doctori
 Data: Date

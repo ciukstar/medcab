@@ -198,6 +198,13 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
+    
+    isAuthorized (RecordDeleR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordEditR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordNewR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized r@(RecordsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
+
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid

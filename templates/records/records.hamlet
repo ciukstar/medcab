@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgWelcome}
+      _{MsgRecords}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -28,46 +28,30 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  <figure #figureLogo>
-    <md-icon>medical_services
-    <figcaption.display-large>
-      MedCab
+  $if null records
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoDataYet}
+  $else
+    <md-list>
+      $forall (Entity rid (Record uid _ date time value _ _),Entity _ (MedSign name _ _ _ _),unit) <- records
+        <md-list-item type=link href=@{RecordR uid rid}>
+          <div slot=headline>#{name}
+          <div slot=supporting-text>
+            $with dt <- (show date <> " ") <> show time
+              <time datetime=#{dt}>#{dt}
+          <div slot=supporting-text>
+            #{value}
+            $maybe Entity _ (Unit _ symbol _ _) <- unit
+              \ #{symbol}
+          <md-icon slot=end>arrow_forward_ios
+        <md-divider>
 
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{HomeR}' : '@{VideoR}'">
-    <md-primary-tab #tabHealth aria-controls=panelHealth active=true>
-      Health
-    <md-primary-tab #tabVideo aria-controls=panelVideo>
-      Video
-
-  <div #panelHealth role=tabpanel aria-labelledby=tabHealth>
-
-    $maybe Entity uid _ <- user
-      <md-filled-tonal-button type=link href=@{RecordsR uid}>
-        _{MsgElectronicHealthRecord}
-    $nothing
-      <md-filled-tonal-button type=link href=@{AuthR LoginR}>
-        _{MsgElectronicHealthRecord}
+  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{RecordNewR uid}>
+    <md-icon slot=icon>add
       
-    <md-filled-tonal-button disabled>
-      Health Activity Tracking
-
-    <md-filled-tonal-button disabled>
-      Symptoms Checking
-
-    <md-filled-tonal-button disabled>
-      Appointment Management
-
-    <md-filled-tonal-button disabled>
-      Staff Management
-
-    <md-filled-tonal-button disabled>
-      Wearables Integration
-
-    <md-filled-tonal-button disabled>
-      Payment Integration
-
-  <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

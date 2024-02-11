@@ -1,0 +1,14 @@
+
+#{extra}
+
+^{fvInput signV}
+
+^{fvInput dateV}
+
+^{fvInput timeV}
+
+^{fvInput valueV}
+
+^{fvInput unitV}
+
+^{fvInput remarksV}

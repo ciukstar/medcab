@@ -2,20 +2,32 @@
 
 module Handler.Video (getVideoR) where
 
+import Database.Persist (Entity (Entity))
+
 import Handler.Menu (menu)
+
 import Foundation
     ( Handler
-    , Route (HomeR, VideoR, AuthR)
-    , AppMessage (MsgVideoConference, MsgWelcome, MsgSignIn)
+    , Route (HomeR, VideoR, AuthR, AccountR, AccountPhotoR)
+    , AppMessage
+      ( MsgVideoConference, MsgWelcome, MsgSignIn, MsgUserAccount, MsgPhoto
+      , MsgSignOut
+      )
     )
-import Text.Hamlet (Html)
+
+import Model (AvatarColor (AvatarColorLight))
+
 import Settings (widgetFile)
-import Yesod.Auth ( Route(LoginR) ) 
+
+import Text.Hamlet (Html)
+
+import Yesod.Auth ( Route(LoginR, LogoutR), maybeAuth )
 import Yesod.Core (Yesod(defaultLayout))
 import Yesod.Core.Widget (setTitleI)
 
 getVideoR :: Handler Html
 getVideoR = do
+    user <- maybeAuth
     defaultLayout $ do
         setTitleI MsgVideoConference
         $(widgetFile "video/video")

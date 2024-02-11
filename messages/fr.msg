@@ -1,3 +1,10 @@
+Remarks: Remarques
+Value: Valeur
+Time: Heure
+Date: Date
+Record: Enregistrement
+Records: Enregistrements
+ElectronicHealthRecord: Dossier de santé électronique
 Quantity: Grandeur
 Quantities: Grandeurs
 Categories: Catégories
@@ -76,6 +83,7 @@ InvalidUrlOrRemoved: URL invalide ou ressource supprimée
 PageNotFound: Page non trouvée
 Resources: Ressources
 SourceCode: Code source
+AppDocumentation: Documentation de l'application
 Documentation: Documentation
 Doctors: Médecins
 Data: Donnés

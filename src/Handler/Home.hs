@@ -9,9 +9,10 @@ import Database.Persist (Entity(Entity))
 import Handler.Menu (menu)
 import Foundation
     ( Handler
-    , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR)
+    , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR, RecordsR)
     , AppMessage
       ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount
+      , MsgElectronicHealthRecord
       )
     )
 import Model (statusError, AvatarColor(AvatarColorLight))

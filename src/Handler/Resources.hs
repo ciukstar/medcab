@@ -10,11 +10,11 @@ import Foundation
     , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR, DataR)
     , DataR (UnitsR)
     , AppMessage
-      ( MsgDocumentation, MsgAppName, MsgAppDescription, MsgSignIn, MsgSignOut
-      , MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail, MsgSuperuser
-      , MsgUsername, MsgPassword, MsgClientId, MsgClientSecret, MsgBasicEntities
-      , MsgUser, MsgDoctor, MsgSpecialty, MsgSearchEngineOptimization
-      , MsgSourceCode, MsgIssueTracking, MsgUnitOfMeasure
+      ( MsgAppDocumentation, MsgDocumentation, MsgAppName, MsgAppDescription
+      , MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail
+      , MsgSuperuser, MsgUsername, MsgPassword, MsgClientId, MsgClientSecret
+      , MsgBasicEntities, MsgUser, MsgDoctor, MsgSpecialty, MsgSourceCode
+      , MsgIssueTracking, MsgUnitOfMeasure, MsgSearchEngineOptimization
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
       , MsgDoc007, MsgDoc008
       )
@@ -40,5 +40,5 @@ getDocsR = do
     translate <- (preEscapedToHtml .) <$> getMessageRender
     defaultLayout $ do
         setUltDestCurrent
-        setTitleI MsgDocumentation
+        setTitleI MsgAppDocumentation
         $(widgetFile "resources/docs")
