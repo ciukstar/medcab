@@ -22,8 +22,10 @@ module Handler.Doctors
   ) where
 
 import Control.Monad (void, join)
+
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+
 import Database.Persist
     ( Entity (Entity, entityKey)
     , PersistStoreWrite (insert, delete, replace, insert_)
@@ -35,11 +37,13 @@ import Database.Esqueleto.Experimental
     , (^.), (?.), (==.), (:&)((:&)), (=.)
     , where_, orderBy, asc, Value (unValue), update, set, just, leftJoin, desc
     )
+
 import Material3
     ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField
-    , md3mreq, md3mopt
+    , md3mreq, md3mopt, md3dayField
     )
-import Handler.Menu (menu)
+import Menu (menu)
+
 import Foundation
     ( Handler, Widget, Form
     , Route (StaticR, AuthR, AccountR, AccountPhotoR, DataR)
@@ -86,7 +90,7 @@ import Yesod.Core
     )
 import Yesod.Core.Handler (redirect)
 import Yesod.Core.Content (TypedContent (TypedContent), ToContent (toContent))
-import Yesod.Form.Fields (fileField, optionsPairs, dayField)
+import Yesod.Form.Fields (fileField, optionsPairs)
 import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess)
@@ -213,10 +217,10 @@ formSpecialty did specialist extra = do
         , fsAttrs = [("label",rndr MsgSpecialtyTitle)]
         } (specialistTitle . entityVal <$> specialist)
 
-    (certR,certV) <- md3mreq dayField FieldSettings
-        { fsLabel = SomeMessage MsgSpecialty
+    (certR,certV) <- md3mreq md3dayField FieldSettings
+        { fsLabel = SomeMessage MsgCertificateDate
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label",rndr MsgSpecialty)]
+        , fsAttrs = [("label",rndr MsgCertificateDate)]
         } (specialistCertDate . entityVal <$> specialist)
 
     let r = Specialist did <$> specR <*> titleR <*> certR

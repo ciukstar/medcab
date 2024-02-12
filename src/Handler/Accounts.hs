@@ -24,7 +24,7 @@ import Database.Esqueleto.Experimental
     )
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Material3 ( md3textField, md3radioField )
+import Material3 ( md3textField, md3radioField, md3mopt, md3dayField )
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
@@ -65,7 +65,7 @@ import Yesod.Core
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Core.Widget (setTitleI)
-import Yesod.Form.Fields (fileField, dayField, optionsPairs)
+import Yesod.Form.Fields (fileField, optionsPairs)
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess), FieldView (fvInput, fvId)
@@ -106,12 +106,12 @@ formUserInfo :: UserId -> Maybe (Entity UserInfo)
              -> Html -> MForm Handler (FormResult UserInfo, Widget)
 formUserInfo uid info extra = do
     rndr <- getMessageRender
-    (bdayR,bdayV) <- mopt dayField FieldSettings
+    (bdayR,bdayV) <- md3mopt md3dayField FieldSettings
         { fsLabel = SomeMessage MsgBirthday
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgBirthday)]
         } (userInfoBirthDate . entityVal <$> info)
-    (genderR,genderV) <- mopt (md3radioField (optionsPairs options)) FieldSettings
+    (genderR,genderV) <- md3mopt (md3radioField (optionsPairs options)) FieldSettings
         { fsLabel = SomeMessage MsgGender
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [ ("class", "app-gender-options")

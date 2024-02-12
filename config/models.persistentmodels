@@ -5,17 +5,17 @@
 Record
     user UserId OnDeleteCascade
     sign MedSignId OnDeleteCascade
-    date Day
-    time TimeOfDay
+    time LocalTime
     value Double
     unit UnitId Maybe OnDeleteSetNull
     remarks Textarea Maybe
-    UniqueRecord user sign date time
+    UniqueRecord user sign time
 
 
 MedSign
     name Text
     code Text Maybe
+    icon Text Maybe
     descr Textarea Maybe
     unit UnitId Maybe OnDeleteSetNull
     tag SignTagId Maybe OnDeleteSetNull

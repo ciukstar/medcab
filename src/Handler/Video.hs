@@ -4,8 +4,6 @@ module Handler.Video (getVideoR) where
 
 import Database.Persist (Entity (Entity))
 
-import Handler.Menu (menu)
-
 import Foundation
     ( Handler
     , Route (HomeR, VideoR, AuthR, AccountR, AccountPhotoR)
@@ -15,6 +13,7 @@ import Foundation
       )
     )
 
+import Menu (menu)
 import Model (AvatarColor (AvatarColorLight))
 
 import Settings (widgetFile)

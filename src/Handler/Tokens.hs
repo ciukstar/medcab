@@ -34,7 +34,6 @@ import Database.Persist
     )
 import qualified Database.Persist as P ((=.))
 
-import Handler.Menu (menu)
 import Foundation
     ( Handler, Widget, App (appSettings)
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
@@ -50,6 +49,7 @@ import Foundation
 import Data.Function ((&))
 
 import Material3 (md3radioField, md3emailField)
+import Menu (menu)
 import Model
     ( gmailAccessToken, gmailRefreshToken, gmail
     , StoreType

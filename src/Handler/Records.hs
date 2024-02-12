@@ -22,8 +22,6 @@ import Database.Esqueleto.Experimental
 import Database.Persist
     (Entity (Entity), PersistStoreWrite (insert_, delete, replace))
 
-import Handler.Menu (menu)
-
 import Foundation
     ( Handler, Form
     , Route
@@ -38,19 +36,21 @@ import Foundation
       , MsgEdit, MsgConfirmPlease, MsgInvalidFormData, MsgRecordDeleted
       )
     )
-    
+
 import Material3
-    ( md3mreq, md3selectField, md3textareaField, md3mopt, md3doubleField )
-    
+    ( md3mreq, md3selectField, md3textareaField, md3mopt, md3doubleField
+    , md3datetimeLocalField
+    )
+import Menu (menu)
 import Model
     ( AvatarColor (AvatarColorLight), statusError
     , EntityField
-      ( RecordUser, RecordSign, MedSignId, RecordUnit, UnitId, RecordDate
+      ( RecordUser, RecordSign, MedSignId, RecordUnit, UnitId
       , RecordTime, MedSignName, UnitSymbol, RecordId
       )
     , UserId
     , Record
-      ( Record, recordSign, recordDate, recordTime, recordValue, recordUnit
+      ( Record, recordSign, recordTime, recordValue, recordUnit
       , recordRemarks
       )
     , MedSign (MedSign), Unit (Unit), RecordId, statusSuccess
@@ -67,8 +67,8 @@ import Yesod.Core
     , whamlet
     )
 import Yesod.Core.Widget (setTitleI)
-import Yesod.Form.Fields (optionsPairs, dayField, timeField)
-import Yesod.Form.Functions (generateFormPost, mreq, runFormPost)
+import Yesod.Form.Fields (optionsPairs)
+import Yesod.Form.Functions (generateFormPost, runFormPost)
 import Yesod.Form.Types
     ( FieldSettings(FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     , FieldView (fvInput), FormResult (FormSuccess)
@@ -106,7 +106,7 @@ postRecordR uid rid = do
 
 getRecordEditR :: UserId -> RecordId -> Handler Html
 getRecordEditR uid rid = do
-    
+
     record <- runDB $ selectOne $ do
         x <- from $ table @Record
         where_ $ x ^. RecordId ==. val rid
@@ -130,7 +130,7 @@ postRecordsR uid = do
       _otherwise -> defaultLayout $ do
           msgs <- getMessages
           setTitleI MsgRecord
-          $(widgetFile "records/new")    
+          $(widgetFile "records/new")
 
 
 getRecordNewR :: UserId -> Handler Html
@@ -158,13 +158,7 @@ formRecord uid record extra = do
         , fsAttrs = [("label", rndr MsgMedicalSign)]
         } (recordSign . entityVal <$> record)
 
-    (dateR,dateV) <- mreq dayField FieldSettings
-        { fsLabel = SomeMessage MsgDate
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgDate)]
-        } (recordDate . entityVal <$> record)
-
-    (timeR,timeV) <- mreq timeField FieldSettings
+    (timeR,timeV) <- md3mreq md3datetimeLocalField FieldSettings
         { fsLabel = SomeMessage MsgTime
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgTime)]
@@ -192,15 +186,15 @@ formRecord uid record extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgRemarks)]
         } (recordRemarks . entityVal <$> record)
-        
-    let r = Record uid <$> signR <*> dateR <*> timeR <*> valueR <*> unitR <*> remarksR
+
+    let r = Record uid <$> signR <*> timeR <*> valueR <*> unitR <*> remarksR
     let w = $(widgetFile "records/form")
     return (r,w)
 
 
 getRecordR :: UserId -> RecordId -> Handler Html
 getRecordR uid rid = do
-    
+
     record <- runDB $ selectOne $ do
         x :& s :& u <- from $ table @Record
             `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
@@ -227,9 +221,9 @@ getRecordsR uid = do
             `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
             `leftJoin` table @Unit `on` (\(x :& _ :& u) -> x ^. RecordUnit ==. u ?. UnitId)
         where_ $ x ^. RecordUser ==. val uid
-        orderBy [desc (x ^. RecordDate), desc (x ^. RecordTime)]
+        orderBy [desc (x ^. RecordTime)]
         return (x,s,u)
-    
+
     user <- maybeAuth
     msgs <- getMessages
     defaultLayout $ do

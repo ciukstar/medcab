@@ -16,6 +16,9 @@ module Material3
   , md3switchField
   , md3htmlField
   , md3doubleField
+  , md3dayField
+  , md3timeField
+  , md3datetimeLocalField
   , tsep
   ) where
 
@@ -36,7 +39,7 @@ import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
-    , FormMessage, doubleField
+    , FormMessage, doubleField, dayField, timeField, datetimeLocalField
     )
 import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
@@ -44,6 +47,9 @@ import Yesod.Form.Types
     , FieldSettings (fsId, fsName, fsAttrs)
     , FieldView (fvErrors), MForm, FormResult
     )
+import Data.Time.Calendar (Day)
+import Data.Time (TimeOfDay, LocalTime)
+import Data.Time.Format.ISO8601 (iso8601Show)
 
 
 md3switchField :: Monad m => Field m Bool
@@ -121,6 +127,44 @@ md3textField = textField { fieldView = \theId name attrs ex req -> [whamlet|
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }
+
+
+md3dayField :: RenderMessage m FormMessage => Field (HandlerFor m) Day
+md3dayField = dayField { fieldView = \theId name attrs ex req -> [whamlet|
+<md-filled-text-field ##{theId} type=date name=#{name} :req:required value=#{either id (pack . show) ex} *{attrs}>
+  <span slot=trailing-icon style="display:flex;flex-direction:row;align-items:center">
+    $if elem "error" (fst <$> attrs)
+      <md-icon>error
+    <md-icon-button type=button
+      onclick="document.getElementById('#{theId}').shadowRoot.querySelector('input').showPicker()">
+      <md-icon>today
+|] }
+
+
+md3timeField :: RenderMessage m FormMessage => Field (HandlerFor m) TimeOfDay
+md3timeField = timeField { fieldView = \theId name attrs ex req -> [whamlet|
+<md-filled-text-field ##{theId} type=time name=#{name} :req:required value=#{either id (pack . show) ex} *{attrs}>
+  <span slot=trailing-icon style="display:flex;flex-direction:row;align-items:center">
+    $if elem "error" (fst <$> attrs)
+      <md-icon>error
+    <md-icon-button type=button slot=trailing-icon
+      onclick="document.getElementById('#{theId}').shadowRoot.querySelector('input').showPicker()">
+        <md-icon>schedule
+|] }
+
+
+md3datetimeLocalField :: RenderMessage m FormMessage => Field (HandlerFor m) LocalTime
+md3datetimeLocalField = datetimeLocalField { fieldView = \theId name attrs ex req -> [whamlet|
+<md-filled-text-field ##{theId} type=datetime-local name=#{name} :req:required value=#{either id showVal ex} *{attrs}>
+  <span slot=trailing-icon style="display:flex;flex-direction:row;align-items:center">
+    $if elem "error" (fst <$> attrs)
+      <md-icon>error
+    <md-icon-button type=button slot=trailing-icon
+      onclick="document.getElementById('#{theId}').shadowRoot.querySelector('input').showPicker()">
+        <md-icon>schedule
+|] }
+  where
+    showVal = pack . iso8601Show
 
 
 md3textareaField :: RenderMessage m FormMessage => Field (HandlerFor m) Textarea

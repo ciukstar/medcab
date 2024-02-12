@@ -36,9 +36,8 @@ import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_, replace)
     )
 
-import Handler.Menu (menu)
-
-import Material3 (md3textField, md3textareaField, md3mreq, md3mopt)
+import Material3 (md3textField, md3textareaField, md3mreq, md3mopt, md3dayField)
+import Menu (menu)
 import Model
     ( Specialty
       ( Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup )
@@ -69,7 +68,7 @@ import Foundation
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
       , MsgNoSubspecialtiesYet, MsgAlreadyExists, MsgDoctors, MsgNoDoctorsYet
       , MsgSinceDate, MsgDoctor, MsgFullName, MsgMobile, MsgEmailAddress
-      , MsgSpecialtyTitle
+      , MsgSpecialtyTitle, MsgCertificateDate
       )
     )
 import Settings (widgetFile)
@@ -85,7 +84,7 @@ import Yesod.Core
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist (runDB))
 import Yesod.Form.Fields
-    ( optionsPairs, dayField, selectField, OptionList (olOptions)
+    ( optionsPairs, selectField, OptionList (olOptions)
     , Option (optionInternalValue, optionExternalValue, optionDisplay)
     )
 import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
@@ -184,10 +183,10 @@ formSpecialist sid specialist extra = do
         , fsAttrs = [("label",rndr MsgSpecialtyTitle)]
         } (specialistTitle . entityVal <$> specialist)
 
-    (certR,certV) <- md3mreq dayField FieldSettings
-        { fsLabel = SomeMessage MsgSpecialty
+    (certR,certV) <- md3mreq md3dayField FieldSettings
+        { fsLabel = SomeMessage MsgCertificateDate
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label",rndr MsgSpecialty)]
+        , fsAttrs = [("label",rndr MsgCertificateDate)]
         } (specialistCertDate . entityVal <$> specialist)
 
     let r = Specialist <$> docR <*> pure sid <*> titleR <*> certR

@@ -1,3 +1,4 @@
+Icon: Icône
 Remarks: Remarques
 Value: Valeur
 Time: Heure

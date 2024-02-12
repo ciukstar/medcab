@@ -34,8 +34,9 @@ import Foundation
       , MsgAttribution
       )
     )
-import Handler.Menu (menu)
+    
 import Material3 ( md3textField, md3switchField, md3htmlField, md3mopt, md3mreq )
+import Menu (menu)
 import Model
     ( AvatarColor (AvatarColorLight), statusError, statusSuccess
     , UserId
@@ -49,6 +50,7 @@ import Model
       ( UserAuthTypeGoogle, UserAuthTypeEmail, UserAuthTypePassword)
     , UserPhoto (UserPhoto)
     )
+    
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg

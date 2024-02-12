@@ -57,8 +57,12 @@
         _{MsgNoDataYet}
   $else
     <md-list>
-      $forall Entity sid (MedSign name code _ _ _) <- signs
+      $forall Entity sid (MedSign name code icon _ _ _) <- signs
         <md-list-item type=link href=@?{(DataR $ MedSignR sid,stati)}>
+          $maybe icon <- icon
+            <md-icon slot=start>#{icon}
+          $nothing
+            <span slot=start>
           <div slot=headline>#{name}
           <div slot=supporting-text>
             $maybe code <- code

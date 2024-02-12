@@ -5,6 +5,8 @@
 
 ^{fvInput codeV}
 
+^{fvInput iconV}
+
 ^{fvInput unitV}
 
 ^{fvInput descrV}

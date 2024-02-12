@@ -1,3 +1,4 @@
+Icon: Pictogramă
 Remarks: Observații
 Value: Valoare
 Time: Ora

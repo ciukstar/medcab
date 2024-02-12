@@ -28,7 +28,7 @@ import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
 import Data.Time.Calendar (Day)
-import Data.Time.LocalTime (TimeOfDay)
+import Data.Time.LocalTime (LocalTime)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
@@ -70,6 +70,8 @@ data AuthenticationType = UserAuthTypePassword
                         | UserAuthTypeGoogle
     deriving (Show, Read, Eq, Ord)
 derivePersistField "AuthenticationType"
+
+derivePersistField "LocalTime"
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

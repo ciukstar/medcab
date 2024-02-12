@@ -4,7 +4,6 @@
 module Handler.Resources (getDocsR) where
 
 import Database.Persist (Entity (Entity))
-import Handler.Menu (menu)
 import Foundation
     ( Handler
     , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR, DataR)
@@ -19,6 +18,8 @@ import Foundation
       , MsgDoc007, MsgDoc008
       )
     )
+    
+import Menu (menu)
 import Model (AvatarColor (AvatarColorLight))
 
 import Settings (widgetFile)

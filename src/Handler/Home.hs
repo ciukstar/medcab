@@ -6,7 +6,7 @@
 module Handler.Home (getHomeR) where
 
 import Database.Persist (Entity(Entity))
-import Handler.Menu (menu)
+
 import Foundation
     ( Handler
     , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR, RecordsR)
@@ -15,7 +15,10 @@ import Foundation
       , MsgElectronicHealthRecord
       )
     )
+
+import Menu (menu)
 import Model (statusError, AvatarColor(AvatarColorLight))
+
 import Settings (widgetFile)
 import Text.Hamlet (Html)
 import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )

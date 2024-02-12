@@ -35,11 +35,15 @@
         _{MsgNoDataYet}
   $else
     <md-list>
-      $forall (Entity rid (Record uid _ date time value _ _),Entity _ (MedSign name _ _ _ _),unit) <- records
+      $forall (Entity rid (Record uid _ time value _ _),Entity _ (MedSign name _ icon _ _ _),unit) <- records
         <md-list-item type=link href=@{RecordR uid rid}>
+          $maybe icon <- icon
+            <md-icon slot=start>#{icon}
+          $nothing
+            <span slot=start>
           <div slot=headline>#{name}
           <div slot=supporting-text>
-            $with dt <- (show date <> " ") <> show time
+            $with dt <- show time
               <time datetime=#{dt}>#{dt}
           <div slot=supporting-text>
             #{value}

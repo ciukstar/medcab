@@ -39,14 +39,13 @@ import Database.Persist
     )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
-import Handler.Menu (menu)
-
 import Material3
     (md3mreq, md3textField, md3selectField, md3mopt, md3textareaField, tsep)
+import Menu (menu)
 import Model
     ( AvatarColor (AvatarColorLight), statusError, statusSuccess
     , MedSign
-      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag
+      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag, medSignIcon
       )
     , EntityField
       ( MedSignName, MedSignId, MedSignUnit, UnitId, UnitName, UnitSymbol
@@ -70,7 +69,7 @@ import Foundation
       , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack, MsgTabs
       , MsgGroup, MsgDescription, MsgUnitOfMeasure, MsgCode, MsgInvalidFormData
       , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
-      , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails
+      , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails, MsgNone, MsgIcon
       )
     )
 
@@ -367,6 +366,12 @@ formMedSign sign extra = do
         , fsAttrs = [("label", rndr MsgCode)]
         } (medSignCode . entityVal <$> sign)
 
+    (iconR,iconV) <- md3mopt md3textField FieldSettings
+        { fsLabel = SomeMessage MsgIcon
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgIcon)]
+        } (medSignIcon . entityVal <$> sign)
+
     (descrR,descrV) <- md3mopt md3textareaField FieldSettings
         { fsLabel = SomeMessage MsgDescription
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -395,7 +400,7 @@ formMedSign sign extra = do
         , fsAttrs = [("label", rndr MsgTag)]
         } (medSignTag . entityVal <$> sign)
 
-    let r = MedSign <$> nameR <*> codeR <*> descrR <*> unitR <*> tagR
+    let r = MedSign <$> nameR <*> codeR <*> iconR <*> descrR <*> unitR <*> tagR
     let w = $(widgetFile "data/signs/form")
     return (r,w)
   where
