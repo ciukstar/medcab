@@ -1,3 +1,5 @@
+Measurements: Измерения
+Measurement: Измерение
 Icon: Значок
 Remarks: Примечания
 Value: Значение

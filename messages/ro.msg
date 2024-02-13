@@ -1,3 +1,5 @@
+Measurements: Măsurători
+Measurement: Măsurătoare
 Icon: Pictogramă
 Remarks: Observații
 Value: Valoare

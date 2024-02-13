@@ -199,6 +199,12 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     
+    isAuthorized (RecordMeasurementDeleR uid _ _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordMeasurementEditR uid _ _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordMeasurementNewR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordMeasurementR uid _ _) _ = isAuthenticatedSelf uid
+    isAuthorized (RecordMeasurementsR uid _) _ = isAuthenticatedSelf uid
+    
     isAuthorized (RecordDeleR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordEditR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordNewR uid) _ = isAuthenticatedSelf uid

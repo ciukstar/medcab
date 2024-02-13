@@ -1,3 +1,5 @@
+Measurements: Measurements
+Measurement: Measurement
 Icon: Icon
 Remarks: Remarks
 Value: Value

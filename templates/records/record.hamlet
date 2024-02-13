@@ -29,34 +29,39 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{RecordR uid rid}' : '@{RecordMeasurementsR uid rid}'">
+    <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      _{MsgDetails}
+    <md-primary-tab #tabMeasurements aria-controls=panelMeasurements>
+      _{MsgMeasurements}
 
-  $forall (Entity _ (Record _ _ time value _ remarks),Entity _ (MedSign name _ _ _ _ _),unit) <- record
-    <dl>
+  <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-      <dt.label-large>_{MsgDate}
-      <dd.body-medium>
-        $with dt <- show time
-          <time datetime=#{dt}>#{dt}
-          
-      <dt.label-large>_{MsgMedicalSign}
-      <dd.body-medium>#{name}
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
 
-      <dt.label-large>_{MsgValue}
-      <dd.body-medium>
-        #{value}
-        $maybe Entity _ (Unit _ symbol _ _) <- unit
-          \ #{symbol}
+    $forall (Entity _ (Record _ _ time remarks),Entity _ (MedSign name _ _ _ _ _)) <- record
+      <dl>
 
-      <dt.label-large>_{MsgRemarks}
-      <dd.body-medium>
-        $maybe remarks <- remarks
-          #{remarks}
+        <dt.label-large>_{MsgDate}
+        <dd.body-medium>
+          $with dt <- show time
+            <time datetime=#{dt}>#{dt}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+        <dt.label-large>_{MsgMedicalSign}
+        <dd.body-medium>#{name}
+
+        <dt.label-large>_{MsgRemarks}
+        <dd.body-medium>
+          $maybe remarks <- remarks
+            #{remarks}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
+        
+  <div #panelMeasurements role=tabpanel aria-labelledby=tabMeasurements>

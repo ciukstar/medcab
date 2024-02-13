@@ -1,0 +1,55 @@
+
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{RecordsR uid} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgRecord}
+
+  <div #headerEnd>
+
+
+<main>
+
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{RecordR uid rid}' : '@{RecordMeasurementsR uid rid}'">
+    <md-primary-tab #tabDetails aria-controls=panelDetails>
+      _{MsgDetails}
+    <md-primary-tab #tabMeasurements aria-controls=#{idPanelMeasurements} active=true>
+      _{MsgMeasurements}
+
+  <div #panelDetails role=tabpanel aria-labelledby=tabDetails>
+        
+  <div ##{idPanelMeasurements} role=tabpanel aria-labelledby=tabMeasurements>
+
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
+
+    $if null measurements
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&varnothing;
+        <figcaption.body-large>
+          _{MsgNoDataYet}
+    $else
+      <md-list>
+        $forall (Entity mid (Measurement _ value name _),unit) <- measurements
+          <md-list-item type=link href=@{RecordMeasurementR uid rid mid}>
+            <div slot=headline>
+              #{value}
+              $maybe Entity _ (Unit _ symbol _ _) <- unit
+                \ #{symbol}
+            <div slot=supporting-text>#{name}
+            <md-icon slot=end>arrow_forward_ios
+          <md-divider>
+
+    <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{RecordMeasurementNewR uid rid}>
+      <md-icon slot=icon>add
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}

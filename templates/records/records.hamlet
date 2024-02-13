@@ -35,7 +35,7 @@
         _{MsgNoDataYet}
   $else
     <md-list>
-      $forall (Entity rid (Record uid _ time value _ _),Entity _ (MedSign name _ icon _ _ _),unit) <- records
+      $forall (Entity rid (Record uid _ time _),Entity _ (MedSign name _ icon _ _ _)) <- records
         <md-list-item type=link href=@{RecordR uid rid}>
           $maybe icon <- icon
             <md-icon slot=start>#{icon}
@@ -45,10 +45,6 @@
           <div slot=supporting-text>
             $with dt <- show time
               <time datetime=#{dt}>#{dt}
-          <div slot=supporting-text>
-            #{value}
-            $maybe Entity _ (Unit _ symbol _ _) <- unit
-              \ #{symbol}
           <md-icon slot=end>arrow_forward_ios
         <md-divider>
 

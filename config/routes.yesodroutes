@@ -1,4 +1,11 @@
 
+
+/users/#UserId/records/#RecordId/measurements/#MeasurementId/dele RecordMeasurementDeleR POST
+/users/#UserId/records/#RecordId/measurements/#MeasurementId/edit RecordMeasurementEditR GET
+/users/#UserId/records/#RecordId/measurements/forms/new      	  RecordMeasurementNewR  GET
+/users/#UserId/records/#RecordId/measurements/#MeasurementId 	  RecordMeasurementR     GET POST
+/users/#UserId/records/#RecordId/measurements 		     	  RecordMeasurementsR    GET POST
+
 /users/#UserId/records/#RecordId/dele RecordDeleR POST
 /users/#UserId/records/#RecordId/edit RecordEditR GET
 /users/#UserId/records/forms/new      RecordNewR  GET

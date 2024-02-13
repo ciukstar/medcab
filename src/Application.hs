@@ -51,7 +51,9 @@ import System.Log.FastLogger
 
 import Handler.Records
     ( getRecordsR, getRecordR, getRecordNewR, postRecordsR, getRecordEditR
-    , postRecordDeleR, postRecordR
+    , postRecordDeleR, postRecordR, getRecordMeasurementsR, getRecordMeasurementR
+    , getRecordMeasurementNewR, postRecordMeasurementsR, getRecordMeasurementEditR
+    , postRecordMeasurementDeleR, postRecordMeasurementR
     )
 
 import Handler.Accounts

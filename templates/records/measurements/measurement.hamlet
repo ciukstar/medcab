@@ -1,0 +1,59 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{RecordMeasurementsR uid rid} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgMeasurement}
+
+  <div #headerEnd>
+    <md-icon-button type=button aria-label=_{MsgDele}
+      onclick="document.getElementById('idDialogDelete').open = true">
+      <md-icon>delete
+    <md-icon-button href=@{RecordMeasurementEditR uid rid mid} aria-label=_{MsgEdit}>
+      <md-icon>edit
+
+<md-dialog #idDialogDelete>
+  <div slot=headline>
+    _{MsgConfirmPlease}
+  <div slot=content>
+    _{MsgDeleteAreYouSure}
+  <div slot=actions>
+    <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
+      _{MsgCancel}
+    <form slot=content method=post action=@{RecordMeasurementDeleR uid rid mid} enctype=#{et}>
+      ^{fw}
+      <md-filled-button type=submit>
+        _{MsgDele}
+
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $forall (Entity _ (Measurement _ value name _),record,sign,unit) <- measurement
+    <dl>
+
+      $with Entity _ (MedSign sname _ _ _ _ _) <- sign
+        <dt.label-large>_{MsgName}
+        <dd.body-medium>#{sname}: #{name}
+
+      <dt.label-large>_{MsgValue}
+      <dd.body-medium>
+        #{value}
+        $maybe Entity _ (Unit _ symbol _ _) <- unit
+          \ #{symbol}
+
+      $with Entity _ (Record _ _ time _) <- record
+        <dt.label-large>_{MsgDate}
+        <dd.body-medium>
+          $with dt <- show time
+            <time datetime=#{dt}>#{dt}
+
+  $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+    <aside.app-snackbar.shape-small.elevation-1.primary-container>
+      <md-elevation>
+      <span.body-medium>#{status}. #
+      <span.body-medium>#{msg}
