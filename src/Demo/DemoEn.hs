@@ -6,7 +6,15 @@ module Demo.DemoEn (fillDemoEn) where
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Reader (ReaderT)
+
+import Data.FileEmbed (embedFile)
+import Data.Time (utcToLocalTime, addLocalTime, nominalDay, getCurrentTimeZone)
+import Data.Time.Calendar (addGregorianYearsClip)
+import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
+import Data.Time.LocalTime (localDay, localTimeOfDay)
+
 import Database.Persist.SqlBackend (SqlBackend)
+
 import Model
     ( AuthenticationType (UserAuthTypeEmail)
     , Specialty
@@ -28,9 +36,16 @@ import Model
       , specialistTitle
       ), Unit (Unit, unitName, unitSymbol, unitDescr, unitQuantity)
     , MedSign
-      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag, medSignIcon )
+      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag
+      , medSignIcon
+      )
     , SignTag (SignTag, signTagName, signTagGroup, signTagDescr)
     , Quantity (Quantity, quantityName, quantityDescr)
+    , Record (recordUser, recordSign, Record, recordTime, recordRemarks, recordDay)
+    , Measurement
+      ( Measurement, measurementRecord, measurementValue, measurementUnit
+      , measurementName
+      )
     )
 
 import Text.Hamlet (shamlet)
@@ -39,16 +54,15 @@ import Text.Shakespeare.Text (st)
 import Yesod.Auth.Email (saltPass)
 import Yesod.Form.Fields (Textarea(Textarea))
 import Yesod.Persist(PersistStoreWrite (insert, insert_))
-import Data.FileEmbed (embedFile)
-import Data.Time.Calendar (addGregorianYearsClip)
-import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 
 fillDemoEn :: MonadIO m => ReaderT SqlBackend m ()
 fillDemoEn = do
 
-    today <- liftIO $ utctDay <$> getCurrentTime
-
+    tz <- liftIO getCurrentTimeZone
+    now <- liftIO getCurrentTime
+    let today = utctDay now
+    let localNow = utcToLocalTime tz now
 
     pass1 <- liftIO $ saltPass "marylopez"
     let user1 = User { userEmail = "marylopez@xmail.edu"
@@ -61,9 +75,9 @@ fillDemoEn = do
                      , userAdmin = True
                      }
 
-    u1 <- insert user1
+    usr1 <- insert user1
 
-    insert_ UserPhoto { userPhotoUser = u1
+    insert_ UserPhoto { userPhotoUser = usr1
                       , userPhotoMime = "image/avif"
                       , userPhotoPhoto = $(embedFile "demo/happy-woman-gray-polo-shirt-with-pink-pin-button_53876-102858.avif")
                       , userPhotoAttribution = Just [shamlet|
@@ -84,9 +98,9 @@ fillDemoEn = do
                      , userAdmin = False
                      }
 
-    u2 <- insert user2
+    usr2 <- insert user2
 
-    insert_ UserPhoto { userPhotoUser = u2
+    insert_ UserPhoto { userPhotoUser = usr2
                       , userPhotoMime = "image/avif"
                       , userPhotoPhoto = $(embedFile "demo/smiley-handsome-man-posing_23-2148911841.avif")
                       , userPhotoAttribution = Just [shamlet|
@@ -366,7 +380,7 @@ fillDemoEn = do
                         , medSignTag = Just st1
                         }
 
-    sgn2 <- insert_ sign2
+    sgn2 <- insert sign2
 
     let sign3 = MedSign { medSignName = "Heart rate"
                         , medSignCode = Just "HR"
@@ -376,7 +390,7 @@ fillDemoEn = do
                         , medSignTag = Just st1
                         }
 
-    sgn3 <- insert_ sign3
+    sgn3 <- insert sign3
 
     let sign4 = MedSign { medSignName = "Respiratory rate"
                         , medSignCode = Just "RR"
@@ -457,5 +471,143 @@ fillDemoEn = do
                          }
 
     sgn11 <- insert sign11
+
+    let twoDaysBefore = addLocalTime ((-2) * nominalDay) localNow
+
+    let record1 = Record { recordUser = usr1
+                         , recordSign = sgn2
+                         , recordDay = localDay twoDaysBefore
+                         , recordTime = localTimeOfDay twoDaysBefore
+                         , recordRemarks = Nothing
+                         }
+
+    r1 <- insert record1
+
+    let measurement11 = Measurement { measurementRecord = r1
+                                    , measurementValue = 128
+                                    , measurementName = "Systolic"
+                                    , measurementUnit = Just u1
+                                    }
+
+    m11 <- insert measurement11
+
+    let measurement12 = Measurement { measurementRecord = r1
+                                    , measurementValue = 70
+                                    , measurementName = "Diastolic"
+                                    , measurementUnit = Just u1
+                                    }
+
+    m12 <- insert measurement12
+
+    let measurement13 = Measurement { measurementRecord = r1
+                                    , measurementValue = 60
+                                    , measurementName = "Pulse"
+                                    , measurementUnit = Just u2
+                                    }
+
+    m13 <- insert measurement13
+
+    let record2 = Record { recordUser = usr1
+                         , recordSign = sgn4
+                         , recordDay = localDay twoDaysBefore
+                         , recordTime = localTimeOfDay twoDaysBefore
+                         , recordRemarks = Nothing
+                         }
+
+    r2 <- insert record2
+
+    let measurement21 = Measurement { measurementRecord = r2
+                                    , measurementValue = 15
+                                    , measurementName = "Breaths"
+                                    , measurementUnit = Just u7
+                                    }
+
+    m21 <- insert measurement21
+
+    let record03 = Record { recordUser = usr1
+                          , recordSign = sgn3
+                          , recordDay = localDay twoDaysBefore
+                          , recordTime = localTimeOfDay twoDaysBefore
+                          , recordRemarks = Nothing
+                          }
+
+    r03 <- insert record03
+
+    let measurement031 = Measurement { measurementRecord = r03
+                                     , measurementValue = 72
+                                     , measurementName = "Beats"
+                                     , measurementUnit = Just u2
+                                     }
+
+    m031 <- insert measurement031
+    
+    let yesterday = addLocalTime ((-1) * nominalDay) localNow
+
+    let record3 = Record { recordUser = usr1
+                         , recordSign = sgn2
+                         , recordDay = localDay yesterday
+                         , recordTime = localTimeOfDay yesterday
+                         , recordRemarks = Nothing
+                         }
+
+    r3 <- insert record3
+
+    let measurement31 = Measurement { measurementRecord = r3
+                                    , measurementValue = 127
+                                    , measurementName = "Systolic"
+                                    , measurementUnit = Just u1
+                                    }
+
+    m31 <- insert measurement31
+
+    let measurement32 = Measurement { measurementRecord = r3
+                                    , measurementValue = 71
+                                    , measurementName = "Diastolic"
+                                    , measurementUnit = Just u1
+                                    }
+
+    m32 <- insert measurement32
+
+    let measurement33 = Measurement { measurementRecord = r3
+                                    , measurementValue = 64
+                                    , measurementName = "Pulse"
+                                    , measurementUnit = Just u2
+                                    }
+
+    m33 <- insert measurement33
+
+    let record4 = Record { recordUser = usr1
+                         , recordSign = sgn4
+                         , recordDay = localDay yesterday
+                         , recordTime = localTimeOfDay yesterday
+                         , recordRemarks = Nothing
+                         }
+
+    r4 <- insert record4
+
+    let measurement41 = Measurement { measurementRecord = r4
+                                    , measurementValue = 17
+                                    , measurementName = "Breaths"
+                                    , measurementUnit = Just u7
+                                    }
+
+    m41 <- insert measurement41
+
+    let record13 = Record { recordUser = usr1
+                          , recordSign = sgn3
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
+
+    r13 <- insert record13
+
+    let measurement131 = Measurement { measurementRecord = r13
+                                     , measurementValue = 69
+                                     , measurementName = "Beats"
+                                     , measurementUnit = Just u2
+                                     }
+
+    m131 <- insert measurement131
 
     return ()

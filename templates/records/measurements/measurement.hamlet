@@ -46,10 +46,10 @@
         $maybe Entity _ (Unit _ symbol _ _) <- unit
           \ #{symbol}
 
-      $with Entity _ (Record _ _ time _) <- record
+      $with Entity _ (Record _ _ day time _) <- record
         <dt.label-large>_{MsgDate}
         <dd.body-medium>
-          $with dt <- show time
+          $with dt <- show (LocalTime day time)
             <time datetime=#{dt}>#{dt}
 
   $forall (status,msg) <- filter ((/=) statusError . fst) msgs

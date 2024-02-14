@@ -12,9 +12,10 @@ Measurement
 Record
     user UserId OnDeleteCascade
     sign MedSignId OnDeleteCascade
-    time LocalTime
+    day Day
+    time TimeOfDay
     remarks Textarea Maybe
-    UniqueRecord user sign time
+    UniqueRecord user sign day time
 
 
 MedSign

@@ -42,12 +42,12 @@
       <div.app-banner.error.body-medium>
         #{status}. #{msg}
 
-    $forall (Entity _ (Record _ _ time remarks),Entity _ (MedSign name _ _ _ _ _)) <- record
+    $forall (Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _ _)) <- record
       <dl>
 
         <dt.label-large>_{MsgDate}
         <dd.body-medium>
-          $with dt <- show time
+          $with dt <- show (LocalTime day time)
             <time datetime=#{dt}>#{dt}
 
         <dt.label-large>_{MsgMedicalSign}

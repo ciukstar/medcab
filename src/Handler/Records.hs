@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 module Handler.Records
   ( getRecordsR
@@ -20,8 +21,13 @@ module Handler.Records
   , postRecordMeasurementR
   ) where
 
+import Control.Monad (forM)
+
 import Data.Bifunctor (Bifunctor(bimap))
+import qualified Data.Map as M (Map, fromListWith, toDescList)
 import Data.Text (Text)
+import Data.Time.Calendar (Day)
+import Data.Time.LocalTime (LocalTime(LocalTime, localTimeOfDay, localDay))
 
 import Database.Esqueleto.Experimental
     ( select, from, table, where_, val, innerJoin, on, leftJoin
@@ -59,10 +65,10 @@ import Model
     , EntityField
       ( RecordUser, RecordSign, MedSignId, UnitId, RecordTime, MedSignName
       , UnitSymbol, RecordId, MeasurementRecord, MeasurementUnit, UnitName
-      , MeasurementId, MeasurementName
+      , MeasurementId, MeasurementName, RecordDay
       )
     , UserId
-    , Record (Record, recordSign, recordTime, recordRemarks)
+    , Record (Record, recordSign, recordTime, recordRemarks, recordDay)
     , MedSign (MedSign), Unit (Unit), RecordId, statusSuccess
     , Measurement
       ( Measurement, measurementValue, measurementName, measurementUnit )
@@ -246,6 +252,7 @@ getRecordMeasurementsR uid rid = do
         x :& u <- from $ table @Measurement
             `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
         where_ $ x ^. MeasurementRecord ==. val rid
+        orderBy [asc (x ^. MeasurementId)]
         return (x,u)
         
     msgs <- getMessages
@@ -342,7 +349,7 @@ formRecord uid record extra = do
         { fsLabel = SomeMessage MsgTime
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgTime)]
-        } (recordTime . entityVal <$> record)
+        } (LocalTime <$> (recordDay . entityVal <$> record) <*> (recordTime . entityVal <$> record))
 
     (remarksR,remarksV) <- md3mopt md3textareaField FieldSettings
         { fsLabel = SomeMessage MsgRemarks
@@ -350,7 +357,7 @@ formRecord uid record extra = do
         , fsAttrs = [("label", rndr MsgRemarks)]
         } (recordRemarks . entityVal <$> record)
 
-    let r = Record uid <$> signR <*> timeR <*> remarksR
+    let r = Record uid <$> signR <*> (localDay <$> timeR) <*> (localTimeOfDay <$> timeR) <*> remarksR
     let w = $(widgetFile "records/form")
     return (r,w)
 
@@ -378,13 +385,21 @@ formRecordDelete extra = return (pure (), [whamlet|#{extra}|])
 
 getRecordsR :: UserId -> Handler Html
 getRecordsR uid = do
-
-    records <- runDB $ select $ do
+    
+    xs <- runDB ( select $ do
         x :& s <- from $ table @Record
             `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
         where_ $ x ^. RecordUser ==. val uid
-        orderBy [desc (x ^. RecordTime)]
-        return (x,s)
+        orderBy [desc (x ^. RecordDay), desc (x ^. RecordTime)]
+        return (x,s) )
+
+    groups <- groupByDay <$> forM xs ( \r@(Entity rid _,_) -> (r,) <$> runDB ( select $ do
+        x :& u <- from $ table @Measurement
+            `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
+        orderBy [asc (x ^. MeasurementId)]
+        where_ $ x ^. MeasurementRecord ==. val rid
+        return (x,u) ) )
+        
 
     user <- maybeAuth
     msgs <- getMessages
@@ -392,3 +407,15 @@ getRecordsR uid = do
         setTitleI MsgElectronicHealthRecord
         idFabAdd <- newIdent
         $(widgetFile "records/records")
+
+  where
+
+      groupByDay :: [((Entity Record,Entity MedSign),[(Entity Measurement,Maybe (Entity Unit))])]
+                 -> [(Day,[((Entity Record,Entity MedSign),[(Entity Measurement,Maybe (Entity Unit))])])]
+      groupByDay = M.toDescList . groupByKey (recordDay . entityVal . fst . fst)
+      
+      groupByKey :: (Ord k) => (v -> k) -> [v] -> M.Map k [v]
+      groupByKey key = M.fromListWith (<>) . fmap (\x -> (key x,[x]))
+
+      irange = [1 :: Int ..]
+      

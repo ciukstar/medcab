@@ -1,0 +1,24 @@
+
+Array.from(
+  document.body.querySelectorAll('time.app-day[datetime]')
+).forEach(function (x) {
+  x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
+    navigator.language,
+    { weekday: 'short',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }
+  );
+});
+
+Array.from(
+  document.body.querySelectorAll('time.app-time[datetime]')
+).forEach(function (x) {
+  x.textContent = new Date(x.getAttribute('datetime')).toLocaleTimeString(
+    navigator.language,
+    { hour: "numeric",
+      minute: "numeric"
+    }
+  );
+});
