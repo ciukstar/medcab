@@ -1,4 +1,7 @@
 
+/doctors/#DoctorId 	DoctorR      GET
+/doctors/#DoctorId/poto DoctorPhotoR GET
+/doctors 		DoctorsR     GET
 
 /users/#UserId/records/#RecordId/measurements/#MeasurementId/dele RecordMeasurementDeleR POST
 /users/#UserId/records/#RecordId/measurements/#MeasurementId/edit RecordMeasurementEditR GET
@@ -67,15 +70,15 @@
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/dele SpecialistDeleR        POST
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/edit SpecialistEditR        GET
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId 	   SpecialistR            GET POST
-    /doctors/#DoctorId/specialties/form/create        	   DoctorSpecialtyCreateR GET
-    /doctors/#DoctorId/specialties                    	   DoctorSpecialtiesR     GET POST
+    /staff/#DoctorId/specialties/form/create        	   DoctorSpecialtyCreateR GET
+    /staff/#DoctorId/specialties                    	   DoctorSpecialtiesR     GET POST
 
-    /doctors/#DoctorId/photo DoctorPhotoR  GET
-    /doctors/form/create     DoctorCreateR GET
-    /doctors/#DoctorId/dele  DoctorDeleR   POST
-    /doctors/#DoctorId/edit  DoctorEditR   GET
-    /doctors/#DoctorId 	     DoctorR       GET POST
-    /doctors        	     DoctorsR      GET POST
+    /staff/#DoctorId/photo StaffPhotoR  GET
+    /staff/form/create     DoctorCreateR GET
+    /staff/#DoctorId/dele  DoctorDeleR   POST
+    /staff/#DoctorId/edit  DoctorEditR   GET
+    /staff/#DoctorId 	   MemberR       GET POST
+    /staff        	   StaffR      	 GET POST
 
     /dele/experts/#SpecialistId/#SpecialtyId/doctors/#DoctorId/+Specialties SpecialtyDoctorDeleR   POST
     /edit/experts/#SpecialistId/#SpecialtyId/doctors/#DoctorId/+Specialties SpecialtyDoctorEditR   GET

@@ -1,0 +1,10 @@
+
+Array.from(
+  document.body.querySelectorAll('.app-numeric[data-value]')
+).forEach(function (x) {
+  x.textContent = Intl.NumberFormat(navigator.language, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    useGrouping: true
+  }).format(x.dataset.value);
+});

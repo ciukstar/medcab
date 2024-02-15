@@ -34,7 +34,7 @@
       #{status}. #{msg}
 
   <figure>
-    <img src=@{DataR $ DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+    <img src=@{DataR $ StaffPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
     <figcaption.body-small>
       $maybe attrib <- attrib
         #{attrib}

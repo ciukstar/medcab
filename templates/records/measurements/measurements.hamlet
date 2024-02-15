@@ -34,10 +34,10 @@
           _{MsgNoDataYet}
     $else
       <md-list>
-        $forall (Entity mid (Measurement _ value name _),unit) <- measurements
+        $forall (Entity mid (Measurement _ name value _),unit) <- measurements
           <md-list-item type=link href=@{RecordMeasurementR uid rid mid}>
             <div slot=headline>
-              #{value}
+              <span.app-numeric data-value=#{value}>#{value}
               $maybe Entity _ (Unit _ symbol _ _) <- unit
                 \ #{symbol}
             <div slot=supporting-text>#{name}

@@ -9,9 +9,9 @@ import Database.Persist (Entity(Entity))
 
 import Foundation
     ( Handler
-    , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR, RecordsR)
+    , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR, RecordsR, DoctorsR)
     , AppMessage
-      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount
+      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount, MsgDoctors
       , MsgElectronicHealthRecord
       )
     )

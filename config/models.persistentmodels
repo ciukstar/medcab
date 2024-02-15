@@ -3,8 +3,8 @@
 
 Measurement
     record RecordId OnDeleteCascade
-    value Double
     name Text
+    value Double
     unit UnitId Maybe OnDeleteSetNull
     UniqueMeasurement record name
 
@@ -17,6 +17,12 @@ Record
     remarks Textarea Maybe
     UniqueRecord user sign day time
 
+Normal
+    sign MedSignId OnDeleteCascade
+    name Text
+    lowerBound Double
+    upperBound Double
+    UniqueNormal sign name
 
 MedSign
     name Text

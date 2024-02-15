@@ -14,6 +14,9 @@
     <md-menu-item href=@{HomeR} :curr == Just HomeR:selected>
       _{MsgWelcome}
 
+    <md-menu-item href=@{DoctorsR} :curr == Just DoctorsR:selected>
+      _{MsgDoctors}
+
 
     $maybe Entity uid _ <- user
       <md-menu-item type=link href=@{RecordsR uid} :curr == Just (RecordsR uid):selected>
@@ -23,7 +26,7 @@
         _{MsgRecords}
 
     <details.app-submenu #idDetailsData
-      :elem curr [Just (DataR MedSignsR), Just (DataR UnitsR), Just (DataR DoctorsR), Just (DataR $ SpecialtiesR (Specialties [])), Just (DataR UsersR), Just (DataR TokensR)]:open
+      :elem curr [Just (DataR MedSignsR), Just (DataR UnitsR), Just (DataR StaffR), Just (DataR $ SpecialtiesR (Specialties [])), Just (DataR UsersR), Just (DataR TokensR)]:open
       ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
       <summary>
         <md-menu-item>
@@ -31,7 +34,7 @@
             _{MsgData}
             <md-icon.app-expand-icon slot=icon>expand_more
           
-      <md-menu-item href=@{DataR DoctorsR} :curr == Just (DataR DoctorsR):selected>
+      <md-menu-item href=@{DataR StaffR} :curr == Just (DataR StaffR):selected>
         _{MsgDoctors}
           
       <md-menu-item href=@{DataR $ SpecialtiesR (Specialties [])} :curr == Just (DataR $ SpecialtiesR (Specialties [])):selected>

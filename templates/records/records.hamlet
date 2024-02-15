@@ -34,42 +34,43 @@
       <figcaption.body-large>
         _{MsgNoDataYet}
   $else
-    <md-list>
-      $with m <- length groups 
-        $forall (j,(day,records)) <- zip irange groups
-          <md-list-item type=button>
-            <details open>
-              <summary>
-                $with d <- show day
-                  <time.app-day.body-large datetime=#{d}>d
-              <md-list>
-                $with n <- length records
-                  $forall (i,((Entity rid (Record uid _ day time _),sign),measurements)) <- zip irange records
-                    $with Entity _ (MedSign name _ icon _ _ _) <- sign
-                      <md-list-item type=link href=@{RecordR uid rid}>
-                        $maybe icon <- icon
-                          <md-icon slot=start>#{icon}
-                        $nothing
-                          <span slot=start>
-                        <div slot=headline>#{name}
-                        <div slot=supporting-text>
+    $with m <- length groups 
+      $forall (j,(day,records)) <- zip irange groups
+        <details open>
+          <summary>
+            $with d <- show day
+              <time.app-day.body-large datetime=#{d}>d
+          <md-list>
+            $with n <- length records
+              $forall (i,((Entity rid (Record uid _ day time _),sign),measurements)) <- zip irange records
+                $with Entity _ (MedSign name _ icon _ _ _) <- sign
+                  <md-list-item type=link href=@{RecordR uid rid}>
+                    <div slot=start>
+                      <small>
+                        <small>
                           $with dt <- show (LocalTime day time)
                             <time.app-time datetime=#{dt}>#{dt}
+                      $maybe icon <- icon
+                        <md-icon>#{icon}
+                      $nothing
+                        <span>&nbsp;
+                    <div slot=headline>#{name}
 
-                        <table slot=supporting-text>
-                          <tbody>
-                          $forall (Entity _ (Measurement _ value name _),unit) <- measurements
-                            <tr>
-                              <td>#{name}: 
-                              <td>#{value}
-                              <td>
-                                $maybe Entity _ (Unit _ symbol _ _) <- unit
-                                  #{symbol}
-                        <md-icon slot=end>arrow_forward_ios
-                      $if i /= n
-                        <md-divider>
-          $if j /= m
-            <md-divider>
+                    <table slot=supporting-text>
+                      <tbody>
+                        $forall (Entity _ (Measurement _ name value _),unit) <- measurements
+                          <tr>
+                            <td>#{name}:&nbsp;
+                            $with value <- show value
+                              <td.app-numeric data-value=#{value}>#{value}
+                            <td>
+                              $maybe Entity _ (Unit _ symbol _ _) <- unit
+                                #{symbol}
+                    <md-icon slot=end>arrow_forward_ios
+                  $if i /= n
+                    <md-divider>
+        $if j /= m
+          <md-divider>
 
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
     <a href=@{RecordNewR uid}>

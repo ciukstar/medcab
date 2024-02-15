@@ -57,7 +57,7 @@ import Foundation
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
-      , SpecialtyDeleR, SpecialtyDoctorsR, DoctorPhotoR, SpecialtyDoctorR
+      , SpecialtyDeleR, SpecialtyDoctorsR, StaffPhotoR, SpecialtyDoctorR
       , SpecialtyDoctorDeleR, SpecialtyDoctorEditR, SpecialtyDoctorCreateR
       )
     , AppMessage
@@ -204,7 +204,7 @@ formSpecialist sid specialist extra = do
                   <md-filled-select ##{theId} *{attrs} :req:required name=#{name}>
                     $forall opt<- opts
                       <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
-                        <img slot=start src=@{DataR $ DoctorPhotoR (optionInternalValue opt)}
+                        <img slot=start src=@{DataR $ StaffPhotoR (optionInternalValue opt)}
                           width=56 height=56 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
                         <div slot=headline>#{optionDisplay opt}
                     $if elem "error" (fst <$> attrs)

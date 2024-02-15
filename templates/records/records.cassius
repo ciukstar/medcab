@@ -16,16 +16,35 @@ header
     gap: 1rem
   
 main
+
   display: flex
   flex-direction: column
-  gap: 0
+  gap: 1rem
   
   .error
-    align-self: stretch
-    padding: 1rem
+      align-self: stretch
+      padding: 1rem
 
-  time.app-day
-      margin: 1rem
+  details
+      summary
+          padding: 1rem
+          time.app-day
+              margin-left: 1rem
+      summary:hover
+          cursor: pointer
+      md-list
+          md-list-item
+              div[slot=start]
+                height: 100%
+                display: flex
+                flex-direction: column
+                justify-content: flex-start
+                align-items: center
+                gap: 0.5rem
+              table tr
+                  td.app-numeric[data-value]
+                      font-weight: bold
+                      text-align: end
 
   ##{idFabAdd}
     position: fixed

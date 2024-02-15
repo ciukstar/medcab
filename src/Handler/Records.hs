@@ -22,6 +22,7 @@ module Handler.Records
   ) where
 
 import Control.Monad (forM)
+import Control.Monad.Trans.Reader (ReaderT)
 
 import Data.Bifunctor (Bifunctor(bimap))
 import qualified Data.Map as M (Map, fromListWith, toDescList)
@@ -36,6 +37,7 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist
     (Entity (Entity), PersistStoreWrite (insert_, delete, replace))
+import Database.Persist.Sql ( SqlBackend )
 
 import Foundation
     ( Handler, Form
@@ -174,13 +176,13 @@ formRecordMeasurement :: RecordId -> Maybe (Entity Measurement) -> Form Measurem
 formRecordMeasurement rid measurement extra = do
 
     rndr <- getMessageRender
-    
+
     (valueR,valueV) <- md3mreq md3doubleField FieldSettings
         { fsLabel = SomeMessage MsgValue
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgValue)]
         } (measurementValue . entityVal <$> measurement)
-    
+
     (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -191,15 +193,15 @@ formRecordMeasurement rid measurement extra = do
         x <- from $ table @Unit
         orderBy [asc (x ^. UnitName)]
         return ((x ^. UnitSymbol, x ^. UnitName),x ^. UnitId) )
-    
+
     (unitR,unitV) <- md3mopt (md3selectField (optionsPairs units)) FieldSettings
         { fsLabel = SomeMessage MsgUnitOfMeasure
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgUnitOfMeasure)]
         } (measurementUnit . entityVal <$> measurement)
-        
-    
-    return ( Measurement rid <$> valueR <*> nameR <*> unitR
+
+
+    return ( Measurement rid <$> nameR <*> valueR <*> unitR
            , $(widgetFile "records/measurements/form")
            )
   where
@@ -229,7 +231,7 @@ getRecordMeasurementR uid rid mid = do
             `innerJoin` table @Record `on` (\(x :& r) -> x ^. MeasurementRecord ==. r ^. RecordId)
             `innerJoin` table @MedSign `on` (\(_ :& r :& s) -> r ^. RecordSign ==. s ^. MedSignId)
             `leftJoin` table @Unit `on` (\(x :& _ :& _ :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
-            
+
         where_ $ x ^. MeasurementId ==. val mid
         return (x,r,s,u)
 
@@ -247,14 +249,14 @@ formRecordMeasurementDelete extra = return (FormSuccess (), [whamlet|#{extra}|])
 
 getRecordMeasurementsR :: UserId -> RecordId -> Handler Html
 getRecordMeasurementsR uid rid = do
-    
+
     measurements <- runDB $ select $ do
         x :& u <- from $ table @Measurement
             `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
         where_ $ x ^. MeasurementRecord ==. val rid
         orderBy [asc (x ^. MeasurementId)]
         return (x,u)
-        
+
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgMeasurements
@@ -365,11 +367,13 @@ formRecord uid record extra = do
 getRecordR :: UserId -> RecordId -> Handler Html
 getRecordR uid rid = do
 
-    record <- runDB $ selectOne $ do
+    r <- runDB $ selectOne $ do
         x :& s <- from $ table @Record
             `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
         where_ $ x ^. RecordId ==. val rid
         return (x,s)
+
+    record <- mapM (\e@(Entity xid _,_) -> (e,) <$> runDB (measurements xid)) r
 
     (fw,et) <- generateFormPost formRecordDelete
     msgs <- getMessages
@@ -378,6 +382,16 @@ getRecordR uid rid = do
         idPanelDetails <- newIdent
         $(widgetFile "records/record")
 
+  where
+
+      measurements :: RecordId -> ReaderT SqlBackend Handler [(Entity Measurement,Maybe (Entity Unit))]
+      measurements xid = select $ do
+          x :& u <- from $ table @Measurement
+              `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
+          where_ $ x ^. MeasurementRecord ==. val xid
+          orderBy [asc (x ^. MeasurementId)]
+          return (x,u)
+
 
 formRecordDelete :: Form ()
 formRecordDelete extra = return (pure (), [whamlet|#{extra}|])
@@ -385,7 +399,7 @@ formRecordDelete extra = return (pure (), [whamlet|#{extra}|])
 
 getRecordsR :: UserId -> Handler Html
 getRecordsR uid = do
-    
+
     xs <- runDB ( select $ do
         x :& s <- from $ table @Record
             `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
@@ -399,7 +413,7 @@ getRecordsR uid = do
         orderBy [asc (x ^. MeasurementId)]
         where_ $ x ^. MeasurementRecord ==. val rid
         return (x,u) ) )
-        
+
 
     user <- maybeAuth
     msgs <- getMessages
@@ -413,9 +427,8 @@ getRecordsR uid = do
       groupByDay :: [((Entity Record,Entity MedSign),[(Entity Measurement,Maybe (Entity Unit))])]
                  -> [(Day,[((Entity Record,Entity MedSign),[(Entity Measurement,Maybe (Entity Unit))])])]
       groupByDay = M.toDescList . groupByKey (recordDay . entityVal . fst . fst)
-      
+
       groupByKey :: (Ord k) => (v -> k) -> [v] -> M.Map k [v]
       groupByKey key = M.fromListWith (<>) . fmap (\x -> (key x,[x]))
 
       irange = [1 :: Int ..]
-      

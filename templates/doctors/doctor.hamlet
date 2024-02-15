@@ -1,0 +1,42 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{DoctorsR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgDoctor}
+
+  <div #headerEnd>
+
+
+<main>
+
+  $maybe (Entity did (Doctor name mobile email),attrib) <- doctor
+
+    <figure>
+      <img src=@{DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
+
+    <md-tabs aria-label=_{MsgTabs}
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DoctorR did}' : '#'">
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+        _{MsgDetails}
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
+        _{MsgSpecializations}
+
+    <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
+      <dl>
+        <dt.label-large scope=row>_{MsgFullName}
+        <dd.body-medium>#{name}
+
+        <dt.label-large scope=row>_{MsgMobile}
+        <dd.body-medium>#{mobile}
+
+        <dt.label-large scope=row>_{MsgEmailAddress}
+        <dd.body-medium>#{email}
+
+  <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>

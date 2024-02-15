@@ -33,18 +33,21 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $forall (Entity _ (Measurement _ value name _),record,sign,unit) <- measurement
+  $forall (Entity _ (Measurement _ name value _),record,sign,unit) <- measurement
     <dl>
 
-      $with Entity _ (MedSign sname _ _ _ _ _) <- sign
-        <dt.label-large>_{MsgName}
-        <dd.body-medium>#{sname}: #{name}
+      <dt.label-large>_{MsgName}
+      <dd.body-medium>#{name}
 
       <dt.label-large>_{MsgValue}
       <dd.body-medium>
-        #{value}
+        <span.app-numeric data-value=#{value}>#{value}
         $maybe Entity _ (Unit _ symbol _ _) <- unit
           \ #{symbol}
+
+      $with Entity _ (MedSign name _ _ _ _ _) <- sign
+        <dt.label-large>_{MsgMedicalSign}
+        <dd.body-medium>#{name}
 
       $with Entity _ (Record _ _ day time _) <- record
         <dt.label-large>_{MsgDate}

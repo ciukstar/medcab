@@ -199,6 +199,10 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     
+    isAuthorized (DoctorR _) _ = isAuthenticated
+    isAuthorized (DoctorPhotoR _) _ = isAuthenticated
+    isAuthorized DoctorsR _ = isAuthenticated
+    
     isAuthorized (RecordMeasurementDeleR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementEditR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementNewR uid _) _ = isAuthenticatedSelf uid
@@ -268,9 +272,9 @@ instance Yesod App where
     isAuthorized (DataR (DoctorDeleR _)) _ = isAdmin
     isAuthorized (DataR (DoctorEditR _)) _ = isAdmin
     isAuthorized (DataR DoctorCreateR) _ = isAdmin
-    isAuthorized (DataR (DoctorPhotoR _)) _ = isAdmin
-    isAuthorized (DataR (DoctorR _)) _ = isAdmin
-    isAuthorized r@(DataR DoctorsR) _ = setUltDest r >> isAdmin
+    isAuthorized (DataR (StaffPhotoR _)) _ = isAdmin
+    isAuthorized (DataR (MemberR _)) _ = isAdmin
+    isAuthorized r@(DataR StaffR) _ = setUltDest r >> isAdmin
 
     
     isAuthorized (DataR (SpecialtyDoctorDeleR {})) _ = isAdmin

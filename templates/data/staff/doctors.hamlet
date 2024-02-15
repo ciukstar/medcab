@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgWelcome}
+      _{MsgDoctors}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -28,46 +28,28 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  <figure #figureLogo>
-    <md-icon>medical_services
-    <figcaption.display-large>
-      MedCab
+  $if null doctors
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoDoctorsYet}
+  $else
+    <md-list>
+      $forall (Entity did (Doctor name _ email),attrib) <- doctors
+        <md-list-item type=link href=@{DataR $ MemberR did}>
+          <img slot=start src=@{DataR $ StaffPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
+          <div slot=headline>#{name}
+          <div slot=supporting-text>#{email}
+          <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
+        <md-divider>
 
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{HomeR}' : '@{VideoR}'">
-    <md-primary-tab #tabHealth aria-controls=panelHealth active=true>
-      Health
-    <md-primary-tab #tabVideo aria-controls=panelVideo>
-      Video
-
-  <div #panelHealth role=tabpanel aria-labelledby=tabHealth>
-
-    <md-filled-tonal-button type=link href=@{DoctorsR}>
-      _{MsgDoctors}
-
-    $maybe Entity uid _ <- user
-      <md-filled-tonal-button type=link href=@{RecordsR uid}>
-        _{MsgElectronicHealthRecord}
-    $nothing
-      <md-filled-tonal-button type=link href=@{AuthR LoginR}>
-        _{MsgElectronicHealthRecord}
-      
-    <md-filled-tonal-button disabled>
-      Health Activity Tracking
-
-    <md-filled-tonal-button disabled>
-      Symptoms Checking
-
-    <md-filled-tonal-button disabled>
-      Appointment Management
-
-    <md-filled-tonal-button disabled>
-      Wearables Integration
-
-    <md-filled-tonal-button disabled>
-      Payment Integration
-
-  <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
+  <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{DataR DoctorCreateR}>
+    <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

@@ -49,6 +49,10 @@ import System.Log.FastLogger
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
+import Handler.Doctors
+    ( getDoctorsR, getDoctorPhotoR, getDoctorR
+    )
+
 import Handler.Records
     ( getRecordsR, getRecordR, getRecordNewR, postRecordsR, getRecordEditR
     , postRecordDeleR, postRecordR, getRecordMeasurementsR, getRecordMeasurementR
@@ -91,9 +95,9 @@ import Handler.Units
     , postQuantityUnitR
     )
 
-import Handler.Doctors
-    ( getDoctorsR, getDoctorCreateR, getDoctorPhotoR, postDoctorsR
-    , getDoctorR, postDoctorDeleR, getDoctorEditR, postDoctorR
+import Handler.Staff
+    ( getStaffR, getDoctorCreateR, getStaffPhotoR, postStaffR
+    , getMemberR, postDoctorDeleR, getDoctorEditR, postMemberR
     , getDoctorSpecialtiesR, getDoctorSpecialtyCreateR, postDoctorSpecialtiesR
     , getSpecialistR, getSpecialistEditR, postSpecialistDeleR, postSpecialistR
     )

@@ -6,8 +6,8 @@ import Database.Persist (Entity(Entity))
 
 import Foundation
     ( Widget
-    , Route (HomeR, DataR, DocsR, AuthR, RecordsR)
-    , DataR (UsersR, TokensR, DoctorsR, SpecialtiesR, UnitsR, MedSignsR)
+    , Route (HomeR, DataR, DocsR, AuthR, DoctorsR, RecordsR)
+    , DataR (UsersR, TokensR, StaffR, SpecialtiesR, UnitsR, MedSignsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors, MsgUsers
       , MsgDocumentation, MsgSourceCode, MsgResources, MsgSpecialties

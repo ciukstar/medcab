@@ -474,124 +474,194 @@ fillDemoEn = do
 
     let twoDaysBefore = addLocalTime ((-2) * nominalDay) localNow
 
-    let record1 = Record { recordUser = usr1
-                         , recordSign = sgn2
-                         , recordDay = localDay twoDaysBefore
-                         , recordTime = localTimeOfDay twoDaysBefore
-                         , recordRemarks = Nothing
-                         }
+    let record121 = Record { recordUser = usr1
+                           , recordSign = sgn2
+                           , recordDay = localDay twoDaysBefore
+                           , recordTime = localTimeOfDay twoDaysBefore
+                           , recordRemarks = Nothing
+                           }
 
-    r1 <- insert record1
+    r121 <- insert record121
 
-    let measurement11 = Measurement { measurementRecord = r1
-                                    , measurementValue = 128
-                                    , measurementName = "Systolic"
-                                    , measurementUnit = Just u1
-                                    }
+    let measurement1211 = Measurement { measurementRecord = r121
+                                      , measurementValue = 128
+                                      , measurementName = "Systolic"
+                                      , measurementUnit = Just u1
+                                      }
 
-    m11 <- insert measurement11
+    m1211 <- insert measurement1211
 
-    let measurement12 = Measurement { measurementRecord = r1
-                                    , measurementValue = 70
-                                    , measurementName = "Diastolic"
-                                    , measurementUnit = Just u1
-                                    }
+    let measurement1212 = Measurement { measurementRecord = r121
+                                      , measurementValue = 70
+                                      , measurementName = "Diastolic"
+                                      , measurementUnit = Just u1
+                                      }
 
-    m12 <- insert measurement12
+    m1212 <- insert measurement1212
 
-    let measurement13 = Measurement { measurementRecord = r1
-                                    , measurementValue = 60
-                                    , measurementName = "Pulse"
-                                    , measurementUnit = Just u2
-                                    }
+    let measurement1213 = Measurement { measurementRecord = r121
+                                      , measurementValue = 60
+                                      , measurementName = "Pulse"
+                                      , measurementUnit = Just u2
+                                      }
 
-    m13 <- insert measurement13
+    m1213 <- insert measurement1213
 
-    let record2 = Record { recordUser = usr1
-                         , recordSign = sgn4
-                         , recordDay = localDay twoDaysBefore
-                         , recordTime = localTimeOfDay twoDaysBefore
-                         , recordRemarks = Nothing
-                         }
+    let record14 = Record { recordUser = usr1
+                          , recordSign = sgn4
+                          , recordDay = localDay twoDaysBefore
+                          , recordTime = localTimeOfDay twoDaysBefore
+                          , recordRemarks = Nothing
+                          }
 
-    r2 <- insert record2
+    r14 <- insert record14
 
-    let measurement21 = Measurement { measurementRecord = r2
-                                    , measurementValue = 15
-                                    , measurementName = "Breaths"
-                                    , measurementUnit = Just u7
-                                    }
+    let measurement141 = Measurement { measurementRecord = r14
+                                     , measurementValue = 15
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u7
+                                     }
 
-    m21 <- insert measurement21
+    m141 <- insert measurement141
 
-    let record03 = Record { recordUser = usr1
+    let record13 = Record { recordUser = usr1
                           , recordSign = sgn3
                           , recordDay = localDay twoDaysBefore
                           , recordTime = localTimeOfDay twoDaysBefore
                           , recordRemarks = Nothing
                           }
 
-    r03 <- insert record03
+    r13 <- insert record13
 
-    let measurement031 = Measurement { measurementRecord = r03
+    let measurement131 = Measurement { measurementRecord = r13
                                      , measurementValue = 72
-                                     , measurementName = "Beats"
+                                     , measurementName = "Value"
                                      , measurementUnit = Just u2
                                      }
 
-    m031 <- insert measurement031
+    m131 <- insert measurement131
+
+    let record221 = Record { recordUser = usr2
+                           , recordSign = sgn2
+                           , recordDay = localDay twoDaysBefore
+                           , recordTime = localTimeOfDay twoDaysBefore
+                           , recordRemarks = Nothing
+                           }
+
+    r221 <- insert record221
+
+    let measurement2211 = Measurement { measurementRecord = r221
+                                      , measurementValue = 128
+                                      , measurementName = "Systolic"
+                                      , measurementUnit = Just u1
+                                      }
+
+    m2211 <- insert measurement2211
+
+    let measurement2212 = Measurement { measurementRecord = r221
+                                      , measurementValue = 70
+                                      , measurementName = "Diastolic"
+                                      , measurementUnit = Just u1
+                                      }
+
+    m2212 <- insert measurement2212
+
+    let measurement2213 = Measurement { measurementRecord = r221
+                                      , measurementValue = 60
+                                      , measurementName = "Pulse"
+                                      , measurementUnit = Just u2
+                                      }
+
+    m2213 <- insert measurement2213
+
+    let record24 = Record { recordUser = usr2
+                          , recordSign = sgn4
+                          , recordDay = localDay twoDaysBefore
+                          , recordTime = localTimeOfDay twoDaysBefore
+                          , recordRemarks = Nothing
+                          }
+
+    r24 <- insert record24
+
+    let measurement241 = Measurement { measurementRecord = r24
+                                     , measurementValue = 15
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u7
+                                     }
+
+    m241 <- insert measurement241
+
+    let record23 = Record { recordUser = usr2
+                          , recordSign = sgn3
+                          , recordDay = localDay twoDaysBefore
+                          , recordTime = localTimeOfDay twoDaysBefore
+                          , recordRemarks = Nothing
+                          }
+
+    r23 <- insert record23
+
+    let measurement231 = Measurement { measurementRecord = r23
+                                     , measurementValue = 72
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u2
+                                     }
+
+    m231 <- insert measurement231
+
+
+
     
     let yesterday = addLocalTime ((-1) * nominalDay) localNow
 
-    let record3 = Record { recordUser = usr1
-                         , recordSign = sgn2
-                         , recordDay = localDay yesterday
-                         , recordTime = localTimeOfDay yesterday
-                         , recordRemarks = Nothing
-                         }
+    let record12 = Record { recordUser = usr1
+                          , recordSign = sgn2
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
 
-    r3 <- insert record3
+    r12 <- insert record12
 
-    let measurement31 = Measurement { measurementRecord = r3
-                                    , measurementValue = 127
-                                    , measurementName = "Systolic"
-                                    , measurementUnit = Just u1
-                                    }
+    let measurement121 = Measurement { measurementRecord = r12
+                                     , measurementValue = 127
+                                     , measurementName = "Systolic"
+                                     , measurementUnit = Just u1
+                                     }
 
-    m31 <- insert measurement31
+    m121 <- insert measurement121
 
-    let measurement32 = Measurement { measurementRecord = r3
-                                    , measurementValue = 71
-                                    , measurementName = "Diastolic"
-                                    , measurementUnit = Just u1
-                                    }
+    let measurement122 = Measurement { measurementRecord = r12
+                                     , measurementValue = 71
+                                     , measurementName = "Diastolic"
+                                     , measurementUnit = Just u1
+                                     }
 
-    m32 <- insert measurement32
+    m122 <- insert measurement122
 
-    let measurement33 = Measurement { measurementRecord = r3
-                                    , measurementValue = 64
-                                    , measurementName = "Pulse"
-                                    , measurementUnit = Just u2
-                                    }
+    let measurement123 = Measurement { measurementRecord = r12
+                                     , measurementValue = 64
+                                     , measurementName = "Pulse"
+                                     , measurementUnit = Just u2
+                                     }
 
-    m33 <- insert measurement33
+    m123 <- insert measurement123
 
-    let record4 = Record { recordUser = usr1
-                         , recordSign = sgn4
-                         , recordDay = localDay yesterday
-                         , recordTime = localTimeOfDay yesterday
-                         , recordRemarks = Nothing
-                         }
+    let record14 = Record { recordUser = usr1
+                          , recordSign = sgn4
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
 
-    r4 <- insert record4
+    r14 <- insert record14
 
-    let measurement41 = Measurement { measurementRecord = r4
-                                    , measurementValue = 17
-                                    , measurementName = "Breaths"
-                                    , measurementUnit = Just u7
-                                    }
+    let measurement141 = Measurement { measurementRecord = r14
+                                     , measurementValue = 17
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u7
+                                     }
 
-    m41 <- insert measurement41
+    m141 <- insert measurement141
 
     let record13 = Record { recordUser = usr1
                           , recordSign = sgn3
@@ -604,10 +674,77 @@ fillDemoEn = do
 
     let measurement131 = Measurement { measurementRecord = r13
                                      , measurementValue = 69
-                                     , measurementName = "Beats"
+                                     , measurementName = "Value"
                                      , measurementUnit = Just u2
                                      }
 
     m131 <- insert measurement131
+
+    let record22 = Record { recordUser = usr2
+                          , recordSign = sgn2
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
+
+    r22 <- insert record22
+
+    let measurement221 = Measurement { measurementRecord = r22
+                                     , measurementValue = 127
+                                     , measurementName = "Systolic"
+                                     , measurementUnit = Just u1
+                                     }
+
+    m221 <- insert measurement221
+
+    let measurement222 = Measurement { measurementRecord = r22
+                                     , measurementValue = 71
+                                     , measurementName = "Diastolic"
+                                     , measurementUnit = Just u1
+                                     }
+
+    m222 <- insert measurement222
+
+    let measurement223 = Measurement { measurementRecord = r22
+                                     , measurementValue = 64
+                                     , measurementName = "Pulse"
+                                     , measurementUnit = Just u2
+                                     }
+
+    m223 <- insert measurement223
+
+    let record24 = Record { recordUser = usr2
+                          , recordSign = sgn4
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
+
+    r24 <- insert record24
+
+    let measurement241 = Measurement { measurementRecord = r24
+                                     , measurementValue = 17
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u7
+                                     }
+
+    m241 <- insert measurement241
+
+    let record23 = Record { recordUser = usr2
+                          , recordSign = sgn3
+                          , recordDay = localDay yesterday
+                          , recordTime = localTimeOfDay yesterday
+                          , recordRemarks = Nothing
+                          }
+
+    r23 <- insert record23
+
+    let measurement231 = Measurement { measurementRecord = r23
+                                     , measurementValue = 69
+                                     , measurementName = "Value"
+                                     , measurementUnit = Just u2
+                                     }
+
+    m231 <- insert measurement231
 
     return ()

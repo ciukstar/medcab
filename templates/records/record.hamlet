@@ -42,7 +42,7 @@
       <div.app-banner.error.body-medium>
         #{status}. #{msg}
 
-    $forall (Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _ _)) <- record
+    $forall ((Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _ _)),measurements) <- record
       <dl>
 
         <dt.label-large>_{MsgDate}
@@ -53,9 +53,22 @@
         <dt.label-large>_{MsgMedicalSign}
         <dd.body-medium>#{name}
 
-        <dt.label-large>_{MsgRemarks}
+        <dt.label-large>_{MsgMeasurement}
         <dd.body-medium>
-          $maybe remarks <- remarks
+          <table>
+            <tbody>
+              $forall (Entity _ (Measurement _ name value _),unit) <- measurements
+                <tr>
+                  <td>#{name}:&nbsp;
+                  $with value <- show value
+                    <td.app-numeric data-value=#{value}>#{value}
+                  <td>
+                    $maybe Entity _ (Unit _ symbol _ _) <- unit
+                      #{symbol}
+
+        $maybe remarks <- remarks
+          <dt.label-large>_{MsgRemarks}
+          <dd.body-medium>
             #{remarks}
 
     $forall (status,msg) <- filter ((/=) statusError . fst) msgs

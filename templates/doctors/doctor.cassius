@@ -1,0 +1,29 @@
+
+header
+  position: sticky
+  top: 0
+  z-index: 1
+  padding: 0.5rem 1rem
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  align-items: center
+
+  #headerStart
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    gap: 1rem
+    
+main
+  display: flex
+  flex-direction: column
+  figure
+    text-align: center
+  md-tabs
+    z-index: 0
+  dl
+    margin: 1rem 2rem
+    dt + dd
+      margin-bottom: 1rem
