@@ -1,3 +1,12 @@
+UpperBound: Верхний предел
+LowerBound: Нижний предел
+NormalValue: Нормальное значение
+NormalValues: Нормальные значения
+RecordVitalSigns: Запишите жизненные показатели
+BookAppointment: Записаться на прием
+AudioCall: Аудио звонок
+VideoCall: Видеозвонок
+FindDoctor: Найти врача
 Measurements: Измерения
 Measurement: Измерение
 Icon: Значок

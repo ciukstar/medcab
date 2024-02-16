@@ -1,3 +1,12 @@
+UpperBound: Limite supérieure
+LowerBound: Limite inférieure
+NormalValue: Valeur normale
+NormalValues: Valeurs normales
+RecordVitalSigns: Enregistrer les signes vitaux
+BookAppointment: Prendre rendez-vous
+AudioCall: Appel audio
+VideoCall: Appel vidéo
+FindDoctor: Trouver un médecin
 Measurements: Mesures
 Measurement: Mesure
 Icon: Icône

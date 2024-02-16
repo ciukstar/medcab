@@ -1,0 +1,56 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@?{(DataR $ MedSignNormalsR sid,stati)} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgNormalValue}
+
+  <div #headerEnd>
+    <md-icon-button type=button aria-label=_{MsgDele}
+      onclick="document.getElementById('idDialogDelete').open = true">
+      <md-icon>delete
+    <md-icon-button href=@{DataR $ MedSignNormalEditR sid nid} aria-label=_{MsgEdit}>
+      <md-icon>edit
+
+<md-dialog #idDialogDelete>
+  <div slot=headline>
+    _{MsgConfirmPlease}
+  <div slot=content>
+    _{MsgDeleteAreYouSure}
+  <div slot=actions>
+    <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
+      _{MsgCancel}
+    <form slot=content method=post action=@{DataR $ MedSignNormalDeleR sid nid} enctype=#{et}>
+      ^{fw}
+      <md-filled-button type=submit>
+        _{MsgDele}
+
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $maybe (Entity _ (Normal _ name lower upper _),unit) <- normal
+    <dl>
+
+      <dt.label-large>_{MsgName}
+      <dd.body-medium>#{name}
+
+      <dt.label-large>_{MsgLowerBound}
+      <dd.body-medium.app-numeric data-value=#{lower}>#{lower}
+
+      <dt.label-large>_{MsgUpperBound}
+      <dd.body-medium.app-numeric data-value=#{upper}>#{upper}
+
+      $maybe Entity _ (Unit uname symbol _ _) <- unit
+        <dt.label-large>_{MsgUnitOfMeasure}
+        <dd.body-medium>#{symbol} (#{uname})
+
+  $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+    <aside.app-snackbar.shape-small.elevation-1.primary-container>
+      <md-elevation>
+      <span.body-medium>#{status}. #
+      <span.body-medium>#{msg}

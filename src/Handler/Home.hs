@@ -9,10 +9,10 @@ import Database.Persist (Entity(Entity))
 
 import Foundation
     ( Handler
-    , Route (AuthR, HomeR, VideoR, AccountPhotoR, AccountR, RecordsR, DoctorsR)
+    , Route (AuthR, AccountPhotoR, AccountR, RecordsR, DoctorsR)
     , AppMessage
-      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount, MsgDoctors
-      , MsgElectronicHealthRecord
+      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount, MsgAppName
+      , MsgFindDoctor, MsgRecordVitalSigns
       )
     )
 
@@ -20,10 +20,12 @@ import Menu (menu)
 import Model (statusError, AvatarColor(AvatarColorLight))
 
 import Settings (widgetFile)
+
 import Text.Hamlet (Html)
+
 import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )
-import Yesod.Core.Widget (setTitleI)
 import Yesod.Core (Yesod(defaultLayout), getMessages, setUltDestCurrent)
+import Yesod.Core.Widget (setTitleI)
 
 
 getHomeR :: Handler Html

@@ -1,3 +1,12 @@
+UpperBound: Limită superioară
+LowerBound: Limita inferioară
+NormalValue: Valoarea normală
+NormalValues: Valori normale
+RecordVitalSigns: Înregistrați semnele vitale
+BookAppointment: Rezervați o programare
+AudioCall: Apel audio
+VideoCall: Apel video
+FindDoctor: Găsește un doctor
 Measurements: Măsurători
 Measurement: Măsurătoare
 Icon: Pictogramă

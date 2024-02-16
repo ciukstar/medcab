@@ -1,0 +1,56 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@?{(DataR MedSignsR,stati)} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgMedicalSign}
+
+  <div #headerEnd>
+
+
+<main>
+
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ MedSignR sid}' : '@{DataR $ MedSignNormalsR sid}'">
+    <md-primary-tab #tabDetails aria-controls=panelDetails>
+      _{MsgDetails}
+    <md-primary-tab #tabNormals aria-controls=#{idPanelNormals} active=true>
+      _{MsgNormalValues}
+
+  <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+
+  <div ##{idPanelNormals} role=tabpanel aria-labelledby=tabNormals>
+
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
+
+    $if null normals
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&varnothing;
+        <figcaption.body-large>
+          _{MsgNoDataYet}
+    $else
+      <md-list>
+        $forall (Entity nid (Normal _ name lower upper _),unit) <- normals
+          <md-list-item type=link href=@?{(DataR $ MedSignNormalR sid nid,stati)}>
+            <div slot=headline>#{name}
+            <div slot=supporting-text>
+              <span.app-numeric data-value=#{lower}>#{lower}
+              &nbsp;&mdash;&nbsp; 
+              <span.app-numeric data-value=#{upper}>#{upper}
+              $maybe Entity _ (Unit _ symbol _ _) <- unit
+                \ #{symbol}
+            <md-icon slot=end>arrow_forward_ios
+          <md-divider>
+
+    <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{DataR $ MedSignNormalAddR sid}>
+      <md-icon slot=icon>add
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}

@@ -2,7 +2,7 @@
 header
   position: sticky
   top: 0
-  z-index: 2
+  z-index: 1
   padding: 0.5rem 1rem
   display: flex
   flex-direction: row
@@ -14,36 +14,24 @@ header
     justify-content: flex-start
     align-items: center
     gap: 1rem
-  
+    
 main
   display: flex
   flex-direction: column
-  gap: 1rem
   .error
     align-self: stretch
     padding: 1rem
-  #figureLogo
-    text-align: center
-    md-icon
-      color: red
-      --md-icon-size: 128px
-  md-tabs
-    z-index: 0
-    md-primary-tab a
-      text-decoration: none
-      border: 1px solid black
-  div[role=tabpanel]
-    margin: 1rem
-    display: flex
-    flex-direction: column
-    gap: 1rem
+  dl
+    margin: 1rem 2rem
+    dt + dd
+      margin-bottom: 1rem
 
 aside.app-snackbar
   box-sizing: border-box
   position: fixed
-  bottom: 0
+  bottom: 4rem
   left: 0
   margin: 1rem
   width: calc(100% - 2 * 1rem)
   padding: 1rem
-  --md-elevation-level: 3
+  --md-elevation-level: 1

@@ -22,7 +22,7 @@
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}
-      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DoctorR did}' : '#'">
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DoctorR did}' : '@{DoctorSpecialtiesR did}'">
       <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
         _{MsgDetails}
       <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
@@ -39,4 +39,17 @@
         <dt.label-large scope=row>_{MsgEmailAddress}
         <dd.body-medium>#{email}
 
-  <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
+      <div #actions>
+        <md-filled-tonal-button type=button>
+          <md-icon slot=icon>video_call
+          _{MsgVideoCall}
+
+        <md-filled-tonal-button type=button>
+          <md-icon slot=icon>call
+          _{MsgAudioCall}
+
+        <md-filled-tonal-button type=button>
+          <md-icon slot=icon>book_online
+          _{MsgBookAppointment}
+
+    <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>

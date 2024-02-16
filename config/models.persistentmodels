@@ -22,6 +22,7 @@ Normal
     name Text
     lowerBound Double
     upperBound Double
+    unit UnitId Maybe OnDeleteSetNull
     UniqueNormal sign name
 
 MedSign

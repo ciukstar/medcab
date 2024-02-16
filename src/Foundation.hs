@@ -199,6 +199,7 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     
+    isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated
     isAuthorized (DoctorPhotoR _) _ = isAuthenticated
     isAuthorized DoctorsR _ = isAuthenticated
@@ -221,7 +222,7 @@ instance Yesod App where
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _ _) _ = return Authorized
-    isAuthorized VideoR _ = return Authorized
+    
     isAuthorized HomeR _ = return Authorized
 
     isAuthorized DocsR _ = return Authorized
@@ -238,6 +239,13 @@ instance Yesod App where
     isAuthorized (DataR (SignTagAddR _)) _ = isAdmin
     isAuthorized (DataR (SignTagR _ _)) _ = isAdmin
     isAuthorized (DataR (SignTagsR _)) _ = isAdmin
+    
+    
+    isAuthorized (DataR (MedSignNormalDeleR _ _)) _ = isAdmin
+    isAuthorized (DataR (MedSignNormalEditR _ _)) _ = isAdmin
+    isAuthorized (DataR (MedSignNormalAddR _)) _ = isAdmin
+    isAuthorized (DataR (MedSignNormalR _ _)) _ = isAdmin
+    isAuthorized (DataR (MedSignNormalsR _)) _ = isAdmin
     
     isAuthorized (DataR (MedSignDeleR _)) _ = isAdmin
     isAuthorized (DataR (MedSignEditR _)) _ = isAdmin
@@ -268,7 +276,7 @@ instance Yesod App where
     isAuthorized (DataR (SpecialistEditR {})) _ = isAdmin
     isAuthorized (DataR (SpecialistR {})) _ = isAdmin
     isAuthorized (DataR (DoctorSpecialtyCreateR _)) _ = isAdmin
-    isAuthorized (DataR (DoctorSpecialtiesR _)) _ = isAdmin
+    isAuthorized (DataR (StaffSpecialtiesR _)) _ = isAdmin
     isAuthorized (DataR (DoctorDeleR _)) _ = isAdmin
     isAuthorized (DataR (DoctorEditR _)) _ = isAdmin
     isAuthorized (DataR DoctorCreateR) _ = isAdmin

@@ -1,3 +1,12 @@
+UpperBound: Upper bound
+LowerBound: Lower bound
+NormalValue: Normal value
+NormalValues: Normal values
+RecordVitalSigns: Record vital signs
+BookAppointment: Book appointment
+AudioCall: Audio call
+VideoCall: Video call
+FindDoctor: Find a doctor
 Measurements: Measurements
 Measurement: Measurement
 Icon: Icon

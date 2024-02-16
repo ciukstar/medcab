@@ -29,43 +29,54 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  <md-tabs aria-label=_{MsgTabs}
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ MedSignR sid}' : '@{DataR $ MedSignNormalsR sid}'">
+    <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      _{MsgDetails}
+    <md-primary-tab #tabNormals aria-controls=panelNormals>
+      _{MsgNormalValues}
 
-  $maybe (Entity _ (MedSign name code icon descr _ _),unit,tag) <- sign
-    <dl>
-      <dt.label-large>_{MsgIcon}
-      <dd>
-        $maybe icon <- icon
-          <md-icon>#{icon}
-        $nothing
-          <i>_{MsgNone}
-          
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
+  <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-      <dt.label-large>_{MsgCode}
-      <dd.body-medium>
-        $maybe code <- code
-          #{code}
-  
-      $maybe Entity _ (Unit uname symbol _ _) <- unit
-        <dt.label-large>_{MsgUnitOfMeasure}
-        <dd.body-medium>#{uname} (#{symbol})
-        
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
 
-      <dt.label-large>_{MsgDescription}
-      <dd.body-medium>
-        $maybe descr <- descr
-          #{descr}
-          
-      $maybe Entity _ (SignTag tname _ _) <- tag
-        <dt.label-large>_{MsgGroup}
-        <dd.body-medium>#{tname}
+    $maybe (Entity _ (MedSign name code icon descr _ _),unit,tag) <- sign
+      <dl>
+        <dt.label-large>_{MsgIcon}
+        <dd>
+          $maybe icon <- icon
+            <md-icon>#{icon}
+          $nothing
+            <i>_{MsgNone}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+        <dt.label-large>_{MsgName}
+        <dd.body-medium>#{name}
+
+        <dt.label-large>_{MsgCode}
+        <dd.body-medium>
+          $maybe code <- code
+            #{code}
+
+        $maybe Entity _ (Unit uname symbol _ _) <- unit
+          <dt.label-large>_{MsgUnitOfMeasure}
+          <dd.body-medium>#{uname} (#{symbol})
+
+
+        <dt.label-large>_{MsgDescription}
+        <dd.body-medium>
+          $maybe descr <- descr
+            #{descr}
+
+        $maybe Entity _ (SignTag tname _ _) <- tag
+          <dt.label-large>_{MsgGroup}
+          <dd.body-medium>#{tname}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
+
+  <div #panelNormals role=tabpanel aria-labelledby=tabNormals hidden>

@@ -50,7 +50,7 @@ import System.Log.FastLogger
 -- Don't forget to add new modules to your cabal file!
 
 import Handler.Doctors
-    ( getDoctorsR, getDoctorPhotoR, getDoctorR
+    ( getDoctorsR, getDoctorPhotoR, getDoctorR, getDoctorSpecialtiesR
     )
 
 import Handler.Records
@@ -71,7 +71,6 @@ import Handler.Accounts
     , postAccountInfoR
     )
     
-import Handler.Video ( getVideoR )
 import Handler.Home ( getHomeR )
 
 import Handler.Common
@@ -83,7 +82,9 @@ import Handler.MedSigns
     ( getMedSignsR, getMedSignR, getMedSignAddR, postMedSignDeleR
     , getMedSignEditR, postMedSignsR, postMedSignR, getSignTagsR, getSignTagR
     , getSignTagAddR, getSignTagEditR, postSignTagDeleR, postSignTagsR
-    , postSignTagR
+    , postSignTagR, getMedSignNormalsR, getMedSignNormalR, getMedSignNormalAddR
+    , postMedSignNormalsR, getMedSignNormalEditR, postMedSignNormalDeleR
+    , postMedSignNormalR
     )
 
 import Handler.Units
@@ -98,7 +99,7 @@ import Handler.Units
 import Handler.Staff
     ( getStaffR, getDoctorCreateR, getStaffPhotoR, postStaffR
     , getMemberR, postDoctorDeleR, getDoctorEditR, postMemberR
-    , getDoctorSpecialtiesR, getDoctorSpecialtyCreateR, postDoctorSpecialtiesR
+    , getStaffSpecialtiesR, getDoctorSpecialtyCreateR, postStaffSpecialtiesR
     , getSpecialistR, getSpecialistEditR, postSpecialistDeleR, postSpecialistR
     )
 

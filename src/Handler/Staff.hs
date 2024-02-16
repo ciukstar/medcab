@@ -12,9 +12,9 @@ module Handler.Staff
   , postDoctorDeleR
   , getDoctorEditR
   , postMemberR
-  , getDoctorSpecialtiesR
+  , getStaffSpecialtiesR
   , getDoctorSpecialtyCreateR
-  , postDoctorSpecialtiesR
+  , postStaffSpecialtiesR
   , getSpecialistR
   , postSpecialistDeleR
   , getSpecialistEditR
@@ -49,7 +49,7 @@ import Foundation
     , Route (StaticR, AuthR, AccountR, AccountPhotoR, DataR)
     , DataR
       ( DoctorCreateR, StaffR, StaffPhotoR, MemberR, DoctorDeleR, DoctorEditR
-      , DoctorSpecialtiesR, DoctorSpecialtyCreateR, SpecialistR
+      , StaffSpecialtiesR, DoctorSpecialtyCreateR, SpecialistR
       , SpecialistDeleR, SpecialistEditR
       )
     , AppMessage
@@ -108,7 +108,7 @@ postSpecialistDeleR did sid xid = do
       FormSuccess () -> do
           runDB $ delete xid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR $ DoctorSpecialtiesR did
+          redirect $ DataR $ StaffSpecialtiesR did
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
           redirect $ DataR $ SpecialistR did sid xid
@@ -129,7 +129,7 @@ postSpecialistR did sid xid = do
       FormSuccess r -> do
           runDB $ replace xid r
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR $ DoctorSpecialtiesR did
+          redirect $ DataR $ StaffSpecialtiesR did
       _otherwise -> defaultLayout $ do
               setTitleI MsgSpecialization
               $(widgetFile "data/staff/specialties/edit")
@@ -170,14 +170,14 @@ getSpecialistR did sid xid = do
         $(widgetFile "data/staff/specialties/specialty")
 
 
-postDoctorSpecialtiesR :: DoctorId -> Handler Html
-postDoctorSpecialtiesR did = do
+postStaffSpecialtiesR :: DoctorId -> Handler Html
+postStaffSpecialtiesR did = do
     ((fr,fw),et) <- runFormPost $ formSpecialty did Nothing
     case fr of
       FormSuccess r -> do
           runDB $ insert_ r
           addMessageI statusSuccess MsgRecordCreated
-          redirect $ DataR $ DoctorSpecialtiesR did
+          redirect $ DataR $ StaffSpecialtiesR did
       _otherwise -> do
           defaultLayout $ do
               setTitleI MsgSpecialty
@@ -247,8 +247,8 @@ formSpecialty did specialist extra = do
             _otherwise -> Left MsgAlreadyExists
 
 
-getDoctorSpecialtiesR :: DoctorId -> Handler Html
-getDoctorSpecialtiesR did = do
+getStaffSpecialtiesR :: DoctorId -> Handler Html
+getStaffSpecialtiesR did = do
 
     attrib <- (unValue =<<) <$> runDB ( selectOne $ do
         x <- from $ table @DoctorPhoto

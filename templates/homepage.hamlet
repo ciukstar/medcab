@@ -31,27 +31,19 @@
   <figure #figureLogo>
     <md-icon>medical_services
     <figcaption.display-large>
-      MedCab
+      _{MsgAppName}
 
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{HomeR}' : '@{VideoR}'">
-    <md-primary-tab #tabHealth aria-controls=panelHealth active=true>
-      Health
-    <md-primary-tab #tabVideo aria-controls=panelVideo>
-      Video
-
-  <div #panelHealth role=tabpanel aria-labelledby=tabHealth>
-
+  <nav>
     <md-filled-tonal-button type=link href=@{DoctorsR}>
-      _{MsgDoctors}
+      _{MsgFindDoctor}
 
     $maybe Entity uid _ <- user
       <md-filled-tonal-button type=link href=@{RecordsR uid}>
-        _{MsgElectronicHealthRecord}
+        _{MsgRecordVitalSigns}
     $nothing
       <md-filled-tonal-button type=link href=@{AuthR LoginR}>
-        _{MsgElectronicHealthRecord}
-      
+        _{MsgRecordVitalSigns}
+
     <md-filled-tonal-button disabled>
       Health Activity Tracking
 
@@ -66,8 +58,6 @@
 
     <md-filled-tonal-button disabled>
       Payment Integration
-
-  <div #panelVideo role=tabpanel aria-labelledby=tabVideo hidden>
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

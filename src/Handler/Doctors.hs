@@ -5,6 +5,7 @@ module Handler.Doctors
   ( getDoctorsR
   , getDoctorPhotoR
   , getDoctorR
+  , getDoctorSpecialtiesR
   ) where
 
 import Control.Monad (join)
@@ -15,7 +16,7 @@ import Data.Text.Encoding (encodeUtf8)
 import Database.Esqueleto.Experimental
     (select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), val
+    , Value (unValue), val, innerJoin
     )
 import Database.Persist (Entity (Entity))
 
@@ -23,21 +24,27 @@ import Foundation
     ( Handler
     , Route
       ( AuthR, AccountR, AccountPhotoR, DoctorPhotoR, StaticR, DoctorR, DoctorsR
+      , DoctorSpecialtiesR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
-      , MsgEmailAddress, MsgDetails, MsgBack
+      , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
+      , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       )
     )
 
 import Menu (menu)
 import Model
-    ( statusError, Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId
-    , EntityField (DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId)
-    , AvatarColor (AvatarColorLight)
+    ( statusError, AvatarColor (AvatarColorLight)
+    , EntityField
+      ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
+      , SpecialtyId, SpecialistDoctor
+      )
+    , Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId
+    , Specialist (Specialist), Specialty (Specialty)
     )
-    
+
 import Settings (widgetFile)
 import Settings.StaticFiles (img_person_FILL0_wght400_GRAD0_opsz24_svg)
 
@@ -52,6 +59,26 @@ import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist.Core (YesodPersist(runDB))
 
 
+getDoctorSpecialtiesR :: DoctorId -> Handler Html
+getDoctorSpecialtiesR did = do
+
+    attrib <- (unValue =<<) <$> runDB ( selectOne $ do
+        x <- from $ table @DoctorPhoto
+        where_ $ x ^. DoctorPhotoDoctor ==. val did
+        return (x ^. DoctorPhotoAttribution) )
+
+    specialties <- runDB $ select $ do
+        x :& s <- from $ table @Specialist
+            `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. SpecialistSpecialty ==. s ^. SpecialtyId)
+        where_ $ x ^. SpecialistDoctor ==. val did
+        return (x,s)
+
+    defaultLayout $ do
+        setTitleI MsgDoctor
+        idPanelSpecialties <- newIdent
+        $(widgetFile "doctors/specialties")
+
+
 getDoctorR :: DoctorId -> Handler Html
 getDoctorR did = do
 
@@ -60,12 +87,12 @@ getDoctorR did = do
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. DoctorId ==. val did
         return (x,h ?. DoctorPhotoAttribution) )
-        
+
     defaultLayout $ do
-        setTitleI MsgDoctor 
+        setTitleI MsgDoctor
         idPanelDetails <- newIdent
         $(widgetFile "doctors/doctor")
-    
+
 
 
 getDoctorsR :: Handler Html

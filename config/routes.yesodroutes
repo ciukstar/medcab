@@ -1,7 +1,8 @@
 
-/doctors/#DoctorId 	DoctorR      GET
-/doctors/#DoctorId/poto DoctorPhotoR GET
-/doctors 		DoctorsR     GET
+/doctors/#DoctorId/specialties DoctorSpecialtiesR GET
+/doctors/#DoctorId 	       DoctorR      	  GET
+/doctors/#DoctorId/poto        DoctorPhotoR 	  GET
+/doctors 		       DoctorsR     	  GET
 
 /users/#UserId/records/#RecordId/measurements/#MeasurementId/dele RecordMeasurementDeleR POST
 /users/#UserId/records/#RecordId/measurements/#MeasurementId/edit RecordMeasurementEditR GET
@@ -22,8 +23,7 @@
 /accounts/#UserId       	     AccountR         GET POST
 /accounts               	     AccountsR        GET
 
-/video VideoR GET
-/      HomeR  GET
+/ HomeR GET
 
 /auth   AuthR   Auth   getAuth
 /static StaticR Static appStatic
@@ -43,6 +43,14 @@
     /tag/#SignTagId/+SignTags 	    SignTagR     GET POST
     /tags/+SignTags    	      	    SignTagsR    GET POST
 
+
+    
+    /dele/signs/#MedSignId/normals/#NormalId MedSignNormalDeleR POST
+    /edit/signs/#MedSignId/normals/#NormalId MedSignNormalEditR GET
+    /forms/signs/#MedSignId/normals/new      MedSignNormalAddR  GET
+    /signs/#MedSignId/normals/#NormalId      MedSignNormalR     GET POST
+    /signs/#MedSignId/normals 		     MedSignNormalsR    GET POST
+    
     /signs/#MedSignId/dele MedSignDeleR POST
     /signs/#MedSignId/edit MedSignEditR GET
     /forms/signs/new  	   MedSignAddR  GET
@@ -71,7 +79,7 @@
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId/edit SpecialistEditR        GET
     /spacialists/#DoctorId/#SpecialtyId/#SpecialistId 	   SpecialistR            GET POST
     /staff/#DoctorId/specialties/form/create        	   DoctorSpecialtyCreateR GET
-    /staff/#DoctorId/specialties                    	   DoctorSpecialtiesR     GET POST
+    /staff/#DoctorId/specialties                    	   StaffSpecialtiesR      GET POST
 
     /staff/#DoctorId/photo StaffPhotoR  GET
     /staff/form/create     DoctorCreateR GET

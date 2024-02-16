@@ -1,6 +1,6 @@
 <header.app-top-app-bar.background>
   <div #headerStart>
-    <md-icon-button href=@{DataR $ DoctorSpecialtiesR did} aria-label=_{MsgBack}>
+    <md-icon-button href=@{DataR $ StaffSpecialtiesR did} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
     <h1.title-large>
@@ -8,10 +8,10 @@
       
 <main>
 
-  <form method=post action=@{DataR $ DoctorSpecialtiesR did} enctype=#{et} novalidate>
+  <form method=post action=@{DataR $ StaffSpecialtiesR did} enctype=#{et} novalidate>
     ^{fw}
     <div.app-form-actions>
-      <md-text-button type=button href=@{DataR $ DoctorSpecialtiesR did}>
+      <md-text-button type=button href=@{DataR $ StaffSpecialtiesR did}>
         _{MsgCancel}
       <md-filled-button type=submit>
         _{MsgSave}

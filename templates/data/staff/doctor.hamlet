@@ -44,7 +44,7 @@
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}
-      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ MemberR did}' : '@{DataR $ DoctorSpecialtiesR did}'">
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{DataR $ MemberR did}' : '@{DataR $ StaffSpecialtiesR did}'">
       <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
         _{MsgDetails}
       <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
