@@ -43,7 +43,7 @@
           <md-list>
             $with n <- length records
               $forall (i,((Entity rid (Record uid _ day time _),sign),measurements)) <- zip irange records
-                $with Entity _ (MedSign name _ icon _ _ _) <- sign
+                $with Entity _ (MedSign name _ icon _ _) <- sign
                   <md-list-item type=link href=@{RecordR uid rid}>
                     <div slot=start>
                       <small>

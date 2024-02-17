@@ -30,7 +30,6 @@ MedSign
     code Text Maybe
     icon Text Maybe
     descr Textarea Maybe
-    unit UnitId Maybe OnDeleteSetNull
     tag SignTagId Maybe OnDeleteSetNull
     UniqueMedSign name
 

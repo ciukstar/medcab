@@ -42,7 +42,7 @@
       <div.app-banner.error.body-medium>
         #{status}. #{msg}
 
-    $forall ((Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _ _)),measurements) <- record
+    $forall ((Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _)),measurements) <- record
       <dl>
 
         <dt.label-large>_{MsgDate}

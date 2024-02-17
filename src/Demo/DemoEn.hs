@@ -36,15 +36,19 @@ import Model
       , specialistTitle
       ), Unit (Unit, unitName, unitSymbol, unitDescr, unitQuantity)
     , MedSign
-      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag
-      , medSignIcon
+      ( MedSign, medSignName, medSignCode, medSignDescr, medSignTag, medSignIcon
       )
     , SignTag (SignTag, signTagName, signTagGroup, signTagDescr)
     , Quantity (Quantity, quantityName, quantityDescr)
-    , Record (recordUser, recordSign, Record, recordTime, recordRemarks, recordDay)
+    , Record
+      ( recordUser, recordSign, Record, recordTime, recordRemarks, recordDay )
     , Measurement
       ( Measurement, measurementRecord, measurementValue, measurementUnit
       , measurementName
+      )
+    , Normal
+      ( Normal, normalName, normalLowerBound, normalUpperBound, normalUnit
+      , normalSign
       )
     )
 
@@ -366,57 +370,114 @@ fillDemoEn = do
                         , medSignCode = Just "BT"
                         , medSignIcon = Just "thermometer"
                         , medSignDescr = Just $ Textarea "Thermoregulation is the ability of an organism to keep its body temperature within certain boundaries, even when the surrounding temperature is very different"
-                        , medSignUnit = Just u5
                         , medSignTag = Just st1
                         }
 
-    sgn1 <- insert_ sign1
+    sgn1 <- insert sign1
+
+    let normal11 = Normal { normalSign = sgn1
+                          , normalName = "Value"
+                          , normalLowerBound = 36.1
+                          , normalUpperBound = 37.2
+                          , normalUnit = Just u5
+                          }
+
+    insert_ normal11
 
     let sign2 = MedSign { medSignName = "Blood pressure"
                         , medSignCode = Just "BP"
                         , medSignIcon = Just "blood_pressure"
                         , medSignDescr = Just $ Textarea "Blood pressure is the pressure of circulating blood against the walls of blood vessels. Most of this pressure results from the heart pumping blood through the circulatory system"
-                        , medSignUnit = Just u1
                         , medSignTag = Just st1
                         }
 
     sgn2 <- insert sign2
 
+    let normal21 = Normal { normalSign = sgn2
+                          , normalName = "Systolic"
+                          , normalLowerBound = 90
+                          , normalUpperBound = 120
+                          , normalUnit = Just u1
+                          }
+
+    insert_ normal21
+
+    let normal22 = Normal { normalSign = sgn2
+                          , normalName = "Diastolic"
+                          , normalLowerBound = 50
+                          , normalUpperBound = 80
+                          , normalUnit = Just u1
+                          }
+
+    insert_ normal22
+
+    let normal23 = Normal { normalSign = sgn2
+                          , normalName = "Pulse"
+                          , normalLowerBound = 60
+                          , normalUpperBound = 100
+                          , normalUnit = Just u1
+                          }
+
+    insert_ normal23
+
     let sign3 = MedSign { medSignName = "Heart rate"
                         , medSignCode = Just "HR"
                         , medSignIcon = Just "cardiology"
                         , medSignDescr = Just $ Textarea "In medicine, a pulse represents the tactile arterial palpation of the cardiac cycle (heartbeat) by trained fingertips"
-                        , medSignUnit = Just u2
                         , medSignTag = Just st1
                         }
 
     sgn3 <- insert sign3
 
+    let normal31 = Normal { normalSign = sgn3
+                          , normalName = "Value"
+                          , normalLowerBound = 60
+                          , normalUpperBound = 100
+                          , normalUnit = Just u2
+                          }
+
+    insert_ normal31
+
     let sign4 = MedSign { medSignName = "Respiratory rate"
                         , medSignCode = Just "RR"
                         , medSignIcon = Just "respiratory_rate"
                         , medSignDescr = Just $ Textarea "The respiratory rate is the rate at which breathing occurs; it is set and controlled by the respiratory center of the brain. A person's respiratory rate is usually measured in breaths per minute"
-                        , medSignUnit = Just u7
                         , medSignTag = Just st1
                         }
 
     sgn4 <- insert sign4
 
+    let normal41 = Normal { normalSign = sgn4
+                          , normalName = "Value"
+                          , normalLowerBound = 12
+                          , normalUpperBound = 18
+                          , normalUnit = Just u7
+                          }
+
+    insert_ normal41
+
     let sign5 = MedSign { medSignName = "Weight loss"
                         , medSignCode = Nothing
                         , medSignIcon = Just "monitor_weight_loss"
                         , medSignDescr = Just $ Textarea "Weight loss, in the context of medicine, health, or physical fitness, refers to a reduction of the total body mass, by a mean loss of fluid, body fat (adipose tissue), or lean mass (namely bone mineral deposits, muscle, tendon, and other connective tissue)"
-                        , medSignUnit = Just u9
                         , medSignTag = Just st22
                         }
 
     sgn5 <- insert sign5
 
+    let normal51 = Normal { normalSign = sgn5
+                          , normalName = "Value"
+                          , normalLowerBound = 3
+                          , normalUpperBound = 80
+                          , normalUnit = Just u9
+                          }
+
+    insert_ normal51
+
     let sign6 = MedSign { medSignName = "Headache"
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
                         , medSignDescr = Just $ Textarea "Headache, also known as cephalalgia, is the symptom of pain in the face, head, or neck"
-                        , medSignUnit = Nothing
                         , medSignTag = Just st22
                         }
 
@@ -426,7 +487,6 @@ fillDemoEn = do
                         , medSignCode = Nothing
                         , medSignIcon = Just "sick"
                         , medSignDescr = Just $ Textarea "Pain is a distressing feeling often caused by intense or damaging stimuli"
-                        , medSignUnit = Nothing
                         , medSignTag = Just st22
                         }
 
@@ -436,7 +496,6 @@ fillDemoEn = do
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
                         , medSignDescr = Just $ Textarea "Fatigue describes a state of tiredness (which is not sleepiness) or exhaustion"
-                        , medSignUnit = Nothing
                         , medSignTag = Just st22
                         }
 
@@ -446,7 +505,6 @@ fillDemoEn = do
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
                         , medSignDescr = Just $ Textarea "Anorexia is a medical term for a loss of appetite"
-                        , medSignUnit = Nothing
                         , medSignTag = Just st22
                         }
 
@@ -456,7 +514,6 @@ fillDemoEn = do
                          , medSignCode = Nothing
                          , medSignIcon = Nothing
                          , medSignDescr = Just $ Textarea "Night sweats or nocturnal hyperhidrosis is the repeated occurrence of excessive sweating during sleep"
-                         , medSignUnit = Nothing
                          , medSignTag = Just st22
                          }
 
@@ -466,7 +523,6 @@ fillDemoEn = do
                          , medSignCode = Nothing
                          , medSignIcon = Nothing
                          , medSignDescr = Just $ Textarea "As a medical term, malaise is a feeling of general discomfort, uneasiness or lack of wellbeing and often the first sign of an infection or other disease"
-                         , medSignUnit = Nothing
                          , medSignTag = Just st22
                          }
 

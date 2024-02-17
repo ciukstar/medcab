@@ -31,12 +31,12 @@ import Data.Time.Calendar (Day)
 import Data.Time.LocalTime (LocalTime(LocalTime, localTimeOfDay, localDay))
 
 import Database.Esqueleto.Experimental
-    ( select, from, table, where_, val, innerJoin, on, leftJoin
+    ( select, from, table, where_, val, innerJoin, on, leftJoin, selectOne
     , (^.), (?.), (==.), (:&)((:&))
-    , orderBy, desc, asc, Value (unValue), Entity (entityVal), selectOne
+    , orderBy, desc, asc, Value (unValue), Entity (entityVal), subSelectUnsafe
     )
 import Database.Persist
-    (Entity (Entity), PersistStoreWrite (insert_, delete, replace))
+    (Entity (Entity), PersistStoreWrite (insert, insert_, delete, replace))
 import Database.Persist.Sql ( SqlBackend )
 
 import Foundation
@@ -67,14 +67,14 @@ import Model
     , EntityField
       ( RecordUser, RecordSign, MedSignId, UnitId, RecordTime, MedSignName
       , UnitSymbol, RecordId, MeasurementRecord, MeasurementUnit, UnitName
-      , MeasurementId, MeasurementName, RecordDay
+      , MeasurementId, MeasurementName, RecordDay, NormalSign, NormalId
       )
     , UserId
     , Record (Record, recordSign, recordTime, recordRemarks, recordDay)
     , MedSign (MedSign), Unit (Unit), RecordId, statusSuccess
     , Measurement
       ( Measurement, measurementValue, measurementName, measurementUnit )
-    , MeasurementId
+    , MeasurementId, Normal (normalName)
     )
 
 import Settings (widgetFile)
@@ -177,19 +177,35 @@ formRecordMeasurement rid measurement extra = do
 
     rndr <- getMessageRender
 
+    normals <- liftHandler $ runDB $ select $ do
+        x <- from $ table @Normal
+        where_ $ x ^. NormalSign ==. subSelectUnsafe ( do
+            y <- from $ table @Record
+            where_ $ y ^. RecordId ==. val rid
+            return $ y ^. RecordSign )
+        orderBy [asc (x ^. NormalId)]
+        return x
+
+    (nameR,nameV) <- case normals of
+      [] -> md3mreq uniqueNameField FieldSettings
+          { fsLabel = SomeMessage MsgName
+          , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+          , fsAttrs = [("label", rndr MsgName)]
+          } (measurementName . entityVal <$> measurement)
+          
+      xs -> md3mreq (uniqueNameSelectField (namePairs xs)) FieldSettings
+          { fsLabel = SomeMessage MsgName
+          , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+          , fsAttrs = [("label", rndr MsgName)]
+          } (measurementName . entityVal <$> measurement)
+
     (valueR,valueV) <- md3mreq md3doubleField FieldSettings
         { fsLabel = SomeMessage MsgValue
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgValue)]
         } (measurementValue . entityVal <$> measurement)
 
-    (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
-        { fsLabel = SomeMessage MsgName
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgName)]
-        } (measurementName . entityVal <$> measurement)
-
-    units <- liftHandler $ (bimap ((\(a, b) -> a <> tsep <> b) . bimap unValue unValue) unValue <$>) <$> runDB ( select $ do
+    units <- liftHandler $ (unval <$>) <$> runDB ( select $ do
         x <- from $ table @Unit
         orderBy [asc (x ^. UnitName)]
         return ((x ^. UnitSymbol, x ^. UnitName),x ^. UnitId) )
@@ -205,6 +221,14 @@ formRecordMeasurement rid measurement extra = do
            , $(widgetFile "records/measurements/form")
            )
   where
+
+      namePairs xs = zipWith (\a b -> (normalName $ entityVal a,normalName $ entityVal b)) xs xs
+      
+      unval = bimap ((\(a, b) -> a <> tsep <> b) . bimap unValue unValue) unValue
+      
+      uniqueNameSelectField :: [(Text,Text)] -> Field Handler Text
+      uniqueNameSelectField xs = checkM uniqueName (md3selectField (optionsPairs xs))
+      
       uniqueNameField :: Field Handler Text
       uniqueNameField = checkM uniqueName md3textField
 
@@ -313,9 +337,9 @@ postRecordsR uid = do
     ((fr,fw),et) <- runFormPost $ formRecord uid Nothing
     case fr of
       FormSuccess r -> do
-          runDB $ insert_ r
+          rid <- runDB $ insert r
           addMessageI statusSuccess MsgRecordCreated
-          redirect $ RecordsR uid
+          redirect $ RecordMeasurementsR uid rid
       _otherwise -> defaultLayout $ do
           msgs <- getMessages
           setTitleI MsgRecord

@@ -45,7 +45,7 @@
         $maybe Entity _ (Unit _ symbol _ _) <- unit
           \ #{symbol}
 
-      $with Entity _ (MedSign name _ _ _ _ _) <- sign
+      $with Entity _ (MedSign name _ _ _ _) <- sign
         <dt.label-large>_{MsgMedicalSign}
         <dd.body-medium>#{name}
 

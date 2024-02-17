@@ -56,12 +56,11 @@ import Menu (menu)
 import Model
     ( AvatarColor (AvatarColorLight), statusError, statusSuccess
     , MedSign
-      ( MedSign, medSignName, medSignCode, medSignUnit, medSignDescr, medSignTag
-      , medSignIcon
+      ( MedSign, medSignName, medSignCode, medSignDescr, medSignTag, medSignIcon
       )
     , EntityField
-      ( MedSignName, MedSignId, MedSignUnit, UnitId, UnitName, UnitSymbol
-      , SignTagName, SignTagId, MedSignTag, SignTagGroup, NormalSign, NormalName
+      ( MedSignName, MedSignId, UnitId, UnitName, UnitSymbol, SignTagName
+      , SignTagId, MedSignTag, SignTagGroup, NormalSign, NormalName
       , NormalUnit, NormalId
       )
     , MedSignId, Unit (Unit)
@@ -87,6 +86,7 @@ import Foundation
       , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
       , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails, MsgNone, MsgIcon
       , MsgNormalValues, MsgNormalValue, MsgLowerBound, MsgUpperBound
+      , MsgInvalidRangeBoundaries
       )
     )
 
@@ -105,7 +105,7 @@ import Yesod.Core.Handler (getMessages, newIdent)
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Form.Fields (optionsPairs)
-import Yesod.Form.Functions (generateFormPost, runFormPost, checkM)
+import Yesod.Form.Functions (generateFormPost, runFormPost, checkM, check)
 import Yesod.Form.Types
     ( FormResult(FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
@@ -132,12 +132,12 @@ formMedSignNormalDelete extra = return (FormSuccess (), [whamlet|#{extra}|])
 
 postMedSignNormalR :: MedSignId -> NormalId -> Handler Html
 postMedSignNormalR sid nid = do
-    
+
     normal <- runDB $ selectOne $ do
         x <- from $ table @Normal
         where_ $ x ^. NormalId ==. val nid
         return x
-        
+
     ((fr,fw),et) <- runFormPost $ formMedSignNormal sid normal
     case fr of
       FormSuccess r -> do
@@ -152,12 +152,12 @@ postMedSignNormalR sid nid = do
 
 getMedSignNormalEditR :: MedSignId -> NormalId -> Handler Html
 getMedSignNormalEditR sid nid = do
-    
+
     normal <- runDB $ selectOne $ do
         x <- from $ table @Normal
         where_ $ x ^. NormalId ==. val nid
         return x
-        
+
     (fw,et) <- generateFormPost $ formMedSignNormal sid normal
     msgs <- getMessages
     defaultLayout $ do
@@ -177,7 +177,7 @@ postMedSignNormalsR sid = do
           msgs <- getMessages
           setTitleI MsgNormalValue
           $(widgetFile "data/signs/normals/create")
-    
+
 
 
 getMedSignNormalAddR :: MedSignId -> Handler Html
@@ -193,26 +193,26 @@ formMedSignNormal :: MedSignId -> Maybe (Entity Normal) -> Form Normal
 formMedSignNormal sid normal extra = do
 
     rndr <- getMessageRender
-    
+
     (nameR,nameV) <- md3mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgName)]
         } (normalName . entityVal <$> normal)
-    
+
     (lowerR,lowerV) <- md3mreq md3doubleField FieldSettings
         { fsLabel = SomeMessage MsgLowerBound
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgLowerBound)]
         } (normalLowerBound . entityVal <$> normal)
-    
-    (upperR,upperV) <- md3mreq md3doubleField FieldSettings
+
+    (upperR,upperV) <- md3mreq (gteField lowerR) FieldSettings
         { fsLabel = SomeMessage MsgUpperBound
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgUpperBound)]
         } (normalUpperBound . entityVal <$> normal)
 
-    units <- liftHandler $ (bimap ((\(a, b) -> a <> tsep <> b) . bimap unValue unValue) unValue <$>) <$> runDB ( select $ do
+    units <- liftHandler $ (unval <$>) <$> runDB ( select $ do
         x <- from $ table @Unit
         orderBy [asc (x ^. UnitName)]
         return ((x ^. UnitSymbol, x ^. UnitName),x ^. UnitId) )
@@ -222,11 +222,21 @@ formMedSignNormal sid normal extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgUnitOfMeasure)]
         } (normalUnit . entityVal <$> normal)
-    
+
     let r = Normal sid <$> nameR <*> lowerR <*> upperR <*> unitR
     let w = $(widgetFile "data/signs/normals/form")
     return (r,w)
   where
+
+      gteField :: FormResult Double -> Field Handler Double
+      gteField lowerR = check (gte lowerR) md3doubleField
+
+      gte :: FormResult Double -> Double -> Either AppMessage Double
+      gte (FormSuccess x) y | y < x = Left MsgInvalidRangeBoundaries
+      gte _ y = Right y
+      
+      unval = bimap ((\(a, b) -> a <> tsep <> b) . bimap unValue unValue) unValue
+      
       uniqueNameField :: Field Handler Text
       uniqueNameField = checkM uniqueName md3textField
 
@@ -248,13 +258,13 @@ formMedSignNormal sid normal extra = do
 getMedSignNormalR :: MedSignId -> NormalId -> Handler Html
 getMedSignNormalR sid nid = do
     stati <- reqGetParams <$> getRequest
-    
+
     normal <- runDB $ selectOne $ do
         x :& u <- from $ table @Normal
             `leftJoin` table @Unit `on` (\(x :& u) -> x ^. NormalUnit ==. u ?. UnitId)
         where_ $ x ^. NormalId ==. val nid
         return (x,u)
-    
+
     (fw,et) <- generateFormPost formMedSignNormalDelete
     msgs <- getMessages
     defaultLayout $ do
@@ -266,11 +276,12 @@ getMedSignNormalsR :: MedSignId -> Handler Html
 getMedSignNormalsR sid = do
 
     stati <- reqGetParams <$> getRequest
-    
+
     normals <- runDB $ select $ do
         x :& u <- from $ table @Normal
             `leftJoin` table @Unit `on` (\(x :& u) -> x ^. NormalUnit ==. u ?. UnitId)
         where_ $ x ^. NormalSign ==. val sid
+        orderBy [asc (x ^. NormalId)]
         return (x,u)
 
     msgs <- getMessages
@@ -346,7 +357,7 @@ postSignTagsR ps = do
 
 getSignTagAddR :: SignTags -> Handler Html
 getSignTagAddR ps@(SignTags tids) = do
-    
+
     (fw,et) <- generateFormPost $ formSignTag (LS.last tids) Nothing
     msgs <- getMessages
     defaultLayout $ do
@@ -433,10 +444,10 @@ getSignTagsR ps@(SignTags tids) = do
         cte <- withRecursive
             (do
                   x <- from $ table @SignTag
-                  
+
                   unless (null tids) $ where_ $ x ^. SignTagGroup ==. just (val (last tids))
                   when (null tids) $ where_ $ isNothing_ $ x ^. SignTagGroup
-                  
+
                   let level = val (length tids)
                   return (level,x)
             )
@@ -563,17 +574,6 @@ formMedSign sign extra = do
         , fsAttrs = [("label", rndr MsgDescription)]
         } (medSignDescr . entityVal <$> sign)
 
-    units <- liftHandler $ (bimap ((\(a, b) -> a <> tsep <> b) . bimap unValue unValue) unValue <$>) <$> runDB ( select $ do
-        x <- from $ table @Unit
-        orderBy [asc (x ^. UnitName)]
-        return ((x ^. UnitSymbol, x ^. UnitName),x ^. UnitId) )
-
-    (unitR,unitV) <- md3mopt (md3selectField (optionsPairs units)) FieldSettings
-        { fsLabel = SomeMessage MsgUnitOfMeasure
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgUnitOfMeasure)]
-        } (medSignUnit . entityVal <$> sign)
-
     tags <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( select $ do
         x <- from $ table @SignTag
         orderBy [asc (x ^. SignTagName)]
@@ -585,7 +585,7 @@ formMedSign sign extra = do
         , fsAttrs = [("label", rndr MsgTag)]
         } (medSignTag . entityVal <$> sign)
 
-    let r = MedSign <$> nameR <*> codeR <*> iconR <*> descrR <*> unitR <*> tagR
+    let r = MedSign <$> nameR <*> codeR <*> iconR <*> descrR <*> tagR
     let w = $(widgetFile "data/signs/form")
     return (r,w)
   where
@@ -612,11 +612,10 @@ getMedSignR sid = do
     stati <- reqGetParams <$> getRequest
 
     sign <- runDB $ selectOne $ do
-        x :& u :& t <- from $ table @MedSign
-            `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MedSignUnit ==. u ?. UnitId)
-            `leftJoin` table @SignTag `on` (\(x :& _ :& t) -> x ^. MedSignTag ==. t ?. SignTagId)
+        x :& t <- from $ table @MedSign
+            `leftJoin` table @SignTag `on` (\(x :& t) -> x ^. MedSignTag ==. t ?. SignTagId)
         where_ $ x ^. MedSignId ==. val sid
-        return (x,u,t)
+        return (x,t)
     (fw,et) <- generateFormPost formDelete
     msgs <- getMessages
     defaultLayout $ do
@@ -659,8 +658,8 @@ getMedSignsR = do
         where_ $ x ^. SignTagGroup `in_` justList ( valList selected )
         return $ x ^. SignTagGroup )
 
-    
-    
+
+
     signs <- runDB $ select $ do
         x <- from $ table @MedSign
         unless (null selected) $ where_ $ (x ^. MedSignTag) `in_` justList ( subSelectList

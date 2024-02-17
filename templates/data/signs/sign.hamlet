@@ -42,7 +42,7 @@
       <div.app-banner.error.body-medium>
         #{status}. #{msg}
 
-    $maybe (Entity _ (MedSign name code icon descr _ _),unit,tag) <- sign
+    $maybe (Entity _ (MedSign name code icon descr _),tag) <- sign
       <dl>
         <dt.label-large>_{MsgIcon}
         <dd>
@@ -58,11 +58,6 @@
         <dd.body-medium>
           $maybe code <- code
             #{code}
-
-        $maybe Entity _ (Unit uname symbol _ _) <- unit
-          <dt.label-large>_{MsgUnitOfMeasure}
-          <dd.body-medium>#{uname} (#{symbol})
-
 
         <dt.label-large>_{MsgDescription}
         <dd.body-medium>

@@ -1,3 +1,4 @@
+InvalidRangeBoundaries: Неверные границы диапазона
 UpperBound: Верхний предел
 LowerBound: Нижний предел
 NormalValue: Нормальное значение

@@ -7,8 +7,6 @@
 
 ^{fvInput iconV}
 
-^{fvInput unitV}
-
 ^{fvInput descrV}
 
 ^{fvInput tagV}

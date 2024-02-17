@@ -1,8 +1,8 @@
 
 #{extra}
 
-^{fvInput valueV}
-
 ^{fvInput nameV}
+
+^{fvInput valueV}
 
 ^{fvInput unitV}

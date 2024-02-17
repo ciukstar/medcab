@@ -1,3 +1,4 @@
+InvalidRangeBoundaries: Invalid range boundaries
 UpperBound: Upper bound
 LowerBound: Lower bound
 NormalValue: Normal value

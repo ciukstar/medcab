@@ -1,3 +1,4 @@
+InvalidRangeBoundaries: Limite de interval nevalide
 UpperBound: Limită superioară
 LowerBound: Limita inferioară
 NormalValue: Valoarea normală
