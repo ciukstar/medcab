@@ -202,7 +202,7 @@ instance Yesod App where
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated
     isAuthorized (DoctorPhotoR _) _ = isAuthenticated
-    isAuthorized DoctorsR _ = isAuthenticated
+    isAuthorized r@DoctorsR _ = setUltDest r >> isAuthenticated
     
     isAuthorized (RecordMeasurementDeleR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementEditR uid _ _) _ = isAuthenticatedSelf uid
