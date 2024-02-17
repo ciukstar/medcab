@@ -2,11 +2,9 @@
 
 module Menu (menu) where
 
-import Database.Persist (Entity(Entity))
-
 import Foundation
     ( Widget
-    , Route (HomeR, DataR, DocsR, AuthR, DoctorsR, RecordsR)
+    , Route (HomeR, DataR, DocsR, DoctorsR, RecordsR)
     , DataR (UsersR, TokensR, StaffR, SpecialtiesR, UnitsR, MedSignsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors, MsgUsers
@@ -18,11 +16,9 @@ import Model (Specialties (Specialties))
 
 import Settings (widgetFile)
 
-import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core.Handler (getCurrentRoute)
 
 menu :: Widget
 menu = do
-    user <- maybeAuth
     curr <- getCurrentRoute
     $(widgetFile "menu")

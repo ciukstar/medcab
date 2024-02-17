@@ -17,13 +17,8 @@
     <md-menu-item href=@{DoctorsR} :curr == Just DoctorsR:selected>
       _{MsgDoctors}
 
-
-    $maybe Entity uid _ <- user
-      <md-menu-item type=link href=@{RecordsR uid} :curr == Just (RecordsR uid):selected>
-        _{MsgRecords}
-    $nothing
-      <md-menu-item type=link href=@{AuthR LoginR}>
-        _{MsgRecords}
+    <md-menu-item type=link href=@{RecordsR} :curr == Just RecordsR:selected>
+      _{MsgRecords}
 
     <details.app-submenu #idDetailsData
       :elem curr [Just (DataR MedSignsR), Just (DataR UnitsR), Just (DataR StaffR), Just (DataR $ SpecialtiesR (Specialties [])), Just (DataR UsersR), Just (DataR TokensR)]:open

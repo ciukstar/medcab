@@ -296,7 +296,7 @@ postRecordDeleR uid rid = do
       FormSuccess () -> do
           runDB $ delete rid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ RecordsR uid
+          redirect RecordsR
       _otherwise -> defaultLayout $ do
           addMessageI statusError MsgInvalidFormData
           redirect $ RecordR uid rid
@@ -332,18 +332,22 @@ getRecordEditR uid rid = do
         $(widgetFile "records/edit")
 
 
-postRecordsR :: UserId -> Handler Html
-postRecordsR uid = do
-    ((fr,fw),et) <- runFormPost $ formRecord uid Nothing
-    case fr of
-      FormSuccess r -> do
-          rid <- runDB $ insert r
-          addMessageI statusSuccess MsgRecordCreated
-          redirect $ RecordMeasurementsR uid rid
-      _otherwise -> defaultLayout $ do
-          msgs <- getMessages
-          setTitleI MsgRecord
-          $(widgetFile "records/new")
+postRecordsR :: Handler Html
+postRecordsR = do
+    user <- maybeAuth
+    case user of
+      Nothing             -> redirect $ AuthR LoginR
+      Just (Entity uid _) -> do
+          ((fr,fw),et) <- runFormPost $ formRecord uid Nothing
+          case fr of
+            FormSuccess r -> do
+                rid <- runDB $ insert r
+                addMessageI statusSuccess MsgRecordCreated
+                redirect $ RecordMeasurementsR uid rid
+            _otherwise -> defaultLayout $ do
+                msgs <- getMessages
+                setTitleI MsgRecord
+                $(widgetFile "records/new")
 
 
 getRecordNewR :: UserId -> Handler Html
@@ -421,30 +425,32 @@ formRecordDelete :: Form ()
 formRecordDelete extra = return (pure (), [whamlet|#{extra}|])
 
 
-getRecordsR :: UserId -> Handler Html
-getRecordsR uid = do
-
-    xs <- runDB ( select $ do
-        x :& s <- from $ table @Record
-            `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
-        where_ $ x ^. RecordUser ==. val uid
-        orderBy [desc (x ^. RecordDay), desc (x ^. RecordTime)]
-        return (x,s) )
-
-    groups <- groupByDay <$> forM xs ( \r@(Entity rid _,_) -> (r,) <$> runDB ( select $ do
-        x :& u <- from $ table @Measurement
-            `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
-        orderBy [asc (x ^. MeasurementId)]
-        where_ $ x ^. MeasurementRecord ==. val rid
-        return (x,u) ) )
-
+getRecordsR :: Handler Html
+getRecordsR = do
 
     user <- maybeAuth
-    msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgElectronicHealthRecord
-        idFabAdd <- newIdent
-        $(widgetFile "records/records")
+ 
+    case user of
+      Nothing             -> redirect $ AuthR LoginR
+      Just (Entity uid _) -> do
+          xs <- runDB ( select $ do
+              x :& s <- from $ table @Record
+                  `innerJoin` table @MedSign `on` (\(x :& s) -> x ^. RecordSign ==. s ^. MedSignId)
+              where_ $ x ^. RecordUser ==. val uid
+              orderBy [desc (x ^. RecordDay), desc (x ^. RecordTime)]
+              return (x,s) )
+
+          groups <- groupByDay <$> forM xs ( \r@(Entity rid _,_) -> (r,) <$> runDB ( select $ do
+              x :& u <- from $ table @Measurement
+                  `leftJoin` table @Unit `on` (\(x :& u) -> x ^. MeasurementUnit ==. u ?. UnitId)
+              orderBy [asc (x ^. MeasurementId)]
+              where_ $ x ^. MeasurementRecord ==. val rid
+              return (x,u) ) )
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgElectronicHealthRecord
+              idFabAdd <- newIdent
+              $(widgetFile "records/records")
 
   where
 

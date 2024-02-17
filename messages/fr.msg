@@ -118,6 +118,7 @@ EmailVerification: Vérification de l'E-mail
 Verification: Vérification
 Registration: Enregistrement
 ResendEmail: Ré-envoyer l'email
+LoginPlease: Veuillez vous connecter pour accéder à cette page
 LoginRequired: Vous devez vous connecter pour accéder à cette page
 AnotherAccountAccessProhibited: L'accès au compte d'un autre utilisateur est interdit
 OtherProfileChangeRestricted: La modification du profil d'un autre utilisateur est restreinte

@@ -9,11 +9,8 @@
 
 <main>
 
-  <h1.headline-large>
-    _{MsgPermissionDenied}.
-
-  <p.body-medium>
-    #{msg}.
+  <h2.headline-medium>
+    #{msg}
   
   <md-filled-button type=button href=@{AuthR LoginR}>
     _{MsgSignIn}

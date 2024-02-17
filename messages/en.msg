@@ -118,6 +118,7 @@ EmailVerification: Email verification
 Verification: Verification
 Registration: Registration
 ResendEmail: Resend email
+LoginPlease: Please log in to access this page
 LoginRequired: You must login to access this page
 AnotherAccountAccessProhibited: Access to another user's account is prohibited
 OtherProfileChangeRestricted: Changing another user's profile is restricted

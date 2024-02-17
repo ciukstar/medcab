@@ -14,7 +14,7 @@
 /users/#UserId/records/#RecordId/edit RecordEditR GET
 /users/#UserId/records/forms/new      RecordNewR  GET
 /users/#UserId/records/#RecordId      RecordR     GET POST
-/users/#UserId/records 	              RecordsR    GET POST
+/records 	                      RecordsR    GET POST
 
 /accounts/#UserId/info/edit          AccountInfoEditR GET
 /accounts/#UserId/info		     AccountInfoR     GET POST

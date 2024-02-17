@@ -118,6 +118,7 @@ EmailVerification: Проверка электронной почты
 Verification: Проверка
 Registration: Регистрация
 ResendEmail: Отправить письмо повторно
+LoginPlease: Пожалуйста, войдите для доступа к этой странице
 LoginRequired: Вы должны авторизоваться, чтобы получить доступ к этой странице
 AnotherAccountAccessProhibited: Доступ к учетной записи другого пользователя запрещен
 OtherProfileChangeRestricted: Изменение профиля другого пользователя ограничено

@@ -118,6 +118,7 @@ EmailVerification: Verificare a email-ului
 Verification: Verificare
 Registration: Înregistrare
 ResendEmail: Retrimiteți e-mailul
+LoginPlease: Vă rugăm să vă conectați pentru a accesa această pagină
 LoginRequired: Trebuie să vă autentificați pentru a accesa această pagină
 AnotherAccountAccessProhibited: Accesul la contul altui utilizator este interzis
 OtherProfileChangeRestricted: Modificarea profilului altui utilizator este restricționată

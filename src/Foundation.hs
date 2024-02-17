@@ -214,7 +214,7 @@ instance Yesod App where
     isAuthorized (RecordEditR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordNewR uid) _ = isAuthenticatedSelf uid
     isAuthorized (RecordR uid _) _ = isAuthenticatedSelf uid
-    isAuthorized r@(RecordsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
+    isAuthorized r@RecordsR _ = setUltDest r >> isAuthenticated
 
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
@@ -833,7 +833,7 @@ isAuthenticated :: Handler AuthResult
 isAuthenticated = do
     muid <- maybeAuthId
     case muid of
-        Nothing -> unauthorizedI MsgAnotherAccountAccessProhibited
+        Nothing -> unauthorizedI MsgLoginPlease
         Just _ -> return Authorized
 
 
@@ -843,7 +843,7 @@ isAuthenticatedSelf uid = do
     case muid of
         Just uid' | uid == uid' -> return Authorized
                   | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
-        Nothing -> unauthorizedI MsgLoginRequired
+        Nothing -> unauthorizedI MsgLoginPlease
 
 
 isAdmin :: Handler AuthResult
@@ -853,7 +853,7 @@ isAdmin = do
         Just (Entity _ (User _ _ _ _ _ _ True _)) -> return Authorized
         Just (Entity _ (User _ _ _ _ _ _ _ True)) -> return Authorized
         Just (Entity _ (User _ _ _ _ _ _ _ False)) -> unauthorizedI MsgAccessDeniedAdminsOnly
-        Nothing -> unauthorizedI MsgLoginRequired
+        Nothing -> unauthorizedI MsgLoginPlease
 
 
 instance YesodAuthPersist App
