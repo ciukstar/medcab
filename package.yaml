@@ -19,6 +19,7 @@ dependencies:
 - yesod-persistent
 - yesod-sitemap
 - yesod-auth-oauth2
+- yesod-websockets
 - classy-prelude
 - classy-prelude-conduit
 - classy-prelude-yesod
@@ -29,6 +30,7 @@ dependencies:
 - persistent-template
 - template-haskell
 - shakespeare
+- stm
 - hjsmin
 - monad-control
 - wai-extra
@@ -64,6 +66,7 @@ dependencies:
 - listsafe
 - transformers
 - email-validate
+- unliftio
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

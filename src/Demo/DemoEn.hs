@@ -26,7 +26,7 @@ import Model
     , UserPhoto
       ( UserPhoto, userPhotoMime, userPhotoPhoto, userPhotoUser
       , userPhotoAttribution
-      ), Doctor (doctorName, Doctor, doctorMobile, doctorEmail)
+      ), Doctor (doctorName, Doctor, doctorMobile, doctorEmail, doctorPhone)
     , DoctorPhoto
       ( DoctorPhoto, doctorPhotoDoctor, doctorPhotoMime, doctorPhotoPhoto
       , doctorPhotoAttribution
@@ -150,6 +150,7 @@ fillDemoEn = do
     let doctor1 = Doctor { doctorName = "Dr. Julian Maulsby"
                          , doctorMobile = "+18056594960"
                          , doctorEmail = "jmaulsby@xmail.edu"
+                         , doctorPhone = Just "+18056594960"
                          }
     d1 <- insert doctor1
 
@@ -176,6 +177,7 @@ fillDemoEn = do
     let doctor2 = Doctor { doctorName = "Dr. Valentina Schoen"
                          , doctorMobile = "+12258813837"
                          , doctorEmail = "vschoen@xmail.edu"
+                         , doctorPhone = Just "+12258813837"
                          }
     d2 <- insert doctor2
 
@@ -197,6 +199,7 @@ fillDemoEn = do
     let doctor3 = Doctor { doctorName = "Dr. Steve Stefano"
                          , doctorMobile = "+13029222541"
                          , doctorEmail = "sstefano@xmail.edu"
+                         , doctorPhone = Just "+13029222541"
                          }
     d3 <- insert doctor3
 
@@ -218,6 +221,7 @@ fillDemoEn = do
     let doctor4 = Doctor { doctorName = "Dr. Jocelyn Frascone"
                          , doctorMobile = "+17743753179"
                          , doctorEmail = "jfrascone@xmail.edu"
+                         , doctorPhone = Just "+17743753179"
                          }
     d4 <- insert doctor4
 

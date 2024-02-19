@@ -90,6 +90,7 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import Chat.Data (Chat)
 
 
 
@@ -103,6 +104,7 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
+    , getChat        :: Chat
     }
 
 mkMessage "App" "messages" "en"
@@ -124,9 +126,13 @@ mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
 -- | A convenient synonym for creating forms.
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
+
 -- | A convenient synonym for database access functions.
 type DB a = forall (m :: Type -> Type).
     (MonadUnliftIO m) => ReaderT SqlBackend m a
+
+
+
 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
@@ -197,7 +203,8 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
-
+    
+    isAuthorized (DoctorChatR _) _ = isAuthenticated
     
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated

@@ -1,3 +1,5 @@
+Chat: Chat
+Phone: Phone
 InvalidRangeBoundaries: Invalid range boundaries
 UpperBound: Upper bound
 LowerBound: Lower bound

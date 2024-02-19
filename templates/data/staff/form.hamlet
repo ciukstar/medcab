@@ -15,6 +15,11 @@
 ^{fvInput photoV}
 
 ^{fvInput attribV}
+
 ^{fvInput nameV}
+
 ^{fvInput mobileV}
+
+^{fvInput phoneV}
+
 ^{fvInput emailV}

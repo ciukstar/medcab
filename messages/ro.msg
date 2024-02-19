@@ -1,3 +1,5 @@
+Chat: Chat
+Phone: Telefon
 InvalidRangeBoundaries: Limite de interval nevalide
 UpperBound: Limită superioară
 LowerBound: Limita inferioară

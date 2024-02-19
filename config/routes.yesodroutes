@@ -1,4 +1,6 @@
 
+/chats        DoctorChatR Chat getChat
+
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
 /doctors/#DoctorId 	       DoctorR      	  GET
 /doctors/#DoctorId/poto        DoctorPhotoR 	  GET

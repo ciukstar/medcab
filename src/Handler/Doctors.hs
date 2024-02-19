@@ -24,15 +24,18 @@ import Foundation
     ( Handler
     , Route
       ( AuthR, AccountR, AccountPhotoR, DoctorPhotoR, StaticR, DoctorR, DoctorsR
-      , DoctorSpecialtiesR
+      , DoctorSpecialtiesR, DoctorChatR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
+      , MsgPhone, MsgChat
       )
     )
+
+import Chat.Data ( Route(ChatR) )
 
 import Menu (menu)
 import Model

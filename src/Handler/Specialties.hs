@@ -62,7 +62,7 @@ import Foundation
       )
     , AppMessage
       ( MsgSpecialties, MsgUserAccount, MsgNoSpecialtiesYet, MsgSignIn
-      , MsgSignOut, MsgPhoto, MsgEdit, MsgSpecialty, MsgDescription
+      , MsgSignOut, MsgPhoto, MsgEdit, MsgSpecialty, MsgDescription, MsgPhone
       , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails

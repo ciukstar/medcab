@@ -1,3 +1,5 @@
+Chat: Chat
+Phone: Téléphone
 InvalidRangeBoundaries: Limites de plage non valides
 UpperBound: Limite supérieure
 LowerBound: Limite inférieure

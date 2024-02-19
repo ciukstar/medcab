@@ -59,12 +59,12 @@ import Foundation
       , MsgEdit, MsgDele, MsgRecordDeleted, MsgDeleteAreYouSure, MsgConfirmPlease
       , MsgRecordEdited, MsgSpecialties, MsgTabs, MsgSpecialty, MsgNoSpecialtiesYet
       , MsgAttribution, MsgSpecialtyTitle, MsgSpecializations, MsgCertificateDate
-      , MsgInvalidFormData, MsgAlreadyExists
+      , MsgInvalidFormData, MsgAlreadyExists, MsgPhone
       )
     )
 import Model
     ( AvatarColor (AvatarColorLight)
-    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail)
+    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone)
     , DoctorId, DoctorPhoto (DoctorPhoto)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
@@ -408,6 +408,11 @@ formDoctor doctor extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",rndr MsgEmailAddress)]
         } (doctorEmail . entityVal <$> doctor)
+    (phoneR,phoneV) <- md3mopt md3telField FieldSettings
+        { fsLabel = SomeMessage MsgPhone
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label",rndr MsgMobile)]
+        } (doctorPhone . entityVal <$> doctor)
 
     (photoR,photoV) <- md3mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
@@ -428,7 +433,7 @@ formDoctor doctor extra = do
         , fsAttrs = [("label",rndr MsgAttribution)]
         } attrib
 
-    let r = (,,) <$> (Doctor <$> nameR <*> mobileR <*> emailR) <*> photoR <*> attribR
+    let r = (,,) <$> (Doctor <$> nameR <*> mobileR <*> emailR <*> phoneR) <*> photoR <*> attribR
 
     idLabelPhoto <- newIdent
     idFigurePhoto <- newIdent

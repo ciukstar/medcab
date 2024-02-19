@@ -1,3 +1,5 @@
+Chat: Chat
+Phone: Телефон
 InvalidRangeBoundaries: Неверные границы диапазона
 UpperBound: Верхний предел
 LowerBound: Нижний предел

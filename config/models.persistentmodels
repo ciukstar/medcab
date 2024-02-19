@@ -69,6 +69,7 @@ Doctor
     name Text
     mobile Text
     email Text
+    phone Text Maybe
 
 Specialty
     name Text

@@ -41,7 +41,7 @@
       $nothing
         _{MsgPhoto}
 
-  $maybe (Entity _ (Specialist _ _ title cert),Entity _ (Doctor dname _ _),Entity _ (Specialty sname _ _ _)) <- specialst
+  $maybe (Entity _ (Specialist _ _ title cert),Entity _ (Doctor dname _ _ _),Entity _ (Specialty sname _ _ _)) <- specialst
     <dl>
       <dt.label-large scope=row>_{MsgSpecialtyTitle}
       <dd.body-medium>#{title}
