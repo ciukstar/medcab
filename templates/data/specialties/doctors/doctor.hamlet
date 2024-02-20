@@ -41,7 +41,7 @@
       $nothing
         _{MsgPhoto}
 
-  $maybe (Entity _ (Doctor name mobile email phone),Entity _ (Specialist _ _ title cert)) <- doctor
+  $maybe (Entity _ (Doctor name mobile email phone _),Entity _ (Specialist _ _ title cert)) <- doctor
         
     <dl>
       <dt.label-large>_{MsgSpecialtyTitle}

@@ -33,7 +33,7 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $maybe (Entity did (Doctor name mobile email phone),attrib) <- doctor
+  $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
     <figure>
       <img src=@{DataR $ StaffPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>

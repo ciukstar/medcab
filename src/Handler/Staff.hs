@@ -59,23 +59,23 @@ import Foundation
       , MsgEdit, MsgDele, MsgRecordDeleted, MsgDeleteAreYouSure, MsgConfirmPlease
       , MsgRecordEdited, MsgSpecialties, MsgTabs, MsgSpecialty, MsgNoSpecialtiesYet
       , MsgAttribution, MsgSpecialtyTitle, MsgSpecializations, MsgCertificateDate
-      , MsgInvalidFormData, MsgAlreadyExists, MsgPhone
+      , MsgInvalidFormData, MsgAlreadyExists, MsgPhone, MsgUser
       )
     )
 import Model
     ( AvatarColor (AvatarColorLight)
-    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone)
+    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone, doctorUser)
     , DoctorId, DoctorPhoto (DoctorPhoto)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
       , SpecialtyName, SpecialtyId, SpecialistDoctor, SpecialistSpecialty
-      , DoctorPhotoAttribution, SpecialistId, SpecialistTitle
+      , DoctorPhotoAttribution, SpecialistId, SpecialistTitle, UserName, UserId, UserEmail
       )
     , statusSuccess, statusError
     , SpecialtyId, Specialty (specialtyName, Specialty)
     , SpecialistId
     , Specialist
-      (Specialist, specialistCertDate, specialistSpecialty, specialistTitle)
+      (Specialist, specialistCertDate, specialistSpecialty, specialistTitle), User (User)
     )
 import Settings (widgetFile)
 import Settings.StaticFiles
@@ -98,7 +98,7 @@ import Yesod.Form.Types
     , FieldView (fvInput, fvId), Field
     )
 import Yesod.Persist (YesodPersist (runDB))
-import Data.Bifunctor (Bifunctor(second))
+import Data.Bifunctor (Bifunctor(second, bimap))
 
 
 postSpecialistDeleR :: DoctorId -> SpecialtyId -> SpecialistId -> Handler Html
@@ -414,6 +414,17 @@ formDoctor doctor extra = do
         , fsAttrs = [("label",rndr MsgMobile)]
         } (doctorPhone . entityVal <$> doctor)
 
+    users <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( select $ do
+        x <- from $ table @User
+        orderBy [asc (x ^. UserEmail)]
+        return (x ^. UserEmail, x ^. UserId) )
+        
+    (userR,userV) <- md3mopt (md3selectField (optionsPairs users)) FieldSettings
+        { fsLabel = SomeMessage MsgUser
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label",rndr MsgUser)]
+        } (doctorUser . entityVal <$> doctor)
+
     (photoR,photoV) <- md3mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -433,7 +444,7 @@ formDoctor doctor extra = do
         , fsAttrs = [("label",rndr MsgAttribution)]
         } attrib
 
-    let r = (,,) <$> (Doctor <$> nameR <*> mobileR <*> emailR <*> phoneR) <*> photoR <*> attribR
+    let r = (,,) <$> (Doctor <$> nameR <*> mobileR <*> emailR <*> phoneR <*> userR) <*> photoR <*> attribR
 
     idLabelPhoto <- newIdent
     idFigurePhoto <- newIdent

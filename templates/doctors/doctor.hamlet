@@ -11,7 +11,7 @@
 
 <main>
 
-  $maybe (Entity did (Doctor name mobile email phone),attrib) <- doctor
+  $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
     <figure>
       <img src=@{DoctorPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
@@ -52,7 +52,7 @@
 
       <div #actions>
           
-        <md-filled-tonal-button #idButtonChat type=link href=@{DoctorChatR $ ChatR did}>
+        <md-filled-tonal-button #idButtonChat type=link href=@{DoctorChatR $ ChatRoomR did}>
           <md-icon slot=icon>Chat
           _{MsgChat}
           

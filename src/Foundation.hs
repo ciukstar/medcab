@@ -10,8 +10,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TupleSections #-}
 
 module Foundation where
+
+import ChatRoom.Data (ChatRoom)
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -29,11 +32,11 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Lazy.Encoding
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, val, where_
+    ( selectOne, from, table, val, where_, valList, asc, not_, just
     , (^.)
-    , Value (unValue), select, orderBy, desc, in_, valList
+    , Value (unValue), select, orderBy, in_
     )
-import qualified Database.Esqueleto.Experimental as E ((==.))
+import qualified Database.Esqueleto.Experimental as E ((==.), exists)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 
 import Material3 (md3emailField, md3passwordField)
@@ -90,7 +93,6 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
-import Chat.Data (Chat)
 
 
 
@@ -104,7 +106,7 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
-    , getChat        :: Chat
+    , getChatRoom    :: ChatRoom
     }
 
 mkMessage "App" "messages" "en"
@@ -205,6 +207,11 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
     
     isAuthorized (DoctorChatR _) _ = isAuthenticated
+
+    
+    isAuthorized (PatientNewR _) _ = isDoctor
+    isAuthorized (PatientR _) _ = isDoctor
+    isAuthorized r@PatientsR _ = setUltDest r >> isDoctor
     
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated
@@ -610,11 +617,34 @@ instance YesodAuthEmail App where
               let r = (,) <$> emailR <*> passR
                   w = do
                       
-                      accounts <- liftHandler $ runDB $ select $ do
+                      users <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
                           x <- from $ table @User
-                          where_ $  x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
-                          orderBy [desc (x ^. UserId)]
-                          return x
+                          where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
+                          where_ $ not_ $ x ^. UserSuperuser
+                          where_ $ not_ $ E.exists $ do
+                              y <- from $ table @Doctor
+                              where_ $ y ^. DoctorUser E.==. just (x ^. UserId)
+                          orderBy [asc (x ^. UserId)]
+                          return x )
+                      
+                      doctors <- liftHandler $ ((,True) <$>) <$> runDB ( select $ do
+                          x <- from $ table @User
+                          where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
+                          where_ $ not_ $ x ^. UserSuperuser
+                          where_ $ E.exists $ do
+                              y <- from $ table @Doctor
+                              where_ $ y ^. DoctorUser E.==. just (x ^. UserId)
+                          orderBy [asc (x ^. UserId)]
+                          return x )
+                      
+                      supers <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
+                          x <- from $ table @User
+                          where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
+                          where_ $ x ^. UserSuperuser
+                          orderBy [asc (x ^. UserId)]
+                          return x )
+
+                      let accounts = users <> doctors <> supers
                       
                       toWidget [cassius|
                           ##{fvId emailV}, ##{fvId passV}
@@ -628,7 +658,7 @@ instance YesodAuthEmail App where
     <md-icon slot=icon>arrow_drop_down
   <md-menu #menuDemoAccounts anchor=anchorDemoAccounts>
     $with n <- length accounts 
-      $forall (i,Entity uid (User email _ _ _ _ name super admin)) <- zip (irange 1) accounts
+      $forall (i,(Entity uid (User email _ _ _ _ name super admin),doctor)) <- zip (irange 1) accounts
         $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
           <md-menu-item onclick="document.getElementById('#{fvId emailV}').value = '#{email}';document.getElementById('#{fvId passV}').value = '#{pass}'">
             <md-icon slot=start>
@@ -639,7 +669,7 @@ instance YesodAuthEmail App where
               $maybe name <- name
                 #{name}
             <div slot=supporting-text style="text-transform:uppercase">
-              $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator)]
+              $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator),(doctor,MsgDoctor)]
                 $if not (null roles)
                   $forall role <- roles
                     _{role} #
@@ -860,6 +890,21 @@ isAdmin = do
         Just (Entity _ (User _ _ _ _ _ _ True _)) -> return Authorized
         Just (Entity _ (User _ _ _ _ _ _ _ True)) -> return Authorized
         Just (Entity _ (User _ _ _ _ _ _ _ False)) -> unauthorizedI MsgAccessDeniedAdminsOnly
+        Nothing -> unauthorizedI MsgLoginPlease
+
+
+isDoctor :: Handler AuthResult
+isDoctor = do
+    user <- maybeAuth
+    case user of
+        Just (Entity uid _) -> do
+            doctor <- runDB $ selectOne $ do
+                x <- from $ table @Doctor
+                where_ $ x ^. DoctorUser E.==. just (val uid)
+                return x
+            case doctor of
+              Just _ -> return Authorized
+              Nothing -> unauthorizedI MsgAccessDeniedDoctorsOnly
         Nothing -> unauthorizedI MsgLoginPlease
 
 

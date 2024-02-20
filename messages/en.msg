@@ -1,3 +1,6 @@
+NoPatientsYet: You don't have any patients yet
+AccessDeniedDoctorsOnly: Only doctors have access to this page. Please log in as doctor
+Patients: Patients
 Chat: Chat
 Phone: Phone
 InvalidRangeBoundaries: Invalid range boundaries

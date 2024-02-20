@@ -27,6 +27,7 @@ import Data.Function ((.))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
+import Data.Time (UTCTime)
 import Data.Time.Calendar (Day)
 import Data.Time.LocalTime (TimeOfDay)
 
@@ -42,6 +43,11 @@ import Yesod.Core.Dispatch
     , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
     )
 import Yesod.Form (Textarea)
+
+
+data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
+    deriving (Show, Read, Eq, Ord)
+derivePersistField "ChatMessageStatus"
 
 
 data Gender = GenderFemale | GenderMale | GenderOther

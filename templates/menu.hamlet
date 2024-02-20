@@ -14,6 +14,9 @@
     <md-menu-item href=@{HomeR} :curr == Just HomeR:selected>
       _{MsgWelcome}
 
+    <md-menu-item href=@{PatientsR} :curr == Just PatientsR:selected>
+      _{MsgPatients}
+      
     <md-menu-item href=@{DoctorsR} :curr == Just DoctorsR:selected>
       _{MsgDoctors}
 

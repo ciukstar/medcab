@@ -1,3 +1,6 @@
+NoPatientsYet: Nu aveți încă niciun pacient
+AccessDeniedDoctorsOnly: Doar medicii au acces la această pagină. Vă rugăm să vă conectați ca medic
+Patients: Pacienți
 Chat: Chat
 Phone: Telefon
 InvalidRangeBoundaries: Limite de interval nevalide

@@ -58,6 +58,13 @@ Specialist
     certDate Day
     UniqueSpecialist doctor specialty title
 
+Patient
+    user UserId
+    doctor DoctorId
+    since UTCTime
+    UniquePatient user doctor
+
+
 DoctorPhoto
     doctor DoctorId OnDeleteCascade
     mime Text
@@ -70,6 +77,7 @@ Doctor
     mobile Text
     email Text
     phone Text Maybe
+    user UserId Maybe OnDeleteSetNull
 
 Specialty
     name Text
@@ -77,6 +85,14 @@ Specialty
     descr Textarea Maybe
     group SpecialtyId Maybe OnDeleteCascade
     UniqueSpecialtyName name
+
+Chat
+    user UserId OnDeleteCascade
+    interlocutor UserId
+    timemark UTCTime
+    message Text
+    status ChatMessageStatus
+
 
 UserPhoto
     user UserId OnDeleteCascade

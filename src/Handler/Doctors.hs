@@ -35,7 +35,7 @@ import Foundation
       )
     )
 
-import Chat.Data ( Route(ChatR) )
+import ChatRoom.Data ( Route(ChatRoomR) )
 
 import Menu (menu)
 import Model

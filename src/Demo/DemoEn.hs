@@ -26,7 +26,7 @@ import Model
     , UserPhoto
       ( UserPhoto, userPhotoMime, userPhotoPhoto, userPhotoUser
       , userPhotoAttribution
-      ), Doctor (doctorName, Doctor, doctorMobile, doctorEmail, doctorPhone)
+      ), Doctor (doctorName, Doctor, doctorMobile, doctorEmail, doctorPhone, doctorUser)
     , DoctorPhoto
       ( DoctorPhoto, doctorPhotoDoctor, doctorPhotoMime, doctorPhotoPhoto
       , doctorPhotoAttribution
@@ -115,6 +115,54 @@ fillDemoEn = do
 
                       }
 
+    pass3 <- liftIO $ saltPass "jmaulsby"
+    let user3 = User { userEmail = "jmaulsby@xmail.edu"
+                     , userAuthType = UserAuthTypeEmail
+                     , userPassword = Just pass3
+                     , userVerkey = Just "xxxYYYzzz"
+                     , userVerified = True
+                     , userName = Just "Julian Maulsby"
+                     , userSuperuser = False
+                     , userAdmin = False
+                     }
+
+    usr3 <- insert user3
+
+    insert_ UserPhoto { userPhotoUser = usr3
+                      , userPhotoMime = "image/avif"
+                      , userPhotoPhoto = $(embedFile "demo/doctor-smiling-offering-hand_23-2148075683.avif")
+                      , userPhotoAttribution = Just [shamlet|
+                                                            Designed by #
+                                                            <a href="https://www.freepik.com/" target=_blank>
+                                                              Freepik
+                                                            |]
+
+                      }
+
+    pass4 <- liftIO $ saltPass "vschoen"
+    let user4 = User { userEmail = "vschoen@xmail.edu"
+                     , userAuthType = UserAuthTypeEmail
+                     , userPassword = Just pass4
+                     , userVerkey = Just "xxxYYYzzz"
+                     , userVerified = True
+                     , userName = Just "Valentina Schoen"
+                     , userSuperuser = False
+                     , userAdmin = False
+                     }
+
+    usr4 <- insert user4
+
+    insert_ UserPhoto { userPhotoUser = usr4
+                      , userPhotoMime = "image/avif"
+                      , userPhotoPhoto = $(embedFile "demo/doctor-office-looking-camera_23-2147796576.avif")
+                      , userPhotoAttribution = Just [shamlet|
+                                                            Designed by #
+                                                            <a href="https://www.freepik.com/" target=_blank>
+                                                              Freepik
+                                                            |]
+
+                      }
+
     let specialty1 = Specialty { specialtyName = "Allergy and immunology"
                                , specialtyCode = Just "ALLI"
                                , specialtyDescr = Just $ Textarea [st|Immunology is a branch of medicine that covers the study of immune systems in all organisms.|]
@@ -151,6 +199,7 @@ fillDemoEn = do
                          , doctorMobile = "+18056594960"
                          , doctorEmail = "jmaulsby@xmail.edu"
                          , doctorPhone = Just "+18056594960"
+                         , doctorUser = Just usr3
                          }
     d1 <- insert doctor1
 
@@ -178,6 +227,7 @@ fillDemoEn = do
                          , doctorMobile = "+12258813837"
                          , doctorEmail = "vschoen@xmail.edu"
                          , doctorPhone = Just "+12258813837"
+                         , doctorUser = Just usr4
                          }
     d2 <- insert doctor2
 
@@ -200,6 +250,7 @@ fillDemoEn = do
                          , doctorMobile = "+13029222541"
                          , doctorEmail = "sstefano@xmail.edu"
                          , doctorPhone = Just "+13029222541"
+                         , doctorUser = Nothing
                          }
     d3 <- insert doctor3
 
@@ -222,6 +273,7 @@ fillDemoEn = do
                          , doctorMobile = "+17743753179"
                          , doctorEmail = "jfrascone@xmail.edu"
                          , doctorPhone = Just "+17743753179"
+                         , doctorUser = Nothing
                          }
     d4 <- insert doctor4
 

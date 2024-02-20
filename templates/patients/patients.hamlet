@@ -4,7 +4,7 @@
     ^{menu}
 
     <h1.title-large>
-      _{MsgDoctors}
+      _{MsgPatients}
 
   $maybe Entity uid _ <- user
     <span style="position:relaive">
@@ -28,24 +28,35 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null doctors
+  $if null patients
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
       <figcaption.body-large>
-        _{MsgNoDoctorsYet}
+        _{MsgNoPatientsYet}
   $else
     <md-list>
-      $forall (Entity did (Doctor name _ email _ _),attrib) <- doctors
-        <md-list-item type=link href=@{DoctorR did}>
-          <img slot=start src=@{DoctorPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
-          <div slot=headline>#{name}
-          <div slot=supporting-text>#{email}
+      $forall (Entity pid (Patient _ _ since),(Entity uid (User email _ _ _ _ name _ _),attrib)) <- patients
+        <md-list-item type=link href=@{PatientR pid}>
+          <img slot=start src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
+          <div slot=headline>
+            $maybe name <- name
+              #{name}
+          <div slot=supporting-text>
+            #{email}
+          <div slot=supporting-text>
+            $with dt <- show since
+              _{MsgSinceDate}: <time datetime=#{dt}>#{dt}
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
             <div.app-attribution-wrapper.body-small>
               #{attrib}
         <md-divider>
+
+  $maybe Entity did _ <- doctor
+    <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+      <a href=@{PatientNewR did}>
+      <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

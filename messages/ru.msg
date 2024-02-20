@@ -1,3 +1,6 @@
+NoPatientsYet: У вас пока нет пациентов
+AccessDeniedDoctorsOnly: Доступ к этой странице имеют только врачи. Пожалуйста, войдите как врач
+Patients: Пациенты
 Chat: Chat
 Phone: Телефон
 InvalidRangeBoundaries: Неверные границы диапазона
@@ -152,7 +155,7 @@ UserRegistered: Пользователь зарегистрирован
 FullName: Full name
 Save: Сохранить
 Cancel: Отмена
-UserAccount: Учетная запись пользователя
+UserAccount: Учетная запись
 Photo: Фото
 Password: Пароль
 EmailAddress: Адрес электронной почты

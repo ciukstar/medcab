@@ -35,7 +35,7 @@
         _{MsgNoDoctorsYet}
   $else
     <md-list>
-      $forall (Entity did (Doctor name _ email _),attrib) <- doctors
+      $forall (Entity did (Doctor name _ email _ _),attrib) <- doctors
         <md-list-item type=link href=@{DataR $ MemberR did}>
           <img slot=start src=@{DataR $ StaffPhotoR did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
           <div slot=headline>#{name}

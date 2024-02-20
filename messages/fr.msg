@@ -1,3 +1,6 @@
+NoPatientsYet: Vous n'avez pas encore de patients
+AccessDeniedDoctorsOnly: Seuls les médecins ont accès à cette page. Veuillez vous connecter en tant que médecin
+Patients: Patients
 Chat: Chat
 Phone: Téléphone
 InvalidRangeBoundaries: Limites de plage non valides

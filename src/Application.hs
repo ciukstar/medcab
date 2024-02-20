@@ -29,6 +29,9 @@ import Database.Persist.Sqlite
       , connectionPoolConfigIdleTimeout, connectionPoolConfigSize
       )
     )
+
+import qualified Data.Map as M (empty)
+
 import Import
 import Language.Haskell.TH.Syntax ( qLocation )
 import Network.HTTP.Client.TLS ( getGlobalManager )
@@ -48,6 +51,10 @@ import System.Log.FastLogger
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
+
+import Handler.Patients
+    ( getPatientsR, getPatientR, getPatientNewR
+    )
 
 import Handler.Doctors
     ( getDoctorsR, getDoctorPhotoR, getDoctorR, getDoctorSpecialtiesR
@@ -120,8 +127,8 @@ import Handler.Users
     , getUserPhotoR, postUserR
     )
     
-import Chat ()
-import Chat.Data ( Chat(Chat) )
+import ChatRoom ()
+import ChatRoom.Data ( ChatRoom (ChatRoom) )
 import Demo.DemoEn (fillDemoEn)
 import Yesod.Auth.Email (saltPass)
 
@@ -144,7 +151,7 @@ makeFoundation appSettings = do
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
 
-    getChat <- Chat <$> atomically newBroadcastTChan
+    getChatRoom <- ChatRoom <$> newTVarIO M.empty
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
