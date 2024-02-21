@@ -1,5 +1,6 @@
 NoPatientsYet: У вас пока нет пациентов
 AccessDeniedDoctorsOnly: Доступ к этой странице имеют только врачи. Пожалуйста, войдите как врач
+Patient: Пациент
 Patients: Пациенты
 Chat: Chat
 Phone: Телефон
@@ -83,6 +84,7 @@ Details: Подробности
 Subspecialties: Специализации
 Tabs: Вкладки
 ConfirmPlease: Пожалуйста подтвердите
+RemoveAreYouSure: Вы уверены, что хотите удалить?
 DeleteAreYouSure: Вы уверены, что хотите удалить?
 ErDiagram: ER-диаграмма
 Name: Имя

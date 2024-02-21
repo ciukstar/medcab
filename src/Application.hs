@@ -53,7 +53,8 @@ import System.Log.FastLogger
 -- Don't forget to add new modules to your cabal file!
 
 import Handler.Patients
-    ( getPatientsR, getPatientR, getPatientNewR
+    ( getPatientsR, getPatientR, getPatientNewR, postPatientNewR
+    , postPatientRemoveR
     )
 
 import Handler.Doctors

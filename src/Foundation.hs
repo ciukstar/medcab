@@ -208,7 +208,7 @@ instance Yesod App where
     
     isAuthorized (DoctorChatR _) _ = isAuthenticated
 
-    
+    isAuthorized (PatientRemoveR _) _ = isDoctor
     isAuthorized (PatientNewR _) _ = isDoctor
     isAuthorized (PatientR _) _ = isDoctor
     isAuthorized r@PatientsR _ = setUltDest r >> isDoctor

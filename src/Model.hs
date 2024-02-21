@@ -22,7 +22,7 @@ import ClassyPrelude.Yesod
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
-import Data.Eq (Eq)
+import Data.Eq (Eq ((==)))
 import Data.Function ((.))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
@@ -105,6 +105,11 @@ instance PathMultiPiece Specialties where
 
     fromPathMultiPiece :: [Text] -> Maybe Specialties
     fromPathMultiPiece xs = Specialties <$> mapM ((toSqlKey <$>) . readMaybe . unpack) xs
+
+
+instance Eq User where
+    (==) :: User -> User -> Bool
+    a == b = userEmail a == userEmail b
 
 
 gmailSender :: Text

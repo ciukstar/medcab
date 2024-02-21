@@ -1,5 +1,6 @@
 NoPatientsYet: You don't have any patients yet
 AccessDeniedDoctorsOnly: Only doctors have access to this page. Please log in as doctor
+Patient: Patient
 Patients: Patients
 Chat: Chat
 Phone: Phone
@@ -83,6 +84,7 @@ Details: Details
 Subspecialties: Subspecialties
 Tabs: Tabs
 ConfirmPlease: Please confirm
+RemoveAreYouSure: Are you sure you want to remove?
 DeleteAreYouSure: Are you sure you want to delete?
 ErDiagram: ER Diagram
 Name: Name

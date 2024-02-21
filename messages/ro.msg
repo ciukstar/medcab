@@ -1,5 +1,6 @@
 NoPatientsYet: Nu aveți încă niciun pacient
 AccessDeniedDoctorsOnly: Doar medicii au acces la această pagină. Vă rugăm să vă conectați ca medic
+Patient: Pacient
 Patients: Pacienți
 Chat: Chat
 Phone: Telefon
@@ -83,6 +84,7 @@ Details: Detalii
 Subspecialties: Subspecialități
 Tabs: File
 ConfirmPlease: Vă rugăm să confirmați
+RemoveAreYouSure: Sigur doriți să eliminați?
 DeleteAreYouSure: Sigur doriți să ștergeți?
 ErDiagram: Diagrama ER
 Name: Nume

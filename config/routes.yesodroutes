@@ -1,9 +1,10 @@
 
 /chats        DoctorChatR ChatRoom getChatRoom
 
-/patients/#DoctorId/new PatientNewR GET
-/patients/#PatientId 	PatientR    GET
-/patients	     	PatientsR   GET
+/patients/#PatientId/remove PatientRemoveR POST
+/patients/#DoctorId/new     PatientNewR    GET POST
+/patients/#PatientId 	    PatientR       GET
+/patients	     	    PatientsR      GET
 
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
 /doctors/#DoctorId 	       DoctorR      	  GET

@@ -7,6 +7,8 @@ import '@material/web/chips/chip-set.js';
 import '@material/web/chips/assist-chip.js';
 import '@material/web/chips/filter-chip.js';
 
+import '@material/web/checkbox/checkbox.js';
+
 import '@material/web/dialog/dialog.js';
 import '@material/web/divider/divider.js';
 import '@material/web/elevation/elevation.js';

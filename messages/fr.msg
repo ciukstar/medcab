@@ -1,5 +1,6 @@
 NoPatientsYet: Vous n'avez pas encore de patients
 AccessDeniedDoctorsOnly: Seuls les médecins ont accès à cette page. Veuillez vous connecter en tant que médecin
+Patient: Patient
 Patients: Patients
 Chat: Chat
 Phone: Téléphone
@@ -83,7 +84,8 @@ Details: Détails
 Subspecialties: Sous-spécialités
 Tabs: Onglets
 ConfirmPlease: Veuillez confirmer
-DeleteAreYouSure: Etes-vous sûr que vous voulez supprimer?
+RemoveAreYouSure: Êtes-vous sûr de vouloir supprimer ?
+DeleteAreYouSure: Etes-vous sûr que vous voulez supprimer ?
 ErDiagram: Diagramme ER
 Name: Nom
 Code: Code

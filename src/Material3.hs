@@ -19,6 +19,8 @@ module Material3
   , md3dayField
   , md3timeField
   , md3datetimeLocalField
+  , md3checkboxesField
+  , md3checkboxesFieldList
   , tsep
   ) where
 
@@ -40,6 +42,7 @@ import Yesod.Form.Fields
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
     , FormMessage, doubleField, dayField, timeField, datetimeLocalField
+    , checkboxesFieldList, optionsPairs, multiSelectFieldList, multiSelectField
     )
 import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
@@ -50,6 +53,27 @@ import Yesod.Form.Types
 import Data.Time.Calendar (Day)
 import Data.Time (TimeOfDay, LocalTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
+
+
+md3checkboxesFieldList :: (Eq a, RenderMessage m msg) => [(msg,a)] -> Field (HandlerFor m) [a]
+md3checkboxesFieldList = md3checkboxesField . optionsPairs
+
+
+md3checkboxesField :: Eq a => HandlerFor m (OptionList a) -> Field (HandlerFor m) [a]
+md3checkboxesField ioptlist = (multiSelectField ioptlist)
+    { fieldView = \theId name attrs val _idReq -> do
+          opts <- olOptions <$> handlerToWidget ioptlist
+          let optselected (Left _) _ = False
+              optselected (Right vals) opt = optionInternalValue opt `elem` vals
+          [whamlet|
+            <span ##{theId}>
+              $forall opt <- opts
+                <label>
+                  <md-checkbox touch-target=wrapper
+                    name=#{name} value=#{optionExternalValue opt} *{attrs} :optselected val opt:checked>
+                  #{optionDisplay opt}
+          |]
+    }
 
 
 md3switchField :: Monad m => Field m Bool
