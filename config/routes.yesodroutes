@@ -1,14 +1,19 @@
 
-/chats        DoctorChatR ChatRoom getChatRoom
+/chats DoctorChatR ChatRoom getChatRoom
 
-/patients/#PatientId/remove PatientRemoveR POST
-/patients/#DoctorId/new     PatientNewR    GET POST
-/patients/#PatientId 	    PatientR       GET
-/patients	     	    PatientsR      GET
+/patients/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR GET
+/patients/#UserId/doctors/#DoctorId 	        MyDoctorR	     GET
+/patients/#UserId/doctors/#DoctorId/photo       MyDoctorPhotoR 	     GET
+/patients/#UserId/doctors 			MyDoctorsR	     GET
+
+/doctors/#DoctorId/patients/#PatientId/remove MyPatientRemoveR POST
+/form/doctors/#DoctorId/patients/new          MyPatientNewR    GET
+/doctors/#DoctorId/patients/#PatientId 	      MyPatientR       GET
+/doctors/#DoctorId/patients            	      MyPatientsR      GET POST
 
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
 /doctors/#DoctorId 	       DoctorR      	  GET
-/doctors/#DoctorId/poto        DoctorPhotoR 	  GET
+/doctors/#DoctorId/photo       DoctorPhotoR 	  GET
 /doctors 		       DoctorsR     	  GET
 
 /users/#UserId/records/#RecordId/measurements/#MeasurementId/dele RecordMeasurementDeleR POST

@@ -208,10 +208,15 @@ instance Yesod App where
     
     isAuthorized (DoctorChatR _) _ = isAuthenticated
 
-    isAuthorized (PatientRemoveR _) _ = isDoctor
-    isAuthorized (PatientNewR _) _ = isDoctor
-    isAuthorized (PatientR _) _ = isDoctor
-    isAuthorized r@PatientsR _ = setUltDest r >> isDoctor
+    isAuthorized (MyDoctorSpecialtiesR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyDoctorR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
+    
+    isAuthorized (MyPatientRemoveR did _) _ = isDoctorSelf did
+    isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
+    isAuthorized (MyPatientR did _) _ = isDoctorSelf did
+    isAuthorized r@(MyPatientsR did) _ = setUltDest r >> isDoctorSelf did
     
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated
@@ -905,6 +910,22 @@ isDoctor = do
             case doctor of
               Just _ -> return Authorized
               Nothing -> unauthorizedI MsgAccessDeniedDoctorsOnly
+        Nothing -> unauthorizedI MsgLoginPlease
+
+
+isDoctorSelf :: DoctorId -> Handler AuthResult
+isDoctorSelf did = do
+    user <- maybeAuth
+    case user of
+        Just (Entity uid _) -> do
+            doctor <- runDB $ selectOne $ do
+                x <- from $ table @Doctor
+                where_ $ x ^. DoctorUser E.==. just (val uid)
+                return x
+            case doctor of
+              Just (Entity did' _) | did' == did -> return Authorized
+                                   | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
+              Nothing -> unauthorizedI MsgAccessDeniedDoctorsOnly 
         Nothing -> unauthorizedI MsgLoginPlease
 
 

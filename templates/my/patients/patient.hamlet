@@ -1,6 +1,6 @@
 <header.app-top-app-bar.background>
   <div #headerStart>
-    <md-icon-button href=@{PatientsR} aria-label=_{MsgBack}>
+    <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
     <h1.title-large>
@@ -19,7 +19,7 @@
   <div slot=actions>
     <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
       _{MsgCancel}
-    <form slot=content method=post action=@{PatientRemoveR pid} enctype=#{et}>
+    <form slot=content method=post action=@{MyPatientRemoveR did pid} enctype=#{et}>
       ^{fw}
       <md-filled-button type=submit>
         _{MsgRemove}

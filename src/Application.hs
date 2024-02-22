@@ -52,9 +52,12 @@ import System.Log.FastLogger
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
-import Handler.Patients
-    ( getPatientsR, getPatientR, getPatientNewR, postPatientNewR
-    , postPatientRemoveR
+import Handler.MyDoctors
+    ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR )
+
+import Handler.MyPatients
+    ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
+    , postMyPatientRemoveR
     )
 
 import Handler.Doctors

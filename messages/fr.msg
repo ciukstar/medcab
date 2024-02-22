@@ -1,3 +1,4 @@
+AccessDeniedPatiensOnly: Seuls les patients ont accès à cette page. Veuillez vous connecter en tant que patient
 NoPatientsYet: Vous n'avez pas encore de patients
 AccessDeniedDoctorsOnly: Seuls les médecins ont accès à cette page. Veuillez vous connecter en tant que médecin
 Patient: Patient

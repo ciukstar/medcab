@@ -4,12 +4,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Handler.Patients
-  ( getPatientsR
-  , getPatientR
-  , getPatientNewR
-  , postPatientNewR
-  , postPatientRemoveR
+module Handler.MyPatients
+  ( getMyPatientsR
+  , getMyPatientR
+  , getMyPatientNewR
+  , postMyPatientsR
+  , postMyPatientRemoveR
   ) where
 
 import Control.Monad (join, forM_)
@@ -28,8 +28,8 @@ import Database.Persist (Entity (Entity), PersistStoreWrite (insert_, delete))
 import Foundation
     ( Handler, Form, App
     , Route
-      ( AuthR, AccountPhotoR, PatientR, AccountR, PatientNewR, PatientsR
-      , PatientRemoveR
+      ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
+      , MyPatientRemoveR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
@@ -47,7 +47,7 @@ import Model
     , DoctorId, Doctor
     , EntityField
       ( PatientUser, UserId, PatientDoctor, DoctorUser, UserPhotoUser, PatientId
-      , UserPhotoAttribution, UserSuperuser
+      , UserPhotoAttribution, UserSuperuser, DoctorId
       )
     , PatientId, Patient(Patient)
     )
@@ -72,21 +72,21 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 
 
-postPatientRemoveR :: PatientId -> Handler Html
-postPatientRemoveR pid = do
+postMyPatientRemoveR :: DoctorId -> PatientId -> Handler Html
+postMyPatientRemoveR did pid = do
     ((fr,_),_) <- runFormPost formPatientRemove
     case fr of
       FormSuccess () -> do
           runDB $ delete pid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect PatientsR
+          redirect $ MyPatientsR did
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
-          redirect $ PatientR pid
+          redirect $ MyPatientR did pid
 
 
-postPatientNewR :: DoctorId -> Handler Html
-postPatientNewR did = do
+postMyPatientsR :: DoctorId -> Handler Html
+postMyPatientsR did = do
 
     patients <- runDB $ select $ do
         x <- from $ table @User
@@ -101,15 +101,15 @@ postPatientNewR did = do
       FormSuccess r -> do
           forM_ r $ \x -> runDB $ insert_ x
           addMessageI statusSuccess MsgRecordCreated
-          redirect PatientsR
+          redirect $ MyPatientsR did
       _otherwise -> defaultLayout $ do
           msgs <- getMessages
           setTitleI MsgPatients
-          $(widgetFile "patients/new")
+          $(widgetFile "my/patients/new")
 
 
-getPatientNewR :: DoctorId -> Handler Html
-getPatientNewR did = do
+getMyPatientNewR :: DoctorId -> Handler Html
+getMyPatientNewR did = do
 
     patients <- runDB $ select $ do
         x <- from $ table @User
@@ -124,7 +124,7 @@ getPatientNewR did = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgPatients
-        $(widgetFile "patients/new")
+        $(widgetFile "my/patients/new")
 
 
 formPatients :: DoctorId -> [Entity User] -> Form [Patient]
@@ -135,7 +135,7 @@ formPatients did options extra = do
     (usersR,usersV) <- mreq (usersFieldList (option <$> options)) "" Nothing
 
     let r = (<*>) <$> ((<*>) . (Patient <$>) <$> ((entityKey <$>) <$> usersR) <*> pure (pure did)) <*> pure (pure now)
-    let w = $(widgetFile "patients/form")
+    let w = $(widgetFile "my/patients/form")
     return (r,w)
   where
       option e@(Entity _ (User email _ _ _ _ _ _ _)) = (email,e)
@@ -168,8 +168,8 @@ formPatients did options extra = do
           }
 
 
-getPatientR :: PatientId -> Handler Html
-getPatientR pid = do
+getMyPatientR :: DoctorId -> PatientId -> Handler Html
+getMyPatientR did pid = do
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -181,35 +181,31 @@ getPatientR pid = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgPatient
-        $(widgetFile "patients/patient")
+        $(widgetFile "my/patients/patient")
 
 
 formPatientRemove :: Form ()
 formPatientRemove extra = return (pure (), [whamlet|#{extra}|])
 
 
-getPatientsR :: Handler Html
-getPatientsR = do
+getMyPatientsR :: DoctorId -> Handler Html
+getMyPatientsR did = do
     user <- maybeAuth
 
-    doctor <- case user of
-      Just (Entity uid _) -> runDB $ selectOne $ do
+    doctor <- runDB $ selectOne $ do
         x <- from $ table @Doctor
-        where_ $ x ^. DoctorUser ==. just (val uid)
+        where_ $ x ^. DoctorId ==. val did
         return x
-      Nothing -> return Nothing
 
-    patients <- (second (second (join . unValue)) <$>) <$> case doctor of
-      Just (Entity did _) -> runDB $ select $ do
-          x :& u :& h <- from $ table @Patient
-              `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
-              `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
-          where_ $ x ^. PatientDoctor ==. val did
-          return (x,(u,h ?. UserPhotoAttribution))
-      Nothing -> return []
+    patients <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& u :& h <- from $ table @Patient
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+        where_ $ x ^. PatientDoctor ==. val did
+        return (x,(u,h ?. UserPhotoAttribution)) )
 
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgPatients
         idFabAdd <- newIdent
-        $(widgetFile "patients/patients")
+        $(widgetFile "my/patients/patients")

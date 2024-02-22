@@ -1,3 +1,4 @@
+AccessDeniedPatiensOnly: Only patients have access to this page. Please log in as patient
 NoPatientsYet: You don't have any patients yet
 AccessDeniedDoctorsOnly: Only doctors have access to this page. Please log in as doctor
 Patient: Patient

@@ -42,7 +42,7 @@ import Yesod.Form.Fields
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
     , FormMessage, doubleField, dayField, timeField, datetimeLocalField
-    , checkboxesFieldList, optionsPairs, multiSelectFieldList, multiSelectField
+    , optionsPairs, multiSelectField
     )
 import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types

@@ -1,0 +1,80 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgDoctor}
+
+  <div #headerEnd>
+
+
+<main>
+
+  $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
+
+    <figure>
+      <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
+
+    <md-tabs aria-label=_{MsgTabs}
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR uid did}' : '@{MyDoctorSpecialtiesR uid did}'">
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+        _{MsgDetails}
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
+        _{MsgSpecializations}
+
+    <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
+      <dl>
+        <dt.label-large scope=row>_{MsgFullName}
+        <dd.body-medium>#{name}
+
+        <dt.label-large scope=row>_{MsgMobile}
+        <dd>
+          <md-text-button type=link href="tel:#{mobile}" trailing-icon>
+            #{mobile}
+            <md-icon slot=icon>smartphone
+
+        $maybe phone <- phone 
+          <dt.label-large scope=row>_{MsgPhone}
+          <dd>
+            <md-text-button type=link href="tel:#{phone}" trailing-icon>
+              #{phone}
+              <md-icon slot=icon>phone
+
+        <dt.label-large scope=row>_{MsgEmailAddress}
+        <dd.body-medium>
+          <a href="mailto:#{email}">#{email}
+
+      <div #actions>
+          
+        <md-filled-tonal-button #idButtonChat type=link href=@{DoctorChatR $ ChatRoomR did}>
+          <md-icon slot=icon>Chat
+          _{MsgChat}
+          
+        <md-filled-tonal-button #idButtonVideoCall type=button>
+          <md-icon slot=icon>video_call
+          _{MsgVideoCall}
+
+        <md-filled-tonal-button type=button>
+          <md-icon slot=icon>call
+          _{MsgAudioCall}
+
+        <md-filled-tonal-button type=button>
+          <md-icon slot=icon>book_online
+          _{MsgBookAppointment}
+
+    <md-dialog #idDialogVideo fullscreen>
+      <div slot=headline>Video
+      <div slot=content>
+        <video controls autoplay muted #selfview width=250 height=150>
+        <video controls autoplay #remoteview width=250 height=150>
+      <div slot=actions>
+        <md-text-button type=button onclick="document.getElementById('idDialogVideo').open = false">
+          Close
+
+    <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
