@@ -28,15 +28,15 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null doctors
+  $if null patients
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
       <figcaption.body-large>
         _{MsgNoDoctorsYet}
   $else
     <md-list>
-      $forall (Entity did (Doctor name _ email _ _),attrib) <- doctors
-        <md-list-item type=link href=@{MyDoctorR uid did}>
+      $forall (Entity pid _,(Entity did (Doctor name _ email _ _),attrib)) <- patients
+        <md-list-item type=link href=@{MyDoctorR pid uid did}>
           <img slot=start src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
           <div slot=headline>#{name}
           <div slot=supporting-text>#{email}

@@ -9,27 +9,40 @@
 {-# LANGUAGE InstanceSigs #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
-
-import ChatRoom.Data (ChatRoom (ChatRoom), resourcesChatRoom, Route (ChatRoomR))
+import ChatRoom.Data
+    ( ChatRoom (ChatRoom), resourcesChatRoom
+    , Route (DoctorChatRoomR, PatientChatRoomR)
+    )
+    
 import Conduit ((.|), mapM_C, runConduit)
+
 import Control.Monad (forever)
-import Control.Concurrent.STM.TChan (writeTChan, dupTChan, readTChan, newBroadcastTChan)
+import Control.Concurrent.STM.TChan
+    ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val
-    , (^.), (==.)
+    ( selectOne, from, table, where_, val, innerJoin, on
+    , (^.), (==.), (:&) ((:&)), just
     )
-import Database.Persist (Entity (Entity))
+import Database.Persist (Entity (Entity), entityVal)
+import Database.Persist.Sql (fromSqlKey)
 
+import Data.Maybe (fromMaybe)
 import qualified Data.Map as M (lookup, insert, alter)
-import Data.Text (Text)
+import Data.Text (pack)
 
 import Foundation
-    ( App, Route (DoctorR, DoctorPhotoR)
-    , AppMessage(MsgBack, MsgChat, MsgPhoto)
+    ( App, Route (MyDoctorR, DoctorPhotoR, MyPatientR, AccountPhotoR)
+    , AppMessage(MsgBack, MsgChat, MsgPhoto, MsgMessage)
     )
 
-import Model (DoctorId, Doctor (Doctor), EntityField (DoctorId))
+import Model
+    ( AvatarColor (AvatarColorDark)
+    , Doctor (Doctor), PatientId, Patient, User (userEmail, userName)
+    , EntityField
+      ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
+      )
+    )
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
@@ -41,6 +54,7 @@ import Yesod
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
     , getSubYesod, setTitleI, Application
     )
+import Yesod.Auth (maybeAuth)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Persist (YesodPersist(runDB))
 import Yesod.WebSockets
@@ -54,17 +68,15 @@ userJoinedChannel (Just (writeCan,numUsers)) = Just (writeCan,numUsers + 1)
 
 cleanupChannel :: (Eq a1, Num a1) => Maybe (a2,a1) -> Maybe (a2,a1)
 cleanupChannel Nothing = Nothing
-cleanupChannel (Just (writeChan, 1)) = Nothing
+cleanupChannel (Just (_writeChan, 1)) = Nothing
 cleanupChannel (Just c) = Just c
 
 
-chatApp :: WebSocketsT (SubHandlerFor ChatRoom mater) ()
-chatApp = do
-    sendTextData ("Welcome to the chat server, please enter your name." :: Text)
-    name <- receiveData
+chatApp :: PatientId -> Entity User -> Entity User -> WebSocketsT (SubHandlerFor ChatRoom mater) ()
+chatApp pid user interlocutor = do
+    let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user) 
     
-    sendTextData $ "Welcome, " <> name <> ". Plsease enter your cannel ID"
-    channelId <- receiveData
+    let channelId = pack $ show $ fromSqlKey pid
     sendTextData $  name <> " just joined " <> channelId
 
     ChatRoom channelMapTVar <- getSubYesod
@@ -98,18 +110,48 @@ chatApp = do
       Right () -> return ()
     
 
-getChatRoomR :: DoctorId -> SubHandlerFor ChatRoom App Html
-getChatRoomR did = do
+getDoctorChatRoomR :: PatientId -> SubHandlerFor ChatRoom App Html
+getDoctorChatRoomR pid = do
 
-    doctor <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @Doctor
-        where_ $ x ^. DoctorId ==. val did
-        return x
+    user <- maybeAuth
     
-    webSockets chatApp
+    patient <- liftHandler $ runDB $ selectOne $ do
+        x :& u :& d :& l <- from $ table @Patient
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
+            `innerJoin` table @Doctor `on` (\(x :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
+            `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
+        where_ $ x ^. PatientId ==. val pid
+        return (x,u,l,d)
+        
+    case (user,patient) of
+      (Just u, Just (_,_,iterlocutor,_)) -> webSockets (chatApp pid u iterlocutor)
+      _ -> return ()
+      
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
-        $(widgetFile "doctors/chat/chat")
+        $(widgetFile "my/doctors/chat/chat")
+    
+
+getPatientChatRoomR :: PatientId -> SubHandlerFor ChatRoom App Html
+getPatientChatRoomR pid = do
+
+    user <- maybeAuth
+    
+    patient <- liftHandler $ runDB $ selectOne $ do
+        x :& u :& d :& l <- from $ table @Patient
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
+            `innerJoin` table @Doctor `on` (\(x :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
+            `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
+        where_ $ x ^. PatientId ==. val pid
+        return (x,u,l,d)
+        
+    case (user,patient) of
+      (Just u, Just (_,iterlocutor,_,_)) -> webSockets (chatApp pid u iterlocutor)
+      _ -> return ()
+      
+    liftHandler $ defaultLayout $ do
+        setTitleI MsgChat
+        $(widgetFile "my/patients/chat/chat")
 
 
 

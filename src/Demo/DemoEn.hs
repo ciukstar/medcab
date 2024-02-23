@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Reader (ReaderT)
 
 import Data.FileEmbed (embedFile)
-import Data.Time (utcToLocalTime, addLocalTime, nominalDay, getCurrentTimeZone)
+import Data.Time (utcToLocalTime, addLocalTime, nominalDay, getCurrentTimeZone, addDays, addUTCTime)
 import Data.Time.Calendar (addGregorianYearsClip)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 import Data.Time.LocalTime (localDay, localTimeOfDay)
@@ -49,7 +49,7 @@ import Model
     , Normal
       ( Normal, normalName, normalLowerBound, normalUpperBound, normalUnit
       , normalSign
-      )
+      ), Patient (Patient, patientUser, patientDoctor, patientSince)
     )
 
 import Text.Hamlet (shamlet)
@@ -586,6 +586,34 @@ fillDemoEn = do
 
     let twoDaysBefore = addLocalTime ((-2) * nominalDay) localNow
 
+    let patient11 = Patient { patientUser = usr1
+                            , patientDoctor = d1
+                            , patientSince = addUTCTime ((-7) * nominalDay) now
+                            }
+
+    insert_ patient11
+
+    let patient12 = Patient { patientUser = usr1
+                            , patientDoctor = d2
+                            , patientSince = addUTCTime ((-6) * nominalDay) now
+                            }
+
+    insert_ patient12
+
+    let patient21 = Patient { patientUser = usr2
+                            , patientDoctor = d1
+                            , patientSince = addUTCTime ((-3) * nominalDay) now
+                            }
+
+    insert_ patient21
+
+    let patient22 = Patient { patientUser = usr2
+                            , patientDoctor = d2
+                            , patientSince = addUTCTime ((-2) * nominalDay) now
+                            }
+
+    insert_ patient22
+    
     let record121 = Record { recordUser = usr1
                            , recordSign = sgn2
                            , recordDay = localDay twoDaysBefore

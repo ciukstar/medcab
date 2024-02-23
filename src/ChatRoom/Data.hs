@@ -15,14 +15,16 @@ import Control.Concurrent.STM.TVar (TVar)
 import qualified Data.Map as M
 import Data.Text (Text)
 
+import Model (PatientId)
+
 import Yesod.Core (renderRoute)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
-import Model (DoctorId)
 
 
 newtype ChatRoom = ChatRoom (TVar (M.Map Text (TChan Text, Int)))
 
 mkYesodSubData "ChatRoom" [parseRoutes|
-/#DoctorId/chat ChatRoomR GET
+/#PatientId/doctor/chat  DoctorChatRoomR  GET
+/#PatientId/patient/chat PatientChatRoomR GET
 |]
 

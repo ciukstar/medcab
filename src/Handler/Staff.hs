@@ -411,7 +411,7 @@ formDoctor doctor extra = do
     (phoneR,phoneV) <- md3mopt md3telField FieldSettings
         { fsLabel = SomeMessage MsgPhone
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label",rndr MsgMobile)]
+        , fsAttrs = [("label",rndr MsgPhone)]
         } (doctorPhone . entityVal <$> doctor)
 
     users <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( select $ do

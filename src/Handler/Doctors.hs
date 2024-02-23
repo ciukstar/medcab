@@ -24,7 +24,7 @@ import Foundation
     ( Handler
     , Route
       ( AuthR, AccountR, AccountPhotoR, DoctorPhotoR, StaticR, DoctorR, DoctorsR
-      , DoctorSpecialtiesR, DoctorChatR
+      , DoctorSpecialtiesR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
@@ -34,8 +34,6 @@ import Foundation
       , MsgPhone, MsgChat
       )
     )
-
-import ChatRoom.Data ( Route(ChatRoomR) )
 
 import Menu (menu)
 import Model
@@ -95,7 +93,6 @@ getDoctorR did = do
         setTitleI MsgDoctor
         idPanelDetails <- newIdent
         $(widgetFile "doctors/doctor")
-
 
 
 getDoctorsR :: Handler Html

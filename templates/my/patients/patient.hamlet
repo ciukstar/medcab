@@ -62,7 +62,7 @@
 
       <div #actions>
           
-        <md-filled-tonal-button type=button>
+        <md-filled-tonal-button  type=link href=@{ChatR $ PatientChatRoomR pid}>
           <md-icon slot=icon>Chat
           _{MsgChat}
           

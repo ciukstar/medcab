@@ -20,7 +20,7 @@
         _{MsgPhoto}
 
   <md-tabs aria-label=_{MsgTabs}
-    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR uid did}' : '@{MyDoctorSpecialtiesR uid did}'">
+    onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR pid uid did}' : '@{MyDoctorSpecialtiesR pid uid did}'">
     <md-primary-tab #tabDetails aria-controls=panelDetails>
       _{MsgDetails}
     <md-primary-tab #tabSpecialties aria-controls=#{idPanelSpecialties} active=true>

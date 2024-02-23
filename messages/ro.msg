@@ -1,3 +1,4 @@
+Message: Mesaj
 AccessDeniedPatiensOnly: Doar pacienții au acces la această pagină. Vă rugăm să vă conectați ca pacient
 NoPatientsYet: Nu aveți încă niciun pacient
 AccessDeniedDoctorsOnly: Doar medicii au acces la această pagină. Vă rugăm să vă conectați ca medic

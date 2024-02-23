@@ -1,8 +1,8 @@
 
-/chats DoctorChatR ChatRoom getChatRoom
+/channels ChatR ChatRoom getChatRoom
 
-/patients/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR GET
-/patients/#UserId/doctors/#DoctorId 	        MyDoctorR	     GET
+/patients/#PatientId/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR GET
+/patients/#PatientId/#UserId/doctors/#DoctorId/dotor 	        MyDoctorR	     GET
 /patients/#UserId/doctors/#DoctorId/photo       MyDoctorPhotoR 	     GET
 /patients/#UserId/doctors 			MyDoctorsR	     GET
 

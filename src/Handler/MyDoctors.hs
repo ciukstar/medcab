@@ -8,6 +8,8 @@ module Handler.MyDoctors
   , getMyDoctorSpecialtiesR
   ) where
 
+import ChatRoom.Data ( Route(DoctorChatRoomR) )
+
 import Control.Monad (join)
 
 import Data.Bifunctor (Bifunctor(second))
@@ -16,7 +18,7 @@ import Data.Text.Encoding (encodeUtf8)
 import Database.Esqueleto.Experimental
     (select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), val, innerJoin, exists
+    , Value (unValue), val, innerJoin
     )
 import Database.Persist (Entity (Entity))
 
@@ -24,7 +26,7 @@ import Foundation
     ( Handler
     , Route
       ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, MyDoctorR, MyDoctorsR
-      , MyDoctorSpecialtiesR, DoctorChatR
+      , MyDoctorSpecialtiesR, ChatR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
@@ -35,18 +37,16 @@ import Foundation
       )
     )
 
-import ChatRoom.Data ( Route(ChatRoomR) )
-
 import Menu (menu)
 import Model
     ( statusError, AvatarColor (AvatarColorLight)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
-      , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientId, PatientUser
+      , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser
       )
     , Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId
     , Specialist (Specialist), Specialty (Specialty)
-    , PatientId, Patient (Patient), UserId
+    , PatientId, Patient, UserId
     )
 
 import Settings (widgetFile)
@@ -63,8 +63,8 @@ import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist.Core (YesodPersist(runDB))
 
 
-getMyDoctorSpecialtiesR :: UserId -> DoctorId -> Handler Html
-getMyDoctorSpecialtiesR uid did = do
+getMyDoctorSpecialtiesR :: PatientId -> UserId -> DoctorId -> Handler Html
+getMyDoctorSpecialtiesR pid uid did = do
 
     attrib <- (unValue =<<) <$> runDB ( selectOne $ do
         x <- from $ table @DoctorPhoto
@@ -83,8 +83,8 @@ getMyDoctorSpecialtiesR uid did = do
         $(widgetFile "my/doctors/specialties")
 
 
-getMyDoctorR :: UserId -> DoctorId -> Handler Html
-getMyDoctorR uid did = do
+getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
+getMyDoctorR pid uid did = do
 
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor
@@ -104,15 +104,13 @@ getMyDoctorsR uid = do
     
     user <- maybeAuth
 
-    doctors <- (second (join . unValue) <$>) <$> runDB ( select $ do
-        x :& h <- from $ table @Doctor
-            `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
-        where_ $ exists $ do
-            y <- from $ table @Patient
-            where_ $ y ^. PatientDoctor ==. x ^. DoctorId
-            where_ $ y ^. PatientUser ==. val uid
-        orderBy [desc (x ^. DoctorId)]
-        return (x, h ?. DoctorPhotoAttribution) )
+    patients <- (second ( second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& d :& h <- from $ table @Patient
+            `innerJoin` table @Doctor `on` (\(x :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
+            `leftJoin` table @DoctorPhoto `on` (\(_ :& d :& h) -> just (d ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+        where_ $ x ^. PatientUser ==. val uid
+        orderBy [desc (d ^. DoctorId)]
+        return (x,(d, h ?. DoctorPhotoAttribution)) )
 
     msgs <- getMessages
     defaultLayout $ do

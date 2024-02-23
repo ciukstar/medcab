@@ -206,10 +206,10 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
     
-    isAuthorized (DoctorChatR _) _ = isAuthenticated
+    isAuthorized (ChatR _) _ = isAuthenticated
 
-    isAuthorized (MyDoctorSpecialtiesR uid _) _ = isAuthenticatedSelf uid
-    isAuthorized (MyDoctorR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
     

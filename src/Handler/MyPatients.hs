@@ -12,6 +12,9 @@ module Handler.MyPatients
   , postMyPatientRemoveR
   ) where
 
+
+import ChatRoom.Data ( Route(PatientChatRoomR) )
+
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
@@ -29,7 +32,7 @@ import Foundation
     ( Handler, Form, App
     , Route
       ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR
+      , MyPatientRemoveR, ChatR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
@@ -44,12 +47,11 @@ import Menu (menu)
 import Model
     ( statusError, statusSuccess, AvatarColor (AvatarColorLight, AvatarColorDark)
     , User (User, userName), UserPhoto
-    , DoctorId, Doctor
+    , DoctorId, Doctor, PatientId, Patient(Patient)
     , EntityField
-      ( PatientUser, UserId, PatientDoctor, DoctorUser, UserPhotoUser, PatientId
+      ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId
       )
-    , PatientId, Patient(Patient)
     )
 
 import Settings (widgetFile)

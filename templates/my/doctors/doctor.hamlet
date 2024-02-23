@@ -22,7 +22,7 @@
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}
-      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR uid did}' : '@{MyDoctorSpecialtiesR uid did}'">
+      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR pid uid did}' : '@{MyDoctorSpecialtiesR pid uid did}'">
       <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
         _{MsgDetails}
       <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
@@ -51,8 +51,7 @@
           <a href="mailto:#{email}">#{email}
 
       <div #actions>
-          
-        <md-filled-tonal-button #idButtonChat type=link href=@{DoctorChatR $ ChatRoomR did}>
+        <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid}>
           <md-icon slot=icon>Chat
           _{MsgChat}
           

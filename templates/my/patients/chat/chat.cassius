@@ -26,13 +26,11 @@ header
             clip-path: circle(50%)
 
 main
-    height: 1000px
     display: flex
     flex-direction: column
     margin: 1rem
-    
     #output
-        border: none
+        border: 1px solid black
         margin-bottom: 1em
 
         p
