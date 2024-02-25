@@ -27,6 +27,7 @@ import Database.Esqueleto.Experimental
     , leftJoin, Value (unValue), not_, exists, Entity (entityKey, entityVal)
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert_, delete))
+import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler, Form, App
@@ -46,7 +47,7 @@ import Foundation
 import Menu (menu)
 import Model
     ( statusError, statusSuccess, AvatarColor (AvatarColorLight, AvatarColorDark)
-    , User (User, userName), UserPhoto
+    , UserId, User (User, userName), UserPhoto
     , DoctorId, Doctor, PatientId, Patient(Patient)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
@@ -74,8 +75,8 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 
 
-postMyPatientRemoveR :: DoctorId -> PatientId -> Handler Html
-postMyPatientRemoveR did pid = do
+postMyPatientRemoveR :: UserId -> DoctorId -> PatientId -> Handler Html
+postMyPatientRemoveR uid did pid = do
     ((fr,_),_) <- runFormPost formPatientRemove
     case fr of
       FormSuccess () -> do
@@ -84,7 +85,7 @@ postMyPatientRemoveR did pid = do
           redirect $ MyPatientsR did
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
-          redirect $ MyPatientR did pid
+          redirect $ MyPatientR uid did pid
 
 
 postMyPatientsR :: DoctorId -> Handler Html
@@ -157,7 +158,7 @@ formPatients did options extra = do
                     <md-list-item type=button onclick="this.querySelector('md-checkbox').click()">
                       <img slot=start src=@{AccountPhotoR (entityKey $ optionInternalValue opt) AvatarColorDark}
                         width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-                        
+
                       <div slot=headline>
                         $maybe name <- userName $ entityVal $ optionInternalValue opt
                           #{name}
@@ -170,8 +171,8 @@ formPatients did options extra = do
           }
 
 
-getMyPatientR :: DoctorId -> PatientId -> Handler Html
-getMyPatientR did pid = do
+getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
+getMyPatientR uid did pid = do
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)

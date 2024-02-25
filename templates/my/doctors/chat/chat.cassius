@@ -26,25 +26,56 @@ header
             clip-path: circle(50%)
 
 main
+
     height: 1000px
     display: flex
     flex-direction: column
     margin: 1rem
     
-    #output
-        border: none
-        margin-bottom: 1em
+    ##{idChatOutput}
+        display: flex
+        flex-direction: column
+        .bubble
+            --md-elevation-level: 1
+            padding: 1rem
+            position: relative
+            background-color: var(--md-sys-color-primary-container)
+            border: 0
 
-        p
-            margin: 0 0 0.5em 0
-            padding: 0 0 0.5em 0
-            border-bottom: 1px dashed #99aa99
-    form
+        p.bubble.right
+            border-radius: 8px 0 8px 8px
+            place-self: end
+        p.bubble.right::after
+          content: ''
+          background-color: var(--md-sys-color-primary-container)
+          position: absolute
+          top: 0
+          right: -8px
+          width: 8px
+          height: 13px
+          clip-path: polygon(0 0,100% 0,0 100%)
+          
+        p.bubble.left
+            border-radius: 0 8px 8px 8px
+            place-self: start
+        p.bubble.left::before
+          content: ''
+          background-color: var(--md-sys-color-primary-container)
+          position: absolute
+          top: 0
+          left: -8px
+          width: 8px
+          height: 13px
+          clip-path: polygon(0 0,100% 0,100% 100%)
+            
+    ##{idMessageForm}
+    
         position: fixed
         bottom: 1rem
         display: flex
         flex-direction: row
         align-items: center
         gap: 1rem
-        #input
+        
+        ##{idMessageInput}
             flex-grow: 1

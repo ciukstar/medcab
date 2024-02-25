@@ -34,24 +34,25 @@
       <figcaption.body-large>
         _{MsgNoPatientsYet}
   $else
-    <md-list>
-      $forall (Entity pid (Patient _ did since),(Entity uid (User email _ _ _ _ name _ _),attrib)) <- patients
-        <md-list-item type=link href=@{MyPatientR did pid}>
-          <img slot=start src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
-          <div slot=headline>
-            $maybe name <- name
-              #{name}
-          <div slot=supporting-text>
-            #{email}
-          <div slot=supporting-text>
-            $with dt <- show since
-              _{MsgSinceDate}: <time datetime=#{dt}>#{dt}
-          <md-icon slot=end>arrow_forward_ios
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
-              #{attrib}
-        <md-divider>
+    $maybe Entity uid _ <- user
+      <md-list>
+        $forall (Entity pid (Patient _ did since),(Entity iid (User email _ _ _ _ name _ _),attrib)) <- patients
+          <md-list-item type=link href=@{MyPatientR uid did pid}>
+            <img slot=start src=@{AccountPhotoR iid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
+            <div slot=headline>
+              $maybe name <- name
+                #{name}
+            <div slot=supporting-text>
+              #{email}
+            <div slot=supporting-text>
+              $with dt <- show since
+                _{MsgSinceDate}: <time datetime=#{dt}>#{dt}
+            <md-icon slot=end>arrow_forward_ios
+          $maybe attrib <- attrib
+            <div.app-attribution>
+              <div.app-attribution-wrapper.body-small>
+                #{attrib}
+          <md-divider>
 
   $maybe Entity did _ <- doctor
     <md-fab aria-label=_{MsgEdit} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">

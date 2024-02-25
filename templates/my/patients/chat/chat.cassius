@@ -26,23 +26,25 @@ header
             clip-path: circle(50%)
 
 main
+
+    height: 1000px
     display: flex
     flex-direction: column
     margin: 1rem
-    #output
-        border: 1px solid black
-        margin-bottom: 1em
-
-        p
-            margin: 0 0 0.5em 0
-            padding: 0 0 0.5em 0
-            border-bottom: 1px dashed #99aa99
-    form
+    
+    ##{idChatOutput}
+        p.interlocutor
+            text-align: left
+        p.user
+            text-align: right
+    ##{idMessageForm}
+    
         position: fixed
         bottom: 1rem
         display: flex
         flex-direction: row
         align-items: center
         gap: 1rem
-        #input
+        
+        ##{idMessageInput}
             flex-grow: 1

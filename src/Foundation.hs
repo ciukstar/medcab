@@ -213,9 +213,9 @@ instance Yesod App where
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
     
-    isAuthorized (MyPatientRemoveR did _) _ = isDoctorSelf did
+    isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
-    isAuthorized (MyPatientR did _) _ = isDoctorSelf did
+    isAuthorized (MyPatientR _ did _) _ = isDoctorSelf did
     isAuthorized r@(MyPatientsR did) _ = setUltDest r >> isDoctorSelf did
     
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated

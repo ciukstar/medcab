@@ -21,6 +21,7 @@ import Database.Esqueleto.Experimental
     , Value (unValue), val, innerJoin
     )
 import Database.Persist (Entity (Entity))
+import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler

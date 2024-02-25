@@ -27,9 +27,12 @@ import Database.Esqueleto.Experimental
 import Database.Persist (Entity (Entity), entityVal)
 import Database.Persist.Sql (fromSqlKey)
 
+import Data.Aeson (ToJSON, Value, toJSON, object, (.=))
+import Data.Aeson.Text (encodeToLazyText)
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as M (lookup, insert, alter)
-import Data.Text (pack)
+import Data.Text (Text, pack)
+import Data.Text.Lazy (toStrict)
 
 import Foundation
     ( App, Route (MyDoctorR, DoctorPhotoR, MyPatientR, AccountPhotoR)
@@ -38,7 +41,8 @@ import Foundation
 
 import Model
     ( AvatarColor (AvatarColorDark)
-    , Doctor (Doctor), PatientId, Patient, User (userEmail, userName)
+    , Doctor (Doctor), PatientId, Patient
+    , UserId, User (User, userEmail, userName)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
       )
@@ -52,7 +56,7 @@ import Settings (widgetFile)
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
-    , getSubYesod, setTitleI, Application
+    , getSubYesod, setTitleI, Application, newIdent
     )
 import Yesod.Auth (maybeAuth)
 import Yesod.Core.Types (YesodSubRunnerEnv)
@@ -73,11 +77,11 @@ cleanupChannel (Just c) = Just c
 
 
 chatApp :: PatientId -> Entity User -> Entity User -> WebSocketsT (SubHandlerFor ChatRoom mater) ()
-chatApp pid user interlocutor = do
+chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
     let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user) 
     
     let channelId = pack $ show $ fromSqlKey pid
-    sendTextData $  name <> " just joined " <> channelId
+    -- sendTextData $  name <> " just joined " <> channelId
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -95,23 +99,36 @@ chatApp pid user interlocutor = do
                                     return writeChan
 
     readChan <- atomically $ do
-        writeTChan writeChan $ name <> " has joined the chat"
+        -- writeTChan writeChan $ name <> " has joined the chat"
         dupTChan writeChan
 
     (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
-        (runConduit (sourceWS .| mapM_C (\msg -> atomically $ writeTChan writeChan $ name <> ": " <> msg)))
+        (runConduit (sourceWS .| mapM_C
+                     (\msg -> atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText (Msg uid iid msg))
+                    ))
 
     atomically $ case e of
       Left _ -> do
           let newChannelMap = M.alter cleanupChannel channelId channelMap
           writeTVar channelMapTVar newChannelMap
-          writeTChan writeChan $ name <> " has left the chat"
+          -- writeTChan writeChan $ name <> " has left the chat"
       Right () -> return ()
     
 
-getDoctorChatRoomR :: PatientId -> SubHandlerFor ChatRoom App Html
-getDoctorChatRoomR pid = do
+data Msg = Msg !UserId !UserId !Text
+
+instance ToJSON Msg where
+   
+    toJSON :: Msg -> Value
+    toJSON (Msg uid iid msg) = object [ "user" .= pack (show $ fromSqlKey uid)
+                                      , "interlocautor" .= pack (show $ fromSqlKey iid)
+                                      , "message" .= msg
+                                      ]
+
+
+getDoctorChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
+getDoctorChatRoomR pid uid = do
 
     user <- maybeAuth
     
@@ -129,11 +146,14 @@ getDoctorChatRoomR pid = do
       
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
+        idChatOutput <- newIdent
+        idMessageForm <- newIdent
+        idMessageInput <- newIdent
         $(widgetFile "my/doctors/chat/chat")
     
 
-getPatientChatRoomR :: PatientId -> SubHandlerFor ChatRoom App Html
-getPatientChatRoomR pid = do
+getPatientChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
+getPatientChatRoomR pid uid = do
 
     user <- maybeAuth
     
@@ -146,11 +166,14 @@ getPatientChatRoomR pid = do
         return (x,u,l,d)
         
     case (user,patient) of
-      (Just u, Just (_,iterlocutor,_,_)) -> webSockets (chatApp pid u iterlocutor)
+      (Just u, Just (_,_,iterlocutor,_)) -> webSockets (chatApp pid u iterlocutor)
       _ -> return ()
       
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
+        idChatOutput <- newIdent
+        idMessageForm <- newIdent
+        idMessageInput <- newIdent
         $(widgetFile "my/patients/chat/chat")
 
 

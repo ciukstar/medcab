@@ -51,9 +51,10 @@
           <a href="mailto:#{email}">#{email}
 
       <div #actions>
-        <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid}>
+      
+        <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid uid}>
           <md-icon slot=icon>Chat
-          _{MsgChat}
+          _{MsgChat} (#{fromSqlKey uid})
           
         <md-filled-tonal-button #idButtonVideoCall type=button>
           <md-icon slot=icon>video_call
