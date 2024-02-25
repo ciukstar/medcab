@@ -12,15 +12,19 @@ conn = new WebSocket(url);
 conn.onmessage = function(e) {
   var data = JSON.parse(e.data),
       p = document.createElement('p');
-  p.classList.add("bubble");
-  p.classList.add(data.user == #{pack $ show $ fromSqlKey uid} ? "user" : "interlocutor");
-  p.classList.add(data.user == #{pack $ show $ fromSqlKey uid} ? "right" : "left");
+  p.classList.add("bubble","body-medium");
+  p.classList.add(... data.user == #{pack $ show $ fromSqlKey uid} ? ["user","right"] : ["interlocutor","left"]);
   p.appendChild(document.createTextNode(data.message));
   output.appendChild(p);
+  output.scrollTop = output.scrollHeight;
 };
 
 form.addEventListener("submit", function(e){
     conn.send(input.value);
     input.value = "";
     e.preventDefault();
+});
+
+window.addEventListener("unload",function () {
+  conn.close();
 });

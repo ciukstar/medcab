@@ -1,9 +1,10 @@
 
 header
+  min-height: var(--appbar-height)
   position: sticky
   top: 0
   z-index: 1
-  padding: 0.5rem 1rem
+  padding: 0 1rem
   display: flex
   flex-direction: row
   justify-content: space-between
@@ -26,25 +27,62 @@ header
             clip-path: circle(50%)
 
 main
-
-    height: 1000px
+    position: relative
+    min-height: calc(100dvh - var(--appbar-height))
     display: flex
     flex-direction: column
-    margin: 1rem
+    margin: 0
+    padding: 0
     
     ##{idChatOutput}
-        p.interlocutor
-            text-align: left
-        p.user
-            text-align: right
-    ##{idMessageForm}
-    
-        position: fixed
-        bottom: 1rem
+        padding: 0 1rem
+        box-sizing: border-box
+        height: calc(100dvh - 2.5 * var(--appbar-height))
+        max-height: calc(100dvh - 2.5 * var(--appbar-height))
+        overflow: auto
+        
         display: flex
-        flex-direction: row
-        align-items: center
-        gap: 1rem
+        flex-direction: column
+        
+        .bubble
+            --md-elevation-level: 5
+            padding: 1rem
+            position: relative
+            background-color: var(--md-sys-color-primary-container)
+            border: 0
+
+        p.bubble.right
+            border-radius: 8px 0 8px 8px
+            place-self: end
+        p.bubble.right::after
+          content: ''
+          background-color: var(--md-sys-color-primary-container)
+          position: absolute
+          top: 0
+          right: -8px
+          width: 9px
+          height: 13px
+          clip-path: polygon(0 0,100% 0,0 100%)
+          
+        p.bubble.left
+            border-radius: 0 8px 8px 8px
+            place-self: start
+        p.bubble.left::before
+          content: ''
+          background-color: var(--md-sys-color-primary-container)
+          position: absolute
+          top: 0
+          left: -8px
+          width: 9px
+          height: 13px
+          clip-path: polygon(0 0,100% 0,100% 100%)
+            
+    ##{idMessageForm}
+        width: 100%
+        position: absolute
+        bottom: 0
+        display: flex
         
         ##{idMessageInput}
             flex-grow: 1
+            margin: 0.5rem

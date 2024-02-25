@@ -19,5 +19,5 @@ $maybe (_,Entity iid (User email _ _ _ _ name _ _),_,Entity did _) <- patient
     <div ##{idChatOutput}>
     <form ##{idMessageForm}>
         <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
-        <md-filled-icon-button type=submit>
-          <md-icon>send
+          <md-filled-icon-button type=submit slot=trailing-icon>
+            <md-icon>send

@@ -1,9 +1,10 @@
 
 header
+  min-height: var(--appbar-height)
   position: sticky
   top: 0
   z-index: 1
-  padding: 0.5rem 1rem
+  padding: 0 1rem
   display: flex
   flex-direction: row
   justify-content: space-between
@@ -26,17 +27,25 @@ header
             clip-path: circle(50%)
 
 main
-
-    height: 1000px
+    position: relative
+    min-height: calc(100dvh - var(--appbar-height))
     display: flex
     flex-direction: column
-    margin: 1rem
+    margin: 0
+    padding: 0
     
     ##{idChatOutput}
+        padding: 0 1rem
+        box-sizing: border-box
+        height: calc(100dvh - 2.5 * var(--appbar-height))
+        max-height: calc(100dvh - 2.5 * var(--appbar-height))
+        overflow: auto
+        
         display: flex
         flex-direction: column
+        
         .bubble
-            --md-elevation-level: 1
+            --md-elevation-level: 5
             padding: 1rem
             position: relative
             background-color: var(--md-sys-color-primary-container)
@@ -51,7 +60,7 @@ main
           position: absolute
           top: 0
           right: -8px
-          width: 8px
+          width: 9px
           height: 13px
           clip-path: polygon(0 0,100% 0,0 100%)
           
@@ -64,18 +73,16 @@ main
           position: absolute
           top: 0
           left: -8px
-          width: 8px
+          width: 9px
           height: 13px
           clip-path: polygon(0 0,100% 0,100% 100%)
             
     ##{idMessageForm}
-    
-        position: fixed
-        bottom: 1rem
+        width: 100%
+        position: absolute
+        bottom: 0
         display: flex
-        flex-direction: row
-        align-items: center
-        gap: 1rem
         
         ##{idMessageInput}
             flex-grow: 1
+            margin: 0.5rem

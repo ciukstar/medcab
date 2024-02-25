@@ -81,7 +81,7 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
     let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user) 
     
     let channelId = pack $ show $ fromSqlKey pid
-    -- sendTextData $  name <> " just joined " <> channelId
+    -- sendTextData $ toStrict $ encodeToLazyText (Msg uid iid (name <> " just joined " <> channelId))
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -90,13 +90,13 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
     let maybeChan = M.lookup channelId channelMap
 
     writeChan <- atomically $ case maybeChan of
-                                Nothing -> do
-                                    chan <- newBroadcastTChan
-                                    writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
-                                    return chan
-                                Just (writeChan,_) -> do
-                                    writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
-                                    return writeChan
+      Nothing -> do
+          chan <- newBroadcastTChan
+          writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
+          return chan
+      Just (writeChan,_) -> do
+          writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
+          return writeChan
 
     readChan <- atomically $ do
         -- writeTChan writeChan $ name <> " has joined the chat"
@@ -107,13 +107,15 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
         (runConduit (sourceWS .| mapM_C
                      (\msg -> atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText (Msg uid iid msg))
                     ))
-
+{--
     atomically $ case e of
       Left _ -> do
           let newChannelMap = M.alter cleanupChannel channelId channelMap
           writeTVar channelMapTVar newChannelMap
-          -- writeTChan writeChan $ name <> " has left the chat"
+          writeTChan writeChan $ toStrict $ encodeToLazyText (Msg uid iid (name <> " has left the chat"))
       Right () -> return ()
+    --}  
+    return ()
     
 
 data Msg = Msg !UserId !UserId !Text
