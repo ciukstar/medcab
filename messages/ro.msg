@@ -193,3 +193,5 @@ Doc006: Pentru a crea un cont nou, este necesar să furnizați o adresă de e-ma
 Doc007: Un superutilizator (vezi mai jos) poate acorda privilegii de administrator oricărui utilizator înregistrat. Un utilizator cu rol de administrator poate, la rândul său, să acorde sau să revoce rolul de administrator altor utilizatori înregistrați. Privilegiile de administrator sunt necesare pentru a gestiona datele la nivel de sistem.
 
 Doc008 href: O unitate de măsură este definită prin furnizarea unui nume, simbol și descriere în secțiunea <a href=#{href}>„Unități de măsură”</a>.
+
+Doc009: Chat pentru medic și pacient

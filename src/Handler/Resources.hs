@@ -15,7 +15,7 @@ import Foundation
       , MsgBasicEntities, MsgUser, MsgDoctor, MsgSpecialty, MsgSourceCode
       , MsgIssueTracking, MsgUnitOfMeasure, MsgSearchEngineOptimization
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
-      , MsgDoc007, MsgDoc008
+      , MsgDoc007, MsgDoc008, MsgDoc009
       )
     )
     

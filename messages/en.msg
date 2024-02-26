@@ -193,3 +193,5 @@ Doc006: To create a new account, it is necessary to provide an email address. Th
 Doc007: A superuser (see below) can grant administrator privileges to any registered user. A user with the administrator role can in turn grant or revoke the administrator role to other registered users. Administrator privileges are required to manage system-wide data.
 
 Doc008 href@Text: A unit of measurement is defined by providing a name, symbol, and description in the section <a href=#{href}>“Measurement units”</a>.
+
+Doc009: Doctor and patient chat

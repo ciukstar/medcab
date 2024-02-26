@@ -193,3 +193,5 @@ Doc006: Pour créer un nouveau compte, il est nécessaire de fournir une adresse
 Doc007: Un superutilisateur (voir ci-dessous) peut accorder des privilèges d'administrateur à tout utilisateur enregistré. Un utilisateur doté du rôle d'administrateur peut à son tour accorder ou révoquer le rôle d'administrateur à d'autres utilisateurs enregistrés. Des privilèges d'administrateur sont requis pour gérer les données à l'échelle du système.
 
 Doc008 href: Une unité de mesure est définie en fournissant un nom, un symbole et une description dans la section <a href=#{href}>« Unités de mesure »</a>.
+
+Doc009: Chat entre médecins et patients

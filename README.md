@@ -2,6 +2,11 @@
 
 [This application](https://medcab-jjgwe5ufda-de.a.run.app) is under development...
 
+
+## Doctor and patient chat
+
+...
+
 ## Basic Entities
 
 ### User
