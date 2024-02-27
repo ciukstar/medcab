@@ -64,7 +64,9 @@
           
         <md-filled-tonal-button  type=link href=@{ChatR $ PatientChatRoomR pid uid}>
           <md-icon slot=icon>Chat
-          _{MsgChat} (#{fromSqlKey uid})
+          _{MsgChat}
+          $if unread > 0
+            \ (#{unread})
           
         <md-filled-tonal-button type=button>
           <md-icon slot=icon>video_call

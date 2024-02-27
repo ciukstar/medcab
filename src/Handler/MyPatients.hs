@@ -24,10 +24,10 @@ import Data.Time.Clock (getCurrentTime)
 import Database.Esqueleto.Experimental
     ( select, selectOne, from, table, where_, val, innerJoin, on, just
     , (^.), (?.), (==.), (:&) ((:&))
-    , leftJoin, Value (unValue), not_, exists, Entity (entityKey, entityVal)
+    , SqlExpr, Value (unValue), leftJoin, not_, exists, countRows, subSelect
+    , Entity (entityKey, entityVal)
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert_, delete))
-import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler, Form, App
@@ -47,11 +47,12 @@ import Foundation
 import Menu (menu)
 import Model
     ( statusError, statusSuccess, AvatarColor (AvatarColorLight, AvatarColorDark)
-    , UserId, User (User, userName), UserPhoto
-    , DoctorId, Doctor, PatientId, Patient(Patient)
+    , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
+    , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
-      , UserPhotoAttribution, UserSuperuser, DoctorId
+      , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
+      , ChatStatus, ChatUser
       )
     )
 
@@ -179,6 +180,18 @@ getMyPatientR uid did pid = do
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PatientId ==. val pid
         return (x,(u,h ?. UserPhotoAttribution)) )
+
+    unread <- maybe 0 unValue <$> runDB ( selectOne $ do
+        x <- from $ table @Chat
+        where_ $ x ^. ChatInterlocutor ==. val uid
+        where_ $ just (x ^. ChatUser) ==. subSelect
+            ( do
+                  y <- from $ table @Patient
+                  where_ $ y ^. PatientId ==. val pid
+                  return $ y ^. PatientUser
+            )
+        where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
+        return (countRows :: SqlExpr (Value Int)) )
 
     (fw,et) <- generateFormPost formPatientRemove
     msgs <- getMessages

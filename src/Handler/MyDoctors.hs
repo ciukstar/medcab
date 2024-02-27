@@ -18,10 +18,9 @@ import Data.Text.Encoding (encodeUtf8)
 import Database.Esqueleto.Experimental
     (select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), val, innerJoin
+    , SqlExpr, Value (unValue), val, innerJoin, countRows, subSelect
     )
 import Database.Persist (Entity (Entity))
-import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler
@@ -41,13 +40,15 @@ import Foundation
 import Menu (menu)
 import Model
     ( statusError, AvatarColor (AvatarColorLight)
-    , EntityField
-      ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
-      , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser
-      )
+    , ChatMessageStatus (ChatMessageStatusUnread)
     , Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId
     , Specialist (Specialist), Specialty (Specialty)
-    , PatientId, Patient, UserId
+    , PatientId, Patient, UserId, Chat
+    , EntityField
+      ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
+      , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser, DoctorUser
+      , ChatInterlocutor, ChatStatus, ChatUser
+      )
     )
 
 import Settings (widgetFile)
@@ -73,8 +74,8 @@ getMyDoctorSpecialtiesR pid uid did = do
         return (x ^. DoctorPhotoAttribution) )
 
     specialties <- runDB $ select $ do
-        x :& s <- from $ table @Specialist
-            `innerJoin` table @Specialty `on` (\(x :& s) -> x ^. SpecialistSpecialty ==. s ^. SpecialtyId)
+        x :& s <- from $ table @Specialist `innerJoin` table @Specialty
+            `on` (\(x :& s) -> x ^. SpecialistSpecialty ==. s ^. SpecialtyId)
         where_ $ x ^. SpecialistDoctor ==. val did
         return (x,s)
 
@@ -88,10 +89,22 @@ getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorR pid uid did = do
 
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
-        x :& h <- from $ table @Doctor
-            `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+        x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
+            `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. DoctorId ==. val did
         return (x,h ?. DoctorPhotoAttribution) )
+
+    unread <- maybe 0 unValue <$> runDB ( selectOne $ do
+        x <- from $ table @Chat
+        where_ $ x ^. ChatInterlocutor ==. val uid
+        where_ $ just (just (x ^. ChatUser)) ==. subSelect
+            ( do
+                  y <- from $ table @Doctor
+                  where_ $ y ^. DoctorId ==. val did
+                  return $ y ^. DoctorUser
+            )
+        where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
+        return (countRows :: SqlExpr (Value Int)) )
 
     defaultLayout $ do
         setTitleI MsgDoctor
@@ -106,9 +119,10 @@ getMyDoctorsR uid = do
     user <- maybeAuth
 
     patients <- (second ( second (join . unValue)) <$>) <$> runDB ( select $ do
-        x :& d :& h <- from $ table @Patient
-            `innerJoin` table @Doctor `on` (\(x :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
-            `leftJoin` table @DoctorPhoto `on` (\(_ :& d :& h) -> just (d ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+        x :& d :& h <- from $ table @Patient `innerJoin` table @Doctor
+            `on` (\(x :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
+            `leftJoin` table @DoctorPhoto
+            `on` (\(_ :& d :& h) -> just (d ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. PatientUser ==. val uid
         orderBy [desc (d ^. DoctorId)]
         return (x,(d, h ?. DoctorPhotoAttribution)) )

@@ -49,10 +49,12 @@ main
             border: 0
             padding: 0.5rem
             position: relative
-            
-            time[datetime]
+
+            .bubble-status-line
                 display: block
                 text-align: end
+                i.icon
+                  font-family: 'Material Symbols Outlined'
 
         .bubble.right
             border-radius: 8px 0 8px 8px

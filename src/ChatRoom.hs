@@ -9,31 +9,34 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
 
-module ChatRoom (module ChatRoom.Data, module ChatRoom) where
+module ChatRoom
+  ( module ChatRoom.Data
+  , getDoctorChatRoomR
+  ) where
+
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route (DoctorChatRoomR, PatientChatRoomR)
     )
-    
-import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO), MonadTrans (lift))
+
+import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
 import Control.Monad (forever)
 import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, innerJoin, on
-    , (^.), (==.), (:&) ((:&)), (||.), (&&.)
-    , just, SqlBackend, select, orderBy, asc
+    ( selectOne, from, table, where_, val, innerJoin, on, update, set
+    , (^.), (==.), (:&) ((:&)), (||.), (&&.), (=.)
+    , just, SqlBackend, select, orderBy, asc, subSelect
     )
-import Database.Persist (Entity (Entity), entityVal, PersistStoreWrite (insert_))
+import Database.Persist
+    ( Entity (Entity), PersistStoreWrite (insert_) )
 import Database.Persist.Sql (fromSqlKey)
 
-import Data.Aeson (ToJSON, Value, toJSON, object, (.=))
 import Data.Aeson.Text (encodeToLazyText)
-import Data.Maybe (fromMaybe)
 import qualified Data.Map as M (lookup, insert, alter)
-import Data.Text (Text, pack)
+import Data.Text (pack)
 import Data.Text.Lazy (toStrict)
 
 import Foundation
@@ -43,13 +46,13 @@ import Foundation
 
 import Model
     ( AvatarColor (AvatarColorDark)
-    , Doctor (Doctor), PatientId, Patient
-    , UserId, User (User, userEmail, userName)
+    , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
+    , Doctor (Doctor), PatientId, Patient, UserId, User (User)
+    , Chat (Chat)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
-      , ChatTimemark, ChatUser, ChatInterlocutor
+      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus
       )
-    , Chat (Chat), ChatMessageStatus (ChatMessageStatusRead)
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -59,7 +62,7 @@ import Settings (widgetFile)
 
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
-    , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler, liftSubHandler)
+    , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
     , getSubYesod, setTitleI, Application, newIdent, YesodPersist (YesodPersistBackend)
     )
 import Yesod.Auth (maybeAuth)
@@ -72,7 +75,11 @@ import Data.Time.Clock (getCurrentTime)
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
 userJoinedChannel Nothing = Nothing
-userJoinedChannel (Just (writeCan,numUsers)) = Just (writeCan,numUsers + 1)
+userJoinedChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers + 1)
+
+userLeftChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
+userLeftChannel Nothing = Nothing
+userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
 cleanupChannel :: (Eq a1, Num a1) => Maybe (a2,a1) -> Maybe (a2,a1)
@@ -84,8 +91,8 @@ cleanupChannel (Just c) = Just c
 chatApp :: (YesodPersist master, YesodPersistBackend master ~ SqlBackend)
         => PatientId -> Entity User -> Entity User -> WebSocketsT (SubHandlerFor ChatRoom master) ()
 chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
-    let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user) 
-    
+    -- let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user)
+
     let channelId = pack $ show $ fromSqlKey pid
     -- sendTextData $ toStrict $ encodeToLazyText (Msg uid iid (name <> " just joined " <> channelId))
 
@@ -110,41 +117,42 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
 
     (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
-        (runConduit (sourceWS
-                     .| mapM_C (\msg -> do
-                                     now <- liftIO getCurrentTime
-                                     let chat = Chat uid iid now msg ChatMessageStatusRead
-                                     atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText chat
-                                     liftHandler (runDB $ insert_ chat)
-                               )
+        (runConduit (sourceWS .| mapM_C (
+                          \msg -> do
+                              
+                              m <- readTVarIO channelMapTVar
+
+                              let n = maybe 0 snd (M.lookup channelId m)
+                              let status = if n > 1 then ChatMessageStatusRead else ChatMessageStatusUnread
+                              
+                              now <- liftIO getCurrentTime
+                              let chat = Chat uid iid now msg status
+                              atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText chat
+                              liftHandler (runDB $ insert_ chat)
+                          )
                     ))
-{--
-    atomically $ case e of
+
+
+    case e of
       Left _ -> do
+          m <- readTVarIO channelMapTVar
+          let newChannelMap = M.alter userLeftChannel channelId m
+          atomically $ writeTVar channelMapTVar newChannelMap
+          {--
           let newChannelMap = M.alter cleanupChannel channelId channelMap
           writeTVar channelMapTVar newChannelMap
           writeTChan writeChan $ toStrict $ encodeToLazyText (Msg uid iid (name <> " has left the chat"))
-      Right () -> return ()
-    --}  
-    return ()
-    
+          --}
+      Right () -> do
+          return ()
 
-data Msg = Msg !UserId !UserId !Text
-
-instance ToJSON Msg where
-   
-    toJSON :: Msg -> Value
-    toJSON (Msg uid iid msg) = object [ "user" .= pack (show $ fromSqlKey uid)
-                                      , "interlocautor" .= pack (show $ fromSqlKey iid)
-                                      , "message" .= msg
-                                      ]
 
 
 getDoctorChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
 getDoctorChatRoomR pid uid = do
 
     user <- maybeAuth
-    
+
     patient <- liftHandler $ runDB $ selectOne $ do
         x :& u :& d :& l <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -152,10 +160,23 @@ getDoctorChatRoomR pid uid = do
             `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
         where_ $ x ^. PatientId ==. val pid
         return (x,u,l,d)
-        
+
+    liftHandler $ runDB $ update $ \x -> do
+        set x [ChatStatus =. val ChatMessageStatusRead]
+        where_ $ x ^. ChatInterlocutor ==. val uid
+        where_ $ just ( just (x ^. ChatUser)) ==. subSelect
+            ( do
+                  y :& d <- from $ table @Patient `innerJoin` table @Doctor
+                      `on` (\(y :& d) -> y ^. PatientDoctor ==. d ^. DoctorId)
+                  where_ $ y ^. PatientId ==. val pid
+                  return $ d ^. DoctorUser
+            )
+        where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
+
     case (user,patient) of
       (Just u, Just (_,_,interlocutor,_)) -> webSockets (chatApp pid u interlocutor)
       _ -> return ()
+
 
     chats <- liftHandler $ runDB $ select $ do
         x <- from $ table @Chat
@@ -172,20 +193,20 @@ getDoctorChatRoomR pid uid = do
                        )
         orderBy [asc (x ^. ChatTimemark)]
         return x
-      
+
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
         idChatOutput <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         $(widgetFile "my/doctors/chat/chat")
-    
+
 
 getPatientChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
 getPatientChatRoomR pid uid = do
 
     user <- maybeAuth
-    
+
     patient <- liftHandler $ runDB $ selectOne $ do
         x :& u :& d :& l <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -193,27 +214,38 @@ getPatientChatRoomR pid uid = do
             `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
         where_ $ x ^. PatientId ==. val pid
         return (x,u,l,d)
-        
+
+    liftHandler $ runDB $ update $ \x -> do
+        set x [ChatStatus =. val ChatMessageStatusRead]
+        where_ $ x ^. ChatInterlocutor ==. val uid
+        where_ $ just (x ^. ChatUser) ==. subSelect
+            ( do
+                  y <- from $ table @Patient
+                  where_ $ y ^. PatientId ==. val pid
+                  return $ y ^. PatientUser
+            )
+        where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
+
     case (user,patient) of
-      (Just u, Just (_,_,interlocutor,_)) -> webSockets (chatApp pid u interlocutor)
+      (Just u, Just (_,interlocutor,_,_)) -> webSockets (chatApp pid u interlocutor)
       _ -> return ()
 
     chats <- liftHandler $ runDB $ select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val uid)
                    &&. ( case patient of
-                           Just (_,_,Entity iid _,_) -> x ^. ChatInterlocutor ==. val iid
+                           Just (_,Entity iid _,_,_) -> x ^. ChatInterlocutor ==. val iid
                            Nothing -> val False
                        )
                  ) ||. ( (x ^. ChatInterlocutor ==. val uid)
                          &&. ( case patient of
-                                 Just (_,_,Entity iid _,_) -> x ^. ChatUser ==. val iid
+                                 Just (_,Entity iid _,_,_) -> x ^. ChatUser ==. val iid
                                  Nothing -> val False
                              )
                        )
         orderBy [asc (x ^. ChatTimemark)]
         return x
-      
+
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
         idChatOutput <- newIdent

@@ -27,14 +27,18 @@ conn = new WebSocket(url);
 conn.onmessage = function(e) {
   var data = JSON.parse(e.data),
       p = document.createElement('p'),
+      l = document.createElement('span'),
       t = document.createElement('time'),
+      i = document.createElement('i'),
       w = document.createElement('span'),
       s = document.createElement('span');
   
   p.classList.add("bubble","body-medium");
   p.classList.add(... data.user == #{pack $ show $ fromSqlKey uid} ? ["user","right"] : ["interlocutor","left"]);
+  l.classList.add("bubble-status-line");
   t.setAttribute('datetime',data.timemark);
   t.classList.add("body-small");
+  i.style.fontFamily = "Material Symbols Outlined";
   w.classList.add("handle-wrapper");
   s.classList.add("handle");
   
@@ -44,7 +48,10 @@ conn.onmessage = function(e) {
   )));
 
   w.appendChild(s);
-  p.appendChild(t);
+  i.appendChild(document.createTextNode("done_all"));
+  l.appendChild(t);
+  l.appendChild(i);
+  p.appendChild(l);
   p.appendChild(w);
   output.appendChild(p);
   output.scrollTop = output.scrollHeight;
