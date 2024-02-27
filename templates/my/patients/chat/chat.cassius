@@ -1,6 +1,6 @@
 
 header
-  min-height: var(--appbar-height)
+  min-height: var(--app-top-appbar-height,64px)
   position: sticky
   top: 0
   z-index: 1
@@ -28,7 +28,7 @@ header
 
 main
     position: relative
-    min-height: calc(100dvh - var(--appbar-height))
+    min-height: calc(100dvh - var(--app-top-appbar-height,64px))
     display: flex
     flex-direction: column
     margin: 0
@@ -37,45 +37,61 @@ main
     ##{idChatOutput}
         padding: 0 1rem
         box-sizing: border-box
-        height: calc(100dvh - 2.5 * var(--appbar-height))
-        max-height: calc(100dvh - 2.5 * var(--appbar-height))
+        height: calc(100dvh - 2.5 * var(--app-top-appbar-height,64px))
+        max-height: calc(100dvh - 2.5 * var(--app-top-appbar-height,64px))
         overflow: auto
         
         display: flex
         flex-direction: column
         
         .bubble
-            --md-elevation-level: 5
-            padding: 1rem
-            position: relative
-            background-color: var(--md-sys-color-primary-container)
+            max-width: 70%
             border: 0
+            padding: 0.5rem
+            position: relative
+            
+            time[datetime]
+                display: block
+                text-align: end
 
-        p.bubble.right
+        .bubble.right
             border-radius: 8px 0 8px 8px
             place-self: end
-        p.bubble.right::after
-          content: ''
-          background-color: var(--md-sys-color-primary-container)
-          position: absolute
-          top: 0
-          right: -8px
-          width: 9px
-          height: 13px
-          clip-path: polygon(0 0,100% 0,0 100%)
+            background-color: var(--md-sys-color-surface-variant)
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
+            
+            .handle-wrapper
+                filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
+                position: absolute
+                top: 0
+                right: -10px
+                display: inline
+                .handle
+                    display: block
+                    background-color: var(--md-sys-color-surface-variant)
+                    width: 10px
+                    height: 13px
+                    clip-path: polygon(0 0,100% 0,0 100%)
           
-        p.bubble.left
+        .bubble.left
             border-radius: 0 8px 8px 8px
             place-self: start
-        p.bubble.left::before
-          content: ''
-          background-color: var(--md-sys-color-primary-container)
-          position: absolute
-          top: 0
-          left: -8px
-          width: 9px
-          height: 13px
-          clip-path: polygon(0 0,100% 0,100% 100%)
+            background-color: var(--md-sys-color-primary-container)
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
+            
+            .handle-wrapper
+                filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
+                position: absolute
+                top: 0
+                left: -10px
+                display: block
+
+                .handle
+                    display: block
+                    background-color: var(--md-sys-color-primary-container)
+                    width: 10px
+                    height: 13px
+                    clip-path: polygon(0 0,100% 0,100% 100%)
             
     ##{idMessageForm}
         width: 100%

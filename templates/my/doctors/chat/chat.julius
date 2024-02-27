@@ -1,9 +1,24 @@
 
+Array.from(
+  document.body.querySelectorAll('time[datetime]')
+).forEach(function (x) {
+  x.textContent = new Date(x.getAttribute('datetime')).toLocaleTimeString(
+    navigator.language, { hour: "numeric",minute: "numeric" }
+  );
+});
+
 var url = document.URL,
     output = document.getElementById(#{idChatOutput}),
     form = document.getElementById(#{idMessageForm}),
     input = document.getElementById(#{idMessageInput}),
     conn;
+
+output.scrollTop = output.scrollHeight;
+
+input.addEventListener('input',function (e) {
+  var btnSubmit = this.querySelector('md-filled-icon-button');
+  btnSubmit.disabled = !(this.value && this.value.trim());
+});
 
 url = url.replace("http:", "ws:").replace("https:", "wss:");
 
@@ -11,18 +26,36 @@ conn = new WebSocket(url);
 
 conn.onmessage = function(e) {
   var data = JSON.parse(e.data),
-      p = document.createElement('p');
+      p = document.createElement('p'),
+      t = document.createElement('time'),
+      w = document.createElement('span'),
+      s = document.createElement('span');
+  
   p.classList.add("bubble","body-medium");
   p.classList.add(... data.user == #{pack $ show $ fromSqlKey uid} ? ["user","right"] : ["interlocutor","left"]);
+  t.setAttribute('datetime',data.timemark);
+  t.classList.add("body-small");
+  w.classList.add("handle-wrapper");
+  s.classList.add("handle");
+  
   p.appendChild(document.createTextNode(data.message));
+  t.appendChild(document.createTextNode(new Date(data.timemark).toLocaleTimeString(
+    navigator.language, {hour: 'numeric',minute: 'numeric'}
+  )));
+
+  w.appendChild(s);
+  p.appendChild(t);
+  p.appendChild(w);
   output.appendChild(p);
   output.scrollTop = output.scrollHeight;
 };
 
 form.addEventListener("submit", function(e){
-    conn.send(input.value);
-    input.value = "";
-    e.preventDefault();
+  conn.send(input.value);
+  input.value = "";
+  var btnSubmit = this.querySelector('md-filled-icon-button');
+  btnSubmit.disabled = true;
+  e.preventDefault();
 });
 
 window.addEventListener("unload",function () {

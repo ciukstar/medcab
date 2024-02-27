@@ -1,23 +1,31 @@
 
 :root
-  --appbar-height: 64px
+  --app-top-appbar-height: 64px
   
 @media screen and (min-width: 768px)
+  header
+    --app-top-appbar-height: 64px
   main
     margin-left: 5rem
     margin-right: 5rem
 
 @media screen and (min-width: 992px)
+  header
+    --app-top-appbar-height: 64px
   main
     margin-left: 10rem
     margin-right: 10rem
 
 @media screen and (min-width: 1200px)
+  header
+    --app-top-appbar-height: 64px
   main
     margin-left: 20%
     margin-right: 20%
 
 @media screen and (min-width: 1400px)
+  header
+    --app-top-appbar-height: 64px
   main
     margin-left: 25%
     margin-right: 25%

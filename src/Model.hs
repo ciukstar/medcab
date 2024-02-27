@@ -16,12 +16,15 @@
 
 module Model where
 
+import Control.Applicative (pure)
 import Control.Monad (mapM)
 import ClassyPrelude.Yesod
     ( Ord, Read, Typeable, Bool, ByteString, Text, Double, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
+import Data.Aeson (Value (String), ToJSON, toJSON, FromJSON, parseJSON)
+import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 import Data.Eq (Eq ((==)))
 import Data.Function ((.))
 import Data.Functor ((<$>))
@@ -48,6 +51,17 @@ import Yesod.Form (Textarea)
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
     deriving (Show, Read, Eq, Ord)
 derivePersistField "ChatMessageStatus"
+
+instance ToJSON ChatMessageStatus where
+    toJSON :: ChatMessageStatus -> Value
+    toJSON ChatMessageStatusRead = "Read"
+    toJSON ChatMessageStatusUnread = "Unread"
+    
+instance FromJSON ChatMessageStatus where
+    parseJSON :: Value -> Parser ChatMessageStatus 
+    parseJSON (String "Read") = pure ChatMessageStatusRead
+    parseJSON (String "Unread") = pure ChatMessageStatusUnread
+    parseJSON invalid = prependFailure "parsing ChatMessageStatus failed" (typeMismatch "String" invalid)
 
 
 data Gender = GenderFemale | GenderMale | GenderOther

@@ -1,9 +1,10 @@
 
 header
+  min-height: var(--app-top-appbar-height,64px)
   position: sticky
   top: 0
   z-index: 2
-  padding: 0.5rem 1rem
+  padding: 0 1rem
   display: flex
   flex-direction: row
   justify-content: space-between

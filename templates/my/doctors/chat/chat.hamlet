@@ -16,7 +16,14 @@ $maybe (_,Entity uid _,_,Entity did (Doctor name _ _ _ _)) <- patient
   
     <div ##{idChatOutput}>
     
+      $forall Entity _ (Chat userId _ time msg status) <- chats
+        <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
+          #{msg}
+          <time.body-small datetime=#{show time}>
+          <span.handle-wrapper>
+            <span.handle>
+    
     <form ##{idMessageForm}>
         <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
-          <md-filled-icon-button type=submit slot=trailing-icon>
+          <md-filled-icon-button type=submit slot=trailing-icon disabled>
             <md-icon>send

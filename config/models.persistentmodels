@@ -86,7 +86,7 @@ Specialty
     group SpecialtyId Maybe OnDeleteCascade
     UniqueSpecialtyName name
 
-Chat
+Chat json
     user UserId OnDeleteCascade
     interlocutor UserId
     timemark UTCTime

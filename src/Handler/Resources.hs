@@ -20,7 +20,7 @@ import Foundation
     )
     
 import Menu (menu)
-import Model (AvatarColor (AvatarColorLight))
+import Model (AvatarColor (AvatarColorLight), statusError)
 
 import Settings (widgetFile)
 import Settings.StaticFiles (img_ERD_MedCab_svg)
@@ -30,7 +30,9 @@ import Text.Hamlet (Html)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
-    ( Yesod(defaultLayout), setUltDestCurrent, getMessageRender, getUrlRender )
+    ( Yesod(defaultLayout), setUltDestCurrent, getMessageRender, getUrlRender
+    , getMessages
+    )
 import Yesod.Core.Widget (setTitleI)
 
 
@@ -39,6 +41,7 @@ getDocsR = do
     user <- maybeAuth
     rndr <- getUrlRender
     translate <- (preEscapedToHtml .) <$> getMessageRender
+    msgs <- getMessages
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgAppDocumentation
