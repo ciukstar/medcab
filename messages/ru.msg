@@ -1,3 +1,4 @@
+ChatParticipantsNotDefined: Участники чата не определены
 Message: Сообщение
 AccessDeniedPatiensOnly: Доступ к этой странице имеют только пациенты. Пожалуйста, войдите в систему как пациент
 NoPatientsYet: У вас пока нет пациентов

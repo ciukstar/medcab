@@ -1,3 +1,4 @@
+ChatParticipantsNotDefined: Les participants au chat ne sont pas définis
 Message: Message
 AccessDeniedPatiensOnly: Seuls les patients ont accès à cette page. Veuillez vous connecter en tant que patient
 NoPatientsYet: Vous n'avez pas encore de patients

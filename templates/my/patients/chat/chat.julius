@@ -32,47 +32,47 @@ url = url.replace("http:", "ws:").replace("https:", "wss:");
 
 conn = new WebSocket(url);
 
-conn.onmessage = function(e) {
+conn.onmessage = function (e) {
   var data = JSON.parse(e.data),
-      p = document.createElement('p'),
-      l = document.createElement('span'),
-      t = document.createElement('time'),
-      i = document.createElement('i'),
-      w = document.createElement('span'),
-      s = document.createElement('span');
+      bubble = document.createElement('p'),
+      bubbleStatusLine = document.createElement('span'),
+      time = document.createElement('time'),
+      icon = document.createElement('i'),
+      bubbleTailOut = document.createElement('span'),
+      bubbleTail = document.createElement('span');
   
-  p.classList.add("bubble","body-medium");
-  p.classList.add(... data.user == #{pack $ show $ fromSqlKey uid} ? ["user","right"] : ["interlocutor","left"]);
-  l.classList.add("bubble-status-line");
-  t.setAttribute('datetime',data.timemark);
-  t.classList.add("body-small");
-  i.style.fontFamily = "Material Symbols Outlined";
-  w.classList.add("bubble-tail-out");
-  s.classList.add("bubble-tail");
+  bubble.classList.add("bubble","body-medium");
+  bubble.classList.add(... data.user == #{pack $ show $ fromSqlKey uid} ? ["user","right"] : ["interlocutor","left"]);
+  bubbleStatusLine.classList.add("bubble-status-line");
+  time.setAttribute("datetime",data.timemark);
+  time.classList.add("body-small");
+  icon.style.fontFamily = "Material Symbols Outlined";
+  bubbleTailOut.classList.add("bubble-tail-out");
+  bubbleTail.classList.add("bubble-tail");
   
-  p.appendChild(document.createTextNode(data.message));
-  t.appendChild(document.createTextNode(new Date(data.timemark).toLocaleTimeString(
+  bubble.appendChild(document.createTextNode(data.message));
+  time.appendChild(document.createTextNode(new Date(data.timemark).toLocaleTimeString(
     navigator.language, {hour: 'numeric',minute: 'numeric'}
   )));
 
-  w.appendChild(s);
-  i.appendChild(document.createTextNode("done_all"));
-  l.appendChild(t);
-  l.appendChild(i);
-  p.appendChild(l);
-  p.appendChild(w);
-  output.appendChild(p);
+  bubbleTailOut.appendChild(bubbleTail);
+  icon.appendChild(document.createTextNode("done_all"));
+  bubbleStatusLine.appendChild(time);
+  bubbleStatusLine.appendChild(icon);
+  bubble.appendChild(bubbleStatusLine);
+  bubble.appendChild(bubbleTailOut);
+  output.appendChild(bubble);
   output.scrollTop = output.scrollHeight;
 };
 
-form.addEventListener("submit", function(e){
+conn.onerror = function (e) {
+  location.reload();
+}; 
+
+form.addEventListener("submit", function(e) {
   conn.send(input.value);
   input.value = "";
   var btnSubmit = this.querySelector('md-filled-icon-button');
   btnSubmit.disabled = true;
   e.preventDefault();
-});
-
-window.addEventListener("unload",function () {
-  conn.close();
 });

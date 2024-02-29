@@ -16,12 +16,12 @@ $maybe (_,Entity iid (User email _ _ _ _ name _ _),_,Entity did _) <- patient
     
       $forall (day,messages) <- chats
         <time.day-bubble.body-small datetime=#{show day}>#{show day}
-        $forall Entity _ (Chat userId _ time msg status) <- messages
+        $forall Entity _ (Chat userId _ time msg _) <- messages
           <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
             #{msg}
             <span.bubble-status-line>
               <time.time-bubble.body-small datetime=#{show time}>
-              <i.icon>done_all
+              <i.icon.success>done_all
             <span.bubble-tail-out>
               <span.bubble-tail>
             

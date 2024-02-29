@@ -28,20 +28,21 @@ import Control.Concurrent.STM.TChan
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, innerJoin, on, update, set
     , (^.), (==.), (:&) ((:&)), (||.), (&&.), (=.)
-    , just, SqlBackend, select, orderBy, asc, subSelect, desc
+    , just, SqlBackend, select, orderBy, subSelect, desc
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (insert_) )
 import Database.Persist.Sql (fromSqlKey)
 
 import Data.Aeson.Text (encodeToLazyText)
-import qualified Data.Map as M (Map,lookup, insert, alter, fromListWith, toList)
+import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
 import Data.Text (pack)
 import Data.Text.Lazy (toStrict)
 
 import Foundation
     ( App, Route (MyDoctorR, DoctorPhotoR, MyPatientR, AccountPhotoR)
-    , AppMessage(MsgBack, MsgChat, MsgPhoto, MsgMessage)
+    , AppMessage
+      ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined )
     )
 
 import Model
@@ -51,7 +52,7 @@ import Model
     , Chat (Chat)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
-      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus, ChatId
+      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus
       )
     )
 
@@ -64,13 +65,14 @@ import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
     , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
+    , invalidArgsI
     )
 import Yesod.Auth (maybeAuth)
 import Yesod.Core.Handler (newIdent)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Persist (YesodPersist(runDB))
 import Yesod.WebSockets
-    ( WebSocketsT, sendTextData, receiveData, race_, sourceWS, webSockets)
+    ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 
@@ -78,24 +80,20 @@ userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
 userJoinedChannel Nothing = Nothing
 userJoinedChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers + 1)
 
+
 userLeftChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
 userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-cleanupChannel :: (Eq a1, Num a1) => Maybe (a2,a1) -> Maybe (a2,a1)
-cleanupChannel Nothing = Nothing
-cleanupChannel (Just (_writeChan, 1)) = Nothing
-cleanupChannel (Just c) = Just c
-
-
 chatApp :: (YesodPersist master, YesodPersistBackend master ~ SqlBackend)
-        => PatientId -> Entity User -> Entity User -> WebSocketsT (SubHandlerFor ChatRoom master) ()
-chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
-    -- let name = fromMaybe (userEmail $ entityVal user) (userName $ entityVal user)
+        => PatientId
+        -> Entity User -- ^ user
+        -> Entity User -- ^ interlocutor
+        -> WebSocketsT (SubHandlerFor ChatRoom master) ()
+chatApp pid (Entity uid _) (Entity iid _) = do
 
     let channelId = pack $ show $ fromSqlKey pid
-    -- sendTextData $ toStrict $ encodeToLazyText (Msg uid iid (name <> " just joined " <> channelId))
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -112,9 +110,7 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
           writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
           return writeChan
 
-    readChan <- atomically $ do
-        -- writeTChan writeChan $ name <> " has joined the chat"
-        dupTChan writeChan
+    readChan <- atomically $ dupTChan writeChan
 
     (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
@@ -139,13 +135,7 @@ chatApp pid user@(Entity uid _) interlocutor@(Entity iid _) = do
           m <- readTVarIO channelMapTVar
           let newChannelMap = M.alter userLeftChannel channelId m
           atomically $ writeTVar channelMapTVar newChannelMap
-          {--
-          let newChannelMap = M.alter cleanupChannel channelId channelMap
-          writeTVar channelMapTVar newChannelMap
-          writeTChan writeChan $ toStrict $ encodeToLazyText (Msg uid iid (name <> " has left the chat"))
-          --}
-      Right () -> do
-          return ()
+      Right () -> return ()
 
 
 
@@ -176,7 +166,7 @@ getDoctorChatRoomR pid uid = do
 
     case (user,patient) of
       (Just u, Just (_,_,interlocutor,_)) -> webSockets (chatApp pid u interlocutor)
-      _ -> return ()
+      _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
 
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
@@ -229,7 +219,7 @@ getPatientChatRoomR pid uid = do
 
     case (user,patient) of
       (Just u, Just (_,interlocutor,_,_)) -> webSockets (chatApp pid u interlocutor)
-      _ -> return ()
+      _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
