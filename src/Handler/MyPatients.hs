@@ -18,16 +18,18 @@ import ChatRoom.Data ( Route(PatientChatRoomR) )
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
-import Data.Bifunctor (Bifunctor(second))
+import Data.Bifunctor (Bifunctor(second, bimap))
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
     ( select, selectOne, from, table, where_, val, innerJoin, on, just
     , (^.), (?.), (==.), (:&) ((:&))
     , SqlExpr, Value (unValue), leftJoin, not_, exists, countRows, subSelect
-    , Entity (entityKey, entityVal)
+    , subSelectCount
     )
-import Database.Persist (Entity (Entity), PersistStoreWrite (insert_, delete))
+import Database.Persist
+    ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_, delete)
+    )
 
 import Foundation
     ( Handler, Form, App
@@ -213,12 +215,26 @@ getMyPatientsR did = do
         where_ $ x ^. DoctorId ==. val did
         return x
 
-    patients <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+    patients <- (second (second (bimap (join . unValue) unValue)) <$>) <$> runDB ( select $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PatientDoctor ==. val did
-        return (x,(u,h ?. UserPhotoAttribution)) )
+        
+        let unread :: SqlExpr (Value Int)
+            unread = subSelectCount $ do
+                c <- from $ table @Chat
+                where_ $ just (c ^. ChatInterlocutor) ==. val (entityKey <$> user)
+                where_ $ just (c ^. ChatUser) ==. subSelect
+                    ( do
+                           y <- from $ table @Patient
+                           where_ $ y ^. PatientId ==. x ^. PatientId
+                           return $ y ^. PatientUser
+                     )
+                where_ $ c ^. ChatStatus ==. val ChatMessageStatusUnread
+              
+        return (x,(u,(h ?. UserPhotoAttribution,unread))) )
+
 
     msgs <- getMessages
     defaultLayout $ do

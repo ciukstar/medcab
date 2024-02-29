@@ -16,14 +16,16 @@ $maybe (_,Entity uid _,_,Entity did (Doctor name _ _ _ _)) <- patient
   
     <div ##{idChatOutput}>
     
-      $forall Entity _ (Chat userId _ time msg _) <- chats
-        <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
-          #{msg}
-          <span.bubble-status-line>
-            <time.body-small datetime=#{show time}>
-            <i.icon>done_all
-          <span.handle-wrapper>
-            <span.handle>
+      $forall (day,messages) <- chats
+        <time.day-bubble.body-small datetime=#{show day}>#{show day}
+        $forall Entity _ (Chat userId _ time msg _) <- messages
+          <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
+            #{msg}
+            <span.bubble-status-line>
+              <time.time-bubble.body-small datetime=#{show time}>
+              <i.icon>done_all
+            <span.handle-wrapper>
+              <span.handle>
     
     <form ##{idMessageForm}>
         <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>

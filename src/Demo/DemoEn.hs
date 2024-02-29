@@ -51,7 +51,7 @@ import Model
     , Normal
       ( Normal, normalName, normalLowerBound, normalUpperBound, normalUnit
       , normalSign
-      ), Patient (Patient, patientUser, patientDoctor, patientSince)
+      ), Patient (Patient, patientUser, patientDoctor, patientSince), Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus), ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
     )
 
 import Text.Hamlet (shamlet)
@@ -888,5 +888,41 @@ fillDemoEn = do
                                      }
 
     m231 <- insert measurement231
+
+    let chat131 = Chat { chatUser = usr1
+                       , chatInterlocutor = usr3
+                       , chatTimemark = addUTCTime ((-1) * nominalDay) now
+                       , chatMessage = "Hi, Dr. Julian Maulsby"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat131
+
+    let chat311 = Chat { chatUser = usr3
+                       , chatInterlocutor = usr1
+                       , chatTimemark = addUTCTime 30 (chatTimemark chat131)
+                       , chatMessage = "Hello, Mary Lopez"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat311
+
+    let chat312 = Chat { chatUser = usr3
+                       , chatInterlocutor = usr1
+                       , chatTimemark = addUTCTime 60 (chatTimemark chat311)
+                       , chatMessage = "How are you doing?"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat312
+
+    let chat132 = Chat { chatUser = usr1
+                       , chatInterlocutor = usr3
+                       , chatTimemark = addUTCTime 65 (chatTimemark chat312)
+                       , chatMessage = "Overall, it's okay, but I'm worried about the blood pressure."
+                       , chatStatus = ChatMessageStatusUnread
+                       }
+
+    insert_ chat132
 
     return ()

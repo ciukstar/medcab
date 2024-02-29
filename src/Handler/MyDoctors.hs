@@ -12,21 +12,22 @@ import ChatRoom.Data ( Route(DoctorChatRoomR) )
 
 import Control.Monad (join)
 
-import Data.Bifunctor (Bifunctor(second))
+import Data.Bifunctor (Bifunctor(second, bimap))
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Esqueleto.Experimental
-    (select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
+    ( select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
     , SqlExpr, Value (unValue), val, innerJoin, countRows, subSelect
+    , subSelectCount
     )
 import Database.Persist (Entity (Entity))
 
 import Foundation
     ( Handler
     , Route
-      ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, MyDoctorR, MyDoctorsR
-      , MyDoctorSpecialtiesR, ChatR
+      ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, MyDoctorR, ChatR
+      , MyDoctorsR, MyDoctorSpecialtiesR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
@@ -118,14 +119,27 @@ getMyDoctorsR uid = do
     
     user <- maybeAuth
 
-    patients <- (second ( second (join . unValue)) <$>) <$> runDB ( select $ do
+    patients <- (second (second (bimap (join . unValue) unValue)) <$>) <$> runDB ( select $ do
         x :& d :& h <- from $ table @Patient `innerJoin` table @Doctor
             `on` (\(x :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
             `leftJoin` table @DoctorPhoto
             `on` (\(_ :& d :& h) -> just (d ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. PatientUser ==. val uid
+        
+        let unread :: SqlExpr (Value Int)
+            unread = subSelectCount $ do
+              c <- from $ table @Chat
+              where_ $ c ^. ChatInterlocutor ==. val uid
+              where_ $ just (just (c ^. ChatUser)) ==. subSelect
+                  ( do
+                        d' <- from $ table @Doctor
+                        where_ $ d' ^. DoctorId ==. d ^. DoctorId
+                        return $ d' ^. DoctorUser
+                  )
+              where_ $ c ^. ChatStatus ==. val ChatMessageStatusUnread
+        
         orderBy [desc (d ^. DoctorId)]
-        return (x,(d, h ?. DoctorPhotoAttribution)) )
+        return (x, (d, (h ?. DoctorPhotoAttribution,unread))) )
 
     msgs <- getMessages
     defaultLayout $ do

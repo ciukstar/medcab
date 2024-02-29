@@ -36,17 +36,19 @@
   $else
     $maybe Entity uid _ <- user
       <md-list>
-        $forall (Entity pid (Patient _ did since),(Entity iid (User email _ _ _ _ name _ _),attrib)) <- patients
+        $forall (Entity pid (Patient _ did _),(Entity iid (User email _ _ _ _ name _ _),(attrib,unread))) <- patients
           <md-list-item type=link href=@{MyPatientR uid did pid}>
             <img slot=start src=@{AccountPhotoR iid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
             <div slot=headline>
               $maybe name <- name
                 #{name}
             <div slot=supporting-text>
-              #{email}
-            <div slot=supporting-text>
-              $with dt <- show since
-                _{MsgSinceDate}: <time datetime=#{dt}>#{dt}
+              $if unread > 0
+                #{unread}
+                <sup>
+                  <md-icon style="--md-icon-size:1.2em">mark_chat_unread
+              $else
+                #{email}
             <md-icon slot=end>arrow_forward_ios
           $maybe attrib <- attrib
             <div.app-attribution>

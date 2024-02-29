@@ -35,7 +35,7 @@ import Database.Persist
 import Database.Persist.Sql (fromSqlKey)
 
 import Data.Aeson.Text (encodeToLazyText)
-import qualified Data.Map as M (lookup, insert, alter)
+import qualified Data.Map as M (Map,lookup, insert, alter, fromListWith, toList)
 import Data.Text (pack)
 import Data.Text.Lazy (toStrict)
 
@@ -63,14 +63,15 @@ import Settings (widgetFile)
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
-    , getSubYesod, setTitleI, Application, newIdent, YesodPersist (YesodPersistBackend)
+    , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
     )
 import Yesod.Auth (maybeAuth)
+import Yesod.Core.Handler (newIdent)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Persist (YesodPersist(runDB))
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, receiveData, race_, sourceWS, webSockets)
-import Data.Time.Clock (getCurrentTime)
+import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -178,7 +179,7 @@ getDoctorChatRoomR pid uid = do
       _ -> return ()
 
 
-    chats <- liftHandler $ runDB $ select $ do
+    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val uid)
                    &&. ( case patient of
@@ -192,7 +193,7 @@ getDoctorChatRoomR pid uid = do
                              )
                        )
         orderBy [asc (x ^. ChatTimemark)]
-        return x
+        return x )
 
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
@@ -230,7 +231,7 @@ getPatientChatRoomR pid uid = do
       (Just u, Just (_,interlocutor,_,_)) -> webSockets (chatApp pid u interlocutor)
       _ -> return ()
 
-    chats <- liftHandler $ runDB $ select $ do
+    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val uid)
                    &&. ( case patient of
@@ -244,7 +245,7 @@ getPatientChatRoomR pid uid = do
                              )
                        )
         orderBy [asc (x ^. ChatTimemark)]
-        return x
+        return x )
 
     liftHandler $ defaultLayout $ do
         setTitleI MsgChat
@@ -254,6 +255,8 @@ getPatientChatRoomR pid uid = do
         $(widgetFile "my/patients/chat/chat")
 
 
+groupByKey :: Ord k => (v -> k) -> [v] -> M.Map k [v]
+groupByKey key = M.fromListWith (<>) . fmap (\x -> (key x,[x]))
 
 
 instance YesodSubDispatch ChatRoom App where

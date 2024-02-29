@@ -35,11 +35,17 @@
         _{MsgNoDoctorsYet}
   $else
     <md-list>
-      $forall (Entity pid _,(Entity did (Doctor name _ email _ _),attrib)) <- patients
+      $forall (Entity pid _,((Entity did (Doctor name _ email _ _),(attrib,unread)))) <- patients
         <md-list-item type=link href=@{MyDoctorR pid uid did}>
           <img slot=start src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
           <div slot=headline>#{name}
-          <div slot=supporting-text>#{email}
+          <div slot=supporting-text>
+            $if unread > 0
+              #{unread}
+              <sup>
+                <md-icon style="--md-icon-size:1.2em">mark_chat_unread
+            $else
+              #{email}
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
