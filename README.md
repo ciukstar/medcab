@@ -5,7 +5,7 @@
 
 ## Doctor and patient chat
 
-...
+... using WebSocket
 
 ## Basic Entities
 

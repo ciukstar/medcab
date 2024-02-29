@@ -6,39 +6,33 @@ header
   z-index: 1
   padding: 0 1rem
   display: flex
-  justify-content: space-between
+  justify-content: flex-start
   align-items: center
+  gap: 1rem
 
-  #headerStart
-    display: flex
-    flex-direction: row
-    justify-content: flex-start
-    align-items: center
-    gap: 1rem
-
-    figure
-        margin: 0
-        padding: 0
-        display: flex
-        flex-direction: row
-        align-items: center
-        img
-            clip-path: circle(50%)
+  figure
+      margin: 0
+      padding: 0
+      display: flex
+      flex-direction: row
+      align-items: center
+      gap: 1rem
+      img
+          clip-path: circle(50%)
 
 main
-    position: relative
-    min-height: calc(100dvh - var(--app-top-appbar-height,64px))
+    height: calc(100svh - var(--app-top-appbar-height,64px))
     display: flex
     flex-direction: column
+    
     margin: 0
     padding: 0
     
     ##{idChatOutput}
         padding: 0 1rem
         box-sizing: border-box
-        height: calc(100dvh - 2.5 * var(--app-top-appbar-height,64px))
-        max-height: calc(100dvh - 2.5 * var(--app-top-appbar-height,64px))
         overflow: auto
+        flex: 1
         
         display: flex
         flex-direction: column
@@ -50,30 +44,33 @@ main
           box-shadow: 1px 1px 1px rgba(0,0,0,0.2)
 
         .bubble
-            max-width: 70%
+            width: fit-content
+            max-width: 80%
             border: 0
             padding: 0.5rem
             position: relative
 
             .bubble-status-line
-                display: block
-                text-align: end
+                display: flex
+                justify-content: flex-end
+                align-items: center
                 i.icon
                   font-family: 'Material Symbols Outlined'
 
         .bubble.right
             border-radius: 8px 0 8px 8px
-            place-self: end
+            align-self: flex-end
             background-color: var(--md-sys-color-surface-variant)
             box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
-            .handle-wrapper
+            .bubble-tail-out
                 filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
                 position: absolute
                 top: 0
                 right: -10px
                 display: inline
-                .handle
+                
+                .bubble-tail
                     display: block
                     background-color: var(--md-sys-color-surface-variant)
                     width: 10px
@@ -82,18 +79,18 @@ main
           
         .bubble.left
             border-radius: 0 8px 8px 8px
-            place-self: start
+            align-self: flex-start
             background-color: var(--md-sys-color-primary-container)
             box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
-            .handle-wrapper
+            .bubble-tail-out
                 filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
                 position: absolute
                 top: 0
                 left: -10px
                 display: block
 
-                .handle
+                .bubble-tail
                     display: block
                     background-color: var(--md-sys-color-primary-container)
                     width: 10px
@@ -101,11 +98,7 @@ main
                     clip-path: polygon(0 0,100% 0,100% 100%)
             
     ##{idMessageForm}
-        width: 100%
-        position: absolute
-        bottom: 0
-        display: flex
-        
+        padding: 0.5rem 0.5rem 1rem 0.5rem
+
         ##{idMessageInput}
-            flex-grow: 1
-            margin: 0.5rem
+            width: 100%

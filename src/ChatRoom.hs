@@ -28,7 +28,7 @@ import Control.Concurrent.STM.TChan
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, innerJoin, on, update, set
     , (^.), (==.), (:&) ((:&)), (||.), (&&.), (=.)
-    , just, SqlBackend, select, orderBy, asc, subSelect
+    , just, SqlBackend, select, orderBy, asc, subSelect, desc
     )
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (insert_) )
@@ -51,7 +51,7 @@ import Model
     , Chat (Chat)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
-      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus
+      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus, ChatId
       )
     )
 
@@ -192,7 +192,7 @@ getDoctorChatRoomR pid uid = do
                                  Nothing -> val False
                              )
                        )
-        orderBy [asc (x ^. ChatTimemark)]
+        orderBy [desc (x ^. ChatTimemark)]
         return x )
 
     liftHandler $ defaultLayout $ do
@@ -244,7 +244,7 @@ getPatientChatRoomR pid uid = do
                                  Nothing -> val False
                              )
                        )
-        orderBy [asc (x ^. ChatTimemark)]
+        orderBy [desc (x ^. ChatTimemark)]
         return x )
 
     liftHandler $ defaultLayout $ do

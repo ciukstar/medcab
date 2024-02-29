@@ -47,8 +47,8 @@ conn.onmessage = function(e) {
   t.setAttribute('datetime',data.timemark);
   t.classList.add("body-small");
   i.style.fontFamily = "Material Symbols Outlined";
-  w.classList.add("handle-wrapper");
-  s.classList.add("handle");
+  w.classList.add("bubble-tail-out");
+  s.classList.add("bubble-tail");
   
   p.appendChild(document.createTextNode(data.message));
   t.appendChild(document.createTextNode(new Date(data.timemark).toLocaleTimeString(

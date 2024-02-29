@@ -925,4 +925,146 @@ fillDemoEn = do
 
     insert_ chat132
 
+    let chat321 = Chat { chatUser = usr3
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime ((-2) * nominalDay) now
+                       , chatMessage = "Hello, John."
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat321
+
+    let chat231 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr3
+                       , chatTimemark = addUTCTime 60 (chatTimemark chat321)
+                       , chatMessage = "Hello, Dr. Julian Maulsby"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat231
+
+    let chat322 = Chat { chatUser = usr3
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime 10 (chatTimemark chat231)
+                       , chatMessage = "Is everything okay?"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat322
+
+    let chat232 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr3
+                       , chatTimemark = addUTCTime 30 (chatTimemark chat322)
+                       , chatMessage = "Yes everything is fine."
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat232
+
+    let chat233 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr3
+                       , chatTimemark = addUTCTime ((-1) * nominalDay) now
+                       , chatMessage = "Hello, Dr. Julian Maulsby"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+    insert_ chat233
+
+    let chat323 = Chat { chatUser = usr3
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime 65 (chatTimemark chat233)
+                       , chatMessage = "Hi, John"
+                       , chatStatus = ChatMessageStatusUnread
+                       }
+
+    insert_ chat323
+
+    let chat141 = Chat { chatUser = usr1
+                       , chatInterlocutor = usr4
+                       , chatTimemark = addUTCTime ((-1) * nominalDay) now
+                       , chatMessage = "Hi, Dr. Valentina Schoen"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat141
+
+    let chat411 = Chat { chatUser = usr4
+                       , chatInterlocutor = usr1
+                       , chatTimemark = addUTCTime 30 (chatTimemark chat141)
+                       , chatMessage = "Hello, Mary Lopez"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat411
+
+    let chat412 = Chat { chatUser = usr4
+                       , chatInterlocutor = usr1
+                       , chatTimemark = addUTCTime 60 (chatTimemark chat411)
+                       , chatMessage = "How are you doing?"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat412
+
+    let chat142 = Chat { chatUser = usr1
+                       , chatInterlocutor = usr4
+                       , chatTimemark = addUTCTime 65 (chatTimemark chat412)
+                       , chatMessage = "Overall, it's okay, but I'm worried about the blood pressure."
+                       , chatStatus = ChatMessageStatusUnread
+                       }
+
+    insert_ chat142
+
+    let chat421 = Chat { chatUser = usr4
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime ((-2) * nominalDay) now
+                       , chatMessage = "Hello, John."
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat421
+
+    let chat241 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr4
+                       , chatTimemark = addUTCTime 60 (chatTimemark chat421)
+                       , chatMessage = "Hello, Dr. Valentina Schoen"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat241
+
+    let chat422 = Chat { chatUser = usr4
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime 10 (chatTimemark chat241)
+                       , chatMessage = "Is everything okay?"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat422
+
+    let chat242 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr4
+                       , chatTimemark = addUTCTime 30 (chatTimemark chat422)
+                       , chatMessage = "Yes everything is fine."
+                       , chatStatus = ChatMessageStatusRead
+                       }
+
+    insert_ chat242
+
+    let chat243 = Chat { chatUser = usr2
+                       , chatInterlocutor = usr4
+                       , chatTimemark = addUTCTime ((-1) * nominalDay) now
+                       , chatMessage = "Hello, Dr. Valentina Schoen"
+                       , chatStatus = ChatMessageStatusRead
+                       }
+    insert_ chat243
+
+    let chat423 = Chat { chatUser = usr4
+                       , chatInterlocutor = usr2
+                       , chatTimemark = addUTCTime 65 (chatTimemark chat243)
+                       , chatMessage = "Hi, John"
+                       , chatStatus = ChatMessageStatusUnread
+                       }
+
+    insert_ chat423
+
     return ()
