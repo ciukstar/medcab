@@ -5,7 +5,11 @@
 
 ## Doctor and patient chat
 
-... using WebSocket
+... using [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+
+## Patient/Doctor Video Call
+
+... using [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 
 ## Basic Entities
 

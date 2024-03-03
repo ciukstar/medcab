@@ -1,3 +1,4 @@
+Configuration: Configuration
 ChatParticipantsNotDefined: Les participants au chat ne sont pas définis
 Message: Message
 AccessDeniedPatiensOnly: Seuls les patients ont accès à cette page. Veuillez vous connecter en tant que patient
@@ -196,3 +197,5 @@ Doc007: Un superutilisateur (voir ci-dessous) peut accorder des privilèges d'ad
 Doc008 href: Une unité de mesure est définie en fournissant un nom, un symbole et une description dans la section <a href=#{href}>« Unités de mesure »</a>.
 
 Doc009: Chat entre médecins et patients
+
+Doc010: Appel vidéo patient/médecin

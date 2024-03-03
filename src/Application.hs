@@ -30,7 +30,10 @@ import Database.Persist.Sqlite
       )
     )
 
+import Data.Aeson.Decoding (decode, decodeStrict)
+-- import Data.Aeson.Decoding (decodeStrictText)
 import qualified Data.Map as M (empty)
+import qualified Data.Text.Encoding as T (encodeUtf8)
 
 import Import
 import Language.Haskell.TH.Syntax ( qLocation )
@@ -149,8 +152,7 @@ mkYesodDispatch "App" resourcesApp
 -- migrations handled by Yesod.
 makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
-    -- Some basic initializations: HTTP connection manager, logger, and static
-    -- subsite.
+    
     appHttpManager <- getGlobalManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
     appStatic <-
@@ -158,7 +160,9 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     getChatRoom <- ChatRoom <$> newTVarIO M.empty
-    getVideoRoom <- VideoRoom <$> newTVarIO M.empty
+    getVideoRoom <- VideoRoom
+        <$> newTVarIO M.empty
+        <*> pure (appRtcPeerConnectionConfig appSettings)
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

@@ -48,5 +48,7 @@ superuser-password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
 
 msvalidate: "_env:YESOD_MS_VALIDATE"
 
+rtc-peer-connection-config: "_env:YESOD_RTC_PEER_CONNECTION_CONFIG"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

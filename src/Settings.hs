@@ -63,13 +63,14 @@ data AppSettings = AppSettings
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
 
-    , appIdleTimeout            :: NominalDiffTime
-    , appGoogleSiteVerification :: Maybe Text
-    , appGoogleClientId         :: Text
-    , appGoogleClientSecret     :: Text
-    , appSuperuserUsername      :: Text
-    , appSuperuserPassword      :: Text
-    , appMsValidate             :: Maybe Text
+    , appIdleTimeout             :: NominalDiffTime
+    , appGoogleSiteVerification  :: Maybe Text
+    , appGoogleClientId          :: Text
+    , appGoogleClientSecret      :: Text
+    , appSuperuserUsername       :: Text
+    , appSuperuserPassword       :: Text
+    , appMsValidate              :: Maybe Text
+    , appRtcPeerConnectionConfig :: Maybe Value
     }
 
 instance FromJSON AppSettings where
@@ -98,14 +99,15 @@ instance FromJSON AppSettings where
         appCopyright              <- o .:  "copyright"
         appAnalytics              <- o .:? "analytics"
 
-        appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
-        appIdleTimeout            <- o .:  "idle-timeout"
-        appGoogleSiteVerification <- o .: "google-site-verification"
-        appGoogleClientId         <- o .:  "google-client-id"
-        appGoogleClientSecret     <- o .:  "google-client-secret"
-        appSuperuserUsername      <- o .:  "superuser-username"
-        appSuperuserPassword      <- o .:  "superuser-password"
-        appMsValidate             <- o .:  "msvalidate"
+        appAuthDummyLogin          <- o .:? "auth-dummy-login"      .!= dev
+        appIdleTimeout             <- o .:  "idle-timeout"
+        appGoogleSiteVerification  <- o .: "google-site-verification"
+        appGoogleClientId          <- o .:  "google-client-id"
+        appGoogleClientSecret      <- o .:  "google-client-secret"
+        appSuperuserUsername       <- o .:  "superuser-username"
+        appSuperuserPassword       <- o .:  "superuser-password"
+        appMsValidate              <- o .:  "msvalidate"
+        appRtcPeerConnectionConfig <- o .:  "rtc-peer-connection-config"
                                      
         return AppSettings {..}
 

@@ -38,7 +38,21 @@
   <section>
     <h2.headline-medium>_{MsgDoc009}
     <p.body-large>    
-      ... using WebSocket
+      ... using #
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">
+        WebSocket
+      
+    <h2.headline-medium>_{MsgDoc010}
+    <p.body-large>    
+      ... using #
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API">
+        WebRTC
+    
+    <dl>
+
+      <dt.label-large>_{MsgConfiguration}
+      <dd.body-small>
+        <code>&dollar;YESOD_RTC_PEER_CONNECTION_CONFIG
 
   <section>
     <h2.headline-medium>_{MsgBasicEntities}

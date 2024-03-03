@@ -8,6 +8,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module VideoRoom
   ( module VideoRoom.Data
@@ -16,7 +17,8 @@ module VideoRoom
   ) where
 
 import VideoRoom.Data
-    ( VideoRoom (VideoRoom), resourcesVideoRoom
+    ( VideoRoom (VideoRoom, rtcPeerConnectionConfig), resourcesVideoRoom
+    , channelMapTVar
     , Route (DoctorVideoRoomR, PatientVideoRoomR)
     )
 
@@ -25,32 +27,24 @@ import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 import Control.Monad (forever)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, innerJoin, on
-    , (^.), (==.), (:&) ((:&))
-    , just, SqlBackend
+    ( SqlBackend
     )
-import Database.Persist ( Entity (Entity) )
 import Database.Persist.Sql (fromSqlKey)
 
+import Data.Aeson (object )
+import Data.Maybe (fromMaybe)
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (pack)
 
 import Foundation
     ( App, Route (MyDoctorR, MyPatientR)
     , AppMessage
-      ( MsgBack, MsgChatParticipantsNotDefined, MsgVideoCall
+      ( MsgBack, MsgVideoCall
       )
     )
 
 import Model
-    ( AvatarColor (AvatarColorDark)
-    , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
-    , DoctorId, Doctor (Doctor), PatientId, Patient, UserId, User (User)
-    , Chat (Chat)
-    , EntityField
-      ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
-      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus
-      )
+    ( DoctorId, PatientId, UserId
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -64,9 +58,7 @@ import Yesod
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
     , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
     )
-import Yesod.Auth (maybeAuth)
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Persist (YesodPersist(runDB))
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 
@@ -89,7 +81,7 @@ chatApp pid polite = do
 
     let channelId = pack $ show $ fromSqlKey pid
 
-    VideoRoom channelMapTVar <- getSubYesod
+    VideoRoom {..} <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
 
@@ -128,17 +120,9 @@ getDoctorVideoRoomR :: PatientId -> UserId -> DoctorId -> SubHandlerFor VideoRoo
 getDoctorVideoRoomR pid uid did = do
     let polite = True
 
-    user <- maybeAuth
+    webSockets (chatApp pid polite) 
 
-    patient <- liftHandler $ runDB $ selectOne $ do
-        x :& u :& d :& l <- from $ table @Patient
-            `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
-            `innerJoin` table @Doctor `on` (\(x :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
-            `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
-        where_ $ x ^. PatientId ==. val pid
-        return (x,u,l,d)
-
-    webSockets (chatApp pid polite)
+    config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
     liftHandler $ defaultLayout $ do
         setTitleI MsgVideoCall
@@ -150,17 +134,9 @@ getPatientVideoRoomR :: PatientId -> DoctorId -> UserId -> SubHandlerFor VideoRo
 getPatientVideoRoomR pid did uid = do
     let polite = False
 
-    user <- maybeAuth
+    webSockets (chatApp pid polite)    
 
-    patient <- liftHandler $ runDB $ selectOne $ do
-        x :& u :& d :& l <- from $ table @Patient
-            `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
-            `innerJoin` table @Doctor `on` (\(x :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
-            `innerJoin` table @User `on` (\(_ :& _ :& d :& l) -> d ^. DoctorUser ==. just (l ^. UserId))
-        where_ $ x ^. PatientId ==. val pid
-        return (x,u,l,d)
-
-    webSockets (chatApp pid polite)
+    config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
     liftHandler $ defaultLayout $ do
         setTitleI MsgVideoCall

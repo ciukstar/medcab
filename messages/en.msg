@@ -1,3 +1,4 @@
+Configuration: Configuration
 ChatParticipantsNotDefined: Chat participants are not defined
 Message: Message
 AccessDeniedPatiensOnly: Only patients have access to this page. Please log in as patient
@@ -196,3 +197,5 @@ Doc007: A superuser (see below) can grant administrator privileges to any regist
 Doc008 href@Text: A unit of measurement is defined by providing a name, symbol, and description in the section <a href=#{href}>“Measurement units”</a>.
 
 Doc009: Doctor and patient chat
+
+Doc010: Patient/Doctor Video Call

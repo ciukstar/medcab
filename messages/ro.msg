@@ -1,3 +1,4 @@
+Configuration: Configurare
 ChatParticipantsNotDefined: Participanții la chat nu sunt definiți
 Message: Mesaj
 AccessDeniedPatiensOnly: Doar pacienții au acces la această pagină. Vă rugăm să vă conectați ca pacient
@@ -196,3 +197,5 @@ Doc007: Un superutilizator (vezi mai jos) poate acorda privilegii de administrat
 Doc008 href: O unitate de măsură este definită prin furnizarea unui nume, simbol și descriere în secțiunea <a href=#{href}>„Unități de măsură”</a>.
 
 Doc009: Chat pentru medic și pacient
+
+Doc010: Apel video pacient/medic
