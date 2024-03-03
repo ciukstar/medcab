@@ -133,6 +133,8 @@ import Handler.Users
     
 import ChatRoom ()
 import ChatRoom.Data ( ChatRoom (ChatRoom) )
+import VideoRoom ()
+import VideoRoom.Data ( VideoRoom (VideoRoom) )
 import Demo.DemoEn (fillDemoEn)
 import Yesod.Auth.Email (saltPass)
 
@@ -156,6 +158,7 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     getChatRoom <- ChatRoom <$> newTVarIO M.empty
+    getVideoRoom <- VideoRoom <$> newTVarIO M.empty
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

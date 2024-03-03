@@ -15,6 +15,7 @@
 module Foundation where
 
 import ChatRoom.Data (ChatRoom)
+import VideoRoom.Data (VideoRoom)
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -107,6 +108,7 @@ data App = App
     , appHttpManager :: Manager
     , appLogger      :: Logger
     , getChatRoom    :: ChatRoom
+    , getVideoRoom   :: VideoRoom
     }
 
 mkMessage "App" "messages" "en"
@@ -207,6 +209,7 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
     
     isAuthorized (ChatR _) _ = isAuthenticated
+    isAuthorized (VideoR _) _ = isAuthenticated
 
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid

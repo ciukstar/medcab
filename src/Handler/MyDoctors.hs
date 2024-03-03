@@ -9,6 +9,7 @@ module Handler.MyDoctors
   ) where
 
 import ChatRoom.Data ( Route(DoctorChatRoomR) )
+import VideoRoom.Data ( Route(DoctorVideoRoomR) )
 
 import Control.Monad (join)
 
@@ -27,7 +28,7 @@ import Foundation
     ( Handler
     , Route
       ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, MyDoctorR, ChatR
-      , MyDoctorsR, MyDoctorSpecialtiesR
+      , MyDoctorsR, MyDoctorSpecialtiesR, VideoR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs

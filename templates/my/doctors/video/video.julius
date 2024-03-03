@@ -1,0 +1,88 @@
+
+const polite = #{polite};
+
+const selfVideo = document.getElementById('selfview');
+const remoteVideo = document.getElementById('remoteview');
+
+var ws = new WebSocket(document.URL.replace("http:", "ws:").replace("https:", "wss:"));
+
+const pc = new RTCPeerConnection({
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+});
+
+pc.ontrack = ({track, streams}) => {
+  track.onunmute = () => {
+    if ( ! remoteVideo.srcObject ) {
+      remoteVideo.srcObject = streams[0];
+    }
+  }
+};
+
+let makingOffer = false;
+
+pc.onnegotiationneeded = async () => {
+  try {
+    makingOffer = true;
+    await pc.setLocalDescription();
+    ws.send(JSON.stringify({ description: pc.localDescription }));
+  } catch (err) {
+    alert(err);
+  } finally {
+    makingOffer = false;
+  }
+};
+
+pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+
+let ignoreOffer = false;
+
+ws.onmessage = async (e) => {
+
+  const {description, candidate} = JSON.parse(e.data);
+  
+  try {
+    if (description) {
+      const offerCollision =
+        description.type === "offer" &&
+        (makingOffer || pc.signalingState !== "stable");
+
+      ignoreOffer = !polite && offerCollision;
+      if (ignoreOffer) {
+        return;
+      }
+
+      await pc.setRemoteDescription(description);
+      if (description.type === "offer") {
+        await pc.setLocalDescription();
+        ws.send(JSON.stringify({ description: pc.localDescription }));
+      }
+    } else if (candidate) {
+      try {
+	await pc.addIceCandidate(candidate);
+      } catch (err) {
+	if (!ignoreOffer) {
+	  throw err;
+	}
+      }
+    }
+  } catch (err) {
+    alert(err);
+  }
+};
+
+async function start() {
+  
+  try {
+    
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    for (const track of stream.getTracks()) {
+      pc.addTrack(track, stream);
+    }
+    
+    selfVideo.srcObject = stream;
+    
+  } catch (err) {
+    alert(err);
+  }
+  
+};

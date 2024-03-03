@@ -37,7 +37,8 @@
 
   <section>
     <h2.headline-medium>_{MsgDoc009}
-    ... using WebSocket
+    <p.body-large>    
+      ... using WebSocket
 
   <section>
     <h2.headline-medium>_{MsgBasicEntities}

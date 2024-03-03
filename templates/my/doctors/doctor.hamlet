@@ -58,7 +58,7 @@
           $if unread > 0
             \ (#{unread})
           
-        <md-filled-tonal-button #idButtonVideoCall type=button>
+        <md-filled-tonal-button #idButtonVideoCall type=link href=@{VideoR $ DoctorVideoRoomR pid uid did}>
           <md-icon slot=icon>video_call
           _{MsgVideoCall}
 
@@ -69,14 +69,5 @@
         <md-filled-tonal-button type=button>
           <md-icon slot=icon>book_online
           _{MsgBookAppointment}
-
-    <md-dialog #idDialogVideo fullscreen>
-      <div slot=headline>Video
-      <div slot=content>
-        <video controls autoplay muted #selfview width=250 height=150>
-        <video controls autoplay #remoteview width=250 height=150>
-      <div slot=actions>
-        <md-text-button type=button onclick="document.getElementById('idDialogVideo').open = false">
-          Close
 
     <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>

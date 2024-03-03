@@ -1,0 +1,15 @@
+
+header
+
+  height: var(--app-top-appbar-height, 64px)
+  display: flex
+  align-items: center
+  gap: 1rem
+
+
+main
+
+   display: flex
+   flex-direction: column
+   align-items: center
+   gap: 1rem

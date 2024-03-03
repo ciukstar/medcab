@@ -1,4 +1,7 @@
 
+
+/video VideoR VideoRoom getVideoRoom
+
 /channels ChatR ChatRoom getChatRoom
 
 /patients/#PatientId/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR GET

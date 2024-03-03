@@ -1,0 +1,16 @@
+<header.app-top-app-bar.background>
+  <md-icon-button href=@{MyDoctorR pid uid did} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgVideoCall}
+
+<main>
+
+  <video controls autoplay muted #selfview width=250 height=150>
+
+  <video controls autoplay #remoteview width=250 height=150>
+
+  <md-filled-icon-button type=button onclick="start()">
+    <md-icon>call
+
