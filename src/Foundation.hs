@@ -28,7 +28,7 @@ import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Function ((&))
 import Data.Kind (Type)
-import qualified Data.List.Safe as LS (head) 
+import qualified Data.List.Safe as LS (head)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Lazy.Encoding
 
@@ -207,7 +207,7 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
-    
+
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
 
@@ -215,23 +215,23 @@ instance Yesod App where
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
-    
+
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
     isAuthorized (MyPatientR _ did _) _ = isDoctorSelf did
     isAuthorized r@(MyPatientsR did) _ = setUltDest r >> isDoctorSelf did
-    
+
     isAuthorized (DoctorSpecialtiesR _) _ = isAuthenticated
     isAuthorized (DoctorR _) _ = isAuthenticated
     isAuthorized (DoctorPhotoR _) _ = isAuthenticated
     isAuthorized r@DoctorsR _ = setUltDest r >> isAuthenticated
-    
+
     isAuthorized (RecordMeasurementDeleR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementEditR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementNewR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordMeasurementsR uid _) _ = isAuthenticatedSelf uid
-    
+
     isAuthorized (RecordDeleR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordEditR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (RecordNewR uid) _ = isAuthenticatedSelf uid
@@ -244,7 +244,7 @@ instance Yesod App where
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _ _) _ = return Authorized
-    
+
     isAuthorized HomeR _ = return Authorized
 
     isAuthorized DocsR _ = return Authorized
@@ -255,33 +255,33 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-    
+
     isAuthorized (DataR (SignTagDeleR _ _)) _ = isAdmin
     isAuthorized (DataR (SignTagEditR _ _)) _ = isAdmin
     isAuthorized (DataR (SignTagAddR _)) _ = isAdmin
     isAuthorized (DataR (SignTagR _ _)) _ = isAdmin
     isAuthorized (DataR (SignTagsR _)) _ = isAdmin
-    
-    
+
+
     isAuthorized (DataR (MedSignNormalDeleR _ _)) _ = isAdmin
     isAuthorized (DataR (MedSignNormalEditR _ _)) _ = isAdmin
     isAuthorized (DataR (MedSignNormalAddR _)) _ = isAdmin
     isAuthorized (DataR (MedSignNormalR _ _)) _ = isAdmin
     isAuthorized (DataR (MedSignNormalsR _)) _ = isAdmin
-    
+
     isAuthorized (DataR (MedSignDeleR _)) _ = isAdmin
     isAuthorized (DataR (MedSignEditR _)) _ = isAdmin
     isAuthorized (DataR MedSignAddR) _ = isAdmin
     isAuthorized (DataR (MedSignR _)) _ = isAdmin
     isAuthorized r@(DataR MedSignsR) _ = setUltDest r >> isAdmin
 
-    
+
     isAuthorized (DataR (QuantityUnitEditR _ _)) _ = isAdmin
     isAuthorized (DataR (QuantityUnitDeleR _ _)) _ = isAdmin
     isAuthorized (DataR (QuantityUnitR _ _)) _ = isAdmin
     isAuthorized (DataR (QuantityUnitCreateR _)) _ = isAdmin
     isAuthorized (DataR (QuantityUnitsR _)) _ = isAdmin
-    
+
     isAuthorized (DataR (QuantityDeleR _)) _ = isAdmin
     isAuthorized (DataR (QuantityEditR _)) _ = isAdmin
     isAuthorized (DataR QuantityAddR) _ = isAdmin
@@ -293,7 +293,7 @@ instance Yesod App where
     isAuthorized (DataR UnitAddR) _ = isAdmin
     isAuthorized (DataR (UnitR _)) _ = isAdmin
     isAuthorized r@(DataR UnitsR) _ = setUltDest r >> isAdmin
-    
+
     isAuthorized (DataR (SpecialistDeleR {})) _ = isAdmin
     isAuthorized (DataR (SpecialistEditR {})) _ = isAdmin
     isAuthorized (DataR (SpecialistR {})) _ = isAdmin
@@ -306,7 +306,7 @@ instance Yesod App where
     isAuthorized (DataR (MemberR _)) _ = isAdmin
     isAuthorized r@(DataR StaffR) _ = setUltDest r >> isAdmin
 
-    
+
     isAuthorized (DataR (SpecialtyDoctorDeleR {})) _ = isAdmin
     isAuthorized (DataR (SpecialtyDoctorEditR {})) _ = isAdmin
     isAuthorized (DataR (SpecialtyDoctorCreateR _ _)) _ = isAdmin
@@ -317,12 +317,12 @@ instance Yesod App where
     isAuthorized (DataR (SpecialtyR _ _)) _ = isAdmin
     isAuthorized (DataR (SpecialtyCreateR _)) _ = isAdmin
     isAuthorized r@(DataR (SpecialtiesR _)) _ = setUltDest r >> isAdmin
-    
+
     isAuthorized (DataR TokensClearR) _ = isAdmin
     isAuthorized (DataR TokensHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
-        
+
     isAuthorized (DataR (UserPhotoR _)) _ = isAdmin
     isAuthorized (DataR (UserDeleR _)) _ = isAdmin
     isAuthorized (DataR (UserEditR _)) _ = isAdmin
@@ -624,7 +624,7 @@ instance YesodAuthEmail App where
                   } Nothing
               let r = (,) <$> emailR <*> passR
                   w = do
-                      
+
                       users <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
                           x <- from $ table @User
                           where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
@@ -634,7 +634,7 @@ instance YesodAuthEmail App where
                               where_ $ y ^. DoctorUser E.==. just (x ^. UserId)
                           orderBy [asc (x ^. UserId)]
                           return x )
-                      
+
                       doctors <- liftHandler $ ((,True) <$>) <$> runDB ( select $ do
                           x <- from $ table @User
                           where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
@@ -644,7 +644,7 @@ instance YesodAuthEmail App where
                               where_ $ y ^. DoctorUser E.==. just (x ^. UserId)
                           orderBy [asc (x ^. UserId)]
                           return x )
-                      
+
                       supers <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
                           x <- from $ table @User
                           where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
@@ -653,7 +653,7 @@ instance YesodAuthEmail App where
                           return x )
 
                       let accounts = users <> doctors <> supers
-                      
+
                       toWidget [cassius|
                           ##{fvId emailV}, ##{fvId passV}
                             align-self: stretch
@@ -665,7 +665,7 @@ instance YesodAuthEmail App where
     _{MsgDemoUserAccounts}
     <md-icon slot=icon>arrow_drop_down
   <md-menu #menuDemoAccounts anchor=anchorDemoAccounts>
-    $with n <- length accounts 
+    $with n <- length accounts
       $forall (i,(Entity uid (User email _ _ _ _ name super admin),doctor)) <- zip (irange 1) accounts
         $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
           <md-menu-item onclick="document.getElementById('#{fvId emailV}').value = '#{email}';document.getElementById('#{fvId passV}').value = '#{pass}'">
@@ -683,7 +683,7 @@ instance YesodAuthEmail App where
                     _{role} #
           $if i /= n
             <md-divider role=separator tabindex=-1>
-      
+
 #{extra}
 
 ^{fvInput emailV}
@@ -707,7 +707,7 @@ instance YesodAuthEmail App where
     sendVerifyEmail email _ verurl = do
 
         renderMsg <- getMessageRender
-        
+
         tokenInfo <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
             where_ $ x ^. TokenApi E.==. val gmail
@@ -928,7 +928,7 @@ isDoctorSelf did = do
             case doctor of
               Just (Entity did' _) | did' == did -> return Authorized
                                    | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
-              Nothing -> unauthorizedI MsgAccessDeniedDoctorsOnly 
+              Nothing -> unauthorizedI MsgAccessDeniedDoctorsOnly
         Nothing -> unauthorizedI MsgLoginPlease
 
 

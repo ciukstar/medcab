@@ -68,6 +68,12 @@ ws.onmessage = async (e) => {
   }
 };
 
+
+async function close() {
+  pc.close();
+}
+
+
 async function start() {
   
   try {
