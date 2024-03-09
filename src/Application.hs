@@ -30,15 +30,12 @@ import Database.Persist.Sqlite
       )
     )
 
-import Data.Aeson.Decoding (decode, decodeStrict)
--- import Data.Aeson.Decoding (decodeStrictText)
 import qualified Data.Map as M (empty)
-import qualified Data.Text.Encoding as T (encodeUtf8)
 
 import Import
 import Language.Haskell.TH.Syntax ( qLocation )
 import Network.HTTP.Client.TLS ( getGlobalManager )
-import Network.Wai (Middleware)
+import Network.Wai (Middleware, mapResponseHeaders)
 import Network.Wai.Middleware.Gzip
     ( gzip, GzipSettings (gzipFiles), GzipFiles (GzipCompress) )
 import Network.Wai.Handler.Warp
@@ -56,7 +53,10 @@ import System.Log.FastLogger
 -- Don't forget to add new modules to your cabal file!
 
 import Handler.MyDoctors
-    ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR )
+    ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR
+    , getMyDoctorNotificationsR, postPushMessageR, postMyDoctorNotificationsR
+    , postPushSubscriptionsR, deletePushSubscriptionR
+    )
 
 import Handler.MyPatients
     ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
@@ -139,7 +139,9 @@ import ChatRoom.Data ( ChatRoom (ChatRoom) )
 import VideoRoom ()
 import VideoRoom.Data ( VideoRoom (VideoRoom) )
 import Demo.DemoEn (fillDemoEn)
+import Web.WebPush (generateVAPIDKeys)
 import Yesod.Auth.Email (saltPass)
+import qualified Network.Wai as W (Response)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -163,6 +165,8 @@ makeFoundation appSettings = do
     getVideoRoom <- VideoRoom
         <$> newTVarIO M.empty
         <*> pure (appRtcPeerConnectionConfig appSettings)
+
+    getVAPID <- generateVAPIDKeys
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
@@ -210,7 +214,20 @@ makeApplication foundation = do
     logWare <- makeLogWare foundation
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
-    return $ logWare $ defaultMiddlewaresNoLogging $ gzip def { gzipFiles = GzipCompress } appPlain
+    
+    return $ logWare $ defaultMiddlewaresNoLogging $
+        ( withHeader ("Service-Worker-Allowed","/")
+          . gzip def { gzipFiles = GzipCompress }
+        ) appPlain
+
+
+withHeader :: Header -> Middleware
+withHeader h app req res = app req $ res . addH h
+
+
+addH :: Header -> W.Response -> W.Response
+addH h = mapResponseHeaders (h :)
+
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation =

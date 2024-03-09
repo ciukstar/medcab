@@ -1,3 +1,7 @@
+AcceptNotifyMeForAudio name@Text: Notify when #{name} makes an audio call
+AcceptNotifyMeForVideo name@Text: Notify when #{name} makes a video call
+AcceptNotifyMeForChat name@Text: Notify when #{name} wants to chat
+Notifications: Notifications
 Configuration: Configuration
 ChatParticipantsNotDefined: Chat participants are not defined
 Message: Message

@@ -1,0 +1,38 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgDoctor}
+
+  <div #headerEnd>
+
+
+<main>
+
+  $maybe (_,attrib) <- doctor
+
+    <figure>
+      <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
+
+    <md-tabs aria-label=_{MsgTabs}>
+      <md-primary-tab #tabDetails aria-controls=panelDetails>
+        _{MsgDetails}
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
+        _{MsgSpecializations}
+      <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true>
+        _{MsgNotifications}
+
+    <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+
+    <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
+
+    <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+      <form method=post action=@{MyDoctorNotificationsR pid uid did} enctype=#{et}>
+        ^{fw}

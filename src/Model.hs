@@ -17,16 +17,18 @@
 module Model where
 
 import Control.Applicative (pure)
-import Control.Monad (mapM)
+import Control.Monad (mapM, return)
 import ClassyPrelude.Yesod
     ( Ord, Read, Typeable, Bool, ByteString, Text, Double, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
-import Data.Aeson (Value (String), ToJSON, toJSON, FromJSON, parseJSON)
+import Data.Aeson
+    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON, withObject, (.:)
+    )
 import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 import Data.Eq (Eq ((==)))
-import Data.Function ((.))
+import Data.Function ((.), ($))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.Text (unpack, pack)
@@ -47,6 +49,9 @@ import Yesod.Core.Dispatch
     )
 import Yesod.Form (Textarea)
 
+import Web.WebPush (PushEndpoint, PushP256dh, PushAuth)
+
+
 
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
     deriving (Show, Read, Eq, Ord)
@@ -56,9 +61,9 @@ instance ToJSON ChatMessageStatus where
     toJSON :: ChatMessageStatus -> Value
     toJSON ChatMessageStatusRead = "Read"
     toJSON ChatMessageStatusUnread = "Unread"
-    
+
 instance FromJSON ChatMessageStatus where
-    parseJSON :: Value -> Parser ChatMessageStatus 
+    parseJSON :: Value -> Parser ChatMessageStatus
     parseJSON (String "Read") = pure ChatMessageStatusRead
     parseJSON (String "Unread") = pure ChatMessageStatusUnread
     parseJSON invalid = prependFailure "parsing ChatMessageStatus failed" (typeMismatch "String" invalid)
@@ -97,6 +102,27 @@ derivePersistField "AuthenticationType"
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
+
+
+instance FromJSON PushSubscription where
+    parseJSON :: Value -> Parser PushSubscription
+    parseJSON = withObject "PushSubscription" $ \v -> do
+        user <- v .: "user"
+        endpoint <- v .: "endpoint"
+        keys <- v .: "keys"
+        keyP256dh <- keys .: "p256dh"
+        keyAuth <- keys .: "auth"
+        return $ PushSubscription user endpoint keyP256dh keyAuth
+
+
+webPushEndpoint :: Text
+webPushEndpoint = "webPushEndpoint"
+
+webPushP256dh :: Text
+webPushP256dh = "webPushP256dh"
+
+webPushAuth :: Text
+webPushAuth = "webPushAuth"
 
 
 newtype SignTags = SignTags { unTags :: [SignTagId] }

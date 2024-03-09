@@ -1,3 +1,7 @@
+AcceptNotifyMeForAudio name: Уведомлять, когда #{name} совершает аудиовызов
+AcceptNotifyMeForVideo name: Уведомлять, когда #{name} совершает видеозвонок
+AcceptNotifyMeForChat name: Уведомлять, когда #{name} хочет пообщаться
+Notifications: Уведомления
 Configuration: Конфигурация
 ChatParticipantsNotDefined: Участники чата не определены
 Message: Сообщение

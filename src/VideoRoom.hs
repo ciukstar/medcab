@@ -120,7 +120,7 @@ getDoctorVideoRoomR :: PatientId -> UserId -> DoctorId -> SubHandlerFor VideoRoo
 getDoctorVideoRoomR pid uid did = do
     let polite = True
 
-    webSockets (chatApp pid polite) 
+    webSockets (chatApp pid polite)
 
     config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
@@ -134,7 +134,7 @@ getPatientVideoRoomR :: PatientId -> DoctorId -> UserId -> SubHandlerFor VideoRo
 getPatientVideoRoomR pid did uid = do
     let polite = False
 
-    webSockets (chatApp pid polite)    
+    webSockets (chatApp pid polite)
 
     config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 

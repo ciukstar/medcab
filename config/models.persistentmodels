@@ -93,6 +93,13 @@ Chat json
     message Text
     status ChatMessageStatus
 
+PushSubscription
+    user UserId OnDeleteCascade
+    endpoint Text
+    p256dh Text
+    auth Text
+    UniquePushSubscription endpoint
+
 
 UserPhoto
     user UserId OnDeleteCascade

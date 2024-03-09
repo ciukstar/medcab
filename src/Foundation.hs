@@ -22,6 +22,7 @@ import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
 
 import Import.NoFoundation
+
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import qualified Data.CaseInsensitive as CI
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
@@ -62,6 +63,8 @@ import Text.Jasmine (minifym)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 
+import Web.WebPush (VAPIDKeysMinDetails)
+
 import Yesod.Auth.Email
     ( SaltedPass, Identifier, Email, VerKey, VerUrl
     , authEmail, loginR, registerR, setpassR, forgotPasswordR
@@ -77,7 +80,6 @@ import Yesod.Auth.Email
       )
     )
 import qualified Yesod.Auth.Email as A (Email)
-
 import Yesod.Auth.Message
     ( AuthMessage
       ( InvalidLogin, EnterEmail, Register, RegisterLong, SetPassTitle, SetPass
@@ -109,6 +111,7 @@ data App = App
     , appLogger      :: Logger
     , getChatRoom    :: ChatRoom
     , getVideoRoom   :: VideoRoom
+    , getVAPID       :: VAPIDKeysMinDetails
     }
 
 mkMessage "App" "messages" "en"
@@ -132,9 +135,7 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
 
 -- | A convenient synonym for database access functions.
-type DB a = forall (m :: Type -> Type).
-    (MonadUnliftIO m) => ReaderT SqlBackend m a
-
+type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
 
 
 
@@ -142,6 +143,8 @@ type DB a = forall (m :: Type -> Type).
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
 
+
+    
     errorHandler :: ErrorResponse -> HandlerFor App TypedContent
     errorHandler NotFound = selectRep $ do
         provideRep $ defaultLayout $ do
@@ -211,6 +214,13 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
 
+
+    isAuthorized PushMessageR _ = isAuthenticated
+    
+    isAuthorized PushSubscriptionR _ = isAuthenticated
+    isAuthorized PushSubscriptionsR _ = isAuthenticated
+
+    isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid

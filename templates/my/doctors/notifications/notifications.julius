@@ -1,0 +1,39 @@
+
+document.querySelector('md-tabs').addEventListener('change',function (e) {
+  window.location.href = e.target.activeTabIndex == 0
+    ? '@{MyDoctorR pid uid did}'
+    : ( e.target.activeTabIndex === 1
+	? '@{MyDoctorSpecialtiesR pid uid did}'
+	: '@{MyDoctorNotificationsR pid uid did}'
+      )
+});
+
+
+function subscribeUserToPush () {
+  return navigator.serviceWorker.ready.then(function (registration) {
+    
+      return registration.pushManager.getSubscription().then(function (subscription) {
+	
+	if (!!subscription) {
+	  return subscription.unsubscribe(subscription.endpoint).then(function (succcess) {
+	    return registration.pushManager.subscribe({
+	      userVisibleOnly: true,
+	      applicationServerKey: new Uint8Array(#{toJSON $ vapidPublicKeyBytes vapidKeys})
+	    });	    
+	  });
+	} else {
+	
+	  return registration.pushManager.subscribe({
+	    userVisibleOnly: true,
+	    applicationServerKey: new Uint8Array(#{toJSON $ vapidPublicKeyBytes vapidKeys})
+	  });
+	}
+	
+    });
+  });
+};
+
+// const subscription = subscribeUserToPush();
+// sendSubscriptionToBackEnd(subscription);
+
+

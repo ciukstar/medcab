@@ -1,0 +1,59 @@
+
+function sendSubscriptionToBackEnd (subscription) {
+
+  const subscr = JSON.parse(JSON.stringify(subscription));
+  subscr.user = #{rawJS userId};
+  
+  console.log('subscr: ',subscr);
+  
+  fetch('@{PushSubscriptionsR}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscr)
+  }).then(function (response) {
+    if (!response.ok) {
+      throw new Error('Bad status code from server.');
+    }
+    return response.json();
+  }).then(function (responseData) {
+    if (!(responseData.data && responseData.data.success)) {
+      throw new Error('Bad response from server.');
+    }
+  });
+  
+};
+
+document.getElementById(#{fvId videoV}).onchange = async function (e) {
+  
+  if (this.selected) {
+    await navigator.serviceWorker.ready.then(function (registration) {
+      Notification.requestPermission().then(function (permission) {
+	if (permission === 'granted') {
+	  registration.pushManager.getSubscription().then(function (subscription) {
+	    const subscr = !subscription ? registration.pushManager.subscribe({
+	      userVisibleOnly: true,
+	      applicationServerKey: new Uint8Array(#{toJSON $ vapidPublicKeyBytes vapidKeys})
+	    }) : subscription;
+
+	    sendSubscriptionToBackEnd(subscr);
+	    
+	  });
+	}
+      });
+    });
+  } else {
+    await navigator.serviceWorker.ready.then(function (registration) {
+      registration.pushManager.getSubscription().then(function (subscription) {
+	subscription.unsubscribe().then(function (success) {
+	
+	  fetch(`@{PushSubscriptionR}?endpoint=${subscription.endpoint}`, {
+	    method: 'DELETE',
+	    headers: { 'Content-Type': 'application/json' },
+	    body: JSON.stringify(subscription)      
+	  });
+	
+	});
+      })
+    });    
+  }
+}

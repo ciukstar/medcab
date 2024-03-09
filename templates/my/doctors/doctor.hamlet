@@ -11,6 +11,10 @@
 
 <main>
 
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
   $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
     <figure>
@@ -21,12 +25,13 @@
         $nothing
           _{MsgPhoto}
 
-    <md-tabs aria-label=_{MsgTabs}
-      onchange="window.location.href = event.target.activeTabIndex == 0 ? '@{MyDoctorR pid uid did}' : '@{MyDoctorSpecialtiesR pid uid did}'">
+    <md-tabs aria-label=_{MsgTabs}>
       <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
         _{MsgDetails}
       <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
         _{MsgSpecializations}
+      <md-primary-tab #tabNotifications aria-controls=panelNotifications>
+        _{MsgNotifications}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
       <dl>
@@ -51,6 +56,9 @@
           <a href="mailto:#{email}">#{email}
 
       <div #actions>
+
+        <md-filled-button type=button #buttonCallNotification>
+          Call Notification
       
         <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid uid}>
           <md-icon slot=icon>Chat
@@ -71,3 +79,12 @@
           _{MsgBookAppointment}
 
     <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
+
+    <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
+
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

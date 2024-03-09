@@ -1,1 +1,20 @@
 
+document.querySelector('md-tabs').addEventListener('change',function (e) {
+  window.location.href = e.target.activeTabIndex == 0
+    ? '@{MyDoctorR pid uid did}'
+    : ( e.target.activeTabIndex === 1
+	? '@{MyDoctorSpecialtiesR pid uid did}'
+	: '@{MyDoctorNotificationsR pid uid did}'
+      )
+});
+
+document.getElementById('buttonCallNotification').onclick = function (e) {
+  
+  fetch('@{PushMessageR}',{
+    method: 'POST',
+    
+  }).then(function (response) {
+    console.log('response: ',response);
+    //location.reload();
+  });
+};

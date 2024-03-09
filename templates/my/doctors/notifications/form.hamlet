@@ -1,0 +1,8 @@
+
+#{extra}
+$forall v <- [chatV,videoV,audioV]
+  <div style="display:flex;align-items:center;gap:1rem">
+    ^{fvInput v}
+    <label.body-large for=#{fvId v}>
+      #{fvLabel v}
+                    

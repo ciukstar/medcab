@@ -1,3 +1,7 @@
+AcceptNotifyMeForAudio name: Avertir lorsque #{name} passe un appel audio
+AcceptNotifyMeForVideo name: Avertir lorsque #{name} passe un appel vidéo
+AcceptNotifyMeForChat name: Avertir lorsque #{name} souhaite discuter
+Notifications: Notifications
 Configuration: Configuration
 ChatParticipantsNotDefined: Les participants au chat ne sont pas définis
 Message: Message

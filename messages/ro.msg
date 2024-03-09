@@ -1,3 +1,7 @@
+AcceptNotifyMeForAudio name: Notificați când #{name} efectuează un apel audio
+AcceptNotifyMeForVideo name: Notificați când #{name} efectuează un apel video
+AcceptNotifyMeForChat name: Notificați când #{name} dorește să discute
+Notifications: Notificări
 Configuration: Configurare
 ChatParticipantsNotDefined: Participanții la chat nu sunt definiți
 Message: Mesaj
