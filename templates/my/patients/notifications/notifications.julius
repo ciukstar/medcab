@@ -1,0 +1,8 @@
+
+document.querySelector('md-tabs').addEventListener('change',function (e) {
+  window.location.href = e.target.activeTabIndex == 0
+    ? '@{MyPatientR uid did pid}'
+    : '@{MyPatientNotificationsR uid did pid}'
+});
+
+

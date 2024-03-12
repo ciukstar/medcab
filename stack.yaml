@@ -31,6 +31,7 @@ resolver:
 #   - wai
 packages:
 - .
+
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
@@ -42,7 +43,8 @@ packages:
 #
 
 extra-deps:
-  - web-push-0.3@sha256:3f3993836babe04f06f834ac7efc5ddeb656e28c6b845236a11752594da7a175,2572
+- git: https://github.com/sarthakbagaria/web-push.git
+  commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

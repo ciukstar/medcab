@@ -1,3 +1,8 @@
+InvalidVAPID: InvalidVAPID
+Generate: Generate
+NoRecipient: No recipient
+SubscribeToNotifications: Subscribe to notifications
+AcceptNotificationsFrom name@Text: Accept notifications from #{name} 
 AcceptNotifyMeForAudio name@Text: Notify when #{name} makes an audio call
 AcceptNotifyMeForVideo name@Text: Notify when #{name} makes a video call
 AcceptNotifyMeForChat name@Text: Notify when #{name} wants to chat

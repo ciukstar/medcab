@@ -60,7 +60,7 @@ import Handler.MyDoctors
 
 import Handler.MyPatients
     ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
-    , postMyPatientRemoveR
+    , postMyPatientRemoveR, getMyPatientNotificationsR, postMyPatientNotificationsR
     )
 
 import Handler.Doctors
@@ -126,7 +126,8 @@ import Handler.Specialties
     )
 
 import Handler.Tokens
-    ( getTokensR, postTokensR, getTokensHookR, postTokensClearR
+    ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
+    , postTokensVapidR
     )
 
 import Handler.Users
@@ -139,7 +140,6 @@ import ChatRoom.Data ( ChatRoom (ChatRoom) )
 import VideoRoom ()
 import VideoRoom.Data ( VideoRoom (VideoRoom) )
 import Demo.DemoEn (fillDemoEn)
-import Web.WebPush (generateVAPIDKeys)
 import Yesod.Auth.Email (saltPass)
 import qualified Network.Wai as W (Response)
 
@@ -156,6 +156,7 @@ makeFoundation :: AppSettings -> IO App
 makeFoundation appSettings = do
     
     appHttpManager <- getGlobalManager
+    
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
     appStatic <-
         (if appMutableStatic appSettings then staticDevel else static)
@@ -165,8 +166,6 @@ makeFoundation appSettings = do
     getVideoRoom <- VideoRoom
         <$> newTVarIO M.empty
         <*> pure (appRtcPeerConnectionConfig appSettings)
-
-    getVAPID <- generateVAPIDKeys
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

@@ -9,31 +9,3 @@ document.querySelector('md-tabs').addEventListener('change',function (e) {
 });
 
 
-function subscribeUserToPush () {
-  return navigator.serviceWorker.ready.then(function (registration) {
-    
-      return registration.pushManager.getSubscription().then(function (subscription) {
-	
-	if (!!subscription) {
-	  return subscription.unsubscribe(subscription.endpoint).then(function (succcess) {
-	    return registration.pushManager.subscribe({
-	      userVisibleOnly: true,
-	      applicationServerKey: new Uint8Array(#{toJSON $ vapidPublicKeyBytes vapidKeys})
-	    });	    
-	  });
-	} else {
-	
-	  return registration.pushManager.subscribe({
-	    userVisibleOnly: true,
-	    applicationServerKey: new Uint8Array(#{toJSON $ vapidPublicKeyBytes vapidKeys})
-	  });
-	}
-	
-    });
-  });
-};
-
-// const subscription = subscribeUserToPush();
-// sendSubscriptionToBackEnd(subscription);
-
-

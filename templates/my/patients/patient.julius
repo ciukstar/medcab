@@ -12,3 +12,21 @@ Array.from(
     }
   );
 });
+
+document.querySelector('md-tabs').addEventListener('change',function (e) {
+  window.location.href = e.target.activeTabIndex == 0
+    ? '@{MyPatientR uid did pid}'
+    : '@{MyPatientNotificationsR uid did pid}'
+});
+
+document.getElementById('buttonCallNotification').onclick = function (e) {
+
+  fetch('@{PushMessageR sid rid}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ "message": "Ignore" })
+  }).then(function (response) {
+    console.log('response: ',response);
+  });
+  
+};

@@ -1,3 +1,8 @@
+InvalidVAPID: VAPID invalide
+Generate: Générer
+NoRecipient: Aucun destinataire
+SubscribeToNotifications: Abonnez-vous aux notifications
+AcceptNotificationsFrom name@Text: Autoriser les notifications de #{name}
 AcceptNotifyMeForAudio name: Avertir lorsque #{name} passe un appel audio
 AcceptNotifyMeForVideo name: Avertir lorsque #{name} passe un appel vidéo
 AcceptNotifyMeForChat name: Avertir lorsque #{name} souhaite discuter

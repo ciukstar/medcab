@@ -1,0 +1,34 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+
+    <h1.title-large>
+      _{MsgPatient}
+
+  <div #headerEnd>
+
+
+<main>
+
+  $maybe (Entity _ (Patient _ _ _),(Entity iid (User _ _ _ _ _ _ _ _),attrib)) <- patient
+
+    <figure>
+      <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 height= loading=lazy alt=_{MsgPhoto}>
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
+
+    <md-tabs aria-label=_{MsgTabs}>
+      <md-primary-tab #tabDetails aria-controls=panelDetails>
+        _{MsgDetails}
+      <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true>
+        _{MsgNotifications}
+
+    <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+
+    <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+      <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et}>
+        ^{fw}

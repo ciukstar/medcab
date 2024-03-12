@@ -31,6 +31,7 @@ import Data.Eq (Eq ((==)))
 import Data.Function ((.), ($))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
+import Data.String (String)
 import Data.Text (unpack, pack)
 import Data.Time (UTCTime)
 import Data.Time.Calendar (Day)
@@ -48,8 +49,6 @@ import Yesod.Core.Dispatch
     , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
     )
 import Yesod.Form (Textarea)
-
-import Web.WebPush (PushEndpoint, PushP256dh, PushAuth)
 
 
 
@@ -176,3 +175,11 @@ statusError = "error"
 
 ultDestKey :: Text
 ultDestKey = "_ULT"
+
+secretVolumeVapid :: String
+secretVolumeVapid = "/vapid/vapid_min_details"
+
+
+secretVolumeGmail :: String
+secretVolumeGmail = "/grt/gmail_refresh_token"
+

@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Handler.MyDoctors
   ( getMyDoctorsR
@@ -19,12 +20,13 @@ import ChatRoom.Data ( Route(DoctorChatRoomR) )
 import VideoRoom.Data ( Route(DoctorVideoRoomR) )
 
 import Control.Lens ((.~))
-import qualified Control.Lens as L
-import Control.Monad (join)
+import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
-import qualified Data.Aeson as A (Value (Bool), Result (Success, Error), object, (.=))
+import qualified Data.Aeson as A
+    ( Value (Bool), Result (Success, Error), object, (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap))
+import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
@@ -33,13 +35,13 @@ import Database.Esqueleto.Experimental
     ( select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
     , SqlExpr, Value (unValue), val, innerJoin, countRows, subSelect, delete
-    , subSelectCount
+    , subSelectCount, subSelectMaybe
     )
 import Database.Persist (Entity (Entity), entityVal, upsertBy, (=.))
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
-    ( Handler
+    ( Handler, Form, App (appHttpManager)
     , Route
       ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, ChatR, VideoR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR
@@ -50,85 +52,101 @@ import Foundation
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
-      , MsgPhone, MsgChat, MsgNotifications, MsgAcceptNotifyMeForChat
-      , MsgAcceptNotifyMeForVideo, MsgAcceptNotifyMeForAudio
-      ), Form, App (getVAPID, appHttpManager)
+      , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
+      , MsgNoRecipient, MsgInvalidVAPID
+      )
     )
 
 import Material3 (md3mreq, md3switchField)
 import Menu (menu)
 import Model
-    ( statusError, AvatarColor (AvatarColorLight)
+    ( statusError, secretVolumeVapid, AvatarColor (AvatarColorLight)
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , Doctor(Doctor, doctorName), DoctorPhoto (DoctorPhoto), DoctorId
+    , Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId
     , Specialist (Specialist), Specialty (Specialty)
     , PatientId, Patient, UserId, Chat
+    , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
+    , User (userName, userEmail)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
       , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser, DoctorUser
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
-      , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
+      , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth, UserId
       )
-    , webPushEndpoint, webPushP256dh, webPushAuth
-    , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
-    , PushSubscriptionId
     )
-    
+
 import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile)
 import Settings.StaticFiles (img_person_FILL0_wght400_GRAD0_opsz24_svg)
 
+import System.IO (readFile')
+
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
+import Text.Read (readMaybe)
 
 import Web.WebPush
     ( mkPushNotification, pushMessage, readVAPIDKeys, sendPushNotification
-    , vapidPublicKeyBytes
+    , vapidPublicKeyBytes, pushSenderEmail, pushExpireInSeconds, VAPIDKeys
+    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent
-    , SomeMessage (SomeMessage), lookupSession, getYesod, addMessage, toHtml
-    , parseCheckJsonBody, returnJson, sendStatusJSON, ToJSON (toJSON), lookupGetParam
+    , SomeMessage (SomeMessage), getYesod, parseCheckJsonBody, returnJson
+    , sendStatusJSON, ToJSON (toJSON), lookupGetParam, invalidArgsI
     )
 import Yesod.Core.Content (TypedContent (TypedContent))
 import Yesod.Core.Handler (getMessages, setUltDestCurrent)
 import Yesod.Core.Widget (setTitleI)
-import Yesod.Persist.Core (YesodPersist(runDB))
-import Yesod.Form.Fields (textField)
-import Yesod.Form.Functions (generateFormPost, runFormPost)
-import Yesod.Form.Input (runInputPost, ireq)
+import Yesod.Form.Functions (generateFormPost)
 import Yesod.Form.Types
     ( FieldSettings(FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
-    , FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess)
+    , FieldView (fvInput, fvLabel, fvId)
     )
+import Yesod.Persist.Core (YesodPersist(runDB))
 
 
-postPushMessageR :: Handler ()
-postPushMessageR = do
-    vapidKeys <- readVAPIDKeys . getVAPID <$> getYesod
-    manager <- appHttpManager <$> getYesod
+postPushMessageR :: UserId -> UserId -> Handler ()
+postPushMessageR sid rid = do
 
-    endpoint <- runInputPost $ ireq textField "endpoint"
-    
-    subscription <- runDB $ selectOne $ do
+    sender <- do
+        s <- runDB $ selectOne $ do
+            x <- from $ table @User
+            where_ $ x ^. UserId ==. val sid
+            return x
+        return $ fromMaybe (maybe "" (userEmail . entityVal) s) (userName . entityVal =<< s)
+
+    subscriptions <- runDB $ select $ do
         x <- from $ table @PushSubscription
-        where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
+        where_ $ x ^. PushSubscriptionUser ==. val rid
         return x
 
-    case subscription of
-      Just (Entity _ (PushSubscription _ x y z)) -> do
-          let notification = mkPushNotification x y z & pushMessage .~ ("My first message" :: Text)
-          result <- sendPushNotification vapidKeys manager notification
-          case result of
-            Left ex -> do
-                liftIO $ print ex
-            Right () -> return ()
-      Nothing -> do
-          let msg = "No subscription found" :: Text
-          liftIO $ print msg
+    manager <- appHttpManager <$> getYesod
+
+    let vol = "/vapid/vapid_min_details"
+    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' vol
+
+    case details of
+      Just vapidKeysMinDetails -> do                           
+          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+
+          forM_ subscriptions $ \(Entity _ (PushSubscription _ x y z)) -> do
+                let notification = mkPushNotification x y z
+                        & pushMessage .~ ("Call from " <> sender :: Text)
+                        & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                        & pushExpireInSeconds .~ 60 * 60
+
+                result <- sendPushNotification vapidKeys manager notification
+
+                case result of
+                  Left ex -> do
+                      liftIO $ print ex
+                  Right () -> return ()
+                  
+      Nothing -> liftIO $ print ("No VAPID leys min details found in volume " <> vol)
 
 
 deletePushSubscriptionR :: Handler ()
@@ -157,67 +175,52 @@ postPushSubscriptionsR = do
 
 
 postMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
-postMyDoctorNotificationsR pid uid did = do
-
-    doctor <- runDB $ selectOne $ do
-        x <- from $ table @Doctor
-        where_ $ x ^. DoctorId ==. val did
-        return x
-    
-    ((fr,fw),et) <- runFormPost $ formNotifications uid (maybe "" (doctorName . entityVal) doctor) Nothing
-    case fr of
-      FormSuccess (_,allowPushNotifications,_) -> undefined
-      _otherwise -> undefined
+postMyDoctorNotificationsR _pid _uid _did = undefined
 
 
 getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorNotificationsR pid uid did = do
 
-    doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
-        x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
-            `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
-        where_ $ x ^. DoctorId ==. val did
-        return (x,h ?. DoctorPhotoAttribution) )
-
-    (fw,et) <- generateFormPost $ formNotifications uid (maybe "" (doctorName . entityVal . fst) doctor) Nothing
-
+    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' secretVolumeVapid
     
-    vapidKeys <- readVAPIDKeys . getVAPID <$> getYesod
+    case details of
+      Just vapidKeysMinDetails -> do
 
-    defaultLayout $ do
-        setTitleI MsgDoctor
-        idPanelNotifications <- newIdent
-        $(widgetFile "my/doctors/notifications/notifications")
+          doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+              x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
+                  `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+              where_ $ x ^. DoctorId ==. val did
+              return (x,h ?. DoctorPhotoAttribution) )
+
+          permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionUser ==. val uid
+              return x )
+              
+          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid permission
+
+          defaultLayout $ do
+              setTitleI MsgDoctor
+              idPanelNotifications <- newIdent
+              $(widgetFile "my/doctors/notifications/notifications")
+              
+      Nothing -> invalidArgsI [MsgInvalidVAPID]
 
 
-formNotifications :: UserId -> Text -> Maybe (Bool, Bool, Bool) -> Form (Bool, Bool, Bool)
-formNotifications uid name notifs extra = do
+formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool
+formNotifications vapidKeys uid notif extra = do
 
     let userId = pack $ show (fromSqlKey uid)
-    
-    vapidKeys <- readVAPIDKeys . getVAPID <$> getYesod
 
-    (chatR,chatV) <- md3mreq md3switchField FieldSettings
-        { fsLabel = SomeMessage (MsgAcceptNotifyMeForChat name)
+    (r,v) <- md3mreq md3switchField FieldSettings
+        { fsLabel = SomeMessage MsgSubscribeToNotifications
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
-        } ( notifs L.^? L._Just . L._1 )
+        } ( pure notif )
 
-    (videoR,videoV) <- md3mreq md3switchField FieldSettings
-        { fsLabel = SomeMessage (MsgAcceptNotifyMeForVideo name)
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("icons","")]
-        } ( notifs L.^? L._Just . L._2 )
-
-    (audioR,audioV) <- md3mreq md3switchField FieldSettings
-        { fsLabel = SomeMessage (MsgAcceptNotifyMeForAudio name)
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("icons","")]
-        } ( notifs L.^? L._Just . L._3 )
-
-    let r = (,,) <$> chatR <*> videoR <*> audioR
-    let w = $(widgetFile "my/doctors/notifications/form")
-    return (r,w)
+    let applicationServerKey = vapidPublicKeyBytes vapidKeys
+    return (r, $(widgetFile "my/doctors/notifications/form"))
 
 
 getMyDoctorSpecialtiesR :: PatientId -> UserId -> DoctorId -> Handler Html
@@ -252,7 +255,7 @@ getMyDoctorR pid uid did = do
     unread <- maybe 0 unValue <$> runDB ( selectOne $ do
         x <- from $ table @Chat
         where_ $ x ^. ChatInterlocutor ==. val uid
-        where_ $ just (just (x ^. ChatUser)) ==. subSelect
+        where_ $ just (x ^. ChatUser) ==. subSelectMaybe
             ( do
                   y <- from $ table @Doctor
                   where_ $ y ^. DoctorId ==. val did
@@ -261,11 +264,15 @@ getMyDoctorR pid uid did = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
-    msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgDoctor
-        idPanelDetails <- newIdent
-        $(widgetFile "my/doctors/doctor")
+    let sid = uid
+    case doctor >>= doctorUser . entityVal . fst of
+      Just rid -> do
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgDoctor
+              idPanelDetails <- newIdent
+              $(widgetFile "my/doctors/doctor")
+      Nothing -> invalidArgsI [MsgNoRecipient]
 
 
 
@@ -304,7 +311,7 @@ getMyDoctorsR uid = do
 
 
 getMyDoctorPhotoR :: UserId -> DoctorId -> Handler TypedContent
-getMyDoctorPhotoR uid did = do
+getMyDoctorPhotoR _ did = do
     photo <- runDB $ selectOne $ do
         x <- from $ table @DoctorPhoto
         where_ $ x ^. DoctorPhotoDoctor ==. val did

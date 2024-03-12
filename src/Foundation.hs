@@ -63,8 +63,6 @@ import Text.Jasmine (minifym)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 
-import Web.WebPush (VAPIDKeysMinDetails)
-
 import Yesod.Auth.Email
     ( SaltedPass, Identifier, Email, VerKey, VerUrl
     , authEmail, loginR, registerR, setpassR, forgotPasswordR
@@ -111,7 +109,6 @@ data App = App
     , appLogger      :: Logger
     , getChatRoom    :: ChatRoom
     , getVideoRoom   :: VideoRoom
-    , getVAPID       :: VAPIDKeysMinDetails
     }
 
 mkMessage "App" "messages" "en"
@@ -142,8 +139,6 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
-
-
     
     errorHandler :: ErrorResponse -> HandlerFor App TypedContent
     errorHandler NotFound = selectRep $ do
@@ -215,7 +210,7 @@ instance Yesod App where
     isAuthorized (VideoR _) _ = isAuthenticated
 
 
-    isAuthorized PushMessageR _ = isAuthenticated
+    isAuthorized (PushMessageR sid _) _ = isAuthenticatedSelf sid
     
     isAuthorized PushSubscriptionR _ = isAuthenticated
     isAuthorized PushSubscriptionsR _ = isAuthenticated
@@ -226,6 +221,8 @@ instance Yesod App where
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
 
+    
+    isAuthorized (MyPatientNotificationsR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
     isAuthorized (MyPatientR _ did _) _ = isDoctorSelf did
@@ -328,8 +325,10 @@ instance Yesod App where
     isAuthorized (DataR (SpecialtyCreateR _)) _ = isAdmin
     isAuthorized r@(DataR (SpecialtiesR _)) _ = setUltDest r >> isAdmin
 
-    isAuthorized (DataR TokensClearR) _ = isAdmin
-    isAuthorized (DataR TokensHookR) _ = isAdmin
+    
+    isAuthorized (DataR TokensVapidR) _ = isAdmin
+    isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
+    isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
 
@@ -723,7 +722,7 @@ instance YesodAuthEmail App where
             where_ $ x ^. TokenApi E.==. val gmail
             return x
 
-        secretExists <- liftIO $ doesFileExist "/grt/gmail_refresh_token"
+        secretExists <- liftIO $ doesFileExist secretVolumeGmail
 
         (rtoken,sender) <- case (tokenInfo,secretExists) of
           (Just (Entity tid (Token _ StoreTypeDatabase)),_) -> do
@@ -746,7 +745,7 @@ instance YesodAuthEmail App where
 
           (Just (Entity tid (Token _ StoreTypeGoogleSecretManager)),True) -> do
 
-              refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
+              refresh <- liftIO $ readFile' secretVolumeGmail
 
               sender <- liftHandler $ (unValue <$>) <$> runDB ( selectOne $ do
                   x <- from $ table @Store
@@ -757,7 +756,7 @@ instance YesodAuthEmail App where
               return (Just (pack refresh),sender)
 
           (_,True) -> do
-              refresh <- liftIO $ readFile' "/grt/gmail_refresh_token"
+              refresh <- liftIO $ readFile' secretVolumeGmail
               return (Just (pack refresh),Just "me")
 
           _otherwise -> return (Nothing,Nothing)

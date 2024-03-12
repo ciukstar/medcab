@@ -5,12 +5,16 @@
 
 packages:
 - completed:
-    hackage: web-push-0.3@sha256:3f3993836babe04f06f834ac7efc5ddeb656e28c6b845236a11752594da7a175,2572
+    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    git: https://github.com/sarthakbagaria/web-push.git
+    name: web-push
     pantry-tree:
-      sha256: c762b4ec943356489c17d3735fc2e0a498cdf63fbaf799edd8e0c731390fbca3
-      size: 451
+      sha256: 6a95d33c838e6987e68225cb66693c8d5825fc3c248c33fa996a895e47130d61
+      size: 1110
+    version: '0.4'
   original:
-    hackage: web-push-0.3@sha256:3f3993836babe04f06f834ac7efc5ddeb656e28c6b845236a11752594da7a175,2572
+    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    git: https://github.com/sarthakbagaria/web-push.git
 snapshots:
 - completed:
     sha256: e2c529ccfb21501f98f639e056cbde50470b86256d9849d7a82d414ca23e4276

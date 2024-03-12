@@ -3,6 +3,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Handler.MyPatients
   ( getMyPatientsR
@@ -10,6 +11,8 @@ module Handler.MyPatients
   , getMyPatientNewR
   , postMyPatientsR
   , postMyPatientRemoveR
+  , getMyPatientNotificationsR
+  , postMyPatientNotificationsR
   ) where
 
 
@@ -20,6 +23,7 @@ import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Bifunctor (Bifunctor(second, bimap))
+import Data.Text (pack)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
@@ -31,52 +35,117 @@ import Database.Esqueleto.Experimental
 import Database.Persist
     ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_, delete)
     )
+import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler, Form, App
     , Route
       ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR
+      , MyPatientRemoveR, ChatR, VideoR, PushSubscriptionR, PushSubscriptionsR
+      , MyPatientNotificationsR, PushMessageR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
       , MsgPhoto, MsgEdit, MsgSinceDate, MsgCancel, MsgSave, MsgBack, MsgPatient
       , MsgRecordCreated, MsgFullName, MsgDele, MsgConfirmPlease, MsgChat
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
-      , MsgVideoCall, MsgRecordDeleted, MsgRemove
+      , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
+      , MsgNotifications, MsgSubscribeToNotifications, MsgNoRecipient, MsgInvalidVAPID
       )
     )
 
+import Material3 (md3switchField, md3mreq)
 import Menu (menu)
 import Model
-    ( statusError, statusSuccess, AvatarColor (AvatarColorLight, AvatarColorDark)
+    ( statusError, statusSuccess, secretVolumeVapid
+    , AvatarColor (AvatarColorLight, AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
+    , PushSubscription
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
-      , ChatStatus, ChatUser
+      , ChatStatus, ChatUser, PushSubscriptionUser
       )
     )
 
 import Settings (widgetFile)
 
+import System.IO (readFile')
+
+import Text.Read (readMaybe)
 import Text.Hamlet (Html)
-import Text.Shakespeare.I18N (RenderMessage)
+import Text.Julius (RawJS(rawJS))
+import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
+
+import Web.WebPush
+    ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
+    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    )
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
-    , redirect, whamlet, handlerToWidget
+    , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
     )
 import Yesod.Form
-    ( FieldView (fvInput), FormResult (FormSuccess), runFormPost
+    ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
     , Field (fieldView), OptionList (olOptions)
     , multiSelectField, optionsPairs
     , Option (optionInternalValue, optionExternalValue, optionDisplay)
+    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
+
+
+postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
+postMyPatientNotificationsR _uid _did _pid = undefined
+
+
+getMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
+getMyPatientNotificationsR uid did pid = do
+
+    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' secretVolumeVapid
+    
+    case details of
+      Just vapidKeysMinDetails -> do
+          patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
+              x :& u :& h <- from $ table @Patient
+                  `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
+                  `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+              where_ $ x ^. PatientId ==. val pid
+              return (x,(u,h ?. UserPhotoAttribution)) )
+
+          permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionUser ==. val uid
+              return x )
+              
+          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid permission
+
+          defaultLayout $ do
+              setTitleI MsgPatient
+              idPanelNotifications <- newIdent
+              $(widgetFile "my/patients/notifications/notifications")
+              
+      Nothing -> invalidArgsI [MsgInvalidVAPID]
+
+
+formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool
+formNotifications vapidKeys uid permission extra = do
+
+    let userId = pack $ show (fromSqlKey uid)
+    let applicationServerKey = vapidPublicKeyBytes vapidKeys
+
+    (r,v) <- md3mreq md3switchField FieldSettings
+        { fsLabel = SomeMessage MsgSubscribeToNotifications
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("icons","")]
+        } ( pure permission )
+
+    return (r,$(widgetFile "my/patients/notifications/form"))
 
 
 postMyPatientRemoveR :: UserId -> DoctorId -> PatientId -> Handler Html
@@ -177,6 +246,7 @@ formPatients did options extra = do
 
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
+    
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -196,11 +266,19 @@ getMyPatientR uid did pid = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
-    (fw,et) <- generateFormPost formPatientRemove
-    msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgPatient
-        $(widgetFile "my/patients/patient")
+    
+
+    let sid = uid
+    case entityKey . fst . snd <$> patient of
+      Just rid -> do
+          (fw,et) <- generateFormPost formPatientRemove
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgPatient
+              idPanelDetails <- newIdent
+              $(widgetFile "my/patients/patient")
+      Nothing -> invalidArgsI [MsgNoRecipient]
+
 
 
 formPatientRemove :: Form ()

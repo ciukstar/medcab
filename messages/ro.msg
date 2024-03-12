@@ -1,3 +1,8 @@
+InvalidVAPID: VAID nevalid
+Generate: Generați
+NoRecipient: Niciun destinatar
+SubscribeToNotifications: Abonați-vă la notificări
+AcceptNotificationsFrom name@Text: Permite notificări de la #{name}
 AcceptNotifyMeForAudio name: Notificați când #{name} efectuează un apel audio
 AcceptNotifyMeForVideo name: Notificați când #{name} efectuează un apel video
 AcceptNotifyMeForChat name: Notificați când #{name} dorește să discute

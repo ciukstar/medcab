@@ -6,8 +6,9 @@
 module Handler.Tokens
   ( getTokensR
   , postTokensR
-  , getTokensHookR
-  , postTokensClearR
+  , getTokensGoogleapisHookR
+  , postTokensGoogleapisClearR
+  , postTokensVapidR
   ) where
 
 import Control.Exception.Safe (tryAny)
@@ -35,15 +36,15 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Widget, App (appSettings)
+    ( Handler, Form, App (appSettings)
     , Route (DataR, AuthR, AccountR, AccountPhotoR)
-    , DataR (TokensR, TokensHookR, TokensClearR)
+    , DataR (TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR)
     , AppMessage
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
       , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
       , MsgGmailAccount, MsgGoogleSecretManager, MsgSignIn, MsgSignOut
-      , MsgUserAccount, MsgPhoto
+      , MsgUserAccount, MsgPhoto, MsgGenerate
       )
     )
 import Data.Function ((&))
@@ -57,7 +58,7 @@ import Model
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
-    , AvatarColor (AvatarColorLight)
+    , AvatarColor (AvatarColorLight), secretVolumeGmail
     )
     
 import Network.Wreq
@@ -88,21 +89,17 @@ import Yesod.Form.Input (ireq, runInputGet)
 import Yesod.Form.Fields (optionsPairs, textField)
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost)
 import Yesod.Form.Types
-    ( MForm, FormResult (FormSuccess), FieldView (fvInput)
+    ( FormResult (FormSuccess), FieldView (fvInput)
     , FieldSettings (FieldSettings, fsLabel, fsId, fsName, fsTooltip, fsAttrs)
     )
 
 
-projects :: Text
-projects = "https://secretmanager.googleapis.com/v1/projects" :: Text
+postTokensVapidR :: Handler Html
+postTokensVapidR = undefined
 
 
-project :: Text
-project = "medcab-410214" :: Text
-
-
-getTokensHookR :: Handler Html
-getTokensHookR = do
+getTokensGoogleapisHookR :: Handler Html
+getTokensGoogleapisHookR = do
     rndr <- getUrlRender
     app <- appSettings <$> getYesod
     let googleClientId = appGoogleClientId app
@@ -113,7 +110,7 @@ getTokensHookR = do
 
     r <- liftIO $ post "https://oauth2.googleapis.com/token"
          [ "code" := code
-         , "redirect_uri" := rndr (DataR TokensHookR)
+         , "redirect_uri" := rndr (DataR TokensGoogleapisHookR)
          , "client_id" := googleClientId
          , "client_secret" := googleClientSecret
          , "grant_type" := ("authorization_code" :: Text)
@@ -184,15 +181,15 @@ getTokensHookR = do
           redirect $ DataR TokensR
 
 
-postTokensClearR :: Handler Html
-postTokensClearR = do
+postTokensGoogleapisClearR :: Handler Html
+postTokensGoogleapisClearR = do
 
     token <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val gmail
         return x
 
-    ((fr2,fw2),et2) <- runFormPost formTokensClear
+    ((fr2,fwGmailClear),etGmailClear) <- runFormPost formTokensClear
     case (fr2,token) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeSession))) -> do
           deleteSession gmailAccessToken
@@ -213,7 +210,7 @@ postTokensClearR = do
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
           app <- appSettings <$> getYesod
           -- 1. read refresh token from mounted volume
-          refreshToken <- liftIO $ readFile' "/grt/gmail_refresh_token"
+          refreshToken <- liftIO $ readFile' secretVolumeGmail
 
           -- 2. get access token from googleapi
           refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
@@ -260,7 +257,8 @@ postTokensClearR = do
           redirect $ DataR TokensR
       _otherwise -> do
           user <- maybeAuth
-          (fw,et) <- generateFormPost $ formStoreOptions token
+          (fwGmail,etGmail) <- generateFormPost $ formStoreOptions token
+          (fwVapid,etVapid) <- generateFormPost $ formVapid token
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
           defaultLayout $ do
@@ -268,7 +266,7 @@ postTokensClearR = do
               $(widgetFile "data/tokens/tokens")
 
 
-formTokensClear :: Html -> MForm Handler (FormResult (),Widget)
+formTokensClear :: Form ()
 formTokensClear extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 
@@ -280,7 +278,7 @@ postTokensR = do
         where_ $ x ^. TokenApi ==. val gmail
         return x
 
-    ((fr,fw),et) <- runFormPost $ formStoreOptions token
+    ((fr,fwGmail),etGmail) <- runFormPost $ formStoreOptions token
     case fr of
       FormSuccess x -> do
           app <- appSettings <$> getYesod
@@ -290,7 +288,7 @@ postTokensR = do
               scope = "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/cloud-platform"
 
           r <- liftIO $ post "https://accounts.google.com/o/oauth2/v2/auth"
-              [ "redirect_uri" := urlRender (DataR TokensHookR)
+              [ "redirect_uri" := urlRender (DataR TokensGoogleapisHookR)
               , "response_type" := ("code" :: Text)
               , "prompt" := ("consent" :: Text)
               , "client_id" := appGoogleClientId app
@@ -303,7 +301,8 @@ postTokensR = do
 
       _otherwise -> do
           user <- maybeAuth
-          (fw2,et2) <- generateFormPost formTokensClear
+          (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
+          (fwVapid,etVapid) <- generateFormPost $ formVapid token
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
@@ -318,8 +317,9 @@ getTokensR = do
         where_ $ x ^. TokenApi ==. val gmail
         return x
 
-    (fw2,et2) <- generateFormPost formTokensClear
-    (fw,et) <- generateFormPost $ formStoreOptions token
+    (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
+    (fwGmail,etGmail) <- generateFormPost $ formStoreOptions token
+    (fwVapid,etVapid) <- generateFormPost $ formVapid token
     msgs <- getMessages
     defaultLayout $ do
         setUltDestCurrent
@@ -327,8 +327,28 @@ getTokensR = do
         $(widgetFile "data/tokens/tokens")
 
 
-formStoreOptions :: Maybe (Entity Token)
-                 -> Html -> MForm Handler (FormResult (Text,StoreType), Widget)
+formVapid :: Maybe (Entity Token) -> Form StoreType
+formVapid token extra = do
+    let storeOptions = [ (MsgUserSession, StoreTypeSession)
+                       , (MsgDatabase, StoreTypeDatabase)
+                       , (MsgGoogleSecretManager, StoreTypeGoogleSecretManager)
+                       ]
+    (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
+        { fsLabel = SomeMessage MsgStoreType
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = [("class","app-options-store-type")]
+        } (tokenStore . entityVal <$> token)
+    return ( storeR
+           , [whamlet|
+               #{extra}
+               <fieldset.shape-medium>
+                 <legend.body-medium>_{MsgStoreType}<sup>*
+                 ^{fvInput storeV}
+             |]
+           )
+
+
+formStoreOptions :: Maybe (Entity Token)-> Form (Text,StoreType)
 formStoreOptions token extra = do
     msg <- getMessageRender
     let storeOptions = [ (MsgUserSession, StoreTypeSession)
@@ -354,3 +374,11 @@ formStoreOptions token extra = do
                  ^{fvInput storeV}
              |]
            )
+
+
+projects :: Text
+projects = "https://secretmanager.googleapis.com/v1/projects" :: Text
+
+
+project :: Text
+project = "medcab-410214" :: Text

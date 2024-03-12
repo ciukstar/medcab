@@ -33,16 +33,32 @@
       Gmail
     <div.app-card-content>
     
-      <form method=post action=@{DataR TokensR} enctype=#{et} #formStoreType>
-        ^{fw}
+      <form.formStoreType method=post action=@{DataR TokensR} enctype=#{etGmail} #formTokensGmail>
+        ^{fwGmail}
           
     <div.app-card-actions>
-      <form method=post action=@{DataR TokensClearR} enctype=#{et2} #formTokensClear>
-        ^{fw2}
-      <md-text-button type=submit form=formTokensClear>
+      <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etGmailClear} #formTokensGmailClear>
+        ^{fwGmailClear}
+      <md-text-button type=submit form=formTokensGmailClear>
         _{MsgClearSettings}
-      <md-filled-button type=submit form=formStoreType>
+      <md-filled-button type=submit form=formTokensGmail>
         _{MsgInitialize}
+
+  <div.app-card.shape-large.outline>
+    <div.app-card-title.headline-medium>
+      VAPID
+    <div.app-card-content>
+    
+      <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} #formTokensVapid>
+        ^{fwVapid}
+          
+    <div.app-card-actions>
+      <form method=post action=# #formTokensVapidClear>
+        
+      <md-text-button type=submit form=formTokensVapidClear disabled>
+        _{MsgClearSettings}
+      <md-filled-button type=submit form=formTokensVapid disabled>
+        _{MsgGenerate}
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

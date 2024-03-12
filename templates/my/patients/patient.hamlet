@@ -41,40 +41,53 @@
             #{attrib}
         $nothing
           _{MsgPhoto}
-          
-    <dl>
-    
-      <dt.label-large>_{MsgSinceDate}
-      <dd.body-medium>
-        $with dt <- show since
-          <time datetime=#{dt}>#{dt}
-          
-      <dt.label-large>_{MsgFullName}
-      <dd.body-medium>
-        $maybe name <- name
-          #{name}
-          
-      <dt.label-large>_{MsgEmailAddress}
-      <dd.body-medium>
-        <md-text-button type=link href="mailto:#{email}" trailing-icon>
-          #{email}
-          <md-icon slot=icon>mail
 
-      <div #actions>
-          
-        <md-filled-tonal-button  type=link href=@{ChatR $ PatientChatRoomR pid uid}>
-          <md-icon slot=icon>Chat
-          _{MsgChat}
-          $if unread > 0
-            \ (#{unread})
-          
-        <md-filled-tonal-button type=link href=@{VideoR $ PatientVideoRoomR pid did uid}>
-          <md-icon slot=icon>video_call
-          _{MsgVideoCall}
+    <md-tabs aria-label=_{MsgTabs}>
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+        _{MsgDetails}
+      <md-primary-tab #tabNotifications aria-controls=panelNotifications>
+        _{MsgNotifications}
 
-        <md-filled-tonal-button type=button>
-          <md-icon slot=icon>call
-          _{MsgAudioCall}
+    <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
+
+      <dl>
+
+        <dt.label-large>_{MsgSinceDate}
+        <dd.body-medium>
+          $with dt <- show since
+            <time datetime=#{dt}>#{dt}
+
+        <dt.label-large>_{MsgFullName}
+        <dd.body-medium>
+          $maybe name <- name
+            #{name}
+
+        <dt.label-large>_{MsgEmailAddress}
+        <dd.body-medium>
+          <md-text-button type=link href="mailto:#{email}" trailing-icon>
+            #{email}
+            <md-icon slot=icon>mail
+
+        <div #actions>
+
+          <md-filled-button type=button #buttonCallNotification>
+            Call Notification
+
+          <md-filled-tonal-button  type=link href=@{ChatR $ PatientChatRoomR pid uid}>
+            <md-icon slot=icon>Chat
+            _{MsgChat}
+            $if unread > 0
+              \ (#{unread})
+
+          <md-filled-tonal-button type=link href=@{VideoR $ PatientVideoRoomR pid did uid}>
+            <md-icon slot=icon>video_call
+            _{MsgVideoCall}
+
+          <md-filled-tonal-button type=button>
+            <md-icon slot=icon>call
+            _{MsgAudioCall}
+
+    <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

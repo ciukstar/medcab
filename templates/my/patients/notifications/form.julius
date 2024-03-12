@@ -30,6 +30,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
       return Notification.requestPermission().then(function (permission) {
 	if (permission === 'granted') {
 	  return registration.pushManager.getSubscription().then(function (subscription) {
+	    
 	    return !subscription ? registration.pushManager.subscribe({
 	      userVisibleOnly: true,
 	      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})

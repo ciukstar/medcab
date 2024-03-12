@@ -27,7 +27,7 @@ main
     padding: 1rem
     .app-card-content
       padding: 1rem
-      #formStoreType
+      .formStoreType
         display: flex
         flex-direction: column
         gap: 1rem        

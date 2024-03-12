@@ -1,3 +1,8 @@
+InvalidVAPID: Неверный VAPID
+Generate: Генерировать
+NoRecipient: Нет получателя
+SubscribeToNotifications: Подписаться на уведомления
+AcceptNotificationsFrom name@Text: Разрешить получать уведомления от #{name}
 AcceptNotifyMeForAudio name: Уведомлять, когда #{name} совершает аудиовызов
 AcceptNotifyMeForVideo name: Уведомлять, когда #{name} совершает видеозвонок
 AcceptNotifyMeForChat name: Уведомлять, когда #{name} хочет пообщаться

@@ -4,7 +4,7 @@
 
 /channels ChatR ChatRoom getChatRoom
 
-/api/push/message       PushMessageR       POST
+/api/push/sender/#UserId/recipient/#UserId PushMessageR POST
 
 /api/push/subscriptions/dele  PushSubscriptionR  DELETE
 /api/push/subscriptions       PushSubscriptionsR POST
@@ -15,10 +15,11 @@
 /patients/#UserId/doctors/#DoctorId/photo       	     MyDoctorPhotoR 	    GET
 /patients/#UserId/doctors 				     MyDoctorsR	     	    GET
 
-/users/#UserId/doctors/#DoctorId/patients/#PatientId/remove MyPatientRemoveR POST
-/form/doctors/#DoctorId/patients/new                 	    MyPatientNewR    GET
-/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    MyPatientR       GET
-/doctors/#DoctorId/patients            	             	    MyPatientsR      GET POST
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/notifications MyPatientNotificationsR GET POST
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/remove 	   MyPatientRemoveR 	   POST
+/form/doctors/#DoctorId/patients/new                 	    	   MyPatientNewR    	   GET
+/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    	   MyPatientR       	   GET
+/doctors/#DoctorId/patients            	             	    	   MyPatientsR      	   GET POST
 
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
 /doctors/#DoctorId 	       DoctorR      	  GET
@@ -120,9 +121,11 @@
     /specialty/#SpecialtyId/+Specialties      	    	      		    SpecialtyR             GET POST
     /specialties/+Specialties 	              	    	      		    SpecialtiesR           GET POST
 
-    /tokens/clear TokensClearR POST
-    /tokens/hook  TokensHookR  GET
-    /tokens 	  TokensR      GET POST
+
+    /tokens/vapid TokensVapidR           POST
+    /tokens/clear TokensGoogleapisClearR POST
+    /tokens/hook  TokensGoogleapisHookR  GET
+    /tokens 	  TokensR      		 GET POST
 
 
     /users/#UserId/photo UserPhotoR  GET
