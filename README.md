@@ -9,7 +9,9 @@
 
 ## Patient/Doctor Video Call
 
-... using [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+... using 
+* [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+* [Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
 
 ## Basic Entities
 

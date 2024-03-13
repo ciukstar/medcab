@@ -28,7 +28,7 @@ import qualified Data.Aeson as A
 import Data.Bifunctor (Bifunctor(second, bimap))
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
-import Data.Text (Text, pack)
+import Data.Text (Text, pack, unpack)
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Esqueleto.Experimental
@@ -53,25 +53,26 @@ import Foundation
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
-      , MsgNoRecipient, MsgInvalidVAPID
+      , MsgNoRecipient, MsgNotGeneratedVAPID
       )
     )
 
 import Material3 (md3mreq, md3switchField)
 import Menu (menu)
 import Model
-    ( statusError, secretVolumeVapid, AvatarColor (AvatarColorLight)
-    , ChatMessageStatus (ChatMessageStatusUnread)
+    ( statusError, secretVolumeVapid, tokenIdVapid, AvatarColor (AvatarColorLight)
+    , ChatMessageStatus (ChatMessageStatusUnread), User (userName, userEmail)
     , Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId
     , Specialist (Specialist), Specialty (Specialty)
-    , PatientId, Patient, UserId, Chat
+    , PatientId, Patient, UserId, Chat, Token, Store
     , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
-    , User (userName, userEmail)
+    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
       , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser, DoctorUser
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
-      , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth, UserId
+      , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
+      , UserId, TokenApi, StoreToken, TokenId, StoreVal, TokenStore
       )
     )
 
@@ -88,8 +89,8 @@ import Text.Read (readMaybe)
 
 import Web.WebPush
     ( mkPushNotification, pushMessage, readVAPIDKeys, sendPushNotification
-    , vapidPublicKeyBytes, pushSenderEmail, pushExpireInSeconds, VAPIDKeys
-    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    , vapidPublicKeyBytes, pushSenderEmail, pushExpireInSeconds
+    , VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
@@ -126,8 +127,25 @@ postPushMessageR sid rid = do
 
     manager <- appHttpManager <$> getYesod
 
-    let vol = "/vapid/vapid_min_details"
-    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' vol
+    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken ==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
 
     case details of
       Just vapidKeysMinDetails -> do                           
@@ -146,7 +164,7 @@ postPushMessageR sid rid = do
                       liftIO $ print ex
                   Right () -> return ()
                   
-      Nothing -> liftIO $ print ("No VAPID leys min details found in volume " <> vol)
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 deletePushSubscriptionR :: Handler ()
@@ -181,8 +199,26 @@ postMyDoctorNotificationsR _pid _uid _did = undefined
 getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorNotificationsR pid uid did = do
 
-    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' secretVolumeVapid
-    
+    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken ==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
+
     case details of
       Just vapidKeysMinDetails -> do
 
@@ -196,7 +232,7 @@ getMyDoctorNotificationsR pid uid did = do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionUser ==. val uid
               return x )
-              
+
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
           (fw,et) <- generateFormPost $ formNotifications vapidKeys uid permission
 
@@ -204,8 +240,8 @@ getMyDoctorNotificationsR pid uid did = do
               setTitleI MsgDoctor
               idPanelNotifications <- newIdent
               $(widgetFile "my/doctors/notifications/notifications")
-              
-      Nothing -> invalidArgsI [MsgInvalidVAPID]
+
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool

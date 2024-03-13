@@ -51,7 +51,12 @@ import Model
     , Normal
       ( Normal, normalName, normalLowerBound, normalUpperBound, normalUnit
       , normalSign
-      ), Patient (Patient, patientUser, patientDoctor, patientSince), Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus), ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
+      )
+    , Patient (Patient, patientUser, patientDoctor, patientSince)
+    , Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus)
+    , ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
+    , Token (Token, tokenApi, tokenStore), tokenIdVapid
+    , StoreType (StoreTypeGoogleSecretManager)
     )
 
 import Text.Hamlet (shamlet)
@@ -70,6 +75,10 @@ fillDemoEn = do
     let today = utctDay now
     let localNow = utcToLocalTime tz now
 
+    insert_ Token { tokenApi = tokenIdVapid
+                  , tokenStore = StoreTypeGoogleSecretManager
+                  }
+    
     pass1 <- liftIO $ saltPass "marylopez"
     let user1 = User { userEmail = "marylopez@xmail.edu"
                      , userAuthType = UserAuthTypeEmail

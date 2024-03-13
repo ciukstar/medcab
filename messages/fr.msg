@@ -1,3 +1,7 @@
+InvalidGoogleAPITokens: Jetons d'API Google non valides
+VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
+InvalidArguments: Arguments invalides
+NotGeneratedVAPID: Le VAPID n'a pas été généré
 InvalidVAPID: VAPID invalide
 Generate: Générer
 NoRecipient: Aucun destinataire

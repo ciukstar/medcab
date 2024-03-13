@@ -30,6 +30,7 @@ import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Function ((&))
 import Data.Kind (Type)
 import qualified Data.List.Safe as LS (head)
+import qualified Data.Text as T (intercalate)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Lazy.Encoding
 
@@ -158,6 +159,15 @@ instance Yesod App where
             $(widgetFile "error/permission-denied")
         provideRep $ return $ object ["message" .= ("Permission Denied. " <> msg)]
         provideRep $ return $ "Permission Denied. " <> msg
+        
+    errorHandler (InvalidArgs msgs) = selectRep $ do
+        provideRep $ defaultLayout $ do
+            setTitleI MsgInvalidArguments
+            idHeader <- newIdent
+            $(widgetFile "error/invalid-args")
+        provideRep $ return $ object ["message" .= msgs]
+        provideRep $ return $ T.intercalate ", " msgs
+        
     errorHandler x = defaultErrorHandler x
 
     -- Controls the base of generated URLs. For more information on modifying,
@@ -719,7 +729,7 @@ instance YesodAuthEmail App where
 
         tokenInfo <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
-            where_ $ x ^. TokenApi E.==. val gmail
+            where_ $ x ^. TokenApi E.==. val tokenIdGmail
             return x
 
         secretExists <- liftIO $ doesFileExist secretVolumeGmail

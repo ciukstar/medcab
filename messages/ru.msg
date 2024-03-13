@@ -1,3 +1,7 @@
+InvalidGoogleAPITokens: Неверные токены Google API
+VapidGenerationWarning: Для создания нового ключа VAPID всем клиентам необходимо повторно подписаться на push-уведомления
+InvalidArguments: Неверные аргументы
+NotGeneratedVAPID: VAPID не был создан
 InvalidVAPID: Неверный VAPID
 Generate: Генерировать
 NoRecipient: Нет получателя

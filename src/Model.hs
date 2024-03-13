@@ -51,7 +51,6 @@ import Yesod.Core.Dispatch
 import Yesod.Form (Textarea)
 
 
-
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
     deriving (Show, Read, Eq, Ord)
 derivePersistField "ChatMessageStatus"
@@ -163,8 +162,11 @@ gmailAccessToken = "gmail_access_token"
 gmailRefreshToken :: Text
 gmailRefreshToken = "gmail_refresh_token"
 
-gmail :: Text
-gmail = "GMAIL_API"
+tokenIdVapid :: Text
+tokenIdVapid = "VAPID"
+
+tokenIdGmail :: Text
+tokenIdGmail = "GMAIL_API"
 
 
 statusSuccess :: Text

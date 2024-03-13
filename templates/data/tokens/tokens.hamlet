@@ -47,9 +47,10 @@
   <div.app-card.shape-large.outline>
     <div.app-card-title.headline-medium>
       VAPID
+    <div.body-small>_{MsgVapidGenerationWarning}.
     <div.app-card-content>
     
-      <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} #formTokensVapid>
+      <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} ##{formTokensVapid}>
         ^{fwVapid}
           
     <div.app-card-actions>
@@ -57,7 +58,7 @@
         
       <md-text-button type=submit form=formTokensVapidClear disabled>
         _{MsgClearSettings}
-      <md-filled-button type=submit form=formTokensVapid disabled>
+      <md-filled-button type=submit form=#{formTokensVapid}>
         _{MsgGenerate}
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

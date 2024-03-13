@@ -1,4 +1,8 @@
-InvalidVAPID: InvalidVAPID
+InvalidGoogleAPITokens: Invalid Google API tokens
+VapidGenerationWarning: Generating a new VAPID key requires all clients to re-subscribe to the push notifications
+InvalidArguments: Invalid arguments
+NotGeneratedVAPID: VAPID not generated
+InvalidVAPID: Invalid VAPID
 Generate: Generate
 NoRecipient: No recipient
 SubscribeToNotifications: Subscribe to notifications

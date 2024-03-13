@@ -23,7 +23,7 @@ import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Bifunctor (Bifunctor(second, bimap))
-import Data.Text (pack)
+import Data.Text (pack, unpack)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
@@ -50,22 +50,25 @@ import Foundation
       , MsgRecordCreated, MsgFullName, MsgDele, MsgConfirmPlease, MsgChat
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
-      , MsgNotifications, MsgSubscribeToNotifications, MsgNoRecipient, MsgInvalidVAPID
+      , MsgNotifications, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
+      , MsgNoRecipient
       )
     )
 
 import Material3 (md3switchField, md3mreq)
 import Menu (menu)
 import Model
-    ( statusError, statusSuccess, secretVolumeVapid
+    ( statusError, statusSuccess, secretVolumeVapid, tokenIdVapid
     , AvatarColor (AvatarColorLight, AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
-    , PushSubscription
+    , PushSubscription, Token, Store
+    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
-      , ChatStatus, ChatUser, PushSubscriptionUser
+      , ChatStatus, ChatUser, PushSubscriptionUser, TokenApi, TokenId
+      , TokenStore, StoreToken, StoreVal
       )
     )
 
@@ -106,7 +109,25 @@ postMyPatientNotificationsR _uid _did _pid = undefined
 getMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientNotificationsR uid did pid = do
 
-    details <- liftIO $ ((\(s,x,y) -> VAPIDKeysMinDetails s x y) <$>) . readMaybe <$> readFile' secretVolumeVapid
+    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken ==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
     
     case details of
       Just vapidKeysMinDetails -> do
@@ -130,7 +151,7 @@ getMyPatientNotificationsR uid did pid = do
               idPanelNotifications <- newIdent
               $(widgetFile "my/patients/notifications/notifications")
               
-      Nothing -> invalidArgsI [MsgInvalidVAPID]
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool
