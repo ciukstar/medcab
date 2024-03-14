@@ -56,9 +56,6 @@
           <a href="mailto:#{email}">#{email}
 
       <div #actions>
-
-        <md-filled-button type=button #buttonCallNotification>
-          Call Notification
       
         <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid uid}>
           <md-icon slot=icon>Chat
@@ -66,7 +63,7 @@
           $if unread > 0
             \ (#{unread})
           
-        <md-filled-tonal-button #idButtonVideoCall type=link href=@{VideoR $ DoctorVideoRoomR pid uid did}>
+        <md-filled-tonal-button ##{idButtonVideoCall} type=link href=@{VideoR $ DoctorVideoRoomR pid uid did}>
           <md-icon slot=icon>video_call
           _{MsgVideoCall}
 

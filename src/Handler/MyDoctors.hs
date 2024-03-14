@@ -307,6 +307,7 @@ getMyDoctorR pid uid did = do
           defaultLayout $ do
               setTitleI MsgDoctor
               idPanelDetails <- newIdent
+              idButtonVideoCall <- newIdent
               $(widgetFile "my/doctors/doctor")
       Nothing -> invalidArgsI [MsgNoRecipient]
 

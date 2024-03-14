@@ -19,14 +19,14 @@ document.querySelector('md-tabs').addEventListener('change',function (e) {
     : '@{MyPatientNotificationsR uid did pid}'
 });
 
-document.getElementById('buttonCallNotification').onclick = function (e) {
+document.getElementById(#{idButtonVideoCall}).onclick = function (e) {
 
   fetch('@{PushMessageR sid rid}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ "message": "Ignore" })
-  }).then(function (response) {
-    console.log('response: ',response);
+  }).catch(function (err) {
+    console.error(err);
   });
   
 };

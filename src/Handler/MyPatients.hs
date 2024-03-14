@@ -297,6 +297,7 @@ getMyPatientR uid did pid = do
           defaultLayout $ do
               setTitleI MsgPatient
               idPanelDetails <- newIdent
+              idButtonVideoCall <- newIdent
               $(widgetFile "my/patients/patient")
       Nothing -> invalidArgsI [MsgNoRecipient]
 

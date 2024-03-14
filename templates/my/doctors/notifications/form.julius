@@ -1,10 +1,8 @@
 
-function sendSubscriptionToBackEnd (subscription) {
+function saveSubscription (subscription) {
 
   const subscr = JSON.parse(JSON.stringify(subscription));
   subscr.user = #{rawJS userId};
-  
-  console.log('subscr: ',subscr);
   
   fetch('@{PushSubscriptionsR}', {
     method: 'POST',
@@ -19,8 +17,25 @@ function sendSubscriptionToBackEnd (subscription) {
     if (!(responseData.data && responseData.data.success)) {
       throw new Error('Bad response from server.');
     }
+  }); 
+};
+
+function subscribeToPushService (registration) {
+  return registration.pushManager.getSubscription().then(function (subscription) {
+    if (!subscription) {
+      return registration.pushManager.subscribe({
+	userVisibleOnly: true,
+	applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+      });
+    } else {
+      return subscription.unsubscribe().then(function (success) {
+	return registration.pushManager.subscribe({
+	  userVisibleOnly: true,
+	  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+	});
+      });
+    }
   });
-  
 };
 
 document.getElementById(#{fvId v}).onchange = function (e) {
@@ -29,17 +44,11 @@ document.getElementById(#{fvId v}).onchange = function (e) {
     navigator.serviceWorker.ready.then(function (registration) {
       return Notification.requestPermission().then(function (permission) {
 	if (permission === 'granted') {
-	  return registration.pushManager.getSubscription().then(function (subscription) {
-	    return !subscription ? registration.pushManager.subscribe({
-	      userVisibleOnly: true,
-	      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-	    }) : Promise.resolve(subscription);
-	    
-	  });
+	  return subscribeToPushService(registration);
 	}
       });
     }).then(function (subscription) {
-      sendSubscriptionToBackEnd(subscription);
+      saveSubscription(subscription);
     });
   } else {
     navigator.serviceWorker.ready.then(function (registration) {
@@ -56,4 +65,4 @@ document.getElementById(#{fvId v}).onchange = function (e) {
       })
     });    
   }
-}
+};
