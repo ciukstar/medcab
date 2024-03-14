@@ -33,15 +33,15 @@
       Gmail
     <div.app-card-content>
     
-      <form.formStoreType method=post action=@{DataR TokensR} enctype=#{etGmail} #formTokensGmail>
+      <form.formStoreType method=post action=@{DataR TokensR} enctype=#{etGmail} ##{formTokensGmail}>
         ^{fwGmail}
           
     <div.app-card-actions>
-      <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etGmailClear} #formTokensGmailClear>
+      <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etGmailClear} ##{formTokensGmailClear}>
         ^{fwGmailClear}
-      <md-text-button type=submit form=formTokensGmailClear>
+      <md-text-button type=submit form=#{formTokensGmailClear}>
         _{MsgClearSettings}
-      <md-filled-button type=submit form=formTokensGmail>
+      <md-filled-button type=submit form=#{formTokensGmail}>
         _{MsgInitialize}
 
   <div.app-card.shape-large.outline>
@@ -54,9 +54,10 @@
         ^{fwVapid}
           
     <div.app-card-actions>
-      <form method=post action=# #formTokensVapidClear>
+      <form method=post action=@{DataR TokensVapidClearR} enctype=#{etVapidClear} ##{formTokensVapidClear}>
+        ^{fwVapidClear}
         
-      <md-text-button type=submit form=formTokensVapidClear disabled>
+      <md-text-button type=submit form=#{formTokensVapidClear}>
         _{MsgClearSettings}
       <md-filled-button type=submit form=#{formTokensVapid}>
         _{MsgGenerate}

@@ -60,7 +60,7 @@ import Foundation
 import Material3 (md3mreq, md3switchField)
 import Menu (menu)
 import Model
-    ( statusError, secretVolumeVapid, tokenIdVapid, AvatarColor (AvatarColorLight)
+    ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
     , ChatMessageStatus (ChatMessageStatusUnread), User (userName, userEmail)
     , Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId
     , Specialist (Specialist), Specialty (Specialty)
@@ -129,7 +129,7 @@ postPushMessageR sid rid = do
 
     storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        where_ $ x ^. TokenApi ==. val apiInfoVapid
         return (x ^. TokenId, x ^. TokenStore) )
 
     let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
@@ -201,7 +201,7 @@ getMyDoctorNotificationsR pid uid did = do
 
     storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        where_ $ x ^. TokenApi ==. val apiInfoVapid
         return (x ^. TokenId, x ^. TokenStore) )
 
     let readTriple (s,x,y) = VAPIDKeysMinDetails s x y

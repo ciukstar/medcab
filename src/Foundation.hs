@@ -335,7 +335,7 @@ instance Yesod App where
     isAuthorized (DataR (SpecialtyCreateR _)) _ = isAdmin
     isAuthorized r@(DataR (SpecialtiesR _)) _ = setUltDest r >> isAdmin
 
-    
+    isAuthorized (DataR TokensVapidClearR) _ = isAdmin
     isAuthorized (DataR TokensVapidR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
@@ -729,7 +729,7 @@ instance YesodAuthEmail App where
 
         tokenInfo <- liftHandler $ runDB $ selectOne $ do
             x <- from $ table @Token
-            where_ $ x ^. TokenApi E.==. val tokenIdGmail
+            where_ $ x ^. TokenApi E.==. val apiInfoGoogle
             return x
 
         secretExists <- liftIO $ doesFileExist secretVolumeGmail

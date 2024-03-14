@@ -122,10 +122,11 @@
     /specialties/+Specialties 	              	    	      		    SpecialtiesR           GET POST
 
 
-    /tokens/vapid TokensVapidR           POST
-    /tokens/clear TokensGoogleapisClearR POST
-    /tokens/hook  TokensGoogleapisHookR  GET
-    /tokens 	  TokensR      		 GET POST
+    /tokens/vapid/clear TokensVapidClearR      POST
+    /tokens/vapid 	TokensVapidR           POST
+    /tokens/clear 	TokensGoogleapisClearR POST
+    /tokens/hook  	TokensGoogleapisHookR  GET
+    /tokens 	  	TokensR      	       GET POST
 
 
     /users/#UserId/photo UserPhotoR  GET

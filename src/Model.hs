@@ -162,11 +162,15 @@ gmailAccessToken = "gmail_access_token"
 gmailRefreshToken :: Text
 gmailRefreshToken = "gmail_refresh_token"
 
-tokenIdVapid :: Text
-tokenIdVapid = "VAPID"
+apiInfoGoogle :: Text
+apiInfoGoogle = "GOOGLE_API"
 
-tokenIdGmail :: Text
-tokenIdGmail = "GMAIL_API"
+secretVapid :: Text
+secretVapid = "vapid_min_details"
+
+apiInfoVapid :: Text
+apiInfoVapid = "VAPID"
+
 
 
 statusSuccess :: Text

@@ -58,7 +58,7 @@ import Foundation
 import Material3 (md3switchField, md3mreq)
 import Menu (menu)
 import Model
-    ( statusError, statusSuccess, secretVolumeVapid, tokenIdVapid
+    ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorLight, AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
@@ -111,7 +111,7 @@ getMyPatientNotificationsR uid did pid = do
 
     storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val tokenIdVapid
+        where_ $ x ^. TokenApi ==. val apiInfoVapid
         return (x ^. TokenId, x ^. TokenStore) )
 
     let readTriple (s,x,y) = VAPIDKeysMinDetails s x y

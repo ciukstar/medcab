@@ -55,8 +55,8 @@ import Model
     , Patient (Patient, patientUser, patientDoctor, patientSince)
     , Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus)
     , ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
-    , Token (Token, tokenApi, tokenStore), tokenIdVapid
-    , StoreType (StoreTypeGoogleSecretManager)
+    , Token (Token, tokenApi, tokenStore), apiInfoVapid
+    , StoreType (StoreTypeGoogleSecretManager), apiInfoGoogle
     )
 
 import Text.Hamlet (shamlet)
@@ -75,7 +75,11 @@ fillDemoEn = do
     let today = utctDay now
     let localNow = utcToLocalTime tz now
 
-    insert_ Token { tokenApi = tokenIdVapid
+    insert_ Token { tokenApi = apiInfoGoogle
+                  , tokenStore = StoreTypeGoogleSecretManager
+                  }
+
+    insert_ Token { tokenApi = apiInfoVapid
                   , tokenStore = StoreTypeGoogleSecretManager
                   }
     

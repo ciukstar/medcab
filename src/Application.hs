@@ -127,7 +127,7 @@ import Handler.Specialties
 
 import Handler.Tokens
     ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
-    , postTokensVapidR
+    , postTokensVapidR, postTokensVapidClearR
     )
 
 import Handler.Users
