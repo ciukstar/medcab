@@ -1,3 +1,5 @@
+IncomingCall: Apel de intrare
+OutgoingCall: Apel de ieșire
 InvalidGoogleAPITokens: Jetoane Google API nevalide
 VapidGenerationWarning: Generarea unei noi chei VAPID necesită ca toți clienții să se aboneze din nou la notificările push
 InvalidArguments: Argumente nevalide

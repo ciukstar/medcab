@@ -1,3 +1,5 @@
+IncomingCall: Incoming call
+OutgoingCall: Outgoing call
 InvalidGoogleAPITokens: Invalid Google API tokens
 VapidGenerationWarning: Generating a new VAPID key requires all clients to re-subscribe to the push notifications
 InvalidArguments: Invalid arguments

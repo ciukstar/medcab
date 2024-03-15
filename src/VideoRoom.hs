@@ -27,7 +27,8 @@ import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 import Control.Monad (forever)
 
 import Database.Esqueleto.Experimental
-    ( SqlBackend
+    ( SqlBackend, selectOne, Value (unValue), from, table, where_, val
+    , (^.), (==.)
     )
 import Database.Persist.Sql (fromSqlKey)
 
@@ -37,14 +38,15 @@ import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (pack)
 
 import Foundation
-    ( App, Route (MyDoctorR, MyPatientR)
+    ( App, Route (MyDoctorR, MyPatientR, MyDoctorPhotoR)
     , AppMessage
-      ( MsgBack, MsgVideoCall
+      ( MsgBack, MsgVideoCall, MsgPhoto, MsgOutgoingCall
       )
     )
 
 import Model
-    ( DoctorId, PatientId, UserId
+    ( DoctorId, PatientId, UserId, DoctorPhoto
+    , EntityField (DoctorPhotoDoctor, DoctorPhotoAttribution)
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -56,9 +58,10 @@ import Settings (widgetFile)
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
-    , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
+    , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend), newIdent
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
+import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 
@@ -124,8 +127,15 @@ getDoctorVideoRoomR pid uid did = do
 
     config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
+    attrib <- liftHandler $ (unValue =<<) <$> runDB ( selectOne $ do
+        x <- from $ table @DoctorPhoto
+        where_ $ x ^. DoctorPhotoDoctor ==. val did
+        return (x ^. DoctorPhotoAttribution) )
+
     liftHandler $ defaultLayout $ do
         setTitleI MsgVideoCall
+        idVideoRemote <- newIdent
+        idVideoSelf <- newIdent
         $(widgetFile "my/doctors/video/video")
 
 

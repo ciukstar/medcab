@@ -4,7 +4,7 @@ function saveSubscription (subscription) {
   const subscr = JSON.parse(JSON.stringify(subscription));
   subscr.user = #{rawJS userId};
   
-  fetch('@{PushSubscriptionsR}', {
+  fetch('@{MyPatientNotificationsR uid did pid}', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscr)
@@ -55,7 +55,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
       return registration.pushManager.getSubscription().then(function (subscription) {
 	return subscription.unsubscribe().then(function (success) {
 	
-	  return fetch(`@{PushSubscriptionR}?endpoint=${subscription.endpoint}`, {
+	  return fetch(`@{MyPatientNotificationsR uid did pid}?endpoint=${subscription.endpoint}`, {
 	    method: 'DELETE',
 	    headers: { 'Content-Type': 'application/json' },
 	    body: JSON.stringify(subscription)      

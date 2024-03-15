@@ -1,3 +1,5 @@
+IncomingCall: Appel entrant
+OutgoingCall: Appel sortant
 InvalidGoogleAPITokens: Jetons d'API Google non valides
 VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
 InvalidArguments: Arguments invalides

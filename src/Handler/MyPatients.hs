@@ -13,6 +13,7 @@ module Handler.MyPatients
   , postMyPatientRemoveR
   , getMyPatientNotificationsR
   , postMyPatientNotificationsR
+  , deleteMyPatientNotificationsR
   ) where
 
 
@@ -30,19 +31,20 @@ import Database.Esqueleto.Experimental
     ( select, selectOne, from, table, where_, val, innerJoin, on, just
     , (^.), (?.), (==.), (:&) ((:&))
     , SqlExpr, Value (unValue), leftJoin, not_, exists, countRows, subSelect
-    , subSelectCount
+    , subSelectCount, delete
     )
 import Database.Persist
-    ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_, delete)
+    ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_)
+    , PersistUniqueWrite (upsertBy), (=.)
     )
+import qualified Database.Persist as P (delete)
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( Handler, Form, App
     , Route
       ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR, PushSubscriptionR, PushSubscriptionsR
-      , MyPatientNotificationsR, PushMessageR
+      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, PushMessageR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
@@ -62,13 +64,15 @@ import Model
     , AvatarColor (AvatarColorLight, AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
-    , PushSubscription, Token, Store
+    , PushSubscription (PushSubscription), Token, Store
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
+    , Unique (UniquePushSubscription)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
       , ChatStatus, ChatUser, PushSubscriptionUser, TokenApi, TokenId
-      , TokenStore, StoreToken, StoreVal
+      , TokenStore, StoreToken, StoreVal, PushSubscriptionP256dh
+      , PushSubscriptionAuth, PushSubscriptionEndpoint
       )
     )
 
@@ -90,6 +94,7 @@ import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
     , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
+    , parseCheckJsonBody, returnJson, sendStatusJSON, lookupGetParam
     )
 import Yesod.Form
     ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
@@ -100,10 +105,33 @@ import Yesod.Form
     )
 import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
+import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
+import Network.HTTP.Types.Status (status400)
 
 
-postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
-postMyPatientNotificationsR _uid _did _pid = undefined
+deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
+deleteMyPatientNotificationsR uid did pid = do
+    endpoint <- lookupGetParam "endpoint"
+    case endpoint of
+      Just x -> runDB $ delete $ do
+          y <- from $ table @PushSubscription
+          where_ $ y ^. PushSubscriptionEndpoint ==. val x
+      Nothing -> return ()
+
+
+postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler A.Value
+postMyPatientNotificationsR uid did pid = do
+    result <- parseCheckJsonBody
+    case result of
+
+      A.Success ps@(PushSubscription uid' psEndpoint psKeyP256dh psKeyAuth) -> do
+          _ <- runDB $ upsertBy (UniquePushSubscription psEndpoint) ps [ PushSubscriptionUser =. uid'
+                                                                       , PushSubscriptionP256dh =. psKeyP256dh
+                                                                       , PushSubscriptionAuth =. psKeyAuth
+                                                                       ]
+          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
+
+      A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
 
 
 getMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
@@ -144,7 +172,7 @@ getMyPatientNotificationsR uid did pid = do
               return x )
               
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid permission
+          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid did pid permission
 
           defaultLayout $ do
               setTitleI MsgPatient
@@ -154,8 +182,8 @@ getMyPatientNotificationsR uid did pid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool
-formNotifications vapidKeys uid permission extra = do
+formNotifications :: VAPIDKeys -> UserId -> DoctorId -> PatientId -> Bool -> Form Bool
+formNotifications vapidKeys uid did pid permission extra = do
 
     let userId = pack $ show (fromSqlKey uid)
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
@@ -174,7 +202,7 @@ postMyPatientRemoveR uid did pid = do
     ((fr,_),_) <- runFormPost formPatientRemove
     case fr of
       FormSuccess () -> do
-          runDB $ delete pid
+          runDB $ P.delete pid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ MyPatientsR did
       _otherwise -> do

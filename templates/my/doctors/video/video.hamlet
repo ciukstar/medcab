@@ -8,9 +8,20 @@
 
 <main>
 
-  <video controls autoplay muted #selfview width=250 height=150>
+  <figure>
+    <img src=@{MyDoctorPhotoR uid did} width=auto height=112 loading=lazy alt=_{MsgPhoto}>
+    <figcaption.body-small>
+      $maybe attrib <- attrib
+        #{attrib}
+      $nothing
+        _{MsgPhoto}
 
-  <video controls autoplay #remoteview width=250 height=150>
+  <p.body-large>_{MsgOutgoingCall} ...
+
+  <video controls autoplay ##{idVideoRemote} width=250 height=150 style="display:none">
+    
+
+  <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
 
   <md-filled-icon-button type=button onclick="start()">
     <md-icon>call

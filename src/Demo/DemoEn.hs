@@ -55,8 +55,9 @@ import Model
     , Patient (Patient, patientUser, patientDoctor, patientSince)
     , Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus)
     , ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
-    , Token (Token, tokenApi, tokenStore), apiInfoVapid
-    , StoreType (StoreTypeGoogleSecretManager), apiInfoGoogle
+    , Token (Token, tokenApi, tokenStore), apiInfoVapid, apiInfoGoogle
+    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase)
+    , Store (Store, storeKey, storeToken, storeVal)
     )
 
 import Text.Hamlet (shamlet)
@@ -65,23 +66,34 @@ import Text.Shakespeare.Text (st)
 import Yesod.Auth.Email (saltPass)
 import Yesod.Form.Fields (Textarea(Textarea))
 import Yesod.Persist(PersistStoreWrite (insert, insert_))
+import Settings (AppSettings (appDevelopment))
 
 
-fillDemoEn :: MonadIO m => ReaderT SqlBackend m ()
-fillDemoEn = do
+fillDemoEn :: MonadIO m => AppSettings -> ReaderT SqlBackend m ()
+fillDemoEn appSettings = do
 
     tz <- liftIO getCurrentTimeZone
     now <- liftIO getCurrentTime
     let today = utctDay now
     let localNow = utcToLocalTime tz now
 
-    insert_ Token { tokenApi = apiInfoGoogle
-                  , tokenStore = StoreTypeGoogleSecretManager
-                  }
-
-    insert_ Token { tokenApi = apiInfoVapid
-                  , tokenStore = StoreTypeGoogleSecretManager
-                  }
+    if appDevelopment appSettings
+        then do    
+        tid <- insert Token { tokenApi = apiInfoVapid
+                            , tokenStore = StoreTypeDatabase
+                            }
+        insert_ Store { storeToken = tid
+                      , storeKey = "VAPID triple"
+                      , storeVal = "(22879504107471320671126810649052900428463951865620953018730582802067053764751,106963013057532433758118925351970093795784080248924999494142080730165234056952,106312979860921952110239664650581548265214157776781431141487974369128419274671)"
+                      }
+        else do
+        insert_ Token { tokenApi = apiInfoGoogle
+                      , tokenStore = StoreTypeGoogleSecretManager
+                      }
+    
+        insert_ Token { tokenApi = apiInfoVapid
+                      , tokenStore = StoreTypeGoogleSecretManager
+                      }
     
     pass1 <- liftIO $ saltPass "marylopez"
     let user1 = User { userEmail = "marylopez@xmail.edu"

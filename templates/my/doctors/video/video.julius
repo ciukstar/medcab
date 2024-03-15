@@ -1,8 +1,7 @@
 
 const polite = #{polite};
-
-const selfVideo = document.getElementById('selfview');
-const remoteVideo = document.getElementById('remoteview');
+const remoteVideo = document.getElementById(#{idVideoRemote});
+const selfVideo = document.getElementById(#{idVideoSelf});
 
 var ws = new WebSocket(document.URL.replace("http:", "ws:").replace("https:", "wss:"));
 

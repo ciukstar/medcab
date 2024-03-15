@@ -23,11 +23,7 @@ module Application
 
 import Control.Monad.Logger ( liftLoc, runLoggingT )
 import Database.Persist.Sqlite
-    ( runSqlPool, sqlDatabase, sqlPoolSize, createSqlitePoolWithConfig
-    , ConnectionPoolConfig
-      ( ConnectionPoolConfig, connectionPoolConfigStripes
-      , connectionPoolConfigIdleTimeout, connectionPoolConfigSize
-      )
+    ( runSqlPool, sqlDatabase, createSqlitePoolWithConfig
     )
 
 import qualified Data.Map as M (empty)
@@ -55,12 +51,13 @@ import System.Log.FastLogger
 import Handler.MyDoctors
     ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR
     , getMyDoctorNotificationsR, postPushMessageR, postMyDoctorNotificationsR
-    , postPushSubscriptionsR, deletePushSubscriptionR
+    , deleteMyDoctorNotificationsR
     )
 
 import Handler.MyPatients
     ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
     , postMyPatientRemoveR, getMyPatientNotificationsR, postMyPatientNotificationsR
+    , deleteMyPatientNotificationsR
     )
 
 import Handler.Doctors
@@ -182,10 +179,7 @@ makeFoundation appSettings = do
     -- Create the database connection pool
     pool <- flip runLoggingT logFunc $ createSqlitePoolWithConfig
         (sqlDatabase $ appDatabaseConf appSettings)
-        ConnectionPoolConfig { connectionPoolConfigStripes = 1
-                             , connectionPoolConfigIdleTimeout = appIdleTimeout appSettings
-                             , connectionPoolConfigSize = sqlPoolSize $ appDatabaseConf appSettings
-                             }
+        (appConnectionPoolConfig appSettings)
 
     -- Perform database migration using our application's logging settings.
     flip runLoggingT logFunc $ flip runSqlPool pool $ do
@@ -201,7 +195,7 @@ makeFoundation appSettings = do
                      , userSuperuser = True
                      , userAdmin = True
                      }
-        fillDemoEn
+        fillDemoEn appSettings
 
     -- Return the foundation
     return $ mkFoundation pool

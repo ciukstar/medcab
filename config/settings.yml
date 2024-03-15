@@ -36,17 +36,19 @@ database:
   database: "_env:YESOD_SQLITE_DATABASE:':memory:'"
   poolsize: "_env:YESOD_SQLITE_POOLSIZE:1"
 
-idle-timeout: "_env:YESOD_SQLITE_IDLETIMEOUT:1200"
-
-google-site-verification: "_env:YESOD_GOOGLE_SITE_VERIFICATION"
-
-google-client-id: "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
-google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
+connection-pool:
+  stripes:      "_env:YESOD_CONNECTION_POOL_STRIPES:1"
+  idle-timeout: "_env:YESOD_CONNECTION_POOL_IDLETIMEOUT:1200"
+  size:         "_env:YESOD_CONNECTION_POOL_POOLSIZE:1"
 
 superuser-username: "_env:YESOD_SUPERUSER_USERNAME:superuser@gmail.com"
 superuser-password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
 
-msvalidate: "_env:YESOD_MS_VALIDATE"
+google-client-id:     "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
+google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
+
+google-site-verification: "_env:YESOD_GOOGLE_SITE_VERIFICATION"
+msvalidate:               "_env:YESOD_MS_VALIDATE"
 
 rtc-peer-connection-config: "_env:YESOD_RTC_PEER_CONNECTION_CONFIG"
 

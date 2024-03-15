@@ -9,10 +9,9 @@ module Handler.MyDoctors
   , getMyDoctorPhotoR
   , getMyDoctorR
   , getMyDoctorSpecialtiesR
-  , postPushSubscriptionsR
-  , deletePushSubscriptionR
   , getMyDoctorNotificationsR
   , postMyDoctorNotificationsR
+  , deleteMyDoctorNotificationsR
   , postPushMessageR
   ) where
 
@@ -45,7 +44,7 @@ import Foundation
     , Route
       ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, ChatR, VideoR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR
-      , PushMessageR, PushSubscriptionsR, PushSubscriptionR
+      , PushMessageR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
@@ -167,8 +166,8 @@ postPushMessageR sid rid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-deletePushSubscriptionR :: Handler ()
-deletePushSubscriptionR = do
+deleteMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler ()
+deleteMyDoctorNotificationsR pid uid did = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
@@ -177,23 +176,19 @@ deletePushSubscriptionR = do
       Nothing -> return ()
 
 
-postPushSubscriptionsR :: Handler A.Value
-postPushSubscriptionsR = do
+postMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler A.Value
+postMyDoctorNotificationsR pid uid did = do
     result <- parseCheckJsonBody
     case result of
 
-      A.Success ps@(PushSubscription uid psEndpoint psKeyP256dh psKeyAuth) -> do
-          _ <- runDB $ upsertBy (UniquePushSubscription psEndpoint) ps [ PushSubscriptionUser =. uid
+      A.Success ps@(PushSubscription uid' psEndpoint psKeyP256dh psKeyAuth) -> do
+          _ <- runDB $ upsertBy (UniquePushSubscription psEndpoint) ps [ PushSubscriptionUser =. uid'
                                                                        , PushSubscriptionP256dh =. psKeyP256dh
                                                                        , PushSubscriptionAuth =. psKeyAuth
                                                                        ]
           returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
 
       A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
-
-
-postMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
-postMyDoctorNotificationsR _pid _uid _did = undefined
 
 
 getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
@@ -234,7 +229,7 @@ getMyDoctorNotificationsR pid uid did = do
               return x )
 
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid permission
+          (fw,et) <- generateFormPost $ formNotifications vapidKeys pid uid did permission
 
           defaultLayout $ do
               setTitleI MsgDoctor
@@ -244,8 +239,8 @@ getMyDoctorNotificationsR pid uid did = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formNotifications :: VAPIDKeys -> UserId -> Bool -> Form Bool
-formNotifications vapidKeys uid notif extra = do
+formNotifications :: VAPIDKeys -> PatientId -> UserId -> DoctorId -> Bool -> Form Bool
+formNotifications vapidKeys pid uid did notif extra = do
 
     let userId = pack $ show (fromSqlKey uid)
 

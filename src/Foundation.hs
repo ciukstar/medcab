@@ -222,9 +222,6 @@ instance Yesod App where
 
     isAuthorized (PushMessageR sid _) _ = isAuthenticatedSelf sid
     
-    isAuthorized PushSubscriptionR _ = isAuthenticated
-    isAuthorized PushSubscriptionsR _ = isAuthenticated
-
     isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid

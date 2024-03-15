@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE InstanceSigs #-}
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
@@ -12,12 +13,17 @@ module Settings where
 
 import ClassyPrelude.Yesod
 import qualified Control.Exception as Exception
-import Data.Aeson                  (Result (..), fromJSON, withObject, (.!=),
-                                    (.:?))
+import Data.Aeson ( Result (..), fromJSON, withObject, (.!=), (.:?) )
+import Data.Aeson.Types (Parser)
 import Data.FileEmbed              (embedFile)
-import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml                   (decodeEither')
-import Database.Persist.Sqlite     (SqliteConf)
+import Database.Persist.Sqlite
+    ( SqliteConf
+    , ConnectionPoolConfig
+      ( ConnectionPoolConfig, connectionPoolConfigStripes
+      , connectionPoolConfigIdleTimeout, connectionPoolConfigSize
+      )
+    )
 import Language.Haskell.TH.Syntax  (Exp, Name, Q)
 import Network.Wai.Handler.Warp    (HostPreference)
 import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
@@ -32,6 +38,8 @@ data AppSettings = AppSettings
     -- ^ Directory from which to serve static files.
     , appDatabaseConf           :: SqliteConf
     -- ^ Configuration settings for accessing the database.
+    , appConnectionPoolConfig   :: ConnectionPoolConfig
+    -- ^ Database connection pool config
     , appRoot                   :: Maybe Text
     -- ^ Base for all generated URLs. If @Nothing@, determined
     -- from the request headers.
@@ -43,6 +51,8 @@ data AppSettings = AppSettings
     -- ^ Get the IP address from the header when logging. Useful when sitting
     -- behind a reverse proxy.
 
+    , appDevelopment            :: Bool
+    -- ^ Development mode
     , appDetailedRequestLogging :: Bool
     -- ^ Use detailed request logging system
     , appShouldLogAll           :: Bool
@@ -63,7 +73,6 @@ data AppSettings = AppSettings
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
 
-    , appIdleTimeout             :: NominalDiffTime
     , appGoogleSiteVerification  :: Maybe Text
     , appGoogleClientId          :: Text
     , appGoogleClientSecret      :: Text
@@ -73,7 +82,18 @@ data AppSettings = AppSettings
     , appRtcPeerConnectionConfig :: Maybe Value
     }
 
+
+instance FromJSON ConnectionPoolConfig where
+    parseJSON :: Value -> Parser ConnectionPoolConfig
+    parseJSON = withObject "ConnectionPoolConfig" $ \o -> do
+        connectionPoolConfigStripes     <- o .: "stripes"
+        connectionPoolConfigIdleTimeout <- o .: "idle-timeout"
+        connectionPoolConfigSize        <- o .: "size"
+        return ConnectionPoolConfig {..}
+
+
 instance FromJSON AppSettings where
+    parseJSON :: Value -> Parser AppSettings
     parseJSON = withObject "AppSettings" $ \o -> do
         let defaultDev =
 #ifdef DEVELOPMENT
@@ -83,25 +103,26 @@ instance FromJSON AppSettings where
 #endif
         appStaticDir              <- o .: "static-dir"
         appDatabaseConf           <- o .: "database"
+        appConnectionPoolConfig   <- o .: "connection-pool"
         appRoot                   <- o .:? "approot"
         appHost                   <- fromString <$> o .: "host"
         appPort                   <- o .: "port"
         appIpFromHeader           <- o .: "ip-from-header"
 
-        dev                       <- o .:? "development"      .!= defaultDev
+        appDevelopment            <- o .:? "development"      .!= defaultDev
 
-        appDetailedRequestLogging <- o .:? "detailed-logging" .!= dev
-        appShouldLogAll           <- o .:? "should-log-all"   .!= dev
-        appReloadTemplates        <- o .:? "reload-templates" .!= dev
-        appMutableStatic          <- o .:? "mutable-static"   .!= dev
-        appSkipCombining          <- o .:? "skip-combining"   .!= dev
+        appDetailedRequestLogging <- o .:? "detailed-logging" .!= appDevelopment
+        appShouldLogAll           <- o .:? "should-log-all"   .!= appDevelopment
+        appReloadTemplates        <- o .:? "reload-templates" .!= appDevelopment
+        appMutableStatic          <- o .:? "mutable-static"   .!= appDevelopment
+        appSkipCombining          <- o .:? "skip-combining"   .!= appDevelopment
 
         appCopyright              <- o .:  "copyright"
         appAnalytics              <- o .:? "analytics"
 
-        appAuthDummyLogin          <- o .:? "auth-dummy-login"      .!= dev
-        appIdleTimeout             <- o .:  "idle-timeout"
-        appGoogleSiteVerification  <- o .: "google-site-verification"
+        appAuthDummyLogin          <- o .:? "auth-dummy-login"      .!= appDevelopment
+        
+        appGoogleSiteVerification  <- o .:  "google-site-verification"
         appGoogleClientId          <- o .:  "google-client-id"
         appGoogleClientSecret      <- o .:  "google-client-secret"
         appSuperuserUsername       <- o .:  "superuser-username"
