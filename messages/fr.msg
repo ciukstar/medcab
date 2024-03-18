@@ -1,3 +1,5 @@
+Decline: Refuser
+Accept: Accepter
 IncomingCall: Appel entrant
 OutgoingCall: Appel sortant
 InvalidGoogleAPITokens: Jetons d'API Google non valides

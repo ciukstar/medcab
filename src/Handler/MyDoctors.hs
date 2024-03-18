@@ -12,22 +12,18 @@ module Handler.MyDoctors
   , getMyDoctorNotificationsR
   , postMyDoctorNotificationsR
   , deleteMyDoctorNotificationsR
-  , postPushMessageR
   ) where
 
 import ChatRoom.Data ( Route(DoctorChatRoomR) )
-import VideoRoom.Data ( Route(DoctorVideoRoomR) )
+import VideoRoom.Data ( Route(DoctorVideoRoomR, PushMessageR) )
 
-import Control.Lens ((.~))
-import Control.Monad (join, forM_)
+import Control.Monad (join)
 import Control.Monad.IO.Class (liftIO)
 
 import qualified Data.Aeson as A
     ( Value (Bool), Result (Success, Error), object, (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap))
-import Data.Maybe (fromMaybe)
-import Data.Function ((&))
-import Data.Text (Text, pack, unpack)
+import Data.Text (pack, unpack)
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Esqueleto.Experimental
@@ -40,11 +36,10 @@ import Database.Persist (Entity (Entity), entityVal, upsertBy, (=.))
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
-    ( Handler, Form, App (appHttpManager)
+    ( Handler, Form
     , Route
       ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, ChatR, VideoR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR
-      , PushMessageR
       )
     , AppMessage
       ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
@@ -60,10 +55,9 @@ import Material3 (md3mreq, md3switchField)
 import Menu (menu)
 import Model
     ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
-    , ChatMessageStatus (ChatMessageStatusUnread), User (userName, userEmail)
-    , Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId
+    , ChatMessageStatus (ChatMessageStatusUnread), PatientId, Patient, Chat, Token
+    , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
-    , PatientId, Patient, UserId, Chat, Token, Store
     , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , EntityField
@@ -71,7 +65,7 @@ import Model
       , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser, DoctorUser
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
-      , UserId, TokenApi, StoreToken, TokenId, StoreVal, TokenStore
+      , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
       )
     )
 
@@ -87,15 +81,14 @@ import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
 import Web.WebPush
-    ( mkPushNotification, pushMessage, readVAPIDKeys, sendPushNotification
-    , vapidPublicKeyBytes, pushSenderEmail, pushExpireInSeconds
-    , VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
+    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent
-    , SomeMessage (SomeMessage), getYesod, parseCheckJsonBody, returnJson
+    , SomeMessage (SomeMessage), parseCheckJsonBody, returnJson
     , sendStatusJSON, ToJSON (toJSON), lookupGetParam, invalidArgsI
     )
 import Yesod.Core.Content (TypedContent (TypedContent))
@@ -109,65 +102,8 @@ import Yesod.Form.Types
 import Yesod.Persist.Core (YesodPersist(runDB))
 
 
-postPushMessageR :: UserId -> UserId -> Handler ()
-postPushMessageR sid rid = do
-
-    sender <- do
-        s <- runDB $ selectOne $ do
-            x <- from $ table @User
-            where_ $ x ^. UserId ==. val sid
-            return x
-        return $ fromMaybe (maybe "" (userEmail . entityVal) s) (userName . entityVal =<< s)
-
-    subscriptions <- runDB $ select $ do
-        x <- from $ table @PushSubscription
-        where_ $ x ^. PushSubscriptionUser ==. val rid
-        return x
-
-    manager <- appHttpManager <$> getYesod
-
-    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
-
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
-
-    case details of
-      Just vapidKeysMinDetails -> do                           
-          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-
-          forM_ subscriptions $ \(Entity _ (PushSubscription _ x y z)) -> do
-                let notification = mkPushNotification x y z
-                        & pushMessage .~ ("Call from " <> sender :: Text)
-                        & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
-                        & pushExpireInSeconds .~ 60 * 60
-
-                result <- sendPushNotification vapidKeys manager notification
-
-                case result of
-                  Left ex -> do
-                      liftIO $ print ex
-                  Right () -> return ()
-                  
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
-
-
 deleteMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler ()
-deleteMyDoctorNotificationsR pid uid did = do
+deleteMyDoctorNotificationsR _pid _uid _did = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
@@ -177,7 +113,7 @@ deleteMyDoctorNotificationsR pid uid did = do
 
 
 postMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler A.Value
-postMyDoctorNotificationsR pid uid did = do
+postMyDoctorNotificationsR _pid _uid _did = do
     result <- parseCheckJsonBody
     case result of
 

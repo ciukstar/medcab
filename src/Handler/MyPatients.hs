@@ -18,7 +18,7 @@ module Handler.MyPatients
 
 
 import ChatRoom.Data ( Route(PatientChatRoomR) )
-import VideoRoom.Data ( Route(PatientVideoRoomR) )
+import VideoRoom.Data ( Route(PatientVideoRoomR, PushMessageR) )
 
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
@@ -44,7 +44,7 @@ import Foundation
     ( Handler, Form, App
     , Route
       ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, PushMessageR
+      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet

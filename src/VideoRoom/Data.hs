@@ -18,16 +18,21 @@ import Data.Text (Text)
 
 import Model (PatientId, DoctorId, UserId)
 
+import Network.HTTP.Client (Manager)
+
 import Yesod.Core (renderRoute)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
+    
 
 data VideoRoom = VideoRoom
     { channelMapTVar :: TVar (M.Map Text ((TQueue Text,TQueue Text), Int))
     , rtcPeerConnectionConfig :: Maybe Value
+    , httpManager :: Manager
     }
 
 mkYesodSubData "VideoRoom" [parseRoutes|
-/#PatientId/users/#UserId/doctors/#DoctorId DoctorVideoRoomR GET
+/#PatientId/users/#UserId/doctors/#DoctorId DoctorVideoRoomR  GET
 /#PatientId/doctors/#DoctorId/users/#UserId PatientVideoRoomR GET
+/sender/#UserId/recipient/#UserId           PushMessageR      POST
 |]
 

@@ -1,4 +1,22 @@
 
 navigator.serviceWorker.register("@{StaticR js_sw_js}", { scope: "/" });
 
+const dialogIncomingCall = document.getElementById(#{idDialogIncomingCall});
+const imgPhoto = document.getElementById(#{idImgPhoto});
+const figcaptionPhoto = document.getElementById(#{idFigcaptionPhoto});
+const buttonDecline = document.getElementById(#{idButtonDecline});
+const buttonAccept = document.getElementById(#{idButtonAccept});
+
+navigator.serviceWorker.onmessage = function (message) {
+  imgPhoto.src = `/accounts/${message.data.senderId}/photo/AvatarColorLight`;
+  figcaptionPhoto.textContent = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
+  buttonDecline.onclick = function (event) {
+    console.log('message: ', message.data);
+  };
+  buttonAccept.onclick = function (event) {
+    console.log('message: ', message.data);
+  };
+  dialogIncomingCall.show();
+};
+
 

@@ -53,16 +53,18 @@ document.getElementById(#{fvId v}).onchange = function (e) {
   } else {
     navigator.serviceWorker.ready.then(function (registration) {
       return registration.pushManager.getSubscription().then(function (subscription) {
-	return subscription.unsubscribe().then(function (success) {
-	
-	  return fetch(`@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`, {
-	    method: 'DELETE',
-	    headers: { 'Content-Type': 'application/json' },
-	    body: JSON.stringify(subscription)      
+	if (subscription) {
+	  return subscription.unsubscribe().then(function (success) {
+	    
+	    return fetch(`@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`, {
+	      method: 'DELETE',
+	      headers: { 'Content-Type': 'application/json' },
+	      body: JSON.stringify(subscription)      
+	    });
+	    
 	  });
-	
-	});
-      })
+	}
+      });
     });    
   }
 };

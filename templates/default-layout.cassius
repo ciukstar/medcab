@@ -31,5 +31,20 @@
     margin-right: 25%
     
 html body
-  margin: 0
-  padding: 0
+    margin: 0
+    padding: 0
+
+    ##{idDialogIncomingCall}
+        ##{idFigurePhoto}
+            text-align: center
+
+        ##{idButtonDecline}
+          --md-sys-color-primary: red
+          --md-sys-color-on-primary: #FFFFFF
+          tab-index: 2
+
+        ##{idButtonAccept}
+          --md-sys-color-primary: green
+          --md-sys-color-on-primary: #FFFFFF
+          tab-index: 1
+          margin-left: 1rem

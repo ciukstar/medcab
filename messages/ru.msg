@@ -1,3 +1,5 @@
+Decline: Отклонить
+Accept: Принять
 IncomingCall: Входящий звонок
 OutgoingCall: Исходящий звонок
 InvalidGoogleAPITokens: Неверные токены Google API

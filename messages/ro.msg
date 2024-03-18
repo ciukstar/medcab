@@ -1,3 +1,5 @@
+Decline: Refuzați
+Accept: Acceptați
 IncomingCall: Apel de intrare
 OutgoingCall: Apel de ieșire
 InvalidGoogleAPITokens: Jetoane Google API nevalide

@@ -10,10 +10,10 @@ document.querySelector('md-tabs').addEventListener('change',function (e) {
 
 document.getElementById(#{idButtonVideoCall}).onclick = function (e) {
 
-  fetch('@{PushMessageR sid rid}', {
+  fetch('@{VideoR $ PushMessageR sid rid}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ "message": "Ignore" })
+    body: new URLSearchParams({ "messageType": MessageTypeCall })
   }).catch(function (err) {
     console.error(err);
   });

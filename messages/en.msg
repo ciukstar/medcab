@@ -1,3 +1,5 @@
+Decline: Decline
+Accept: Accept
 IncomingCall: Incoming call
 OutgoingCall: Outgoing call
 InvalidGoogleAPITokens: Invalid Google API tokens

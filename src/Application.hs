@@ -50,7 +50,7 @@ import System.Log.FastLogger
 
 import Handler.MyDoctors
     ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR
-    , getMyDoctorNotificationsR, postPushMessageR, postMyDoctorNotificationsR
+    , getMyDoctorNotificationsR, postMyDoctorNotificationsR
     , deleteMyDoctorNotificationsR
     )
 
@@ -134,7 +134,7 @@ import Handler.Users
     
 import ChatRoom ()
 import ChatRoom.Data ( ChatRoom (ChatRoom) )
-import VideoRoom ()
+import VideoRoom (postPushMessageR)
 import VideoRoom.Data ( VideoRoom (VideoRoom) )
 import Demo.DemoEn (fillDemoEn)
 import Yesod.Auth.Email (saltPass)
@@ -163,6 +163,7 @@ makeFoundation appSettings = do
     getVideoRoom <- VideoRoom
         <$> newTVarIO M.empty
         <*> pure (appRtcPeerConnectionConfig appSettings)
+        <*> pure appHttpManager
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

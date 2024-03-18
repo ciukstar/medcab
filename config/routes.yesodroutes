@@ -4,8 +4,6 @@
 
 /channels ChatR ChatRoom getChatRoom
 
-/api/push/sender/#UserId/recipient/#UserId PushMessageR POST
-
 /patients/#PatientId/#UserId/doctors/#DoctorId/notifs      MyDoctorNotificationsR GET POST DELETE
 /patients/#PatientId/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR   GET
 /patients/#PatientId/#UserId/doctors/#DoctorId/dotor 	   MyDoctorR	     	  GET

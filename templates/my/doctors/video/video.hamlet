@@ -8,7 +8,7 @@
 
 <main>
 
-  <figure>
+  <figure ##{idOutgoingCall}>
     <img src=@{MyDoctorPhotoR uid did} width=auto height=112 loading=lazy alt=_{MsgPhoto}>
     <figcaption.body-small>
       $maybe attrib <- attrib
@@ -16,11 +16,12 @@
       $nothing
         _{MsgPhoto}
 
-  <p.body-large>_{MsgOutgoingCall} ...
+      <p.body-large>_{MsgOutgoingCall} ...
 
-  <video controls autoplay ##{idVideoRemote} width=250 height=150 style="display:none">
-    
+  <p>Remore
+  <video controls autoplay ##{idVideoRemote} width=250 height=150>
 
+  <p>Self
   <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
 
   <md-filled-icon-button type=button onclick="start()">

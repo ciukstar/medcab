@@ -1,2 +1,22 @@
 
 ^{widget}
+
+<md-dialog ##{idDialogIncomingCall}>
+  <div slot=headline>
+    Incoming call
+
+  <form slot=content method=dialog ##{idFormIncomingCall}>
+
+    <figure ##{idFigurePhoto}>
+      <img ##{idImgPhoto} width=64>
+      <figcaption.body-large ##{idFigcaptionPhoto}>
+
+  <div slot=actions>
+
+    <md-filled-button has-icon ##{idButtonDecline}>
+      <md-icon slot=icon>call_end
+      _{MsgDecline}
+
+    <md-filled-button has-icon ##{idButtonAccept}>
+      <md-icon slot=icon>call
+      _{MsgAccept}

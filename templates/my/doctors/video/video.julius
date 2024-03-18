@@ -1,7 +1,12 @@
 
 const polite = #{polite};
+const outgoingCall = document.getElementById(#{idOutgoingCall});
 const remoteVideo = document.getElementById(#{idVideoRemote});
 const selfVideo = document.getElementById(#{idVideoSelf});
+
+remoteVideo.onplay = function (e) {
+  outgoingCall.style.display = 'none';
+};
 
 var ws = new WebSocket(document.URL.replace("http:", "ws:").replace("https:", "wss:"));
 

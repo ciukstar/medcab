@@ -136,7 +136,6 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
 
 
-
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
@@ -207,6 +206,13 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
+            idDialogIncomingCall <- newIdent
+            idFormIncomingCall <- newIdent
+            idFigurePhoto <- newIdent
+            idImgPhoto <- newIdent
+            idFigcaptionPhoto <- newIdent
+            idButtonDecline <- newIdent
+            idButtonAccept <- newIdent
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -218,9 +224,6 @@ instance Yesod App where
 
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
-
-
-    isAuthorized (PushMessageR sid _) _ = isAuthenticatedSelf sid
     
     isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
