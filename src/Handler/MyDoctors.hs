@@ -66,7 +66,7 @@ import Model
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
       , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
-      )
+      ), PushMsgType (PushMsgTypeCall)
     )
 
 import Network.HTTP.Types.Status (status400)
@@ -129,7 +129,7 @@ postMyDoctorNotificationsR _pid _uid _did = do
 
 getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorNotificationsR pid uid did = do
-
+    
     storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoVapid
@@ -159,9 +159,12 @@ getMyDoctorNotificationsR pid uid did = do
               where_ $ x ^. DoctorId ==. val did
               return (x,h ?. DoctorPhotoAttribution) )
 
+          endpoint <- lookupGetParam "endpoint"
+
           permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails

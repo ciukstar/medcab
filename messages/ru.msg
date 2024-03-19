@@ -1,3 +1,5 @@
+CallAgain: Позвони снова
+CallDeclined: Звонок отклонен
 Decline: Отклонить
 Accept: Принять
 IncomingCall: Входящий звонок

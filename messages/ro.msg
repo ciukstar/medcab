@@ -1,3 +1,5 @@
+CallAgain: Suna din nou 
+CallDeclined: Apel refuzat
 Decline: Refuzați
 Accept: Acceptați
 IncomingCall: Apel de intrare

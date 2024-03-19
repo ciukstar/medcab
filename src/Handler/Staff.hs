@@ -65,17 +65,17 @@ import Foundation
 import Model
     ( AvatarColor (AvatarColorLight)
     , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone, doctorUser)
-    , DoctorId, DoctorPhoto (DoctorPhoto)
+    , DoctorId, DoctorPhoto (DoctorPhoto), User
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
       , SpecialtyName, SpecialtyId, SpecialistDoctor, SpecialistSpecialty
-      , DoctorPhotoAttribution, SpecialistId, SpecialistTitle, UserName, UserId, UserEmail
+      , DoctorPhotoAttribution, SpecialistId, SpecialistTitle, UserId, UserEmail
       )
     , statusSuccess, statusError
     , SpecialtyId, Specialty (specialtyName, Specialty)
     , SpecialistId
     , Specialist
-      (Specialist, specialistCertDate, specialistSpecialty, specialistTitle), User (User)
+      (Specialist, specialistCertDate, specialistSpecialty, specialistTitle)
     )
 import Settings (widgetFile)
 import Settings.StaticFiles

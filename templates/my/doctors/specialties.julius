@@ -12,10 +12,18 @@ Array.from(
 });
 
 document.querySelector('md-tabs').addEventListener('change',function (e) {
-  window.location.href = e.target.activeTabIndex == 0
-    ? '@{MyDoctorR pid uid did}'
-    : ( e.target.activeTabIndex === 1
-        ? '@{MyDoctorSpecialtiesR pid uid did}'
-        : '@{MyDoctorNotificationsR pid uid did}'
-      )
+  navigator.serviceWorker.ready.then(function (registration) {
+    return registration.pushManager.getSubscription();
+  }).then(function (subscription) {
+    return !subscription
+      ? '@{MyDoctorNotificationsR pid uid did}'
+      : `@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`
+  }).then(function (endpoint) {
+    window.location.href = e.target.activeTabIndex == 0
+      ? '@{MyDoctorR pid uid did}'
+      : ( e.target.activeTabIndex === 1
+          ? '@{MyDoctorSpecialtiesR pid uid did}'
+          : endpoint
+        )
+  });
 });

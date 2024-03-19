@@ -1,3 +1,5 @@
+CallAgain: Appelle encore une fois 
+CallDeclined: Appel refusé
 Decline: Refuser
 Accept: Accepter
 IncomingCall: Appel entrant

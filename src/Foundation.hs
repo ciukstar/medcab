@@ -15,7 +15,7 @@
 module Foundation where
 
 import ChatRoom.Data (ChatRoom)
-import VideoRoom.Data (VideoRoom)
+import VideoRoom.Data (VideoRoom, Route (PushMessageR))
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -139,7 +139,7 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
-    
+
     errorHandler :: ErrorResponse -> HandlerFor App TypedContent
     errorHandler NotFound = selectRep $ do
         provideRep $ defaultLayout $ do
@@ -158,7 +158,7 @@ instance Yesod App where
             $(widgetFile "error/permission-denied")
         provideRep $ return $ object ["message" .= ("Permission Denied. " <> msg)]
         provideRep $ return $ "Permission Denied. " <> msg
-        
+
     errorHandler (InvalidArgs msgs) = selectRep $ do
         provideRep $ defaultLayout $ do
             setTitleI MsgInvalidArguments
@@ -166,7 +166,7 @@ instance Yesod App where
             $(widgetFile "error/invalid-args")
         provideRep $ return $ object ["message" .= msgs]
         provideRep $ return $ T.intercalate ", " msgs
-        
+
     errorHandler x = defaultErrorHandler x
 
     -- Controls the base of generated URLs. For more information on modifying,
@@ -213,6 +213,14 @@ instance Yesod App where
             idFigcaptionPhoto <- newIdent
             idButtonDecline <- newIdent
             idButtonAccept <- newIdent
+
+            idDialogOutgoingCall <- newIdent
+            idButtonCancelOutgoingCall <- newIdent
+            
+            idDialogCallDeclined <- newIdent
+            idFormCallDeclined <- newIdent
+            idButtonCancelCallDeclined <- newIdent
+            idButtonCallAgain <- newIdent
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -224,14 +232,14 @@ instance Yesod App where
 
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
-    
+
     isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
 
-    
+
     isAuthorized (MyPatientNotificationsR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did

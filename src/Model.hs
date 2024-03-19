@@ -51,6 +51,19 @@ import Yesod.Core.Dispatch
 import Yesod.Form (Textarea)
 
 
+data PushMsgType = PushMsgTypeCall | PushMsgTypeAccept | PushMsgTypeDecline | PushMsgTypeCancel
+    deriving (Eq, Show, Read)
+
+
+instance ToJSON PushMsgType where
+    toJSON :: PushMsgType -> Data.Aeson.Value
+    toJSON PushMsgTypeCall = String "PushMsgTypeCall"
+    toJSON PushMsgTypeAccept = String "PushMsgTypeAccept"
+    toJSON PushMsgTypeDecline = String "PushMsgTypeDecline"
+    toJSON PushMsgTypeCancel = String "PushMsgTypeCancel"
+    
+
+
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
     deriving (Show, Read, Eq, Ord)
 derivePersistField "ChatMessageStatus"

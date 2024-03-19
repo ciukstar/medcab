@@ -14,17 +14,28 @@ Array.from(
 });
 
 document.querySelector('md-tabs').addEventListener('change',function (e) {
-  window.location.href = e.target.activeTabIndex == 0
-    ? '@{MyPatientR uid did pid}'
-    : '@{MyPatientNotificationsR uid did pid}'
+  navigator.serviceWorker.ready.then(function (registration) {
+    return registration.pushManager.getSubscription();
+  }).then(function (subscription) {
+    return !subscription
+      ? '@{MyPatientNotificationsR uid did pid}'
+      : `@{MyPatientNotificationsR uid did pid}?endpoint=${subscription.endpoint}`
+  }).then(function (endpoint) {
+    window.location.href = e.target.activeTabIndex == 0
+      ? '@{MyPatientR uid did pid}'
+      : endpoint
+  });
 });
 
 document.getElementById(#{idButtonVideoCall}).onclick = function (e) {
 
-  fetch('@{VideoR $ PushMessageR sid rid}', {
+  fetch('@{VideoR PushMessageR}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ "message": "Ignore" })
+    body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
+				"senderId": #{show $ fromSqlKey sid},
+				"recipientId": #{show $ fromSqlKey rid}
+			      })
   }).catch(function (err) {
     console.error(err);
   });

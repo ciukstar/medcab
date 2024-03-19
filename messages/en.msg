@@ -1,3 +1,5 @@
+CallAgain: Call again
+CallDeclined: Call declined
 Decline: Decline
 Accept: Accept
 IncomingCall: Incoming call

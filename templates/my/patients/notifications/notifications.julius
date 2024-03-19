@@ -1,8 +1,16 @@
 
 document.querySelector('md-tabs').addEventListener('change',function (e) {
-  window.location.href = e.target.activeTabIndex == 0
-    ? '@{MyPatientR uid did pid}'
-    : '@{MyPatientNotificationsR uid did pid}'
+  navigator.serviceWorker.ready.then(function (registration) {
+    return registration.pushManager.getSubscription();
+  }).then(function (subscription) {
+    return !subscription
+      ? '@{MyPatientNotificationsR uid did pid}'
+      : `@{MyPatientNotificationsR uid did pid}?endpoint=${subscription.endpoint}`
+  }).then(function (endpoint) {
+    window.location.href = e.target.activeTabIndex == 0
+      ? '@{MyPatientR uid did pid}'
+      : endpoint
+  });
 });
 
 

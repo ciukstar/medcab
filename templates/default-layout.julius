@@ -7,16 +7,85 @@ const figcaptionPhoto = document.getElementById(#{idFigcaptionPhoto});
 const buttonDecline = document.getElementById(#{idButtonDecline});
 const buttonAccept = document.getElementById(#{idButtonAccept});
 
+const dialogOutgoingCall = document.getElementById(#{idDialogOutgoingCall});
+const buttonCancelOutgoingCall = document.getElementById(#{idButtonCancelOutgoingCall});
+
+const dialogCallDeclined = document.getElementById(#{idDialogCallDeclined});
+const formCallDeclined = document.getElementById(#{idFormCallDeclined});
+const buttonCancelCallDeclined = document.getElementById(#{idButtonCancelCallDeclined});
+const buttonCallAgain = document.getElementById(#{idButtonCallAgain});
+
 navigator.serviceWorker.onmessage = function (message) {
   imgPhoto.src = `/accounts/${message.data.senderId}/photo/AvatarColorLight`;
   figcaptionPhoto.textContent = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
+  
   buttonDecline.onclick = function (event) {
-    console.log('message: ', message.data);
+    fetch('@{VideoR PushMessageR}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ "messageType": #{show PushMsgTypeDecline},
+                                  "senderId": message.data.recipientId,
+                                  "recipientId": message.data.senderId
+                                })
+    }).then(function (result) {
+      dialogIncomingCall.close();
+    });
   };
+  
   buttonAccept.onclick = function (event) {
-    console.log('message: ', message.data);
+    fetch('@{VideoR PushMessageR}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ "messageType": #{show PushMsgTypeAccept},
+                                  "senderId": message.data.recipientId,
+                                  "recipientId": message.data.senderId
+                                })
+    }).then(function (result) {
+      dialogIncomingCall.close();
+    });
   };
-  dialogIncomingCall.show();
+  
+  buttonCancelOutgoingCall.onclick = function (event) {
+    fetch('@{VideoR PushMessageR}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ "messageType": #{show PushMsgTypeCancel},
+                                  "senderId": message.data.senderId,
+                                  "recipientId": message.data.recipientId
+                                })
+    }).then(function (result) {
+      dialogOutgoingCall.close();
+    });
+  };
+  
+  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+    // window.location = 
+    dialogOutgoingCall.close();
+    
+  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+
+    dialogOutgoingCall.close();
+
+    const user = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
+    formCallDeclined.textContent = `${user} declined the call`;
+
+    buttonCancelCallDeclined.onclick = function (e) {
+      dialogCallDeclined.close();
+    };
+
+    buttonCallAgain.onclick = function (e) {
+      dialogCallDeclined.close();      
+      dialogOutgoingCall.show();
+    };
+    
+    dialogCallDeclined.show();
+    
+  } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
+    
+    dialogIncomingCall.close();
+    
+  } else if (message.data.messageType === #{show PushMsgTypeCall}) {
+  
+    dialogIncomingCall.show();
+  }
 };
-
-

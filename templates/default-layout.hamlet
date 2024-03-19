@@ -3,7 +3,7 @@
 
 <md-dialog ##{idDialogIncomingCall}>
   <div slot=headline>
-    Incoming call
+    _{MsgIncomingCall}
 
   <form slot=content method=dialog ##{idFormIncomingCall}>
 
@@ -20,3 +20,32 @@
     <md-filled-button has-icon ##{idButtonAccept}>
       <md-icon slot=icon>call
       _{MsgAccept}
+
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{MsgOutgoingCall}
+
+  <form slot=content method=dialog>
+    Outgowing call ...
+
+  <div slot=actions>
+
+    <md-filled-button has-icon ##{idButtonCancelOutgoingCall}>
+      <md-icon slot=icon>call_end
+      _{MsgCancel}
+
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    _{MsgCallDeclined}
+
+  <form slot=content method=dialog ##{idFormCallDeclined}>
+    
+
+  <div slot=actions>
+
+    <md-text-button ##{idButtonCancelCallDeclined}>
+      _{MsgCancel}
+
+    <md-filled-button has-icon ##{idButtonCallAgain}>
+      <md-icon slot=icon>call
+      _{MsgCallAgain}

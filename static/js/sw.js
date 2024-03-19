@@ -1,5 +1,5 @@
 
-self.addEventListener('push', function (event) {
+self.onpush = function (event) {
 
   const message = event.data.json();
   
@@ -12,9 +12,17 @@ self.addEventListener('push', function (event) {
       }
       return message;
     }).then(function (message) {
-      return self.registration.showNotification("Call from user: " + message.senderName, {
-        body: message
+      const [title,body] = message.messageType == 'PushMsgTypeDecline'
+	    ? ['Incoming call declined', `Call from user: ${message.senderName} declined`]
+	    : ( message.messageType == 'PushMsgTypeAccept'
+		? ['Incoming call accepted', `Call from user: ${message.senderName} accepted`]
+		: ['Incoming call', `Call from user: ${message.senderName}`]
+	      );
+      return self.registration.showNotification(title, {
+	image: message.senderPhoto,
+	icon: message.icon,
+        body: body
       });
     })
   );
-});
+};

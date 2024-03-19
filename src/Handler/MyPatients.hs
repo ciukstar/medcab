@@ -66,7 +66,7 @@ import Model
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
     , PushSubscription (PushSubscription), Token, Store
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Unique (UniquePushSubscription)
+    , Unique (UniquePushSubscription), PushMsgType (PushMsgTypeCall)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
@@ -110,7 +110,7 @@ import Network.HTTP.Types.Status (status400)
 
 
 deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
-deleteMyPatientNotificationsR uid did pid = do
+deleteMyPatientNotificationsR _uid _did _pid = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
@@ -120,7 +120,7 @@ deleteMyPatientNotificationsR uid did pid = do
 
 
 postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler A.Value
-postMyPatientNotificationsR uid did pid = do
+postMyPatientNotificationsR _uid _did _pid = do
     result <- parseCheckJsonBody
     case result of
 
@@ -156,7 +156,7 @@ getMyPatientNotificationsR uid did pid = do
 
       Just (_,StoreTypeSession) -> return Nothing
       Nothing -> return Nothing
-    
+
     case details of
       Just vapidKeysMinDetails -> do
           patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
@@ -166,11 +166,14 @@ getMyPatientNotificationsR uid did pid = do
               where_ $ x ^. PatientId ==. val pid
               return (x,(u,h ?. UserPhotoAttribution)) )
 
+          endpoint <- lookupGetParam "endpoint"
+
           permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
-              
+
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
           (fw,et) <- generateFormPost $ formNotifications vapidKeys uid did pid permission
 
@@ -178,7 +181,7 @@ getMyPatientNotificationsR uid did pid = do
               setTitleI MsgPatient
               idPanelNotifications <- newIdent
               $(widgetFile "my/patients/notifications/notifications")
-              
+
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -295,7 +298,7 @@ formPatients did options extra = do
 
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
-    
+
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -315,7 +318,7 @@ getMyPatientR uid did pid = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
-    
+
 
     let sid = uid
     case entityKey . fst . snd <$> patient of
@@ -349,7 +352,7 @@ getMyPatientsR did = do
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PatientDoctor ==. val did
-        
+
         let unread :: SqlExpr (Value Int)
             unread = subSelectCount $ do
                 c <- from $ table @Chat
@@ -361,7 +364,7 @@ getMyPatientsR did = do
                            return $ y ^. PatientUser
                      )
                 where_ $ c ^. ChatStatus ==. val ChatMessageStatusUnread
-              
+
         return (x,(u,(h ?. UserPhotoAttribution,unread))) )
 
 

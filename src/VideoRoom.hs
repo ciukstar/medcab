@@ -33,12 +33,12 @@ import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
     ( selectOne, Value (unValue), from, table, where_, val
-    , (^.), (==.), Entity (entityVal), select
+    , (^.), (==.), Entity (entityVal), select, toSqlKey
     )
 import Database.Persist (Entity (Entity))
 import Database.Persist.Sql (fromSqlKey)
 
-import Data.Aeson (object, (.=), ToJSON (toJSON), Value (String))
+import Data.Aeson (object, (.=))
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
@@ -46,7 +46,7 @@ import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, pack, unpack)
 
 import Foundation
-    ( App, Route (MyDoctorR, MyPatientR, MyDoctorPhotoR)
+    ( App, Route (MyDoctorR, MyPatientR, MyDoctorPhotoR, AccountPhotoR, StaticR)
     , AppMessage
       ( MsgBack, MsgVideoCall, MsgPhoto, MsgOutgoingCall, MsgNotGeneratedVAPID
       )
@@ -60,7 +60,7 @@ import Model
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, UserId, PushSubscriptionUser
       , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
-      )
+      ), PushMsgType (PushMsgTypeCall), AvatarColor (AvatarColorLight)
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -80,33 +80,26 @@ import Web.WebPush
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
     , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
-    , getSubYesod, setTitleI, Application, newIdent, invalidArgsI
+    , getSubYesod, setTitleI, Application, newIdent, invalidArgsI, getUrlRender
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Form.Input (iopt, runInputPost)
-import Yesod.Form.Fields (textField)
+import Yesod.Form.Input (iopt, ireq, runInputPost)
+import Yesod.Form.Fields (textField, intField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
 
-data MessageType = MessageTypeCall | MessageTypeAccept | MessageTypeDecline 
-    deriving (Eq, Show, Read)
+postPushMessageR :: SubHandlerFor VideoRoom App ()
+postPushMessageR = do
 
-
-instance ToJSON MessageType where
-    toJSON :: MessageType -> Data.Aeson.Value
-    toJSON MessageTypeCall = String "Call"
-    toJSON MessageTypeAccept = String "Accept"
-    toJSON MessageTypeDecline = String "Decline"
-
-
-postPushMessageR :: UserId -> UserId -> SubHandlerFor VideoRoom App ()
-postPushMessageR sid rid = do
-
-    messageType <- (\x -> x <|> Just MessageTypeCall) . (readMaybe . unpack =<<)
-        <$> runInputPost (iopt textField "messageType")
+    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
+    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
     
+    messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
+        <$> runInputPost (iopt textField "messageType")
+
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val sid
@@ -141,6 +134,7 @@ postPushMessageR sid rid = do
 
     case details of
       Just vapidKeysMinDetails -> do
+          rndr <- getUrlRender
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
@@ -150,9 +144,8 @@ postPushMessageR sid rid = do
                                                 , "recipientId" .= rid
                                                 , "senderName" .= (userName . entityVal <$> sender)
                                                 , "senderEmail" .= (userEmail . entityVal <$> sender)
-                                                , "senderEndpoint" .= endpoint
-                                                , "senderP256dh" .= p256dh
-                                                , "senderAuth" .= auth
+                                                , "senderPhoto" .= rndr (AccountPhotoR sid AvatarColorLight)
+                                                , "icon" .= rndr (StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg)
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                         & pushExpireInSeconds .~ 60 * 60
@@ -248,7 +241,7 @@ getPatientVideoRoomR pid did uid = do
     liftHandler $ defaultLayout $ do
         setTitleI MsgVideoCall
         $(widgetFile "my/patients/video/video")
-        
+
 
 
 instance YesodSubDispatch VideoRoom App where
