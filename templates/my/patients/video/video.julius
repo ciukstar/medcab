@@ -1,6 +1,5 @@
 
 const polite = #{polite};
-
 const selfVideo = document.getElementById('selfview');
 const remoteVideo = document.getElementById('remoteview');
 
@@ -24,7 +23,7 @@ pc.onnegotiationneeded = async () => {
     await pc.setLocalDescription();
     ws.send(JSON.stringify({ description: pc.localDescription }));
   } catch (err) {
-    alert(err);
+    console.error(err);
   } finally {
     makingOffer = false;
   }
@@ -64,7 +63,7 @@ ws.onmessage = async (e) => {
       }
     }
   } catch (err) {
-    alert(err);
+    console.error(err);
   }
 };
 
@@ -87,7 +86,19 @@ async function start() {
     selfVideo.srcObject = stream;
     
   } catch (err) {
-    alert(err);
+    console.error(err);
   }
   
 };
+
+fetch('@{VideoR PushMessageR}', {
+  method: 'POST',
+  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
+                              "senderId": #{show $ fromSqlKey sid},
+                              "recipientId": #{show $ fromSqlKey rid}
+                            })
+}).then(function (result) {
+  dialogOutgoingCall.show();
+  start();
+});

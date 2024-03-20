@@ -15,7 +15,7 @@ module Handler.MyDoctors
   ) where
 
 import ChatRoom.Data ( Route(DoctorChatRoomR) )
-import VideoRoom.Data ( Route(DoctorVideoRoomR, PushMessageR) )
+import VideoRoom.Data ( Route(DoctorVideoRoomR) )
 
 import Control.Monad (join)
 import Control.Monad.IO.Class (liftIO)
@@ -32,7 +32,7 @@ import Database.Esqueleto.Experimental
     , SqlExpr, Value (unValue), val, innerJoin, countRows, subSelect, delete
     , subSelectCount, subSelectMaybe
     )
-import Database.Persist (Entity (Entity), entityVal, upsertBy, (=.))
+import Database.Persist (Entity (Entity), upsertBy, (=.))
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
@@ -47,7 +47,7 @@ import Foundation
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
-      , MsgNoRecipient, MsgNotGeneratedVAPID
+      , MsgNotGeneratedVAPID
       )
     )
 
@@ -56,7 +56,7 @@ import Menu (menu)
 import Model
     ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
     , ChatMessageStatus (ChatMessageStatusUnread), PatientId, Patient, Chat, Token
-    , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
+    , UserId, Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
     , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
@@ -66,7 +66,7 @@ import Model
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
       , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
-      ), PushMsgType (PushMsgTypeCall)
+      )
     )
 
 import Network.HTTP.Types.Status (status400)
@@ -103,11 +103,12 @@ import Yesod.Persist.Core (YesodPersist(runDB))
 
 
 deleteMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler ()
-deleteMyDoctorNotificationsR _pid _uid _did = do
+deleteMyDoctorNotificationsR _pid uid _did = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
           y <- from $ table @PushSubscription
+          where_ $ y ^. PushSubscriptionUser ==. val uid
           where_ $ y ^. PushSubscriptionEndpoint ==. val x
       Nothing -> return ()
 
@@ -234,17 +235,12 @@ getMyDoctorR pid uid did = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
-    let sid = uid
-    case doctor >>= doctorUser . entityVal . fst of
-      Just rid -> do
-          msgs <- getMessages
-          defaultLayout $ do
-              setTitleI MsgDoctor
-              idPanelDetails <- newIdent
-              idButtonVideoCall <- newIdent
-              $(widgetFile "my/doctors/doctor")
-      Nothing -> invalidArgsI [MsgNoRecipient]
-
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgDoctor
+        idPanelDetails <- newIdent
+        idButtonVideoCall <- newIdent
+        $(widgetFile "my/doctors/doctor")
 
 
 getMyDoctorsR :: UserId -> Handler Html

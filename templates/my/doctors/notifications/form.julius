@@ -24,15 +24,15 @@ function subscribeToPushService (registration) {
   return registration.pushManager.getSubscription().then(function (subscription) {
     if (!subscription) {
       return registration.pushManager.subscribe({
-	userVisibleOnly: true,
-	applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+        userVisibleOnly: true,
+        applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
       });
     } else {
       return subscription.unsubscribe().then(function (success) {
-	return registration.pushManager.subscribe({
-	  userVisibleOnly: true,
-	  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-	});
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+        });
       });
     }
   });
@@ -41,30 +41,38 @@ function subscribeToPushService (registration) {
 document.getElementById(#{fvId v}).onchange = function (e) {
   
   if (this.selected) {
-    navigator.serviceWorker.ready.then(function (registration) {
-      return Notification.requestPermission().then(function (permission) {
-	if (permission === 'granted') {
-	  return subscribeToPushService(registration);
-	}
-      });
+
+    Notification.requestPermission().then(function (permission) {
+      if (permission === 'granted') {
+        return navigator.serviceWorker.ready;
+      }
+    }).then(function (registration) {
+      if (registration) {
+        return subscribeToPushService(registration);
+      }
     }).then(function (subscription) {
-      saveSubscription(subscription);
+      if (subscription) {
+        saveSubscription(subscription);
+      }
     });
+    
   } else {
+    
     navigator.serviceWorker.ready.then(function (registration) {
-      return registration.pushManager.getSubscription().then(function (subscription) {
-	if (subscription) {
-	  return subscription.unsubscribe().then(function (success) {
-	    
-	    return fetch(`@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`, {
-	      method: 'DELETE',
-	      headers: { 'Content-Type': 'application/json' },
-	      body: JSON.stringify(subscription)      
-	    });
-	    
-	  });
-	}
-      });
-    });    
+      return registration.pushManager.getSubscription();
+    }).then(function (subscription) {
+      if (subscription) {
+        subscription.unsubscribe();
+        return subscription;
+      }
+    }).then(function (subscription) {
+      if (subscription) {
+        fetch(`@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription)      
+        });
+      }
+    });
   }
 };

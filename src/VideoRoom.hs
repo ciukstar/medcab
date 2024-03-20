@@ -46,9 +46,11 @@ import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, pack, unpack)
 
 import Foundation
-    ( App, Route (MyDoctorR, MyPatientR, MyDoctorPhotoR, AccountPhotoR, StaticR)
+    ( App
+    , Route (MyDoctorR, MyPatientR, MyDoctorPhotoR, AccountPhotoR, StaticR, VideoR)
     , AppMessage
       ( MsgBack, MsgVideoCall, MsgPhoto, MsgOutgoingCall, MsgNotGeneratedVAPID
+      , MsgNoRecipient
       )
     )
 
@@ -56,11 +58,12 @@ import Model
     ( DoctorId, PatientId, UserId, DoctorPhoto, User (userEmail, userName)
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store, apiInfoVapid, secretVolumeVapid
+    , Store, apiInfoVapid, secretVolumeVapid, PushMsgType (PushMsgTypeCall)
+    , AvatarColor (AvatarColorLight), Doctor (doctorUser), Patient (patientUser)
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, UserId, PushSubscriptionUser
-      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
-      ), PushMsgType (PushMsgTypeCall), AvatarColor (AvatarColorLight)
+      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, DoctorId, PatientId
+      )
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -170,8 +173,8 @@ userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-videoApp :: PatientId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom App) ()
-videoApp pid polite = do
+wsApp :: PatientId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom App) ()
+wsApp pid polite = do
 
     let channelId = pack $ show $ fromSqlKey pid
 
@@ -212,7 +215,7 @@ getDoctorVideoRoomR :: PatientId -> UserId -> DoctorId -> SubHandlerFor VideoRoo
 getDoctorVideoRoomR pid uid did = do
     let polite = True
 
-    webSockets (videoApp pid polite)
+    webSockets (wsApp pid polite)
 
     config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
@@ -221,12 +224,20 @@ getDoctorVideoRoomR pid uid did = do
         where_ $ x ^. DoctorPhotoDoctor ==. val did
         return (x ^. DoctorPhotoAttribution) )
 
-    liftHandler $ defaultLayout $ do
-        setTitleI MsgVideoCall
-        idOutgoingCall <- newIdent
-        idVideoRemote <- newIdent
-        idVideoSelf <- newIdent
-        $(widgetFile "my/doctors/video/video")
+    let sid = uid
+    doctor <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @Doctor
+        where_ $ x ^. DoctorId ==. val did
+        return x
+
+    case doctor >>= doctorUser . entityVal of
+      Just rid -> liftHandler $ defaultLayout $ do
+          setTitleI MsgVideoCall
+          idOutgoingCall <- newIdent
+          idVideoRemote <- newIdent
+          idVideoSelf <- newIdent
+          $(widgetFile "my/doctors/video/video")
+      Nothing -> invalidArgsI [MsgNoRecipient]
 
 
 
@@ -234,13 +245,21 @@ getPatientVideoRoomR :: PatientId -> DoctorId -> UserId -> SubHandlerFor VideoRo
 getPatientVideoRoomR pid did uid = do
     let polite = False
 
-    webSockets (videoApp pid polite)
+    webSockets (wsApp pid polite)
 
     config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
 
-    liftHandler $ defaultLayout $ do
-        setTitleI MsgVideoCall
-        $(widgetFile "my/patients/video/video")
+    patient <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @Patient
+        where_ $ x ^. PatientId ==. val pid
+        return x
+
+    let sid = uid
+    case patientUser . entityVal <$> patient of
+      Just rid -> liftHandler $ defaultLayout $ do
+          setTitleI MsgVideoCall
+          $(widgetFile "my/patients/video/video")
+      Nothing -> invalidArgsI [MsgNoRecipient]
 
 
 

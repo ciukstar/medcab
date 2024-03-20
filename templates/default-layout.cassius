@@ -31,10 +31,20 @@
     margin-right: 25%
     
 html body
+
     margin: 0
     padding: 0
 
+    md-dialog.full-screen
+    
+        height: 100vh
+        max-height: 100vh
+        width: 100vw
+        max-width: 100vw
+        border-radius: 0
+
     ##{idDialogIncomingCall}
+        
         ##{idFigurePhoto}
             text-align: center
 

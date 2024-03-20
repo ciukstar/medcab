@@ -15,18 +15,3 @@ document.querySelector('md-tabs').addEventListener('change',function (e) {
 	)
   });
 });
-
-document.getElementById(#{idButtonVideoCall}).onclick = function (e) {
-
-  fetch('@{VideoR PushMessageR}', {
-    method: 'POST',
-    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
-				"senderId": #{show $ fromSqlKey sid},
-				"recipientId": #{show $ fromSqlKey rid}
-			      })
-  }).catch(function (err) {
-    console.error(err);
-  });
-  
-};

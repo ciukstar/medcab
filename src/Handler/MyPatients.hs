@@ -110,11 +110,12 @@ import Network.HTTP.Types.Status (status400)
 
 
 deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
-deleteMyPatientNotificationsR _uid _did _pid = do
+deleteMyPatientNotificationsR uid _did _pid = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
           y <- from $ table @PushSubscription
+          where_ $ y ^. PushSubscriptionUser ==. val uid
           where_ $ y ^. PushSubscriptionEndpoint ==. val x
       Nothing -> return ()
 
@@ -318,19 +319,13 @@ getMyPatientR uid did pid = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
-
-
-    let sid = uid
-    case entityKey . fst . snd <$> patient of
-      Just rid -> do
-          (fw,et) <- generateFormPost formPatientRemove
-          msgs <- getMessages
-          defaultLayout $ do
-              setTitleI MsgPatient
-              idPanelDetails <- newIdent
-              idButtonVideoCall <- newIdent
-              $(widgetFile "my/patients/patient")
-      Nothing -> invalidArgsI [MsgNoRecipient]
+    (fw,et) <- generateFormPost formPatientRemove
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgPatient
+        idPanelDetails <- newIdent
+        idButtonVideoCall <- newIdent
+        $(widgetFile "my/patients/patient")
 
 
 

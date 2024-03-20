@@ -1,7 +1,8 @@
 
 ^{widget}
 
-<md-dialog ##{idDialogIncomingCall}>
+
+<md-dialog.full-screen ##{idDialogIncomingCall}>
   <div slot=headline>
     _{MsgIncomingCall}
 
@@ -21,7 +22,8 @@
       <md-icon slot=icon>call
       _{MsgAccept}
 
-<md-dialog ##{idDialogOutgoingCall}>
+
+<md-dialog.full-screen ##{idDialogOutgoingCall}>
   <div slot=headline>
     _{MsgOutgoingCall}
 
@@ -34,7 +36,7 @@
       <md-icon slot=icon>call_end
       _{MsgCancel}
 
-<md-dialog ##{idDialogCallDeclined}>
+<md-dialog.full-screen ##{idDialogCallDeclined}>
   <div slot=headline>
     _{MsgCallDeclined}
 
