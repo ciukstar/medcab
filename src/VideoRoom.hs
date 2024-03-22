@@ -14,15 +14,20 @@
 
 module VideoRoom
   ( module VideoRoom.Data
+  , YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+  , wsApp
   , getDoctorVideoRoomR
   , getPatientVideoRoomR
   , postPushMessageR
+  , widgetOutgoingCall
+  , widgetIncomingCall
   ) where
 
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
-    , VideoRoom (VideoRoom, rtcPeerConnectionConfig, httpManager)
+    , VideoRoom (VideoRoom), ChanId (ChanId)
     , Route (DoctorVideoRoomR, PatientVideoRoomR, PushMessageR)
+    , VideoRoomMessage (VideoRoomOutgoingCall, VideoRoomIncomingCall)
     )
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -33,44 +38,37 @@ import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
     ( selectOne, Value (unValue), from, table, where_, val
-    , (^.), (==.), Entity (entityVal), select, toSqlKey
+    , (^.), (==.), Entity (entityVal), select, toSqlKey, SqlBackend
     )
 import Database.Persist (Entity (Entity))
-import Database.Persist.Sql (fromSqlKey)
 
 import Data.Aeson (object, (.=))
+import qualified Data.Aeson as A (Value)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
-import Data.Text (Text, pack, unpack)
-
-import Foundation
-    ( App
-    , Route (MyDoctorR, MyPatientR, MyDoctorPhotoR, AccountPhotoR, StaticR, VideoR)
-    , AppMessage
-      ( MsgBack, MsgVideoCall, MsgPhoto, MsgOutgoingCall, MsgNotGeneratedVAPID
-      , MsgNoRecipient
-      )
-    )
+import Data.Text (Text, unpack)
 
 import Model
-    ( DoctorId, PatientId, UserId, DoctorPhoto, User (userEmail, userName)
+    ( PatientId, UserId, User (userEmail, userName)
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, apiInfoVapid, secretVolumeVapid, PushMsgType (PushMsgTypeCall)
-    , AvatarColor (AvatarColorLight), Doctor (doctorUser), Patient (patientUser)
     , EntityField
-      ( DoctorPhotoDoctor, DoctorPhotoAttribution, UserId, PushSubscriptionUser
-      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, DoctorId, PatientId
+      ( UserId, PushSubscriptionUser
+      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
       )
     )
+    
+import Network.HTTP.Client (Manager)
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
     (atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue)
 
 import Settings (widgetFile)
+
 import System.IO (readFile')
 
 import Text.Read (readMaybe)
@@ -81,24 +79,35 @@ import Web.WebPush
     )
 
 import Yesod
-    ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
-    , mkYesodSubDispatch, SubHandlerFor, Html, MonadHandler (liftHandler)
-    , getSubYesod, setTitleI, Application, newIdent, invalidArgsI, getUrlRender
+    ( Yesod, YesodSubDispatch, yesodSubDispatch , mkYesodSubDispatch
+    , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
+    , Application, newIdent , YesodPersist (YesodPersistBackend)
+    , RenderMessage , FormMessage, HandlerFor, urlField
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
+import Yesod.Core.Widget (WidgetFor)
 import Yesod.Form.Input (iopt, ireq, runInputPost)
 import Yesod.Form.Fields (textField, intField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
 
-postPushMessageR :: SubHandlerFor VideoRoom App ()
+class YesodVideo m where
+    getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
+    getAppHttpManager :: HandlerFor m Manager
+
+
+postPushMessageR :: (Yesod m, YesodVideo m)
+                 => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                 => (RenderMessage m FormMessage)
+                 => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
 
     sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
     rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
+    senderPhoto <- runInputPost (ireq urlField "senderPhoto")
+    icon <- runInputPost (ireq urlField "icon")
     
     messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
         <$> runInputPost (iopt textField "messageType")
@@ -113,7 +122,7 @@ postPushMessageR = do
         where_ $ x ^. PushSubscriptionUser ==. val rid
         return x
 
-    manager <- httpManager <$> getSubYesod
+    manager <- liftHandler getAppHttpManager
 
     storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
@@ -137,7 +146,6 @@ postPushMessageR = do
 
     case details of
       Just vapidKeysMinDetails -> do
-          rndr <- getUrlRender
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
@@ -147,8 +155,8 @@ postPushMessageR = do
                                                 , "recipientId" .= rid
                                                 , "senderName" .= (userName . entityVal <$> sender)
                                                 , "senderEmail" .= (userEmail . entityVal <$> sender)
-                                                , "senderPhoto" .= rndr (AccountPhotoR sid AvatarColorLight)
-                                                , "icon" .= rndr (StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg)
+                                                , "senderPhoto" .= senderPhoto
+                                                , "icon" .= icon
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                         & pushExpireInSeconds .~ 60 * 60
@@ -160,7 +168,7 @@ postPushMessageR = do
                       liftIO $ print ex
                   Right () -> return ()
 
-      Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
+      Nothing -> return () -- liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -173,10 +181,10 @@ userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-wsApp :: PatientId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom App) ()
-wsApp pid polite = do
+wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
+wsApp channelId polite = do 
 
-    let channelId = pack $ show $ fromSqlKey pid
+    -- let channelId = pack $ show $ fromSqlKey pid
 
     VideoRoom {..} <- getSubYesod
 
@@ -210,59 +218,56 @@ wsApp pid polite = do
       Right () -> return ()
 
 
+widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
+                   => UserId -> UserId
+                   -> Text -- ^ Dialog id
+                   -> (Route VideoRoom -> Route m)
+                   -> WidgetFor m ()
+widgetOutgoingCall sid rid idDialogOutgoingCall toParent = do
 
-getDoctorVideoRoomR :: PatientId -> UserId -> DoctorId -> SubHandlerFor VideoRoom App Html
-getDoctorVideoRoomR pid uid did = do
     let polite = True
-
-    webSockets (wsApp pid polite)
-
-    config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
-
-    attrib <- liftHandler $ (unValue =<<) <$> runDB ( selectOne $ do
-        x <- from $ table @DoctorPhoto
-        where_ $ x ^. DoctorPhotoDoctor ==. val did
-        return (x ^. DoctorPhotoAttribution) )
-
-    let sid = uid
-    doctor <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @Doctor
-        where_ $ x ^. DoctorId ==. val did
-        return x
-
-    case doctor >>= doctorUser . entityVal of
-      Just rid -> liftHandler $ defaultLayout $ do
-          setTitleI MsgVideoCall
-          idOutgoingCall <- newIdent
-          idVideoRemote <- newIdent
-          idVideoSelf <- newIdent
-          $(widgetFile "my/doctors/video/video")
-      Nothing -> invalidArgsI [MsgNoRecipient]
+    
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+    
+    idOutgoingCall <- newIdent
+    idVideoRemote <- newIdent
+    idVideoSelf <- newIdent
+    
+    $(widgetFile "my/doctors/video/video")
 
 
+widgetIncomingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
+                   => UserId -> UserId
+                   -> Text -- ^ Dialog id
+                   -> (Route VideoRoom -> Route m)
+                   -> WidgetFor m ()
+widgetIncomingCall sid rid idDialogIncomingCall toParent = do
 
-getPatientVideoRoomR :: PatientId -> DoctorId -> UserId -> SubHandlerFor VideoRoom App Html
-getPatientVideoRoomR pid did uid = do
     let polite = False
-
-    webSockets (wsApp pid polite)
-
-    config <- fromMaybe (object []) . rtcPeerConnectionConfig <$> getSubYesod
-
-    patient <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @Patient
-        where_ $ x ^. PatientId ==. val pid
-        return x
-
-    let sid = uid
-    case patientUser . entityVal <$> patient of
-      Just rid -> liftHandler $ defaultLayout $ do
-          setTitleI MsgVideoCall
-          $(widgetFile "my/patients/video/video")
-      Nothing -> invalidArgsI [MsgNoRecipient]
+    
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+    
+    idOutgoingCall <- newIdent
+    idVideoRemote <- newIdent
+    idVideoSelf <- newIdent
+    
+    $(widgetFile "my/doctors/video/incoming")
 
 
+getDoctorVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                    => UserId -> UserId -> Bool -> SubHandlerFor VideoRoom m ()
+getDoctorVideoRoomR sid rid polite = webSockets (wsApp (ChanId (sid,rid)) polite)
 
-instance YesodSubDispatch VideoRoom App where
-    yesodSubDispatch :: YesodSubRunnerEnv VideoRoom App -> Application
+
+getPatientVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                     => UserId -> UserId -> Bool -> SubHandlerFor VideoRoom m ()
+getPatientVideoRoomR sid rid polite = webSockets (wsApp (ChanId (sid,rid)) polite)
+
+
+
+instance ( Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage
+         , YesodPersist m, YesodPersistBackend m ~ SqlBackend
+         , RenderMessage m FormMessage
+         ) => YesodSubDispatch VideoRoom m where
+    yesodSubDispatch :: YesodSubRunnerEnv VideoRoom m -> Application
     yesodSubDispatch = $(mkYesodSubDispatch resourcesVideoRoom)

@@ -15,7 +15,9 @@
 module Foundation where
 
 import ChatRoom.Data (ChatRoom)
-import VideoRoom.Data (VideoRoom, Route (PushMessageR))
+import VideoRoom.Data
+    ( VideoRoom, Route (PushMessageR), VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage
+    )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -37,7 +39,7 @@ import qualified Data.Text.Lazy.Encoding
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, val, where_, valList, asc, not_, just
     , (^.)
-    , Value (unValue), select, orderBy, in_
+    , Value (unValue), select, orderBy, in_, toSqlKey
     )
 import qualified Database.Esqueleto.Experimental as E ((==.), exists)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
@@ -95,6 +97,8 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import VideoRoom (YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager), widgetIncomingCall)
+import qualified Data.Aeson as A
 
 
 
@@ -134,6 +138,14 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
 -- | A convenient synonym for database access functions.
 type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
+
+
+instance YesodVideo App where
+    getRtcPeerConnectionConfig :: HandlerFor App (Maybe A.Value)
+    getRtcPeerConnectionConfig = appRtcPeerConnectionConfig . appSettings <$> getYesod
+
+    getAppHttpManager :: HandlerFor App Manager
+    getAppHttpManager = appHttpManager <$> getYesod
 
 
 -- Please see the documentation for the Yesod typeclass. There are a number
@@ -221,7 +233,17 @@ instance Yesod App where
             idFormCallDeclined <- newIdent
             idButtonCancelCallDeclined <- newIdent
             idButtonCallAgain <- newIdent
+
+            idVideoSelf <- newIdent
+            idVideoRemote <- newIdent
+            
             $(widgetFile "default-layout")
+
+            widgetIncomingCall
+                (toSqlKey 2) -- sid
+                (toSqlKey 2) -- rid
+                idDialogOutgoingCall VideoR
+            
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
@@ -960,6 +982,16 @@ isDoctorSelf did = do
 
 
 instance YesodAuthPersist App
+
+
+instance RenderMessage App VideoRoomMessage where
+    renderMessage :: App -> [Lang] -> VideoRoomMessage -> Text
+    renderMessage _ [] = defaultVideoRoomMessage
+    renderMessage _ ("en":_) = englishVideoRoomMessage
+    renderMessage _ ("fr":_) = frenchVideoRoomMessage
+    renderMessage _ ("ro":_) = romanianVideoRoomMessage
+    renderMessage _ ("ru":_) = russianVideoRoomMessage
+    renderMessage vr (_:xs) = renderMessage vr xs
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

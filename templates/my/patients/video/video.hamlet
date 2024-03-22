@@ -1,19 +1,21 @@
-<header.app-top-app-bar.background>
-  <md-icon-button type=link href=@{MyPatientR uid did pid} aria-label=_{MsgBack} onclick="close()">
-    <md-icon>arrow_back
 
-  <h1.title-large>
-    _{MsgVideoCall}
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{VideoRoomOutgoingCall}
 
-<main>
+  <form slot=content method=dialog>
+    <p.body-large>_{VideoRoomOutgoingCall} ...
 
-  <video controls autoplay muted #selfview width=250 height=150>
+    <p>Remore
+    <video controls autoplay ##{idVideoRemote} width=250 height=150>
 
-  <video controls autoplay #remoteview width=250 height=150>
+    <p>Self
+    <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
 
-  <md-filled-icon-button type=button onclick="start()">
-    <md-icon>call
+  <div slot=actions>
+    <md-filled-icon-button type=button onclick="start()">
+      <md-icon>call
 
-  <md-filled-icon-button type=link href=@{MyPatientR uid did pid} onclick="close()">
-    <md-icon>call_end
+    <md-filled-icon-button type=button onclick="close()">
+      <md-icon>call_end
 

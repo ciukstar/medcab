@@ -44,7 +44,7 @@ import Foundation
     ( Handler, Form, App
     , Route
       ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR
+      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR
       )
     , AppMessage
       ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
@@ -63,7 +63,7 @@ import Model
     ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorLight, AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
-    , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient), Chat
+    , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient, patientUser), Chat
     , PushSubscription (PushSubscription), Token, Store
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Unique (UniquePushSubscription), PushMsgType (PushMsgTypeCall)
@@ -107,6 +107,8 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Network.HTTP.Types.Status (status400)
+import VideoRoom (widgetOutgoingCall)
+import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
 
 deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
@@ -299,7 +301,7 @@ formPatients did options extra = do
 
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
-
+    
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -321,11 +323,20 @@ getMyPatientR uid did pid = do
 
     (fw,et) <- generateFormPost formPatientRemove
     msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgPatient
-        idPanelDetails <- newIdent
-        idButtonVideoCall <- newIdent
-        $(widgetFile "my/patients/patient")
+
+    let sid = uid
+    case patientUser . entityVal . fst <$> patient of
+      Just rid ->  defaultLayout $ do
+          setTitleI MsgPatient
+          
+          idPanelDetails <- newIdent
+          idButtonVideoCall <- newIdent
+          idDialogOutgoingCall <- newIdent
+        
+          $(widgetFile "my/patients/patient")
+          widgetOutgoingCall sid rid idDialogOutgoingCall VideoR
+
+      Nothing -> invalidArgsI [MsgNoRecipient]
 
 
 

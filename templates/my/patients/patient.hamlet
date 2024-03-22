@@ -76,7 +76,7 @@
             $if unread > 0
               \ (#{unread})
 
-          <md-filled-tonal-button ##{idButtonVideoCall} type=link href=@{VideoR $ PatientVideoRoomR pid did uid}>
+          <md-filled-tonal-button ##{idButtonVideoCall} type=button>
             <md-icon slot=icon>video_call
             _{MsgVideoCall}
 

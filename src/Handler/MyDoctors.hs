@@ -15,7 +15,6 @@ module Handler.MyDoctors
   ) where
 
 import ChatRoom.Data ( Route(DoctorChatRoomR) )
-import VideoRoom.Data ( Route(DoctorVideoRoomR) )
 
 import Control.Monad (join)
 import Control.Monad.IO.Class (liftIO)
@@ -30,7 +29,7 @@ import Database.Esqueleto.Experimental
     ( select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
     , (^.), (?.), (==.), (:&)((:&))
     , SqlExpr, Value (unValue), val, innerJoin, countRows, subSelect, delete
-    , subSelectCount, subSelectMaybe
+    , subSelectCount, subSelectMaybe, Entity (entityVal)
     )
 import Database.Persist (Entity (Entity), upsertBy, (=.))
 import Database.Persist.Sql (fromSqlKey)
@@ -47,7 +46,7 @@ import Foundation
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
-      , MsgNotGeneratedVAPID
+      , MsgNotGeneratedVAPID, MsgNoRecipient
       )
     )
 
@@ -56,7 +55,7 @@ import Menu (menu)
 import Model
     ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
     , ChatMessageStatus (ChatMessageStatusUnread), PatientId, Patient, Chat, Token
-    , UserId, Doctor(Doctor), DoctorPhoto (DoctorPhoto), DoctorId, Store
+    , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
     , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
@@ -66,19 +65,25 @@ import Model
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
       , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
-      )
+      ), PushMsgType (PushMsgTypeCall)
     )
 
 import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile)
-import Settings.StaticFiles (img_person_FILL0_wght400_GRAD0_opsz24_svg)
+import Settings.StaticFiles
+    ( img_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_call_FILL0_wght400_GRAD0_opsz24_svg
+    )
 
 import System.IO (readFile')
 
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
+
+import VideoRoom (widgetOutgoingCall)
+import VideoRoom.Data ( Route(PushMessageR) )
 
 import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
@@ -233,14 +238,23 @@ getMyDoctorR pid uid did = do
                   return $ y ^. DoctorUser
             )
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
-        return (countRows :: SqlExpr (Value Int)) )
+        return (countRows :: SqlExpr (Value Int)) )          
 
-    msgs <- getMessages
-    defaultLayout $ do
-        setTitleI MsgDoctor
-        idPanelDetails <- newIdent
-        idButtonVideoCall <- newIdent
-        $(widgetFile "my/doctors/doctor")
+    let sid = uid
+    case doctor >>= doctorUser . entityVal . fst of
+      Just rid -> do
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgDoctor
+              
+              idPanelDetails <- newIdent
+              idButtonVideoCall <- newIdent
+              idDialogOutgoingCall <- newIdent
+              
+              $(widgetFile "my/doctors/doctor")
+              widgetOutgoingCall sid rid idDialogOutgoingCall VideoR
+              
+      Nothing -> invalidArgsI [MsgNoRecipient]
 
 
 getMyDoctorsR :: UserId -> Handler Html

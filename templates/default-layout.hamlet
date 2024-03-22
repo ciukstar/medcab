@@ -12,6 +12,12 @@
       <img ##{idImgPhoto} width=64>
       <figcaption.body-large ##{idFigcaptionPhoto}>
 
+    <p>Remore
+    <video.remote controls autoplay width=250 height=150>
+
+    <p>Self
+    <video.self controls autoplay muted width=250 height=150>
+
   <div slot=actions>
 
     <md-filled-button has-icon ##{idButtonDecline}>
@@ -28,7 +34,13 @@
     _{MsgOutgoingCall}
 
   <form slot=content method=dialog>
-    Outgowing call ...
+    <p>Outgowing call ...
+
+    <p>Remore
+    <video.remote controls autoplay width=250 height=150 ##{idVideoRemote}>
+
+    <p>Self
+    <video.self controls autoplay muted width=250 height=150 ##{idVideoSelf}>
 
   <div slot=actions>
 

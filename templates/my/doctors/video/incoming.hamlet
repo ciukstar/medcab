@@ -1,10 +1,10 @@
 
-<md-dialog ##{idDialogOutgoingCall}>
+<md-dialog ##{idDialogIncomingCall}>
   <div slot=headline>
-    _{VideoRoomOutgoingCall}
+    _{VideoRoomIncomingCall}
 
   <form slot=content method=dialog>
-    <p.body-large>_{VideoRoomOutgoingCall} ...
+    <p.body-large>_{VideoRoomIncomingCall} ...
 
     <p>Remore
     <video controls autoplay ##{idVideoRemote} width=250 height=150>

@@ -16,6 +16,7 @@ const buttonCancelCallDeclined = document.getElementById(#{idButtonCancelCallDec
 const buttonCallAgain = document.getElementById(#{idButtonCallAgain});
 
 navigator.serviceWorker.onmessage = function (message) {
+  
   imgPhoto.src = `/accounts/${message.data.senderId}/photo/AvatarColorLight`;
   figcaptionPhoto.textContent = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
   

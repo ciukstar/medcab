@@ -1,5 +1,5 @@
 
-document.querySelector('md-tabs').addEventListener('change',function (e) {
+document.querySelector('md-tabs').onchange = function (e) {
   navigator.serviceWorker.ready.then(function (registration) {
     return registration.pushManager.getSubscription();
   }).then(function (subscription) {
@@ -14,4 +14,22 @@ document.querySelector('md-tabs').addEventListener('change',function (e) {
 	  : endpoint
 	)
   });
-});
+};
+
+document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
+
+  fetch('@{VideoR PushMessageR}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
+				"senderId": #{show $ fromSqlKey sid},
+				"recipientId": #{show $ fromSqlKey rid},
+				"senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
+				"icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}'
+			      })
+  }).then(function (result) {
+    document.getElementById(#{idDialogOutgoingCall}).show();
+    //startVideoCall();
+  });
+  
+};
