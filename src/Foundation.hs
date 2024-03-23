@@ -16,7 +16,9 @@ module Foundation where
 
 import ChatRoom.Data (ChatRoom)
 import VideoRoom.Data
-    ( VideoRoom, Route (PushMessageR), VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage
+    ( VideoRoom, Route (PushMessageR), VideoRoomMessage, defaultVideoRoomMessage
+    , englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage
+    , russianVideoRoomMessage, ChanId (ChanId)
     )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
@@ -25,6 +27,7 @@ import Control.Monad.Logger (LogSource)
 
 import Import.NoFoundation
 
+import qualified Data.Aeson as A (Value)
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import qualified Data.CaseInsensitive as CI
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
@@ -66,6 +69,10 @@ import Text.Jasmine (minifym)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 
+import VideoRoom
+    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+    )
+
 import Yesod.Auth.Email
     ( SaltedPass, Identifier, Email, VerKey, VerUrl
     , authEmail, loginR, registerR, setpassR, forgotPasswordR
@@ -97,8 +104,6 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
-import VideoRoom (YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager), widgetIncomingCall)
-import qualified Data.Aeson as A
 
 
 
@@ -215,9 +220,12 @@ instance Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
+        config <- fromMaybe (object []) <$> getRtcPeerConnectionConfig
+
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
+            
             idDialogIncomingCall <- newIdent
             idFormIncomingCall <- newIdent
             idFigurePhoto <- newIdent
@@ -225,25 +233,13 @@ instance Yesod App where
             idFigcaptionPhoto <- newIdent
             idButtonDecline <- newIdent
             idButtonAccept <- newIdent
-
-            idDialogOutgoingCall <- newIdent
-            idButtonCancelOutgoingCall <- newIdent
             
-            idDialogCallDeclined <- newIdent
-            idFormCallDeclined <- newIdent
-            idButtonCancelCallDeclined <- newIdent
-            idButtonCallAgain <- newIdent
-
+            idDialogVideoSession <- newIdent
             idVideoSelf <- newIdent
             idVideoRemote <- newIdent
+            idButtonEndVideoSession <- newIdent
             
-            $(widgetFile "default-layout")
-
-            widgetIncomingCall
-                (toSqlKey 2) -- sid
-                (toSqlKey 2) -- rid
-                idDialogOutgoingCall VideoR
-            
+            $(widgetFile "default-layout")            
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.

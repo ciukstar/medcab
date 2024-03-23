@@ -1,14 +1,9 @@
 
 const polite = #{polite};
-const outgoingCall = document.getElementById(#{idOutgoingCall});
 const remoteVideo = document.getElementById(#{idVideoRemote});
 const selfVideo = document.getElementById(#{idVideoSelf});
 
-remoteVideo.onplay = function (e) {
-  outgoingCall.style.display = 'none';
-};
-
-var ws = new WebSocket(`@{toParent $ DoctorVideoRoomR sid rid polite}`.replace("http:", "ws:").replace("https:", "wss:"));
+var ws = new WebSocket(`@{toParent $ DoctorVideoRoomR channel polite}`.replace("http:", "ws:").replace("https:", "wss:"));
 
 const pc = new RTCPeerConnection(#{config});
 
@@ -72,14 +67,11 @@ ws.onmessage = async (e) => {
   }
 };
 
-
-async function close() {
+async function closeCallerVideoSession() {
   pc.close();
 }
 
-
-async function start() {
-  
+async function startCallerVideoSession() {  
   try {
     
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -96,3 +88,12 @@ async function start() {
 };
 
 
+
+navigator.serviceWorker.addEventListener('message', function (message) {
+  
+  if (message.data.messageType === #{show PushMsgTypeEndVideoSession}) {
+    closeCallerVideoSession();
+    document.getElementById(#{idDialogVideoSession}).close();
+  }
+  
+});

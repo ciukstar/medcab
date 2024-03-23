@@ -1,0 +1,12 @@
+
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{VideoRoomOutgoingCall}
+
+  <form slot=content method=dialog>
+    <p.body-large>_{VideoRoomOutgoingCall} ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>call_end
+      Cancel

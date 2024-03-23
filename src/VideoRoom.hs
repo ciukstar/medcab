@@ -20,7 +20,6 @@ module VideoRoom
   , getPatientVideoRoomR
   , postPushMessageR
   , widgetOutgoingCall
-  , widgetIncomingCall
   ) where
 
 import VideoRoom.Data
@@ -51,10 +50,10 @@ import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, unpack)
 
 import Model
-    ( PatientId, UserId, User (userEmail, userName)
+    ( User (userEmail, userName)
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store, apiInfoVapid, secretVolumeVapid, PushMsgType (PushMsgTypeCall)
+    , Store, apiInfoVapid, secretVolumeVapid, PushMsgType (PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEndVideoSession)
     , EntityField
       ( UserId, PushSubscriptionUser
       , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
@@ -82,7 +81,7 @@ import Yesod
     ( Yesod, YesodSubDispatch, yesodSubDispatch , mkYesodSubDispatch
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
-    , RenderMessage , FormMessage, HandlerFor, urlField
+    , RenderMessage , FormMessage, HandlerFor, urlField, boolField
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Core.Widget (WidgetFor)
@@ -103,14 +102,16 @@ postPushMessageR :: (Yesod m, YesodVideo m)
                  => (RenderMessage m FormMessage)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
-
-    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
-    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
-    senderPhoto <- runInputPost (ireq urlField "senderPhoto")
-    icon <- runInputPost (ireq urlField "icon")
     
     messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
         <$> runInputPost (iopt textField "messageType")
+    icon <- runInputPost (ireq urlField "icon")
+    channelId <- ChanId <$> runInputPost (ireq intField "channelId")
+    polite <- runInputPost (ireq boolField "polite")
+    ws <- runInputPost (ireq textField "ws")
+    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
+    senderPhoto <- runInputPost (ireq urlField "senderPhoto")
+    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
 
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -151,12 +152,15 @@ postPushMessageR = do
           forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
+                                                , "icon" .= icon
+                                                , "channelId" .= (channelId :: ChanId)
+                                                , "ws" .= ws
+                                                , "polite" .= polite
                                                 , "senderId" .= sid
-                                                , "recipientId" .= rid
                                                 , "senderName" .= (userName . entityVal <$> sender)
                                                 , "senderEmail" .= (userEmail . entityVal <$> sender)
                                                 , "senderPhoto" .= senderPhoto
-                                                , "icon" .= icon
+                                                , "recipientId" .= rid
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                         & pushExpireInSeconds .~ 60 * 60
@@ -183,8 +187,6 @@ userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
 wsApp channelId polite = do 
-
-    -- let channelId = pack $ show $ fromSqlKey pid
 
     VideoRoom {..} <- getSubYesod
 
@@ -219,49 +221,32 @@ wsApp channelId polite = do
 
 
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
-                   => UserId -> UserId
-                   -> Text -- ^ Dialog id
+                   => ChanId -- ^ Channel id
+                   -> Text -- ^ Dialog id Outgoing
+                   -> Text -- ^ Dialog id Session
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall sid rid idDialogOutgoingCall toParent = do
+widgetOutgoingCall channel idDialogOutgoingCall idDialogVideoSession toParent = do
 
     let polite = True
     
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
     
-    idOutgoingCall <- newIdent
     idVideoRemote <- newIdent
     idVideoSelf <- newIdent
     
-    $(widgetFile "my/doctors/video/video")
-
-
-widgetIncomingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
-                   => UserId -> UserId
-                   -> Text -- ^ Dialog id
-                   -> (Route VideoRoom -> Route m)
-                   -> WidgetFor m ()
-widgetIncomingCall sid rid idDialogIncomingCall toParent = do
-
-    let polite = False
-    
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-    
-    idOutgoingCall <- newIdent
-    idVideoRemote <- newIdent
-    idVideoSelf <- newIdent
-    
-    $(widgetFile "my/doctors/video/incoming")
+    $(widgetFile "my/doctors/video/outgoing")    
+    $(widgetFile "my/doctors/video/session")
 
 
 getDoctorVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                    => UserId -> UserId -> Bool -> SubHandlerFor VideoRoom m ()
-getDoctorVideoRoomR sid rid polite = webSockets (wsApp (ChanId (sid,rid)) polite)
+                    => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
+getDoctorVideoRoomR channelId polite = webSockets (wsApp channelId polite)
 
 
 getPatientVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                     => UserId -> UserId -> Bool -> SubHandlerFor VideoRoom m ()
-getPatientVideoRoomR sid rid polite = webSockets (wsApp (ChanId (sid,rid)) polite)
+                     => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
+getPatientVideoRoomR channelId polite = webSockets (wsApp channelId polite)
 
 
 

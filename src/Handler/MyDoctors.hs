@@ -82,7 +82,7 @@ import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
-import VideoRoom (widgetOutgoingCall)
+import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (PatientVideoRoomR))
 import VideoRoom.Data ( Route(PushMessageR) )
 
 import Web.WebPush
@@ -222,6 +222,8 @@ getMyDoctorSpecialtiesR pid uid did = do
 getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorR pid uid did = do
 
+    let polite = True
+    
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
             `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -250,9 +252,12 @@ getMyDoctorR pid uid did = do
               idPanelDetails <- newIdent
               idButtonVideoCall <- newIdent
               idDialogOutgoingCall <- newIdent
+              idDialogVideoSession <- newIdent
+
+              let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
               
               $(widgetFile "my/doctors/doctor")
-              widgetOutgoingCall sid rid idDialogOutgoingCall VideoR
+              widgetOutgoingCall channelId idDialogOutgoingCall idDialogVideoSession VideoR
               
       Nothing -> invalidArgsI [MsgNoRecipient]
 

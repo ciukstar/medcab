@@ -2,7 +2,7 @@
 ^{widget}
 
 
-<md-dialog.full-screen ##{idDialogIncomingCall}>
+<md-dialog ##{idDialogIncomingCall}>
   <div slot=headline>
     _{MsgIncomingCall}
 
@@ -11,12 +11,6 @@
     <figure ##{idFigurePhoto}>
       <img ##{idImgPhoto} width=64>
       <figcaption.body-large ##{idFigcaptionPhoto}>
-
-    <p>Remore
-    <video.remote controls autoplay width=250 height=150>
-
-    <p>Self
-    <video.self controls autoplay muted width=250 height=150>
 
   <div slot=actions>
 
@@ -29,12 +23,12 @@
       _{MsgAccept}
 
 
-<md-dialog.full-screen ##{idDialogOutgoingCall}>
+
+<md-dialog.full-screen ##{idDialogVideoSession}>
   <div slot=headline>
-    _{MsgOutgoingCall}
+    Video Session
 
   <form slot=content method=dialog>
-    <p>Outgowing call ...
 
     <p>Remore
     <video.remote controls autoplay width=250 height=150 ##{idVideoRemote}>
@@ -44,22 +38,5 @@
 
   <div slot=actions>
 
-    <md-filled-button has-icon ##{idButtonCancelOutgoingCall}>
-      <md-icon slot=icon>call_end
-      _{MsgCancel}
-
-<md-dialog.full-screen ##{idDialogCallDeclined}>
-  <div slot=headline>
-    _{MsgCallDeclined}
-
-  <form slot=content method=dialog ##{idFormCallDeclined}>
-    
-
-  <div slot=actions>
-
-    <md-text-button ##{idButtonCancelCallDeclined}>
-      _{MsgCancel}
-
-    <md-filled-button has-icon ##{idButtonCallAgain}>
-      <md-icon slot=icon>call
-      _{MsgCallAgain}
+    <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
+      <md-icon>call_end

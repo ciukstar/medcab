@@ -7,15 +7,9 @@ const figcaptionPhoto = document.getElementById(#{idFigcaptionPhoto});
 const buttonDecline = document.getElementById(#{idButtonDecline});
 const buttonAccept = document.getElementById(#{idButtonAccept});
 
-const dialogOutgoingCall = document.getElementById(#{idDialogOutgoingCall});
-const buttonCancelOutgoingCall = document.getElementById(#{idButtonCancelOutgoingCall});
+const dialogVideoSession = document.getElementById(#{idDialogVideoSession});
 
-const dialogCallDeclined = document.getElementById(#{idDialogCallDeclined});
-const formCallDeclined = document.getElementById(#{idFormCallDeclined});
-const buttonCancelCallDeclined = document.getElementById(#{idButtonCancelCallDeclined});
-const buttonCallAgain = document.getElementById(#{idButtonCallAgain});
-
-navigator.serviceWorker.onmessage = function (message) {
+navigator.serviceWorker.addEventListener('message', function (message) {
   
   imgPhoto.src = `/accounts/${message.data.senderId}/photo/AvatarColorLight`;
   figcaptionPhoto.textContent = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
@@ -24,10 +18,16 @@ navigator.serviceWorker.onmessage = function (message) {
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ "messageType": #{show PushMsgTypeDecline},
-                                  "senderId": message.data.recipientId,
-                                  "recipientId": message.data.senderId
-                                })
+      body: new URLSearchParams({
+	"messageType": #{show PushMsgTypeDecline},
+	"icon": message.data.icon,
+	"channelId": message.data.channelId,
+	"polite": message.data.polite,
+	"ws": message.data.ws,
+	"senderId": message.data.recipientId,
+	"senderPhoto": message.data.senderPhoto,
+	"recipientId": message.data.senderId
+      })
     }).then(function (result) {
       dialogIncomingCall.close();
     });
@@ -37,56 +37,141 @@ navigator.serviceWorker.onmessage = function (message) {
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ "messageType": #{show PushMsgTypeAccept},
-                                  "senderId": message.data.recipientId,
-                                  "recipientId": message.data.senderId
-                                })
+      body: new URLSearchParams({
+	"messageType": #{show PushMsgTypeAccept},
+	"icon": message.data.icon,
+	"channelId": message.data.channelId,
+	"polite": message.data.polite,
+	"ws": message.data.ws,
+	"senderId": message.data.recipientId,
+	"senderPhoto": message.data.senderPhoto,
+	"recipientId": message.data.senderId
+      })
     }).then(function (result) {
       dialogIncomingCall.close();
+      const peerConnection = startCaleeVideoSession(message);
+      dialogVideoSession.show();
+      
+      document.getElementById(#{idButtonEndVideoSession}).onclick = function (event) {
+	fetch('@{VideoR PushMessageR}', {
+	  method: 'POST',
+	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	  body: new URLSearchParams({
+	    "messageType": #{show PushMsgTypeEndVideoSession},
+	    "icon": message.data.icon,
+	    "channelId": message.data.channelId,
+	    "polite": message.data.polite,
+	    "ws": message.data.ws,
+	    "senderId": message.data.recipientId,
+	    "senderPhoto": message.data.senderPhoto,
+	    "recipientId": message.data.senderId
+	  })
+	}).then(function (result) {
+	  peerConnection.close();
+	  dialogVideoSession.close();
+	});
+      };
+      
     });
   };
   
-  buttonCancelOutgoingCall.onclick = function (event) {
-    fetch('@{VideoR PushMessageR}', {
-      method: 'POST',
-      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ "messageType": #{show PushMsgTypeCancel},
-                                  "senderId": message.data.senderId,
-                                  "recipientId": message.data.recipientId
-                                })
-    }).then(function (result) {
-      dialogOutgoingCall.close();
-    });
-  };
   
-  if (message.data.messageType === #{show PushMsgTypeAccept}) {
-    // window.location = 
-    dialogOutgoingCall.close();
+  if (message.data.messageType === #{show PushMsgTypeCancel}) {
     
-  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
-
-    dialogOutgoingCall.close();
-
-    const user = !message.data.senderName ? message.data.senderEmail : message.data.senderName;
-    formCallDeclined.textContent = `${user} declined the call`;
-
-    buttonCancelCallDeclined.onclick = function (e) {
-      dialogCallDeclined.close();
-    };
-
-    buttonCallAgain.onclick = function (e) {
-      dialogCallDeclined.close();      
-      dialogOutgoingCall.show();
-    };
-    
-    dialogCallDeclined.show();
-    
-  } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
-    
-    dialogIncomingCall.close();
-    
-  } else if (message.data.messageType === #{show PushMsgTypeCall}) {
-  
+  } else if (message.data.messageType === #{show PushMsgTypeCall}) {    
     dialogIncomingCall.show();
   }
+});
+
+
+function startCaleeVideoSession (message) {
+  
+  const polite = message.data.polite;
+  const remoteVideo = document.getElementById(#{idVideoRemote});
+  const selfVideo = document.getElementById(#{idVideoSelf});
+
+  var ws = new WebSocket(message.data.ws);
+
+  const pc = new RTCPeerConnection(#{config});
+
+  pc.ontrack = ({track, streams}) => {
+    track.onunmute = () => {
+      if ( ! remoteVideo.srcObject ) {
+	remoteVideo.srcObject = streams[0];
+      }
+    }
+  };
+
+  let makingOffer = false;
+
+  pc.onnegotiationneeded = async () => {
+    try {
+      makingOffer = true;
+      await pc.setLocalDescription();
+      ws.send(JSON.stringify({ description: pc.localDescription }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      makingOffer = false;
+    }
+  };
+
+  pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+
+  let ignoreOffer = false;
+
+  ws.onmessage = async (e) => {
+
+    const {description, candidate} = JSON.parse(e.data);
+    
+    try {
+      if (description) {
+	const offerCollision =
+	      description.type === "offer" &&
+	      (makingOffer || pc.signalingState !== "stable");
+
+	ignoreOffer = !polite && offerCollision;
+	if (ignoreOffer) {
+          return;
+	}
+
+	await pc.setRemoteDescription(description);
+	if (description.type === "offer") {
+          await pc.setLocalDescription();
+          ws.send(JSON.stringify({ description: pc.localDescription }));
+	}
+      } else if (candidate) {
+	try {
+	  await pc.addIceCandidate(candidate);
+	} catch (err) {
+	  if (!ignoreOffer) {
+	    throw err;
+	  }
+	}
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  async function start() {
+    
+    try {
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      for (const track of stream.getTracks()) {
+	pc.addTrack(track, stream);
+      }
+      
+      selfVideo.srcObject = stream;
+      
+    } catch (err) {
+      console.error(err);
+    }
+    
+  };
+
+  start();
+
+  return pc;
 };

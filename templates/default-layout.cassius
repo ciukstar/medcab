@@ -58,14 +58,3 @@ html body
           --md-sys-color-on-primary: #FFFFFF
           tab-index: 1
           margin-left: 1rem
-
-    ##{idDialogOutgoingCall}
-        ##{idButtonCancelOutgoingCall}
-          --md-sys-color-primary: red
-          --md-sys-color-on-primary: #FFFFFF
-
-    ##{idDialogCallDeclined}
-        ##{idButtonCallAgain}
-          --md-sys-color-primary: green
-          --md-sys-color-on-primary: #FFFFFF
-          margin-left: 1rem

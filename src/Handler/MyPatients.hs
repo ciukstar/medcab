@@ -18,7 +18,7 @@ module Handler.MyPatients
 
 
 import ChatRoom.Data ( Route(PatientChatRoomR) )
-import VideoRoom.Data ( Route(PatientVideoRoomR, PushMessageR) )
+import VideoRoom.Data ( Route(PatientVideoRoomR, PushMessageR), ChanId (ChanId) )
 
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
@@ -332,9 +332,12 @@ getMyPatientR uid did pid = do
           idPanelDetails <- newIdent
           idButtonVideoCall <- newIdent
           idDialogOutgoingCall <- newIdent
+          idDialogVideoSession <- newIdent
+
+          let channelId = ChanId (fromIntegral (fromSqlKey pid))
         
           $(widgetFile "my/patients/patient")
-          widgetOutgoingCall sid rid idDialogOutgoingCall VideoR
+          widgetOutgoingCall channelId idDialogOutgoingCall idDialogVideoSession VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

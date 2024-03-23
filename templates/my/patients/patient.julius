@@ -33,10 +33,11 @@ document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
+				"icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+				"channelId": #{show channelId},
 				"senderId": #{show $ fromSqlKey sid},
-				"recipientId": #{show $ fromSqlKey rid},
 				"senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
-				"icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}'
+				"recipientId": #{show $ fromSqlKey rid}
                               })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();

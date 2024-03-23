@@ -21,15 +21,20 @@ document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
   fetch('@{VideoR PushMessageR}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ "messageType": #{show PushMsgTypeCall},
-				"senderId": #{show $ fromSqlKey sid},
-				"recipientId": #{show $ fromSqlKey rid},
-				"senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
-				"icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}'
-			      })
+    body: new URLSearchParams({
+      "messageType": #{show PushMsgTypeCall},
+      "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      "channelId": #{show channel},
+      "polite": #{rawJS $ not polite},
+      "ws": '@{VideoR $ PatientVideoRoomR channelId (not polite)}'.replace("http:", "ws:").replace("https:", "wss:"),
+      "senderId": #{show $ fromSqlKey sid},
+      "senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
+      "recipientId": #{show $ fromSqlKey rid}
+    })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
-    //startVideoCall();
+  }).catch(function (err) {
+    console.error(err);
   });
   
 };

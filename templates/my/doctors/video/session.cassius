@@ -13,3 +13,11 @@ main
    flex-direction: column
    align-items: center
    gap: 1rem
+
+md-dialog.full-screen
+
+    height: 100vh
+    max-height: 100vh
+    width: 100vw
+    max-width: 100vw
+    border-radius: 0

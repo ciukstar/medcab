@@ -8,35 +8,22 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module VideoRoom.Data where
 
 import Control.Concurrent.STM.TQueue (TQueue)
 import Control.Concurrent.STM.TVar (TVar)
 
+import Data.Aeson (ToJSON, FromJSON)
 import qualified Data.Map as M
 import Data.Text (Text)
 
-import Database.Persist.Sql (fromSqlKey)
-
-import Model (UserId)
-
-import Yesod.Core (renderRoute)
+import Yesod.Core (renderRoute, PathPiece)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
 
-newtype ChanId = ChanId (UserId, UserId)
-
-
-instance Ord ChanId where
-    (<=) :: ChanId -> ChanId -> Bool
-    ChanId (uid1,uid2) <= ChanId (uid1',uid2') =
-        fromSqlKey uid1 + fromSqlKey uid2 <= fromSqlKey uid1' + fromSqlKey uid2'
-
-
-instance Eq ChanId where
-    (==) :: ChanId -> ChanId -> Bool
-    ChanId (uid1,uid2) == ChanId (uid1',uid2') =
-        (uid1 == uid1' && uid2 == uid2') || (uid1 == uid2' && uid2 == uid1')
+newtype ChanId = ChanId Int
+    deriving (Eq, Ord, Show, Read, PathPiece, ToJSON, FromJSON)
 
 
 newtype VideoRoom = VideoRoom
@@ -67,7 +54,7 @@ defaultVideoRoomMessage = englishVideoRoomMessage
 
 
 mkYesodSubData "VideoRoom" [parseRoutes|
-/#UserId/#UserId/#Bool/x DoctorVideoRoomR  GET
-/#UserId/#UserId/#Bool/y PatientVideoRoomR GET
-/api/push                PushMessageR      POST
+/#ChanId/#Bool/x DoctorVideoRoomR  GET
+/#ChanId/#Bool/y PatientVideoRoomR GET
+/api/push        PushMessageR      POST
 |]

@@ -1,10 +1,9 @@
 
-<md-dialog ##{idDialogIncomingCall}>
+<md-dialog.full-screen ##{idDialogVideoSession}>
   <div slot=headline>
-    _{VideoRoomIncomingCall}
+    Video Session
 
   <form slot=content method=dialog>
-    <p.body-large>_{VideoRoomIncomingCall} ...
 
     <p>Remore
     <video controls autoplay ##{idVideoRemote} width=250 height=150>
@@ -13,8 +12,5 @@
     <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
 
   <div slot=actions>
-    <md-filled-icon-button type=button onclick="start()">
-      <md-icon>call
-
     <md-filled-icon-button type=button onclick="close()">
       <md-icon>call_end
