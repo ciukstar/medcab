@@ -10,7 +10,8 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
 
     document.getElementById(#{idDialogOutgoingCall}).close();
-    
+    document.getElementById(#{idDialogCallDeclined}).show();
+        
   }
   
 });

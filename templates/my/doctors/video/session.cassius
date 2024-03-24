@@ -1,18 +1,10 @@
 
-header
-  margin: 0 1rem
-  height: var(--app-top-appbar-height, 64px)
-  display: flex
-  align-items: center
-  gap: 1rem
+##{idDialogVideoSession}
 
-
-main
-
-   display: flex
-   flex-direction: column
-   align-items: center
-   gap: 1rem
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 1rem
 
 md-dialog.full-screen
 

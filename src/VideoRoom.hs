@@ -53,7 +53,11 @@ import Model
     ( User (userEmail, userName)
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store, apiInfoVapid, secretVolumeVapid, PushMsgType (PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEndVideoSession)
+    , Store, apiInfoVapid, secretVolumeVapid
+    , PushMsgType
+      ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline
+      , PushMsgTypeEndVideoSession
+      )
     , EntityField
       ( UserId, PushSubscriptionUser
       , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
@@ -223,17 +227,20 @@ wsApp channelId polite = do
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
                    => ChanId -- ^ Channel id
                    -> Text -- ^ Dialog id Outgoing
-                   -> Text -- ^ Dialog id Session
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall channel idDialogOutgoingCall idDialogVideoSession toParent = do
+widgetOutgoingCall channel idDialogOutgoingCall toParent = do
 
     let polite = True
     
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-    
+
+    idDialogVideoSession <- newIdent
     idVideoRemote <- newIdent
     idVideoSelf <- newIdent
+
+    idDialogCallDeclined <- newIdent
+    idDialogVideoSessionEnded <- newIdent
     
     $(widgetFile "my/doctors/video/outgoing")    
     $(widgetFile "my/doctors/video/session")

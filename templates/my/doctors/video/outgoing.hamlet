@@ -10,3 +10,15 @@
     <md-filled-button has-icon type=button>
       <md-icon slot=icon>call_end
       Cancel
+      
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    Call declined
+
+  <form slot=content method=dialog>
+    <p.body-large>Call declined ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>close
+      Close

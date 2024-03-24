@@ -14,3 +14,15 @@
   <div slot=actions>
     <md-filled-icon-button type=button onclick="close()">
       <md-icon>call_end
+      
+<md-dialog ##{idDialogVideoSessionEnded}>
+  <div slot=headline>
+    Call Ended
+
+  <form slot=content method=dialog>
+    <p.body-large>Call Ended ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>close
+      Close

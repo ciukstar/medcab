@@ -1,18 +1,17 @@
 
-const polite = #{polite};
-const remoteVideo = document.getElementById(#{idVideoRemote});
-const selfVideo = document.getElementById(#{idVideoSelf});
-
-var ws = new WebSocket(`@{toParent $ DoctorVideoRoomR channel polite}`.replace("http:", "ws:").replace("https:", "wss:"));
+var ws = new WebSocket(
+  '@{toParent $ DoctorVideoRoomR channel polite}'.replace("http:", "ws:").replace("https:", "wss:")
+);
 
 const pc = new RTCPeerConnection(#{config});
 
-pc.ontrack = ({track, streams}) => {
-  track.onunmute = () => {
+pc.ontrack = function (event) {
+  event.track.onunmute = function (e) {
+    const remoteVideo = document.getElementById(#{idVideoRemote});
     if ( ! remoteVideo.srcObject ) {
-      remoteVideo.srcObject = streams[0];
+      remoteVideo.srcObject = event.streams[0];
     }
-  }
+  };
 };
 
 let makingOffer = false;
@@ -43,7 +42,7 @@ ws.onmessage = async (e) => {
         description.type === "offer" &&
         (makingOffer || pc.signalingState !== "stable");
 
-      ignoreOffer = !polite && offerCollision;
+      ignoreOffer = (! #{polite}) && offerCollision;
       if (ignoreOffer) {
         return;
       }
@@ -67,33 +66,31 @@ ws.onmessage = async (e) => {
   }
 };
 
-async function closeCallerVideoSession() {
-  pc.close();
-}
+function startCallerVideoSession() {
 
-async function startCallerVideoSession() {  
-  try {
+  return navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
     
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    for (const track of stream.getTracks()) {
-      pc.addTrack(track, stream);
-    }
+    stream.getTracks().forEach(function (track) { pc.addTrack(track, stream); });    
+    return stream;
     
-    selfVideo.srcObject = stream;
+  }).then(function (stream) {
     
-  } catch (err) {
+    document.getElementById(#{idVideoSelf}).srcObject = stream;
+    return stream;
+    
+  }).then(function (stream) {
+    
+    navigator.serviceWorker.addEventListener('message', function (message) {
+      if (message.data.messageType === #{show PushMsgTypeEndVideoSession}) {
+	stream.getTracks().forEach(function (track) { track.stop(); });
+	pc.close();
+	document.getElementById(#{idDialogVideoSession}).close();
+	document.getElementById(#{idDialogVideoSessionEnded}).show();
+      }
+    });
+    
+  }).catch(function (err) {
     console.error(err);
-  }
+  });
   
 };
-
-
-
-navigator.serviceWorker.addEventListener('message', function (message) {
-  
-  if (message.data.messageType === #{show PushMsgTypeEndVideoSession}) {
-    closeCallerVideoSession();
-    document.getElementById(#{idDialogVideoSession}).close();
-  }
-  
-});

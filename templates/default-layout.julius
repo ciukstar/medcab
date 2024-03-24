@@ -52,7 +52,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       const peerConnection = startCaleeVideoSession(message);
       dialogVideoSession.show();
       
-      document.getElementById(#{idButtonEndVideoSession}).onclick = function (event) {
+      document.getElementById(#{idButtonEndVideoSession}).addEventListener('click', function (event) {
 	fetch('@{VideoR PushMessageR}', {
 	  method: 'POST',
 	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -70,7 +70,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	  peerConnection.close();
 	  dialogVideoSession.close();
 	});
-      };
+      });
       
     });
   };
@@ -154,24 +154,26 @@ function startCaleeVideoSession (message) {
     }
   };
 
-  async function start() {
-    
-    try {
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-      for (const track of stream.getTracks()) {
-	pc.addTrack(track, stream);
-      }
-      
-      selfVideo.srcObject = stream;
-      
-    } catch (err) {
-      console.error(err);
-    }
-    
-  };
 
-  start();
+  navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
+    
+    stream.getTracks().forEach(function (track) { pc.addTrack(track, stream); });    
+    return stream;
+    
+  }).then(function (stream) {
+    
+    document.getElementById(#{idVideoSelf}).srcObject = stream;
+    return stream;
+    
+  }).then(function (stream) {
+
+    document.getElementById(#{idButtonEndVideoSession}).addEventListener('click', function (event) {
+      stream.getTracks().forEach(function (track) { track.stop(); });
+    });
+    
+  }).catch(function (err) {
+    console.error(err);
+  });
 
   return pc;
 };
