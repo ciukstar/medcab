@@ -65,7 +65,7 @@ import Model
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
       , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
-      ), PushMsgType (PushMsgTypeCall)
+      ), PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
     )
 
 import Network.HTTP.Types.Status (status400)
@@ -82,7 +82,7 @@ import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
-import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (PatientVideoRoomR))
+import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (WebSoketR))
 import VideoRoom.Data ( Route(PushMessageR) )
 
 import Web.WebPush
@@ -252,11 +252,12 @@ getMyDoctorR pid uid did = do
               idPanelDetails <- newIdent
               idButtonVideoCall <- newIdent
               idDialogOutgoingCall <- newIdent
+              idButtonOutgoingCallCancel <- newIdent
 
               let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
               
               $(widgetFile "my/doctors/doctor")
-              widgetOutgoingCall channelId idDialogOutgoingCall VideoR
+              widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
               
       Nothing -> invalidArgsI [MsgNoRecipient]
 

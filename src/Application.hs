@@ -134,7 +134,6 @@ import Handler.Users
     
 import ChatRoom ()
 import ChatRoom.Data ( ChatRoom (ChatRoom) )
-import VideoRoom (postPushMessageR)
 import VideoRoom.Data ( VideoRoom (VideoRoom) )
 import Demo.DemoEn (fillDemoEn)
 import Yesod.Auth.Email (saltPass)

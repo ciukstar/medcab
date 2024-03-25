@@ -18,7 +18,7 @@ module Handler.MyPatients
 
 
 import ChatRoom.Data ( Route(PatientChatRoomR) )
-import VideoRoom.Data ( Route(PushMessageR), ChanId (ChanId) )
+import VideoRoom.Data ( Route(PushMessageR, WebSoketR), ChanId (ChanId) )
 
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
@@ -66,7 +66,7 @@ import Model
     , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient, patientUser), Chat
     , PushSubscription (PushSubscription), Token, Store
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Unique (UniquePushSubscription), PushMsgType (PushMsgTypeCall)
+    , Unique (UniquePushSubscription), PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
@@ -301,6 +301,8 @@ formPatients did options extra = do
 
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
+
+    let polite = True
     
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
@@ -332,11 +334,13 @@ getMyPatientR uid did pid = do
           idPanelDetails <- newIdent
           idButtonVideoCall <- newIdent
           idDialogOutgoingCall <- newIdent
+          idButtonOutgoingCallCancel <- newIdent
 
-          let channelId = ChanId (fromIntegral (fromSqlKey pid))
+          let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
         
           $(widgetFile "my/patients/patient")
-          widgetOutgoingCall channelId idDialogOutgoingCall VideoR
+          
+          widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

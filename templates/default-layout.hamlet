@@ -40,3 +40,15 @@
 
     <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
       <md-icon>call_end
+      
+<md-dialog ##{idDialogMissedCall}>
+  <div slot=headline>
+    Missed Call
+
+  <form slot=content method=dialog>
+    <p.body-large>Missed Call ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
+      <md-icon slot=icon>close
+      Close

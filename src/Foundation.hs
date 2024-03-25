@@ -18,7 +18,7 @@ import ChatRoom.Data (ChatRoom)
 import VideoRoom.Data
     ( VideoRoom, Route (PushMessageR), VideoRoomMessage, defaultVideoRoomMessage
     , englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage
-    , russianVideoRoomMessage, ChanId (ChanId)
+    , russianVideoRoomMessage
     )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
@@ -42,7 +42,7 @@ import qualified Data.Text.Lazy.Encoding
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, val, where_, valList, asc, not_, just
     , (^.)
-    , Value (unValue), select, orderBy, in_, toSqlKey
+    , Value (unValue), select, orderBy, in_
     )
 import qualified Database.Esqueleto.Experimental as E ((==.), exists)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
@@ -238,6 +238,8 @@ instance Yesod App where
             idVideoSelf <- newIdent
             idVideoRemote <- newIdent
             idButtonEndVideoSession <- newIdent
+
+            idDialogMissedCall <- newIdent
             
             $(widgetFile "default-layout")            
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")

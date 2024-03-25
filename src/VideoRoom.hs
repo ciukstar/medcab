@@ -16,8 +16,7 @@ module VideoRoom
   ( module VideoRoom.Data
   , YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
   , wsApp
-  , getDoctorVideoRoomR
-  , getPatientVideoRoomR
+  , getWebSoketR
   , postPushMessageR
   , widgetOutgoingCall
   ) where
@@ -25,7 +24,7 @@ module VideoRoom
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (DoctorVideoRoomR, PatientVideoRoomR, PushMessageR)
+    , Route (WebSoketR, PushMessageR)
     , VideoRoomMessage (VideoRoomOutgoingCall, VideoRoomIncomingCall)
     )
 
@@ -37,7 +36,8 @@ import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
     ( selectOne, Value (unValue), from, table, where_, val
-    , (^.), (==.), Entity (entityVal), select, toSqlKey, SqlBackend
+    , (^.), (==.)
+    , Entity (entityVal), select, toSqlKey, SqlBackend, just
     )
 import Database.Persist (Entity (Entity))
 
@@ -85,12 +85,10 @@ import Yesod
     ( Yesod, YesodSubDispatch, yesodSubDispatch , mkYesodSubDispatch
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
-    , RenderMessage , FormMessage, HandlerFor, urlField, boolField
+    , RenderMessage , FormMessage, HandlerFor, lookupPostParam
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Core.Widget (WidgetFor)
-import Yesod.Form.Input (iopt, ireq, runInputPost)
-import Yesod.Form.Fields (textField, intField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
@@ -108,23 +106,23 @@ postPushMessageR :: (Yesod m, YesodVideo m)
 postPushMessageR = do
     
     messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
-        <$> runInputPost (iopt textField "messageType")
-    icon <- runInputPost (ireq urlField "icon")
-    channelId <- ChanId <$> runInputPost (ireq intField "channelId")
-    polite <- runInputPost (ireq boolField "polite")
-    ws <- runInputPost (ireq textField "ws")
-    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
-    senderPhoto <- runInputPost (ireq urlField "senderPhoto")
-    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
+        <$> lookupPostParam "messageType"
+    icon <- lookupPostParam "icon"
+    channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
+    polite <- (readMaybe . unpack =<<) <$> lookupPostParam "polite"
+    ws <- lookupPostParam "ws"
+    sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
+    senderPhoto <- lookupPostParam "senderPhoto"
+    rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
 
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
-        where_ $ x ^. UserId ==. val sid
+        where_ $ just (x ^. UserId) ==. val sid
         return x
 
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription
-        where_ $ x ^. PushSubscriptionUser ==. val rid
+        where_ $ just (x ^. PushSubscriptionUser) ==. val rid
         return x
 
     manager <- liftHandler getAppHttpManager
@@ -152,14 +150,14 @@ postPushMessageR = do
     case details of
       Just vapidKeysMinDetails -> do
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-
+          
           forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
                                                 , "icon" .= icon
-                                                , "channelId" .= (channelId :: ChanId)
+                                                , "channelId" .= channelId
                                                 , "ws" .= ws
-                                                , "polite" .= polite
+                                                , "polite" .= (polite :: Maybe Bool)
                                                 , "senderId" .= sid
                                                 , "senderName" .= (userName . entityVal <$> sender)
                                                 , "senderEmail" .= (userEmail . entityVal <$> sender)
@@ -227,9 +225,10 @@ wsApp channelId polite = do
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
                    => ChanId -- ^ Channel id
                    -> Text -- ^ Dialog id Outgoing
+                   -> Text
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall channel idDialogOutgoingCall toParent = do
+widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel toParent = do
 
     let polite = True
     
@@ -242,19 +241,12 @@ widgetOutgoingCall channel idDialogOutgoingCall toParent = do
     idDialogCallDeclined <- newIdent
     idDialogVideoSessionEnded <- newIdent
     
-    $(widgetFile "my/doctors/video/outgoing")    
-    $(widgetFile "my/doctors/video/session")
+    $(widgetFile "video/outgoing")
 
 
-getDoctorVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                    => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
-getDoctorVideoRoomR channelId polite = webSockets (wsApp channelId polite)
-
-
-getPatientVideoRoomR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                     => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
-getPatientVideoRoomR channelId polite = webSockets (wsApp channelId polite)
-
+getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+             => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
+getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 
 instance ( Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage
