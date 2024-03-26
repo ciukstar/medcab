@@ -54,7 +54,9 @@ import Material3 (md3mreq, md3switchField)
 import Menu (menu)
 import Model
     ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
-    , ChatMessageStatus (ChatMessageStatusUnread), PatientId, Patient, Chat, Token
+    , ChatMessageStatus (ChatMessageStatusUnread)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeEnd)
+    , PatientId, Patient, Chat, Token
     , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
     , PushSubscription (PushSubscription), Unique (UniquePushSubscription)
@@ -65,7 +67,7 @@ import Model
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
       , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
       , TokenApi, StoreToken, TokenId, StoreVal, TokenStore
-      ), PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
+      )
     )
 
 import Network.HTTP.Types.Status (status400)
@@ -135,7 +137,7 @@ postMyDoctorNotificationsR _pid _uid _did = do
 
 getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorNotificationsR pid uid did = do
-    
+
     storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoVapid
@@ -223,7 +225,7 @@ getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorR pid uid did = do
 
     let polite = True
-    
+
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
             `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -240,7 +242,7 @@ getMyDoctorR pid uid did = do
                   return $ y ^. DoctorUser
             )
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
-        return (countRows :: SqlExpr (Value Int)) )          
+        return (countRows :: SqlExpr (Value Int)) )
 
     let sid = uid
     case doctor >>= doctorUser . entityVal . fst of
@@ -248,17 +250,23 @@ getMyDoctorR pid uid did = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgDoctor
-              
+
               idPanelDetails <- newIdent
               idButtonVideoCall <- newIdent
               idDialogOutgoingCall <- newIdent
               idButtonOutgoingCallCancel <- newIdent
+              idButtonEndVideoSession <- newIdent
 
               let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
-              
+
               $(widgetFile "my/doctors/doctor")
-              widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
-              
+              widgetOutgoingCall
+                  channelId
+                  idDialogOutgoingCall
+                  idButtonOutgoingCallCancel
+                  idButtonEndVideoSession
+                  VideoR
+
       Nothing -> invalidArgsI [MsgNoRecipient]
 
 

@@ -62,11 +62,14 @@ import Menu (menu)
 import Model
     ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorLight, AvatarColorDark)
-    , ChatMessageStatus (ChatMessageStatusUnread), UserId, User (User, userName)
-    , UserPhoto, DoctorId, Doctor, PatientId, Patient(Patient, patientUser), Chat
+    , ChatMessageStatus (ChatMessageStatusUnread)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeEnd)
+    , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
+    , PatientId, Patient(Patient, patientUser), Chat
     , PushSubscription (PushSubscription), Token, Store
-    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Unique (UniquePushSubscription), PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
+    , StoreType
+      ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
+    , Unique (UniquePushSubscription)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
@@ -303,7 +306,7 @@ getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
 
     let polite = True
-    
+
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -330,17 +333,23 @@ getMyPatientR uid did pid = do
     case patientUser . entityVal . fst <$> patient of
       Just rid ->  defaultLayout $ do
           setTitleI MsgPatient
-          
+
           idPanelDetails <- newIdent
           idButtonVideoCall <- newIdent
           idDialogOutgoingCall <- newIdent
           idButtonOutgoingCallCancel <- newIdent
+          idButtonEndVideoSession <- newIdent
 
           let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
-        
+
           $(widgetFile "my/patients/patient")
-          
-          widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
+
+          widgetOutgoingCall
+              channelId
+              idDialogOutgoingCall
+              idButtonOutgoingCallCancel
+              idButtonEndVideoSession
+              VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

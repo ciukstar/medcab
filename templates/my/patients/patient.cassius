@@ -1,19 +1,19 @@
 
 header
-  position: sticky
-  top: 0
-  z-index: 1
-  padding: 0.5rem 1rem
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-  align-items: center
-  #headerStart
+
+    position: sticky
+    top: 0
+    z-index: 1
+    height: var(--app-top-appbar-height,64px)
+    padding: 0 1rem
     display: flex
     flex-direction: row
     justify-content: flex-start
     align-items: center
-    gap: 1rem
+    column-gap: 1rem
+
+    #buttonDelete
+        margin-left: auto
     
 main
   display: flex

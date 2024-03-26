@@ -240,6 +240,8 @@ instance Yesod App where
             idButtonEndVideoSession <- newIdent
 
             idDialogMissedCall <- newIdent
+
+            idDialogVideoSessionEnded <- newIdent
             
             $(widgetFile "default-layout")            
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")

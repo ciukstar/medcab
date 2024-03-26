@@ -1,15 +1,13 @@
 <header.app-top-app-bar.background>
-  <div #headerStart>
-    <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
+  <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
 
-    <h1.title-large>
-      _{MsgPatient}
-
-  <div #headerEnd>
-    <md-icon-button type=button aria-label=_{MsgDele}
-      onclick="document.getElementById('idDialogDelete').open = true">
-      <md-icon>delete
+  <h1.title-large>
+    _{MsgPatient}
+      
+  <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
+    onclick="document.getElementById('idDialogDelete').open = true">
+    <md-icon>delete
 
 <md-dialog #idDialogDelete>
   <div slot=headline>

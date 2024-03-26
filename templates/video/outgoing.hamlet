@@ -36,7 +36,7 @@
     <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
 
   <div slot=actions>
-    <md-filled-icon-button type=button onclick="close()">
+    <md-filled-icon-button type=button ##{idButtonEndVideoSession}>
       <md-icon>call_end
       
 <md-dialog ##{idDialogVideoSessionEnded}>

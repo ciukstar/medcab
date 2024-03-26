@@ -16,7 +16,7 @@ document.querySelector('md-tabs').onchange = function (e) {
   });
 };
 
-document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
+document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
 
   fetch('@{VideoR PushMessageR}', {
     method: 'POST',
@@ -37,9 +37,9 @@ document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
     console.error(err);
   });
   
-};
+});
 
-document.getElementById(#{idButtonOutgoingCallCancel}).onclick = function (event) {
+document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click', function (event) {
 
   fetch('@{VideoR PushMessageR}', {
     method: 'POST',
@@ -60,4 +60,27 @@ document.getElementById(#{idButtonOutgoingCallCancel}).onclick = function (event
     console.error(err);
   });
   
-};
+});
+
+document.getElementById(#{idButtonEndVideoSession}).addEventListener('click', function (event) {
+
+  fetch('@{VideoR PushMessageR}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      "messageType": #{show PushMsgTypeEnd},
+      "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      "channelId": #{show channel},
+      "polite": #{rawJS $ not polite},
+      "ws": '@{VideoR $ WebSoketR channelId (not polite)}'.replace("http:", "ws:").replace("https:", "wss:"),
+      "senderId": #{show $ fromSqlKey sid},
+      "senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
+      "recipientId": #{show $ fromSqlKey rid}
+    })
+  }).then(function (result) {
+    document.getElementById(#{idDialogOutgoingCall}).close();
+  }).catch(function (err) {
+    console.error(err);
+  });
+  
+});

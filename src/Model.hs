@@ -51,8 +51,8 @@ import Yesod.Core.Dispatch
 import Yesod.Form (Textarea)
 
 
-data PushMsgType = PushMsgTypeCall | PushMsgTypeAccept | PushMsgTypeDecline | PushMsgTypeCancel
-                 | PushMsgTypeEndVideoSession
+data PushMsgType = PushMsgTypeCall | PushMsgTypeAccept | PushMsgTypeDecline
+                 | PushMsgTypeCancel | PushMsgTypeEnd
     deriving (Eq, Show, Read)
 
 
@@ -62,7 +62,7 @@ instance ToJSON PushMsgType where
     toJSON PushMsgTypeAccept = String "PushMsgTypeAccept"
     toJSON PushMsgTypeDecline = String "PushMsgTypeDecline"
     toJSON PushMsgTypeCancel = String "PushMsgTypeCancel"
-    toJSON PushMsgTypeEndVideoSession = String "PushMsgTypeEndVideoSession"
+    toJSON PushMsgTypeEnd = String "PushMsgTypeEnd"
         
 
 

@@ -1,24 +1,24 @@
 
 header
-  min-height: var(--app-top-appbar-height,64px)
-  position: sticky
-  top: 0
-  z-index: 1
-  padding: 0 1rem
-  display: flex
-  justify-content: flex-start
-  align-items: center
-  gap: 1rem
+    min-height: var(--app-top-appbar-height,64px)
+    position: sticky
+    top: 0
+    z-index: 1
+    padding: 0 1rem
+    display: flex
+    justify-content: flex-start
+    align-items: center
+    column-gap: 1rem
 
-  figure
-      margin: 0
-      padding: 0
-      display: flex
-      flex-direction: row
-      align-items: center
-      gap: 1rem
-      img
-          clip-path: circle(50%)
+    figure
+        margin: 0
+        padding: 0
+        display: flex
+        flex-direction: row
+        align-items: center
+        gap: 1rem
+        img
+            clip-path: circle(50%)
 
 main
     height: calc(100svh - var(--app-top-appbar-height,64px))

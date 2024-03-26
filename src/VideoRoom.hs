@@ -55,8 +55,7 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, apiInfoVapid, secretVolumeVapid
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline
-      , PushMsgTypeEndVideoSession
+      ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEnd
       )
     , EntityField
       ( UserId, PushSubscriptionUser
@@ -225,10 +224,11 @@ wsApp channelId polite = do
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
                    => ChanId -- ^ Channel id
                    -> Text -- ^ Dialog id Outgoing
-                   -> Text
+                   -> Text -- ^ Button id for cancelig outgoing call
+                   -> Text -- ^ Button id for ending call
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel toParent = do
+widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel idButtonEndVideoSession toParent = do
 
     let polite = True
     
