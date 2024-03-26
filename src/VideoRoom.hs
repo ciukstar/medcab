@@ -24,7 +24,7 @@ module VideoRoom
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR)
+    , Route (WebSoketR, PushMessageR, IncomingR)
     , VideoRoomMessage (VideoRoomOutgoingCall, VideoRoomIncomingCall)
     )
 
@@ -73,6 +73,7 @@ import Settings (widgetFile)
 
 import System.IO (readFile')
 
+import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 
 import Web.WebPush
@@ -84,18 +85,71 @@ import Yesod
     ( Yesod, YesodSubDispatch, yesodSubDispatch , mkYesodSubDispatch
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
-    , RenderMessage , FormMessage, HandlerFor, lookupPostParam
+    , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
     )
+import Yesod.Core (defaultLayout)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Core.Widget (WidgetFor)
+import Yesod.Form.Input (runInputGet, ireq)
+import Yesod.Form.Fields (intField, urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+import Text.Julius (RawJS(rawJS))
 
 
 class YesodVideo m where
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
+
+
+getIncomingR :: (Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+             => SubHandlerFor VideoRoom m Html
+getIncomingR = do
+
+    let polite = False
+
+    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
+    back <- runInputGet (ireq urlField "back")
+
+    toParent <- getRouteToParent
+
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+    
+    liftHandler $ defaultLayout $ do
+        idButtonExitVideoSession <- newIdent
+        idVideoRemote <- newIdent
+        idVideoSelf <- newIdent
+        idButtonEndVideoSession <- newIdent
+        $(widgetFile "video/incoming")
+
+
+widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
+                   => ChanId -- ^ Channel id
+                   -> Text -- ^ Dialog id Outgoing
+                   -> Text -- ^ Button id for cancelig outgoing call
+                   -> Text -- ^ Button id for ending call
+                   -> (Route VideoRoom -> Route m)
+                   -> WidgetFor m ()
+widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel idButtonEndVideoSession toParent = do
+
+    let polite = True
+    
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+
+    idDialogVideoSession <- newIdent
+    idVideoRemote <- newIdent
+    idVideoSelf <- newIdent
+
+    idDialogCallDeclined <- newIdent
+    idDialogVideoSessionEnded <- newIdent
+    
+    $(widgetFile "video/outgoing")
+
+
+getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+             => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
+getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 
 postPushMessageR :: (Yesod m, YesodVideo m)
@@ -219,34 +273,6 @@ wsApp channelId polite = do
           let newChannelMap = M.alter userLeftChannel channelId m
           atomically $ writeTVar channelMapTVar newChannelMap
       Right () -> return ()
-
-
-widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
-                   => ChanId -- ^ Channel id
-                   -> Text -- ^ Dialog id Outgoing
-                   -> Text -- ^ Button id for cancelig outgoing call
-                   -> Text -- ^ Button id for ending call
-                   -> (Route VideoRoom -> Route m)
-                   -> WidgetFor m ()
-widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel idButtonEndVideoSession toParent = do
-
-    let polite = True
-    
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
-    idDialogVideoSession <- newIdent
-    idVideoRemote <- newIdent
-    idVideoSelf <- newIdent
-
-    idDialogCallDeclined <- newIdent
-    idDialogVideoSessionEnded <- newIdent
-    
-    $(widgetFile "video/outgoing")
-
-
-getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
-getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 
 instance ( Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage

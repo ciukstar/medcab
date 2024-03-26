@@ -18,7 +18,7 @@
       <md-icon slot=icon>call_end
       _{MsgDecline}
 
-    <md-filled-button has-icon ##{idButtonAccept}>
+    <md-filled-button ##{idButtonAccept} has-icon type=button>
       <md-icon slot=icon>call
       _{MsgAccept}
 

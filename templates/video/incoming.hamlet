@@ -1,0 +1,18 @@
+
+<header.app-top-app-bar.background>
+  <md-icon-button href=#{back} aria-label=MsgBack ##{idButtonExitVideoSession}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    Video Session
+
+<main>    
+
+  <p>Remore
+  <video.remote controls autoplay width=250 height=150 ##{idVideoRemote}>
+
+  <p>Self
+  <video.self controls autoplay muted width=250 height=150 ##{idVideoSelf}>
+
+  <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
+    <md-icon>call_end

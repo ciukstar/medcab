@@ -56,4 +56,5 @@ defaultVideoRoomMessage = englishVideoRoomMessage
 mkYesodSubData "VideoRoom" [parseRoutes|
 /#ChanId/#Bool/ws WebSoketR    GET
 /api/push         PushMessageR POST
+/incoming         IncomingR    GET
 |]

@@ -16,9 +16,9 @@ module Foundation where
 
 import ChatRoom.Data (ChatRoom)
 import VideoRoom.Data
-    ( VideoRoom, Route (PushMessageR), VideoRoomMessage, defaultVideoRoomMessage
-    , englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage
-    , russianVideoRoomMessage
+    ( VideoRoom, Route (PushMessageR, IncomingR), VideoRoomMessage
+    , defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage
+    , romanianVideoRoomMessage, russianVideoRoomMessage
     )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
@@ -220,8 +220,6 @@ instance Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
-        config <- fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
@@ -242,6 +240,8 @@ instance Yesod App where
             idDialogMissedCall <- newIdent
 
             idDialogVideoSessionEnded <- newIdent
+
+            backRoute <- fromMaybe HomeR <$> getCurrentRoute
             
             $(widgetFile "default-layout")            
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -254,6 +254,7 @@ instance Yesod App where
 
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
+    
 
     isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
