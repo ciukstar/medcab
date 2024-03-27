@@ -6,7 +6,7 @@
 
 /patients/#PatientId/#UserId/doctors/#DoctorId/notifs      MyDoctorNotificationsR GET POST DELETE
 /patients/#PatientId/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR   GET
-/patients/#PatientId/#UserId/doctors/#DoctorId/dotor 	   MyDoctorR	     	  GET
+/patients/#PatientId/#UserId/doctors/#DoctorId/doctor 	   MyDoctorR	     	  GET
 /patients/#UserId/doctors/#DoctorId/photo       	   MyDoctorPhotoR 	  GET
 /patients/#UserId/doctors 				   MyDoctorsR	     	  GET
 

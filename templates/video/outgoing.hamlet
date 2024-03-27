@@ -11,34 +11,6 @@
       <md-icon slot=icon>call_end
       Cancel
       
-<md-dialog ##{idDialogCallDeclined}>
-  <div slot=headline>
-    Call declined
-
-  <form slot=content method=dialog>
-    <p.body-large>Call declined ...
-
-  <div slot=actions>
-    <md-filled-button has-icon type=button>
-      <md-icon slot=icon>close
-      Close
-
-<md-dialog.full-screen ##{idDialogVideoSession}>
-  <div slot=headline>
-    Video Session
-
-  <form slot=content method=dialog>
-
-    <p>Remore
-    <video controls autoplay ##{idVideoRemote} width=250 height=150>
-
-    <p>Self
-    <video controls autoplay muted ##{idVideoSelf} width=250 height=150>
-
-  <div slot=actions>
-    <md-filled-icon-button type=button ##{idButtonEndVideoSession}>
-      <md-icon>call_end
-      
 <md-dialog ##{idDialogVideoSessionEnded}>
   <div slot=headline>
     Call Ended

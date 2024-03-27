@@ -24,7 +24,7 @@ module VideoRoom
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, IncomingR)
+    , Route (WebSoketR, PushMessageR, IncomingR, OutgoingR)
     , VideoRoomMessage (VideoRoomOutgoingCall, VideoRoomIncomingCall)
     )
 
@@ -74,6 +74,7 @@ import Settings (widgetFile)
 import System.IO (readFile')
 
 import Text.Hamlet (Html)
+import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
 import Web.WebPush
@@ -86,6 +87,7 @@ import Yesod
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
     , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
+    , getCurrentRoute
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Types (YesodSubRunnerEnv)
@@ -95,7 +97,6 @@ import Yesod.Form.Fields (intField, urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Text.Julius (RawJS(rawJS))
 
 
 class YesodVideo m where
@@ -103,7 +104,30 @@ class YesodVideo m where
     getAppHttpManager :: HandlerFor m Manager
 
 
-getIncomingR :: (Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+getOutgoingR :: (Yesod m, YesodVideo m)
+             => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+             => SubHandlerFor VideoRoom m Html
+getOutgoingR = do
+
+    let polite = True
+
+    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
+    back <- runInputGet (ireq urlField "back")
+
+    toParent <- getRouteToParent
+
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+
+    liftHandler $ defaultLayout $ do
+        idButtonExitVideoSession <- newIdent
+        idVideoRemote <- newIdent
+        idVideoSelf <- newIdent
+        idButtonEndVideoSession <- newIdent
+        $(widgetFile "video/session")
+
+
+getIncomingR :: (Yesod m, YesodVideo m)
+             => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
              => SubHandlerFor VideoRoom m Html
 getIncomingR = do
 
@@ -121,25 +145,17 @@ getIncomingR = do
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
         idButtonEndVideoSession <- newIdent
-        $(widgetFile "video/incoming")
+        $(widgetFile "video/session")
 
 
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
-                   => ChanId -- ^ Channel id
-                   -> Text -- ^ Dialog id Outgoing
+                   => Text -- ^ Dialog id Outgoing
                    -> Text -- ^ Button id for cancelig outgoing call
-                   -> Text -- ^ Button id for ending call
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall channelId idDialogOutgoingCall idButtonOutgoingCallCancel idButtonEndVideoSession toParent = do
+widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel toParent = do
 
-    let polite = True
-    
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
-    idDialogVideoSession <- newIdent
-    idVideoRemote <- newIdent
-    idVideoSelf <- newIdent
+    backRoute <- fromMaybe (toParent OutgoingR) <$> getCurrentRoute
 
     idDialogCallDeclined <- newIdent
     idDialogVideoSessionEnded <- newIdent

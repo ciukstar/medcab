@@ -338,18 +338,12 @@ getMyPatientR uid did pid = do
           idButtonVideoCall <- newIdent
           idDialogOutgoingCall <- newIdent
           idButtonOutgoingCallCancel <- newIdent
-          idButtonEndVideoSession <- newIdent
 
           let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
 
           $(widgetFile "my/patients/patient")
 
-          widgetOutgoingCall
-              channelId
-              idDialogOutgoingCall
-              idButtonOutgoingCallCancel
-              idButtonEndVideoSession
-              VideoR
+          widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

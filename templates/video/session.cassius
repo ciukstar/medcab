@@ -1,0 +1,40 @@
+
+header
+
+    position: sticky
+    top: 0
+    z-index: 1
+    height: var(--app-top-appbar-height, 64px)
+    padding: 0 1rem
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    column-gap: 1rem
+    
+main
+
+    position: relative
+    height: calc(100svh - var(--app-top-appbar-height, 64px))
+
+    ##{idVideoSelf}
+        width: 33%
+        height: auto
+        position: absolute
+        right: 1rem
+        bottom: 1rem
+
+    ##{idButtonEndVideoSession}
+        position: absolute
+        left: 1rem
+        bottom: 1rem
+
+@media screen and (orientation: portrait)
+    ##{idVideoRemote}
+        width: 100%
+        height: auto
+
+@media screen and (orientation: landscape)
+    ##{idVideoRemote}
+        width: auto
+        height: 100%

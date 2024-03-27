@@ -34,7 +34,7 @@ let ignoreOffer = false;
 
 ws.onmessage = async (e) => {
 
-  const {description, candidate} = JSON.parse(e.data);
+  const { description, candidate } = JSON.parse(e.data);
 
   try {
     if (description) {
@@ -50,13 +50,13 @@ ws.onmessage = async (e) => {
 	await pc.setLocalDescription();
 	ws.send(JSON.stringify({ description: pc.localDescription }));
       }
-      
+
     } else if (candidate) {
-      
+
       try {
 	await pc.addIceCandidate(candidate);
       } catch (err) {
-	if (!ignoreOffer) {
+	if ( ! ignoreOffer ) {
 	  throw err;
 	}
       }
@@ -114,7 +114,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     }).then((result) => {
       pc.close();
       ws.close();
-      window.location.href = #{back};    
+      window.location.href = #{back};
     });
   });
 });

@@ -6,13 +6,11 @@
   <h1.title-large>
     Video Session
 
-<main>    
+<main>
 
-  <p>Remore
-  <video.remote controls autoplay width=250 height=150 ##{idVideoRemote}>
+  <video controls autoplay ##{idVideoRemote}>
 
-  <p>Self
-  <video.self controls autoplay muted width=250 height=150 ##{idVideoSelf}>
+  <video controls autoplay muted ##{idVideoSelf}>
 
   <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
     <md-icon>call_end
