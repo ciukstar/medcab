@@ -1,3 +1,5 @@
+Close: Închide
+MissedCall: Apel pierdut
 CallAgain: Suna din nou 
 CallDeclined: Apel refuzat
 Decline: Refuzați

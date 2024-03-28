@@ -3,6 +3,7 @@ let ws = new WebSocket(
   '@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:")
 );
 
+
 let pc = new RTCPeerConnection(#{config});
 
 pc.ontrack = ({track, streams}) => {
@@ -16,19 +17,23 @@ pc.ontrack = ({track, streams}) => {
 
 let makingOffer = false;
 
-pc.onnegotiationneeded = async () => {
-  try {
-    makingOffer = true;
-    await pc.setLocalDescription();
-    ws.send(JSON.stringify({ description: pc.localDescription }));
-  } catch (err) {
-    console.error(err);
-  } finally {
-    makingOffer = false;
-  }
-};
+ws.addEventListener('open', (e) => {
+  
+  pc.onnegotiationneeded = async () => {
+    try {
+      makingOffer = true;
+      await pc.setLocalDescription();
+      ws.send(JSON.stringify({ description: pc.localDescription }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      makingOffer = false;
+    }
+  };
 
-pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+  pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+  
+});
 
 let ignoreOffer = false;
 
@@ -97,24 +102,26 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{show PushMsgTypeEnd}) {
     pc.close();
     ws.close();
-    window.location.href = #{back};
+    document.getElementById(#{idDialogCallEnded}).show();
   }
 
 });
 
 [#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
-  document.getElementById(x).addEventListener('click', function (event) {
+  document.getElementById(x).addEventListener('click', (e) => {
     fetch('@{toParent PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
 	"messageType": #{show PushMsgTypeEnd},
-	"channelId": #{show channel}
+	"channelId": #{show channel},
+	"senderId": #{show $ fromSqlKey sid},
+	"recipientId": #{show $ fromSqlKey rid}
       })
     }).then((result) => {
       pc.close();
       ws.close();
-      window.location.href = #{back};
+      window.location.href = #{backlink};      
     });
   });
 });

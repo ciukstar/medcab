@@ -21,13 +21,6 @@ module VideoRoom
   , widgetOutgoingCall
   ) where
 
-import VideoRoom.Data
-    ( resourcesVideoRoom, channelMapTVar
-    , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, IncomingR, OutgoingR)
-    , VideoRoomMessage (VideoRoomOutgoingCall, VideoRoomIncomingCall)
-    )
-
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
 import Control.Applicative ((<|>))
@@ -37,9 +30,10 @@ import Control.Monad (forever, forM_)
 import Database.Esqueleto.Experimental
     ( selectOne, Value (unValue), from, table, where_, val
     , (^.), (==.)
-    , Entity (entityVal), select, toSqlKey, SqlBackend, just
+    , select, just
     )
-import Database.Persist (Entity (Entity))
+import Database.Persist (Entity (Entity, entityVal))
+import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A (Value)
@@ -50,7 +44,7 @@ import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, unpack)
 
 import Model
-    ( User (userEmail, userName)
+    ( UserId, User (userEmail, userName)
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, apiInfoVapid, secretVolumeVapid
@@ -59,10 +53,10 @@ import Model
       )
     , EntityField
       ( UserId, PushSubscriptionUser
-      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal
-      )
+      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, UserPhotoUser
+      ), UserPhoto (UserPhoto)
     )
-    
+
 import Network.HTTP.Client (Manager)
 
 import UnliftIO.Exception (try, SomeException)
@@ -76,6 +70,17 @@ import System.IO (readFile')
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
+import Text.Shakespeare.Text (st)
+
+import VideoRoom.Data
+    ( resourcesVideoRoom, channelMapTVar
+    , VideoRoom (VideoRoom), ChanId (ChanId)
+    , Route (WebSoketR, PushMessageR, IncomingR, OutgoingR, PhotoR)
+    , VideoRoomMessage
+      ( VideoRoomOutgoingCall, VideoRoomIncomingCall, VideoRoomClose
+      , VideoRoomCallEnded, VideoRoomVideoSession, VideoRoomNotGeneratedVAPID
+      )
+    )
 
 import Web.WebPush
     ( VAPIDKeysMinDetails(VAPIDKeysMinDetails), readVAPIDKeys, mkPushNotification
@@ -90,6 +95,8 @@ import Yesod
     , getCurrentRoute
     )
 import Yesod.Core (defaultLayout)
+import Yesod.Core.Content (TypedContent (TypedContent), toContent)
+import Yesod.Core.Handler (invalidArgsI, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Core.Widget (WidgetFor)
 import Yesod.Form.Input (runInputGet, ireq)
@@ -97,6 +104,7 @@ import Yesod.Form.Fields (intField, urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+import Data.Text.Encoding (encodeUtf8)
 
 
 class YesodVideo m where
@@ -106,13 +114,13 @@ class YesodVideo m where
 
 getOutgoingR :: (Yesod m, YesodVideo m)
              => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-             => SubHandlerFor VideoRoom m Html
-getOutgoingR = do
+             => UserId -> UserId -> SubHandlerFor VideoRoom m Html
+getOutgoingR sid rid = do
 
     let polite = True
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
-    back <- runInputGet (ireq urlField "back")
+    backlink <- runInputGet (ireq urlField "backlink")
 
     toParent <- getRouteToParent
 
@@ -123,43 +131,50 @@ getOutgoingR = do
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
         idButtonEndVideoSession <- newIdent
+        idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
 
 
 getIncomingR :: (Yesod m, YesodVideo m)
+             => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
              => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
              => SubHandlerFor VideoRoom m Html
 getIncomingR = do
 
     let polite = False
 
+    (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
+    (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
+
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
-    back <- runInputGet (ireq urlField "back")
+    backlink <- runInputGet (ireq urlField "backlink")
 
     toParent <- getRouteToParent
 
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-    
+
     liftHandler $ defaultLayout $ do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
         idButtonEndVideoSession <- newIdent
+        idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
 
 
 widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
                    => Text -- ^ Dialog id Outgoing
                    -> Text -- ^ Button id for cancelig outgoing call
+                   -> UserId -> UserId
                    -> (Route VideoRoom -> Route m)
                    -> WidgetFor m ()
-widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel toParent = do
+widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid toParent = do
 
-    backRoute <- fromMaybe (toParent OutgoingR) <$> getCurrentRoute
+    backlink <- fromMaybe (toParent (OutgoingR sid rid)) <$> getCurrentRoute
 
     idDialogCallDeclined <- newIdent
     idDialogVideoSessionEnded <- newIdent
-    
+
     $(widgetFile "video/outgoing")
 
 
@@ -170,18 +185,15 @@ getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                 => (RenderMessage m FormMessage)
+                 => (RenderMessage m FormMessage, RenderMessage m VideoRoomMessage)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
-    
+
     messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
         <$> lookupPostParam "messageType"
     icon <- lookupPostParam "icon"
     channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
-    polite <- (readMaybe . unpack =<<) <$> lookupPostParam "polite"
-    ws <- lookupPostParam "ws"
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
-    senderPhoto <- lookupPostParam "senderPhoto"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
 
     sender <- liftHandler $ runDB $ selectOne $ do
@@ -216,21 +228,24 @@ postPushMessageR = do
       Just (_,StoreTypeSession) -> return Nothing
       Nothing -> return Nothing
 
+    toParent <- getRouteToParent
+    urlRender <- getUrlRender
+
     case details of
       Just vapidKeysMinDetails -> do
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          
+
           forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
+                                                , "topic" .= messageType
                                                 , "icon" .= icon
                                                 , "channelId" .= channelId
-                                                , "ws" .= ws
-                                                , "polite" .= (polite :: Maybe Bool)
                                                 , "senderId" .= sid
-                                                , "senderName" .= (userName . entityVal <$> sender)
-                                                , "senderEmail" .= (userEmail . entityVal <$> sender)
-                                                , "senderPhoto" .= senderPhoto
+                                                , "senderName" .= ( (userName . entityVal <$> sender)
+                                                                    <|> (Just . userEmail . entityVal <$> sender)
+                                                                  )
+                                                , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
                                                 , "recipientId" .= rid
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
@@ -243,7 +258,7 @@ postPushMessageR = do
                       liftIO $ print ex
                   Right () -> return ()
 
-      Nothing -> return () -- liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
+      Nothing -> liftHandler $ invalidArgsI [VideoRoomNotGeneratedVAPID]
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -257,7 +272,7 @@ userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
 wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
-wsApp channelId polite = do 
+wsApp channelId polite = do
 
     VideoRoom {..} <- getSubYesod
 
@@ -289,6 +304,18 @@ wsApp channelId polite = do
           let newChannelMap = M.alter userLeftChannel channelId m
           atomically $ writeTVar channelMapTVar newChannelMap
       Right () -> return ()
+
+
+getPhotoR :: (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+          => UserId -> SubHandlerFor VideoRoom m TypedContent
+getPhotoR uid = do
+    photo <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @UserPhoto
+        where_ $ x ^. UserPhotoUser ==. val uid
+        return x
+    return $ case photo of
+      Just (Entity _ (UserPhoto _ mime bs _)) -> TypedContent (encodeUtf8 mime) $ toContent bs
+      Nothing -> TypedContent "image/svg+xml" $ toContent [st|<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/></svg>|]
 
 
 instance ( Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage

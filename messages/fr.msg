@@ -1,3 +1,5 @@
+Close: Fermer
+MissedCall: Appel manqué
 CallAgain: Appelle encore une fois 
 CallDeclined: Appel refusé
 Decline: Refuser

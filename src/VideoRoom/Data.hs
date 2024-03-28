@@ -19,6 +19,8 @@ import Data.Aeson (ToJSON, FromJSON)
 import qualified Data.Map as M
 import Data.Text (Text)
 
+import Model (UserId)
+
 import Yesod.Core (renderRoute, PathPiece)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
 
@@ -31,31 +33,53 @@ newtype VideoRoom = VideoRoom
     }
 
 
-data VideoRoomMessage = VideoRoomOutgoingCall | VideoRoomIncomingCall
+data VideoRoomMessage = VideoRoomOutgoingCall
+                      | VideoRoomIncomingCall
+                      | VideoRoomCallEnded
+                      | VideoRoomVideoSession
+                      | VideoRoomClose
+                      | VideoRoomNotGeneratedVAPID
 
 englishVideoRoomMessage :: VideoRoomMessage -> Text
 englishVideoRoomMessage VideoRoomOutgoingCall = "Outgoing call"
 englishVideoRoomMessage VideoRoomIncomingCall = "Incoming call"
+englishVideoRoomMessage VideoRoomCallEnded = "Call ended"
+englishVideoRoomMessage VideoRoomVideoSession = "Video Session"
+englishVideoRoomMessage VideoRoomClose = "Close"
+englishVideoRoomMessage VideoRoomNotGeneratedVAPID = "VAPID not generated"
 
 frenchVideoRoomMessage :: VideoRoomMessage -> Text
 frenchVideoRoomMessage VideoRoomOutgoingCall = "Appel sortant"
 frenchVideoRoomMessage VideoRoomIncomingCall = "Appel entrant"
+frenchVideoRoomMessage VideoRoomCallEnded = "Appel terminé"
+frenchVideoRoomMessage VideoRoomVideoSession = "Séance vidéo"
+frenchVideoRoomMessage VideoRoomClose = "Fermer"
+frenchVideoRoomMessage VideoRoomNotGeneratedVAPID = "Le VAPID n'a pas été généré"
 
 romanianVideoRoomMessage :: VideoRoomMessage -> Text
 romanianVideoRoomMessage VideoRoomOutgoingCall = "Apel de ieșire"
 romanianVideoRoomMessage VideoRoomIncomingCall = "Apel de intrare"
+romanianVideoRoomMessage VideoRoomCallEnded = "Apel terminat"
+romanianVideoRoomMessage VideoRoomVideoSession = "Sesiune video"
+romanianVideoRoomMessage VideoRoomClose = "Închide"
+romanianVideoRoomMessage VideoRoomNotGeneratedVAPID = "VAPID nu a fost generat"
 
 russianVideoRoomMessage :: VideoRoomMessage -> Text
 russianVideoRoomMessage VideoRoomOutgoingCall = "Исходящий звонок"
 russianVideoRoomMessage VideoRoomIncomingCall = "Входящий звонок"
+russianVideoRoomMessage VideoRoomCallEnded = "Звонок окончен"
+russianVideoRoomMessage VideoRoomVideoSession = "Видеосессия"
+russianVideoRoomMessage VideoRoomClose = "Закрыть"
+russianVideoRoomMessage VideoRoomNotGeneratedVAPID = "VAPID не был создан"
 
 defaultVideoRoomMessage :: VideoRoomMessage -> Text
 defaultVideoRoomMessage = englishVideoRoomMessage
 
 
 mkYesodSubData "VideoRoom" [parseRoutes|
-/#ChanId/#Bool/ws WebSoketR    GET
-/api/push         PushMessageR POST
-/outgoing         OutgoingR    GET
-/incoming         IncomingR    GET
+/photo/#UserId            PhotoR       GET
+/ws/#ChanId/#Bool         WebSoketR    GET
+/api/push                 PushMessageR POST
+/outgoing/#UserId/#UserId OutgoingR    GET
+/incoming                 IncomingR    GET
 |]

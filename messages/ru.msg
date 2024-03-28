@@ -1,3 +1,5 @@
+Close: Закрыть
+MissedCall: Пропущенный звонок
 CallAgain: Позвони снова
 CallDeclined: Звонок отклонен
 Decline: Отклонить

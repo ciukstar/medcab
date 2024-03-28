@@ -259,7 +259,7 @@ getMyDoctorR pid uid did = do
               let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
 
               $(widgetFile "my/doctors/doctor")
-              widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
+              widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

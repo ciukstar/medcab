@@ -4,8 +4,13 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{show PushMsgTypeAccept}) {
     
     document.getElementById(#{idDialogOutgoingCall}).close();
+    
+    const params = new URLSearchParams({
+      channel: message.data.channelId,
+      backlink: '@{backlink}'
+    });
 
-    window.location.href = `@{toParent OutgoingR}?channel=${message.data.channelId}&back=@{backRoute}`;
+    window.location.href = `@{toParent (OutgoingR sid rid)}?${params}`;
     
   } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
 

@@ -14,23 +14,35 @@ self.onpush = function (event) {
     }).then(function (message) {
       var title, body;
       if (message.messageType === 'PushMsgTypeDecline') {
+	
 	title = 'Incoming call declined';
 	body = `Call from user: ${message.senderName} declined`;
+	
       } else if (message.messageType === 'PushMsgTypeAccept') {
+	
 	title = 'Incoming call accepted';
 	body = `Call from user: ${message.senderName} accepted`;
+	
       } else if (message.messageType === 'PushMsgTypeCancel') {
+	
 	title = 'Call Canceled';
 	body = 'Call Canceled';
-      } else if (message.messageType === 'PushMsgTypeEndVideoSession') {
+	
+      } else if (message.messageType === 'PushMsgTypeEnd') {
+	
 	title = 'PushMsgTypeEndVideoSession';
 	body = 'PushMsgTypeEndVideoSession';
+	
       } else if (message.messageType === 'PushMsgTypeCall') {
+	
 	title = 'Incoming call';
 	body = `Call from user: ${message.senderName}`;
+	
       }
       
       return self.registration.showNotification(title, {
+	tag: message.messageType,
+	renotify: true,
 	image: message.senderPhoto,
 	icon: message.icon,
         body: body

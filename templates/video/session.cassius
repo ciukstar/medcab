@@ -25,9 +25,12 @@ main
         bottom: 1rem
 
     ##{idButtonEndVideoSession}
+        --md-sys-color-primary: red
+        --md-sys-color-on-primary: #FFFFFF
         position: absolute
         left: 1rem
         bottom: 1rem
+        
 
 @media screen and (orientation: portrait)
     ##{idVideoRemote}

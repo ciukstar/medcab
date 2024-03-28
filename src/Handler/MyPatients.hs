@@ -343,7 +343,7 @@ getMyPatientR uid did pid = do
 
           $(widgetFile "my/patients/patient")
 
-          widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel VideoR
+          widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

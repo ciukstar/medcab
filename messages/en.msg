@@ -1,3 +1,5 @@
+Close: Close
+MissedCall: Missed call
 CallAgain: Call again
 CallDeclined: Call declined
 Decline: Decline

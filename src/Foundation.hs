@@ -106,7 +106,6 @@ import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
 
-
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -223,7 +222,7 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
-            
+
             idDialogIncomingCall <- newIdent
             idFormIncomingCall <- newIdent
             idFigurePhoto <- newIdent
@@ -231,19 +230,13 @@ instance Yesod App where
             idFigcaptionPhoto <- newIdent
             idButtonDecline <- newIdent
             idButtonAccept <- newIdent
-            
-            idDialogVideoSession <- newIdent
-            idVideoSelf <- newIdent
-            idVideoRemote <- newIdent
-            idButtonEndVideoSession <- newIdent
 
             idDialogMissedCall <- newIdent
+            idMissedCallCaller <- newIdent
 
-            idDialogVideoSessionEnded <- newIdent
+            backlink <- fromMaybe HomeR <$> getCurrentRoute
 
-            backRoute <- fromMaybe HomeR <$> getCurrentRoute
-            
-            $(widgetFile "default-layout")            
+            $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
@@ -254,7 +247,7 @@ instance Yesod App where
 
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
-    
+
 
     isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid

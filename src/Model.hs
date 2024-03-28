@@ -63,7 +63,6 @@ instance ToJSON PushMsgType where
     toJSON PushMsgTypeDecline = String "PushMsgTypeDecline"
     toJSON PushMsgTypeCancel = String "PushMsgTypeCancel"
     toJSON PushMsgTypeEnd = String "PushMsgTypeEnd"
-        
 
 
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread

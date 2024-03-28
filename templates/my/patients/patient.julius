@@ -36,10 +36,7 @@ document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
       "messageType": #{show PushMsgTypeCall},
       "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
       "channelId": #{show channel},
-      "polite": #{rawJS $ not polite},
-      "ws": '@{VideoR $ WebSoketR channelId (not polite)}'.replace("http:", "ws:").replace("https:", "wss:"),
       "senderId": #{show $ fromSqlKey sid},
-      "senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
       "recipientId": #{show $ fromSqlKey rid}
     })
   }).then(function (result) {
@@ -59,10 +56,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).onclick = function (event
       "messageType": #{show PushMsgTypeCancel},
       "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
       "channelId": #{show channel},
-      "polite": #{rawJS $ not polite},
-      "ws": '@{VideoR $ WebSoketR channelId (not polite)}'.replace("http:", "ws:").replace("https:", "wss:"),
       "senderId": #{show $ fromSqlKey sid},
-      "senderPhoto": '@{AccountPhotoR sid AvatarColorLight}',
       "recipientId": #{show $ fromSqlKey rid}
     })
   }).then(function (result) {

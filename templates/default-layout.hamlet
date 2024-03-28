@@ -22,45 +22,17 @@
       <md-icon slot=icon>call
       _{MsgAccept}
 
-
-
-<md-dialog.full-screen ##{idDialogVideoSession}>
-  <div slot=headline>
-    Video Session
-
-  <form slot=content method=dialog>
-
-    <p>Remore
-    <video.remote controls autoplay width=250 height=150 ##{idVideoRemote}>
-
-    <p>Self
-    <video.self controls autoplay muted width=250 height=150 ##{idVideoSelf}>
-
-  <div slot=actions>
-
-    <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
-      <md-icon>call_end
       
 <md-dialog ##{idDialogMissedCall}>
   <div slot=headline>
-    Missed Call
+    _{MsgMissedCall}
 
   <form slot=content method=dialog>
-    <p.body-large>Missed Call ...
+    <p.body-large>
+      _{MsgMissedCall}: 
+      <span ##{idMissedCallCaller}>
 
   <div slot=actions>
     <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
       <md-icon slot=icon>close
-      Close
-      
-<md-dialog ##{idDialogVideoSessionEnded}>
-  <div slot=headline>
-    Video Session Ended
-
-  <form slot=content method=dialog>
-    <p.body-large>Video Session Ended ...
-
-  <div slot=actions>
-    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
-      <md-icon slot=icon>close
-      Close
+      _{MsgClose}

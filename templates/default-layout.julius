@@ -3,9 +3,8 @@ navigator.serviceWorker.register("@{StaticR js_sw_js}", { scope: "/" });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  document.getElementById(#{idImgPhoto}).src = `/accounts/${message.data.senderId}/photo/AvatarColorLight`;
-  document.getElementById(#{idFigcaptionPhoto}).textContent = !message.data.senderName
-    ? message.data.senderEmail : message.data.senderName;
+  document.getElementById(#{idImgPhoto}).src = message.data.senderPhoto;
+  document.getElementById(#{idFigcaptionPhoto}).textContent = message.data.senderName;
   
   document.getElementById(#{idButtonDecline}).onclick = function (event) {
     fetch('@{VideoR PushMessageR}', {
@@ -15,10 +14,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	"messageType": #{show PushMsgTypeDecline},
 	"icon": message.data.icon,
 	"channelId": message.data.channelId,
-	"polite": message.data.polite,
-	"ws": message.data.ws,
 	"senderId": message.data.recipientId,
-	"senderPhoto": message.data.senderPhoto,
 	"recipientId": message.data.senderId
       })
     }).then(function (result) {
@@ -34,17 +30,21 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	"messageType": #{show PushMsgTypeAccept},
 	"icon": message.data.icon,
 	"channelId": message.data.channelId,
-	"polite": message.data.polite,
-	"ws": message.data.ws,
 	"senderId": message.data.recipientId,
-	"senderPhoto": message.data.senderPhoto,
 	"recipientId": message.data.senderId
       })
     }).then(function (result) {
       
       document.getElementById(#{idDialogIncomingCall}).close();
       
-      window.location.href = `@{VideoR IncomingR}?channel=${message.data.channelId}&back=@{backRoute}`;
+      const params = new URLSearchParams({
+	senderId: message.data.recipientId,
+	recipientId: message.data.senderId,
+	channel: message.data.channelId,
+	backlink: '@{backlink}'
+      });
+      
+      window.location.href = `@{VideoR $ IncomingR}?${params}`;
             
     });
   };
@@ -56,17 +56,14 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{show PushMsgTypeCancel}) {
     
     document.getElementById(#{idDialogIncomingCall}).close();
-    document.getElementById(#{idDialogVideoSession}).close();
+    
+    document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
+    
     document.getElementById(#{idDialogMissedCall}).show();
     
   } else if (message.data.messageType === #{show PushMsgTypeCall}) {
     
     document.getElementById(#{idDialogIncomingCall}).show();
-    
-  } else if (message.data.messageType === #{show PushMsgTypeEnd}) {
-    
-    document.getElementById(#{idDialogVideoSession}).close();
-    document.getElementById(#{idDialogVideoSessionEnded}).show();
     
   }
   
