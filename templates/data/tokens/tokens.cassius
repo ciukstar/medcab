@@ -16,15 +16,18 @@ header
     gap: 1rem
     
 main
+
   margin: 1rem
   display: flex
   flex-direction: column
   justify-content: center
   align-items: center
   gap: 1rem
+  
   .app-card
     align-self: stretch
     padding: 1rem
+    
     .app-card-content
       padding: 1rem
       .formStoreType
@@ -37,19 +40,11 @@ main
           gap: 1rem
           label
             margin-left: 1rem
+	    
     .app-card-actions
       display: flex
       flex-direction: row
       justify-content: flex-end
       align-items: center
       gap: 0.5rem
-
-aside.app-snackbar
-  box-sizing: border-box
-  position: fixed
-  bottom: 0
-  left: 0
-  margin: 1rem
-  width: calc(100% - 2 * 1rem)
-  padding: 1rem
   

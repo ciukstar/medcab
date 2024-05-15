@@ -36,8 +36,7 @@ import Foundation
     )
 
 import Model
-    ( statusError
-    , EntityField
+    ( EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
       , SpecialtyId, SpecialistDoctor
       )
@@ -50,7 +49,7 @@ import Settings.StaticFiles (img_person_FILL0_wght400_GRAD0_opsz24_svg)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent )

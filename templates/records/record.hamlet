@@ -38,9 +38,7 @@
 
   <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-    $forall (status,msg) <- filter ((==) statusError . fst) msgs
-      <div.app-banner.error.body-medium>
-        #{status}. #{msg}
+    ^{widgetBanner msgs}
 
     $forall ((Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _)),measurements) <- record
       <dl>
@@ -71,10 +69,6 @@
           <dd.body-medium>
             #{remarks}
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
-        <md-elevation>
-        <span.body-medium>#{status}. #
-        <span.body-medium>#{msg}
+    ^{widgetSnackbar msgs}
         
   <div #panelMeasurements role=tabpanel aria-labelledby=tabMeasurements>

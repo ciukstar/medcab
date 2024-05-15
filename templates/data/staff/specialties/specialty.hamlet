@@ -29,9 +29,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   <figure>
     <img src=@{DataR $ StaffPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
@@ -57,8 +55,4 @@
       <dt.label-large scope=row>_{MsgSpecialty}
       <dd.body-medium>#{sname}
 
-  $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-    <aside.app-snackbar.shape-small.elevation-1.primary-container>
-      <md-elevation>
-      <span.body-medium>#{status}. #
-      <span.body-medium>#{msg}
+  ^{widgetSnackbar msgs}

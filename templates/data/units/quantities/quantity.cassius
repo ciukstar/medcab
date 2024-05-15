@@ -21,19 +21,6 @@ main
   gap: 1rem
   ##{idPanelDetails}
       margin: 0 2rem
-      .error
-        align-self: stretch
-        padding: 1rem
       dl
         dt + dd
           margin-bottom: 1rem
-
-aside.app-snackbar
-  box-sizing: border-box
-  position: fixed
-  bottom: 0
-  left: 0
-  margin: 1rem
-  width: calc(100% - 2 * 1rem)
-  padding: 1rem
-  --md-elevation-level: 1

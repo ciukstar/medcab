@@ -67,7 +67,7 @@ import Settings.StaticFiles
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core

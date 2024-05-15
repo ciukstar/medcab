@@ -16,9 +16,6 @@ header
     gap: 1rem
     
 main
-  .error
-      align-self: stretch
-      padding: 1rem
   .app-attribution
       position: relative
       margin: 0
@@ -29,13 +26,3 @@ main
           bottom: 0
           left: 0.4rem
           font-size: 0.5rem
-
-aside.app-snackbar
-  box-sizing: border-box
-  position: fixed
-  bottom: 4rem
-  left: 0
-  margin: 1rem
-  width: calc(100% - 2 * 1rem)
-  padding: 1rem
-  --md-elevation-level: 1

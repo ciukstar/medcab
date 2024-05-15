@@ -16,9 +16,6 @@ header
     gap: 1rem
     
 main
-    .error
-        align-self: stretch
-        padding: 1rem
     md-list
         md-list-item img
             clip-path:circle(50%)
@@ -38,13 +35,3 @@ main
         position: fixed
         right: 1rem
         bottom: 1rem
-
-aside.app-snackbar
-  box-sizing: border-box
-  position: fixed
-  bottom: 4rem
-  left: 0
-  margin: 1rem
-  width: calc(100% - 2 * 1rem)
-  padding: 1rem
-  --md-elevation-level: 1

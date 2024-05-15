@@ -18,20 +18,7 @@ header
 main
   display: flex
   flex-direction: column
-  .error
-    align-self: stretch
-    padding: 1rem
   dl
     margin: 1rem 2rem
     dt + dd
       margin-bottom: 1rem
-
-aside.app-snackbar
-  box-sizing: border-box
-  position: fixed
-  bottom: 4rem
-  left: 0
-  margin: 1rem
-  width: calc(100% - 2 * 1rem)
-  padding: 1rem
-  --md-elevation-level: 1

@@ -12,9 +12,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   <md-chip-set>
     $forall Entity qid (Quantity name _) <- quantities
@@ -45,8 +43,4 @@
     <a href=@{DataR UnitAddR}>
     <md-icon slot=icon>add
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+^{widgetSnackbar msgs}

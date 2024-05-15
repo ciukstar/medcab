@@ -12,9 +12,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   $if null specialties
     <figure style="text-align:center">
@@ -36,8 +34,4 @@
     <a href=@{DataR $ SpecialtyCreateR ps}>
     <md-icon slot=icon>add
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+^{widgetSnackbar msgs}

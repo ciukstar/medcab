@@ -83,7 +83,7 @@ import Settings.StaticFiles
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, newIdent, fileSourceByteString

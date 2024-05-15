@@ -38,9 +38,7 @@
 
   <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-    $forall (status,msg) <- filter ((==) statusError . fst) msgs
-      <div.app-banner.error.body-medium>
-        #{status}. #{msg}
+    ^{widgetBanner msgs}
 
     $maybe Entity _ (Quantity name descr) <- quantity
       <dl>
@@ -52,10 +50,6 @@
           $maybe descr <- descr
             #{descr}
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
-        <md-elevation>
-        <span.body-medium>#{status}. #
-        <span.body-medium>#{msg}
+    ^{widgetSnackbar msgs}
         
   <div #panelUnits role=tabpanel aria-labelledby=tabUnits>

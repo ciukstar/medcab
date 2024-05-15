@@ -12,9 +12,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
       
   <section>
     <h2.headline-medium>_{MsgAppDescription}
@@ -123,8 +121,4 @@
     <h2.headline-medium>_{MsgIssueTracking}
     <p.body-medium>#{translate $ MsgDoc004 "https://github.com/ciukstar/medcab/issues"}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+^{widgetSnackbar msgs}

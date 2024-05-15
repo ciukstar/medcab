@@ -13,13 +13,11 @@ import Foundation
       )
     )
 
-import Model (statusError)
-
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser) 
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core (Yesod(defaultLayout), getMessages, setUltDestCurrent)
 import Yesod.Core.Widget (setTitleI)

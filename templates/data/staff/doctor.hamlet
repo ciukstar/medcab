@@ -29,9 +29,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
@@ -65,10 +63,6 @@
         <dt.label-large scope=row>_{MsgEmailAddress}
         <dd.body-medium>#{email}
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
-        <md-elevation>
-        <span.body-medium>#{status}. #
-        <span.body-medium>#{msg}
+    ^{widgetSnackbar msgs}
 
   <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>

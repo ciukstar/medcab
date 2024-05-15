@@ -94,7 +94,7 @@ import Settings (widgetFile)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetSnackbar, widgetBanner)
 
 import Yesod.Core
     ( Yesod(defaultLayout), addMessageI, redirect, SomeMessage (SomeMessage)

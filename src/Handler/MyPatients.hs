@@ -91,7 +91,7 @@ import Web.WebPush
     , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
     
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core

@@ -26,9 +26,8 @@
   <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
   
   <div ##{idPanelDoctors} role=tabpanel aria-labelledby=tabDoctors>
-    $forall (status,msg) <- filter ((==) statusError . fst) msgs
-      <div.app-banner.error.body-medium>
-        #{status}. #{msg}
+  
+    ^{widgetBanner msgs}
 
     $if null doctors
       <figure style="text-align:center">
@@ -57,10 +56,6 @@
       <a href=@{DataR $ SpecialtyDoctorCreateR sid ps}>
       <md-icon slot=icon>add
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
-        <md-elevation>
-        <span.body-medium>#{status}. #
-        <span.body-medium>#{msg}
+    ^{widgetSnackbar msgs}
 
   <div #panelSubspecialties role=tabpanel aria-labelledby=tabSubspecialties hidden>

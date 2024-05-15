@@ -19,15 +19,13 @@ import Foundation
       )
     )
     
-import Model (statusError)
-
 import Settings (widgetFile)
 import Settings.StaticFiles (img_ERD_MedCab_svg)
 
 import Text.Blaze.Html (preEscapedToHtml)
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (Route (LoginR))
 import Yesod.Core

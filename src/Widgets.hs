@@ -1,8 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ExplicitForAll #-}
 
 module Widgets
-  ( widgetMenu
+  ( widgetBanner
+  , widgetSnackbar
+  , widgetMenu
   , widgetUser
   ) where
 
@@ -31,14 +34,26 @@ import Model
     ( Specialties (Specialties), Doctor, User, Patient
     , AvatarColor (AvatarColorLight)
     , EntityField(DoctorUser, PatientUser, UserId)
+    , statusError, statusSuccess
     )
 
 import Settings (widgetFile)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
-import Yesod.Core (MonadHandler(liftHandler))
+import Yesod.Core (MonadHandler(liftHandler), Html, WidgetFor, Yesod)
 import Yesod.Core.Handler (getCurrentRoute)
 import Yesod.Persist (YesodPersist(runDB))
+import Data.Text (Text)
+
+
+widgetBanner :: Yesod  m => [(Text, Html)] -> WidgetFor m ()
+widgetBanner msgs = do
+    $(widgetFile "widgets/banner")
+
+
+widgetSnackbar :: Yesod m => [(Text, Html)] -> WidgetFor m ()
+widgetSnackbar msgs = do
+    $(widgetFile "widgets/snackbar")
 
 
 widgetMenu :: Widget

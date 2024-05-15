@@ -38,9 +38,7 @@
 
   <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 
-    $forall (status,msg) <- filter ((==) statusError . fst) msgs
-      <div.app-banner.error.body-medium>
-        #{status}. #{msg}
+    ^{widgetBanner msgs}
 
     $maybe (Entity _ (MedSign name code icon descr _),tag) <- sign
       <dl>
@@ -68,10 +66,6 @@
           <dt.label-large>_{MsgGroup}
           <dd.body-medium>#{tname}
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
-        <md-elevation>
-        <span.body-medium>#{status}. #
-        <span.body-medium>#{msg}
+    ^{widgetSnackbar msgs}
 
   <div #panelNormals role=tabpanel aria-labelledby=tabNormals hidden>

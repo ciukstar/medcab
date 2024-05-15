@@ -12,9 +12,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   <div.app-card.shape-large.outline>
     <div.app-card-title.headline-medium>
@@ -50,6 +48,4 @@
       <md-filled-button type=submit form=#{formTokensVapid}>
         _{MsgGenerate}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    #{status}. #{msg}
+^{widgetSnackbar msgs}

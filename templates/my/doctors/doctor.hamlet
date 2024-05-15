@@ -7,9 +7,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
@@ -76,8 +74,4 @@
     <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
 
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1.primary-container>
-    <md-elevation>
-    <span.body-medium>#{status}. #
-    <span.body-medium>#{msg}
+^{widgetSnackbar msgs}
