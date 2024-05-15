@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Demo.DemoEn (fillDemoEn) where
+module Demo.DemoRu (fillDemoRu) where
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Reader (ReaderT)
@@ -69,8 +69,8 @@ import Yesod.Persist(PersistStoreWrite (insert, insert_))
 import Settings (AppSettings (appDevelopment))
 
 
-fillDemoEn :: MonadIO m => AppSettings -> ReaderT SqlBackend m ()
-fillDemoEn appSettings = do
+fillDemoRu :: MonadIO m => AppSettings -> ReaderT SqlBackend m ()
+fillDemoRu appSettings = do
 
     tz <- liftIO getCurrentTimeZone
     now <- liftIO getCurrentTime
@@ -95,13 +95,13 @@ fillDemoEn appSettings = do
                       , tokenStore = StoreTypeGoogleSecretManager
                       }
     
-    pass1 <- liftIO $ saltPass "marylopez"
-    let user1 = User { userEmail = "marylopez@xmail.edu"
+    pass1 <- liftIO $ saltPass "bulanovalm"
+    let user1 = User { userEmail = "bulanovalm@xmail.ru"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass1
                      , userVerkey = Just "xxxYYYzzz"
                      , userVerified = True
-                     , userName = Just "Mary Lopez"
+                     , userName = Just "Буланова Любовь Михайловна"
                      , userSuperuser = False
                      , userAdmin = True
                      }
@@ -118,13 +118,13 @@ fillDemoEn appSettings = do
                                                             |]
                       }
 
-    pass2 <- liftIO $ saltPass "jjohnson"
-    let user2 = User { userEmail = "jjohnson@xmail.edu"
+    pass2 <- liftIO $ saltPass "petrovia"
+    let user2 = User { userEmail = "petrovia@xmail.ru"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass2
                      , userVerkey = Just "xxxYYYzzz"
                      , userVerified = True
-                     , userName = Just "John Johnson"
+                     , userName = Just "Петров Иван Александрович"
                      , userSuperuser = False
                      , userAdmin = False
                      }
@@ -142,13 +142,13 @@ fillDemoEn appSettings = do
 
                       }
 
-    pass3 <- liftIO $ saltPass "jmaulsby"
-    let user3 = User { userEmail = "jmaulsby@xmail.edu"
+    pass3 <- liftIO $ saltPass "smirnovav"
+    let user3 = User { userEmail = "smirnovav@xmail.ru"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass3
                      , userVerkey = Just "xxxYYYzzz"
                      , userVerified = True
-                     , userName = Just "Julian Maulsby"
+                     , userName = Just "Смирнов Андрей Васильевич"
                      , userSuperuser = False
                      , userAdmin = False
                      }
@@ -166,13 +166,13 @@ fillDemoEn appSettings = do
 
                       }
 
-    pass4 <- liftIO $ saltPass "vschoen"
-    let user4 = User { userEmail = "vschoen@xmail.edu"
+    pass4 <- liftIO $ saltPass "sergeevaav"
+    let user4 = User { userEmail = "sergeevaav@xmail.ru"
                      , userAuthType = UserAuthTypeEmail
                      , userPassword = Just pass4
                      , userVerkey = Just "xxxYYYzzz"
                      , userVerified = True
-                     , userName = Just "Valentina Schoen"
+                     , userName = Just "Сергеева Александра Владимировна"
                      , userSuperuser = False
                      , userAdmin = False
                      }
@@ -190,41 +190,41 @@ fillDemoEn appSettings = do
 
                       }
 
-    let specialty1 = Specialty { specialtyName = "Allergy and immunology"
+    let specialty1 = Specialty { specialtyName = "Аллергия и иммунология"
                                , specialtyCode = Just "ALLI"
-                               , specialtyDescr = Just $ Textarea [st|Immunology is a branch of medicine that covers the study of immune systems in all organisms.|]
+                               , specialtyDescr = Just $ Textarea [st|Иммунология – это раздел медицины, который занимается изучением иммунной системы всех организмов.|]
                                , specialtyGroup = Nothing
                                }
 
     s1 <- insert specialty1
 
-    let specialty2 = Specialty { specialtyName = "Anesthesiology"
+    let specialty2 = Specialty { specialtyName = "Анестезиология"
                                , specialtyCode = Just "ANES"
-                               , specialtyDescr = Just $ Textarea [st|Anesthesiology, anaesthesiology, or anaesthesia is the medical specialty concerned with the total perioperative care of patients before, during and after surgery.|]
+                               , specialtyDescr = Just $ Textarea [st|Анестезиология, анестезиология или анестезия — это медицинская специальность, занимающаяся полным периоперационным уходом за пациентами до, во время и после операции.|]
                                , specialtyGroup = Nothing
                                }
 
     s2 <- insert specialty2
 
-    let specialty3 = Specialty { specialtyName = "Cardiology"
+    let specialty3 = Specialty { specialtyName = "Кардиология"
                                , specialtyCode = Just "CARD"
-                               , specialtyDescr = Just $ Textarea [st|Cardiology is a branch of medicine that deals with disorders of the heart and the cardiovascular system.|]
+                               , specialtyDescr = Just $ Textarea [st|Кардиология – раздел медицины, занимающийся заболеваниями сердца и сердечно-сосудистой системы.|]
                                , specialtyGroup = Nothing
                                }
 
     s3 <- insert specialty3
 
-    let specialty4 = Specialty { specialtyName = "Dermatology"
+    let specialty4 = Specialty { specialtyName = "Дерматология"
                                , specialtyCode = Just "DERMA"
-                               , specialtyDescr = Just $ Textarea [st|Dermatology is the branch of medicine dealing with the skin. It is a speciality with both medical and surgical aspects. A dermatologist is a specialist medical doctor who manages diseases related to skin, hair, nails, and some cosmetic problems.|]
+                               , specialtyDescr = Just $ Textarea [st|Дерматология – это раздел медицины, занимающийся проблемами кожи. Это специальность, включающая как медицинские, так и хирургические аспекты. Дерматолог – это врач-специалист, который лечит заболевания кожи, волос, ногтей и некоторые косметические проблемы.|]
                                , specialtyGroup = Nothing
                                }
 
     s4 <- insert specialty4
 
-    let doctor1 = Doctor { doctorName = "Dr. Julian Maulsby"
+    let doctor1 = Doctor { doctorName = "Д-р Смирнов Андрей Васильевич"
                          , doctorMobile = "+18056594960"
-                         , doctorEmail = "jmaulsby@xmail.edu"
+                         , doctorEmail = "smirnovav@xmail.ru"
                          , doctorPhone = Just "+18056594960"
                          , doctorUser = Just usr3
                          }
@@ -241,18 +241,18 @@ fillDemoEn appSettings = do
                         }
     insert_ Specialist { specialistDoctor = d1
                        , specialistSpecialty = s1
-                       , specialistTitle = "Allergists"
+                       , specialistTitle = "Аллергологи"
                        , specialistCertDate = addGregorianYearsClip (-11) today
                        }
     insert_ Specialist { specialistDoctor = d1
                        , specialistSpecialty = s1
-                       , specialistTitle = "Immunologist"
+                       , specialistTitle = "Иммунолог"
                        , specialistCertDate = addGregorianYearsClip (-10) today
                        }
 
-    let doctor2 = Doctor { doctorName = "Dr. Valentina Schoen"
+    let doctor2 = Doctor { doctorName = "Д-р Сергеева Александра Владимировна"
                          , doctorMobile = "+12258813837"
-                         , doctorEmail = "vschoen@xmail.edu"
+                         , doctorEmail = "sergeevaav@xmail.ru"
                          , doctorPhone = Just "+12258813837"
                          , doctorUser = Just usr4
                          }
@@ -269,13 +269,13 @@ fillDemoEn appSettings = do
                         }
     insert_ Specialist { specialistDoctor = d2
                        , specialistSpecialty = s2
-                       , specialistTitle = "Anesthesiologist"
+                       , specialistTitle = "Анестезиолог"
                        , specialistCertDate = addGregorianYearsClip (-9) today
                        }
 
-    let doctor3 = Doctor { doctorName = "Dr. Steve Stefano"
+    let doctor3 = Doctor { doctorName = "Д-р Кузнецов Артем Сергеевич"
                          , doctorMobile = "+13029222541"
-                         , doctorEmail = "sstefano@xmail.edu"
+                         , doctorEmail = "kuznetsovas@xmail.ru"
                          , doctorPhone = Just "+13029222541"
                          , doctorUser = Nothing
                          }
@@ -292,13 +292,13 @@ fillDemoEn appSettings = do
                         }
     insert_ Specialist { specialistDoctor = d3
                        , specialistSpecialty = s3
-                       , specialistTitle = "Cardiologist"
+                       , specialistTitle = "Кардиолог"
                        , specialistCertDate = addGregorianYearsClip (-5) today
                        }
 
-    let doctor4 = Doctor { doctorName = "Dr. Jocelyn Frascone"
+    let doctor4 = Doctor { doctorName = "Д-р Степанова Татьяна Николаевна"
                          , doctorMobile = "+17743753179"
-                         , doctorEmail = "jfrascone@xmail.edu"
+                         , doctorEmail = "stepanovatn@xmail.ru"
                          , doctorPhone = Just "+17743753179"
                          , doctorUser = Nothing
                          }
@@ -315,151 +315,151 @@ fillDemoEn appSettings = do
                         }
     insert_ Specialist { specialistDoctor = d4
                        , specialistSpecialty = s4
-                       , specialistTitle = "Dermatologist"
+                       , specialistTitle = "Дерматолог"
                        , specialistCertDate = addGregorianYearsClip (-5) today
                        }
 
-    let quantity1 = Quantity { quantityName = "Length"
-                             , quantityDescr = Just $ Textarea "Length is a measure of distance"
+    let quantity1 = Quantity { quantityName = "Длина"
+                             , quantityDescr = Just $ Textarea "Длина – это мера расстояния"
                              }
 
     q1 <- insert quantity1
 
-    let quantity2 = Quantity { quantityName = "Time"
-                             , quantityDescr = Just $ Textarea "Time is the continued sequence of existence and events that occurs in an apparently irreversible succession from the past, through the present, and into the future"
+    let quantity2 = Quantity { quantityName = "Время"
+                             , quantityDescr = Just $ Textarea "Время — это непрерывная последовательность существования и событий, которая происходит в очевидно необратимой последовательности из прошлого, через настоящее и в будущее."
                              }
 
     q2 <- insert quantity2
 
-    let quantity3 = Quantity { quantityName = "Mass"
-                             , quantityDescr = Just $ Textarea "Mass is an intrinsic property of a body"
+    let quantity3 = Quantity { quantityName = "Масса"
+                             , quantityDescr = Just $ Textarea "Масса – это внутреннее свойство тела"
                              }
 
     q3 <- insert quantity3
 
-    let quantity4 = Quantity { quantityName = "Temperature"
-                             , quantityDescr = Just $ Textarea "Temperature is a physical quantity that quantitatively expresses the attribute of hotness or coldness"
+    let quantity4 = Quantity { quantityName = "Температура"
+                             , quantityDescr = Just $ Textarea "Температура – это физическая величина, количественно выражающая признак жары или холода."
                              }
 
     q4 <- insert quantity4
 
-    let quantity5 = Quantity { quantityName = "Frequency"
-                             , quantityDescr = Just $ Textarea "Frequency is the number of occurrences of a repeating event per unit of time"
+    let quantity5 = Quantity { quantityName = "Частота"
+                             , quantityDescr = Just $ Textarea "Частота – это количество повторений повторяющегося события в единицу времени."
                              }
 
     q5 <- insert quantity5
 
-    let unit1 = Unit { unitName = "Millimeters of mercury"
+    let unit1 = Unit { unitName = "Миллиметры ртутного столба"
                      , unitSymbol = "mmHg"
-                     , unitDescr = Just $ Textarea "A millimetre of mercury is a manometric unit of pressure, formerly defined as the extra pressure generated by a column of mercury one millimetre high, and currently defined as exactly 133.322387415 pascals or exactly 133.322 pascals"
+                     , unitDescr = Just $ Textarea "Миллиметр ртутного столба — это манометрическая единица давления, ранее определяемая как дополнительное давление, создаваемое столбом ртути высотой в один миллиметр, а в настоящее время определяемая как ровно 133,322387415 паскалей или ровно 133,322 паскаля."
                      , unitQuantity = Nothing
                      }
 
     u1 <- insert unit1
 
-    let unit2 = Unit { unitName = "Beats per minute"
+    let unit2 = Unit { unitName = "Частота пульса"
                      , unitSymbol = "bpm"
-                     , unitDescr = Just $ Textarea "Heart rate (or pulse rate) is the frequency of the heartbeat measured by the number of contractions of the heart per minute"
+                     , unitDescr = Just $ Textarea "Частота сердечных сокращений (или частота пульса) — это частота сердечных сокращений, измеряемая количеством сокращений сердца в минуту."
                      , unitQuantity = Just q5
                      }
 
     u2 <- insert unit2
 
-    let unit3 = Unit { unitName = "Centimetre"
-                     , unitSymbol = "cm"
-                     , unitDescr = Just $ Textarea "A centimetre is a unit of length in the International System of Units equal to one hundredth of a metre"
+    let unit3 = Unit { unitName = "Сантиметр"
+                     , unitSymbol = "см"
+                     , unitDescr = Just $ Textarea "Сантиметр — единица длины в Международной системе единиц, равная одной сотой метра."
                      , unitQuantity = Just q1
                      }
 
     u3 <- insert unit3
 
-    let unit4 = Unit { unitName = "Foot"
-                     , unitSymbol = "ft"
-                     , unitDescr = Just $ Textarea "The foot is a unit for measuring length. It is one of the Imperial units and US customary units. One foot contains 12 inches. This is equal to 30.48 centimeters. It is called a foot, because it was originally based on the length of a foot."
+    let unit4 = Unit { unitName = "Фут"
+                     , unitSymbol = "фут"
+                     , unitDescr = Just $ Textarea "Фут – это единица измерения длины. Это одна из имперских единиц и обычных единиц США. В одном футе содержится 12 дюймов. Это равно 30,48 сантиметра. Его называют футом, потому что изначально оно основывалось на длине ступни."
                      , unitQuantity = Just q1
                      }
 
     u4 <- insert unit4
 
-    let unit5 = Unit { unitName = "Celsius"
+    let unit5 = Unit { unitName = "Цельсия"
                      , unitSymbol = "°C"
-                     , unitDescr = Just $ Textarea "The degree Celsius is the unit of temperature on the Celsius scale, one of two temperature scales used in the International System of Units (SI), the other being the closely related Kelvin scale"
+                     , unitDescr = Just $ Textarea "Градус Цельсия — это единица температуры по шкале Цельсия, одной из двух температурных шкал, используемых в Международной системе единиц (СИ), а другая — тесно связанной шкале Кельвина."
                      , unitQuantity = Just q4
                      }
 
     u5 <- insert unit5
 
-    let unit6 = Unit { unitName = "Fahrenheit"
+    let unit6 = Unit { unitName = "Фаренгейт"
                      , unitSymbol = "°F"
-                     , unitDescr = Just $ Textarea "The Fahrenheit scale is a temperature scale based on one proposed in 1724 by the European physicist Daniel Gabriel Fahrenheit. It uses the degree Fahrenheit as the unit"
+                     , unitDescr = Just $ Textarea "Шкала Фаренгейта — это температурная шкала, основанная на шкале, предложенной в 1724 году европейским физиком Даниэлем Габриэлем Фаренгейтом. В качестве единицы измерения используется градус Фаренгейта."
                      , unitQuantity = Just q4
                      }
 
     u6 <- insert unit6
 
-    let unit7 = Unit { unitName = "Breaths per minute"
-                     , unitSymbol = "br/min"
-                     , unitDescr = Just $ Textarea "A person's respiratory rate is usually measured in breaths per minute"
+    let unit7 = Unit { unitName = "Дыханий в минуту"
+                     , unitSymbol = "д/мин"
+                     , unitDescr = Just $ Textarea "Частота дыхания человека обычно измеряется в вдохах в минуту."
                      , unitQuantity = Just q5
                      }
 
     u7 <- insert unit7
 
-    let unit8 = Unit { unitName = "Pound"
+    let unit8 = Unit { unitName = "Фунт"
                      , unitSymbol = "lb"
-                     , unitDescr = Just $ Textarea "The pound or pound-mass is a unit of mass used in both the British imperial and United States customary systems of measurement"
+                     , unitDescr = Just $ Textarea "Фунт или фунт-масса — это единица массы, используемая как в британской имперской системе измерения, так и в общепринятой системе измерения США."
                      , unitQuantity = Just q3
                      }
 
     u8 <- insert unit8
 
-    let unit9 = Unit { unitName = "Kilogram"
-                     , unitSymbol = "kg"
-                     , unitDescr = Just $ Textarea "The kilogram is the base unit of mass in the International System of Units (SI)"
+    let unit9 = Unit { unitName = "Килограмм"
+                     , unitSymbol = "кг"
+                     , unitDescr = Just $ Textarea "Килограмм — основная единица массы в Международной системе единиц (СИ)."
                      , unitQuantity = Just q3
                      }
 
     u9 <- insert unit9
 
-    let signTag1 = SignTag { signTagName = "Vital signs"
-                           , signTagDescr = Just $ Textarea "Vital signs (also known as vitals) are a group of the four to six most crucial medical signs that indicate the status of the body's vital (life-sustaining) functions"
+    let signTag1 = SignTag { signTagName = "Жизненные показатели"
+                           , signTagDescr = Just $ Textarea "Жизненно показатели (также известные как жизненно важные показатели) представляют собой группу из четырех-шести наиболее важных медицинских признаков, которые указывают на состояние жизненно важных (поддерживающих жизнь) функций организма."
                            , signTagGroup = Nothing
                            }
 
     st1 <- insert signTag1
 
-    let signTag2 = SignTag { signTagName = "Symptoms"
-                           , signTagDescr = Just $ Textarea "A symptom is something felt or experienced, such as pain or dizziness"
+    let signTag2 = SignTag { signTagName = "Симптомы"
+                           , signTagDescr = Just $ Textarea "Симптом – это что-то ощущаемое или пережитое, например боль или головокружение."
                            , signTagGroup = Nothing
                            }
 
     st2 <- insert signTag2
 
-    let signTag21 = SignTag { signTagName = "Specific symptoms"
-                            , signTagDescr = Just $ Textarea "Some symptoms are specific, that is, they are associated with a single, specific medical condition"
+    let signTag21 = SignTag { signTagName = "Специфические симптомы"
+                            , signTagDescr = Just $ Textarea "Некоторые симптомы специфичны, то есть связаны с одним конкретным заболеванием."
                             , signTagGroup = Just st2
                             }
 
     st21 <- insert_ signTag21
 
-    let signTag22 = SignTag { signTagName = "Nonspecific symptoms"
-                            , signTagDescr = Just $ Textarea "Nonspecific symptoms, sometimes also called equivocal symptoms, are not specific to a particular condition"
+    let signTag22 = SignTag { signTagName = "Неспецифические симптомы"
+                            , signTagDescr = Just $ Textarea "Неспецифические симптомы, иногда также называемые сомнительными симптомами, не являются специфичными для конкретного состояния."
                             , signTagGroup = Just st2
                             }
 
     st22 <- insert signTag22
 
-    let sign1 = MedSign { medSignName = "Body temperature"
-                        , medSignCode = Just "BT"
+    let sign1 = MedSign { medSignName = "Температура тела"
+                        , medSignCode = Just "ТТ"
                         , medSignIcon = Just "thermometer"
-                        , medSignDescr = Just $ Textarea "Thermoregulation is the ability of an organism to keep its body temperature within certain boundaries, even when the surrounding temperature is very different"
+                        , medSignDescr = Just $ Textarea "Терморегуляция – это способность организма поддерживать температуру своего тела в определенных пределах, даже если температура окружающей среды сильно отличается."
                         , medSignTag = Just st1
                         }
 
     sgn1 <- insert sign1
 
     let normal11 = Normal { normalSign = sgn1
-                          , normalName = "Value"
+                          , normalName = "Значение"
                           , normalLowerBound = 36.1
                           , normalUpperBound = 37.2
                           , normalUnit = Just u5
@@ -467,17 +467,17 @@ fillDemoEn appSettings = do
 
     insert_ normal11
 
-    let sign2 = MedSign { medSignName = "Blood pressure"
-                        , medSignCode = Just "BP"
+    let sign2 = MedSign { medSignName = "Артериальное давление"
+                        , medSignCode = Just "АД"
                         , medSignIcon = Just "blood_pressure"
-                        , medSignDescr = Just $ Textarea "Blood pressure is the pressure of circulating blood against the walls of blood vessels. Most of this pressure results from the heart pumping blood through the circulatory system"
+                        , medSignDescr = Just $ Textarea "Артериальное давление – это давление циркулирующей крови на стенки кровеносных сосудов. Большая часть этого давления возникает из-за того, что сердце перекачивает кровь через систему кровообращения."
                         , medSignTag = Just st1
                         }
 
     sgn2 <- insert sign2
 
     let normal21 = Normal { normalSign = sgn2
-                          , normalName = "Systolic"
+                          , normalName = "Систолический"
                           , normalLowerBound = 90
                           , normalUpperBound = 120
                           , normalUnit = Just u1
@@ -486,7 +486,7 @@ fillDemoEn appSettings = do
     insert_ normal21
 
     let normal22 = Normal { normalSign = sgn2
-                          , normalName = "Diastolic"
+                          , normalName = "Диастолический"
                           , normalLowerBound = 50
                           , normalUpperBound = 80
                           , normalUnit = Just u1
@@ -495,7 +495,7 @@ fillDemoEn appSettings = do
     insert_ normal22
 
     let normal23 = Normal { normalSign = sgn2
-                          , normalName = "Pulse"
+                          , normalName = "Пульс"
                           , normalLowerBound = 60
                           , normalUpperBound = 100
                           , normalUnit = Just u1
@@ -503,17 +503,17 @@ fillDemoEn appSettings = do
 
     insert_ normal23
 
-    let sign3 = MedSign { medSignName = "Heart rate"
-                        , medSignCode = Just "HR"
+    let sign3 = MedSign { medSignName = "Частота сердцебиения"
+                        , medSignCode = Just "ЧС"
                         , medSignIcon = Just "cardiology"
-                        , medSignDescr = Just $ Textarea "In medicine, a pulse represents the tactile arterial palpation of the cardiac cycle (heartbeat) by trained fingertips"
+                        , medSignDescr = Just $ Textarea "В медицине пульс представляет собой тактильную пальпацию артерий сердечного цикла (сердцебиения) тренированными кончиками пальцев."
                         , medSignTag = Just st1
                         }
 
     sgn3 <- insert sign3
 
     let normal31 = Normal { normalSign = sgn3
-                          , normalName = "Value"
+                          , normalName = "Значение"
                           , normalLowerBound = 60
                           , normalUpperBound = 100
                           , normalUnit = Just u2
@@ -521,17 +521,17 @@ fillDemoEn appSettings = do
 
     insert_ normal31
 
-    let sign4 = MedSign { medSignName = "Respiratory rate"
-                        , medSignCode = Just "RR"
+    let sign4 = MedSign { medSignName = "Частота дыхания"
+                        , medSignCode = Just "ЧД"
                         , medSignIcon = Just "respiratory_rate"
-                        , medSignDescr = Just $ Textarea "The respiratory rate is the rate at which breathing occurs; it is set and controlled by the respiratory center of the brain. A person's respiratory rate is usually measured in breaths per minute"
+                        , medSignDescr = Just $ Textarea "Частота дыхания — это скорость дыхания; оно задается и контролируется дыхательным центром мозга. Частота дыхания человека обычно измеряется в вдохах в минуту."
                         , medSignTag = Just st1
                         }
 
     sgn4 <- insert sign4
 
     let normal41 = Normal { normalSign = sgn4
-                          , normalName = "Value"
+                          , normalName = "Значение"
                           , normalLowerBound = 12
                           , normalUpperBound = 18
                           , normalUnit = Just u7
@@ -539,17 +539,17 @@ fillDemoEn appSettings = do
 
     insert_ normal41
 
-    let sign5 = MedSign { medSignName = "Weight loss"
+    let sign5 = MedSign { medSignName = "Потеря веса"
                         , medSignCode = Nothing
                         , medSignIcon = Just "monitor_weight_loss"
-                        , medSignDescr = Just $ Textarea "Weight loss, in the context of medicine, health, or physical fitness, refers to a reduction of the total body mass, by a mean loss of fluid, body fat (adipose tissue), or lean mass (namely bone mineral deposits, muscle, tendon, and other connective tissue)"
+                        , medSignDescr = Just $ Textarea "Снижение веса в контексте медицины, здоровья или физической подготовки означает уменьшение общей массы тела за счет средней потери жидкости, жира (жировой ткани) или мышечной массы (а именно минеральных отложений в костях, мышцах, сухожилия и другие соединительные ткани)."
                         , medSignTag = Just st22
                         }
 
     sgn5 <- insert sign5
 
     let normal51 = Normal { normalSign = sgn5
-                          , normalName = "Value"
+                          , normalName = "Значение"
                           , normalLowerBound = 3
                           , normalUpperBound = 80
                           , normalUnit = Just u9
@@ -557,55 +557,55 @@ fillDemoEn appSettings = do
 
     insert_ normal51
 
-    let sign6 = MedSign { medSignName = "Headache"
+    let sign6 = MedSign { medSignName = "Головная боль"
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
-                        , medSignDescr = Just $ Textarea "Headache, also known as cephalalgia, is the symptom of pain in the face, head, or neck"
+                        , medSignDescr = Just $ Textarea "Головная боль, также известная как цефалгия, является симптомом боли в лице, голове или шее."
                         , medSignTag = Just st22
                         }
 
     sgn6 <- insert sign6
 
-    let sign7 = MedSign { medSignName = "Pain"
+    let sign7 = MedSign { medSignName = "Боль"
                         , medSignCode = Nothing
                         , medSignIcon = Just "sick"
-                        , medSignDescr = Just $ Textarea "Pain is a distressing feeling often caused by intense or damaging stimuli"
+                        , medSignDescr = Just $ Textarea "Боль – это мучительное чувство, часто вызываемое интенсивными или повреждающими раздражителями."
                         , medSignTag = Just st22
                         }
 
     sgn7 <- insert sign7
 
-    let sign8 = MedSign { medSignName = "Fatigue"
+    let sign8 = MedSign { medSignName = "Усталость"
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
-                        , medSignDescr = Just $ Textarea "Fatigue describes a state of tiredness (which is not sleepiness) or exhaustion"
+                        , medSignDescr = Just $ Textarea "Усталость описывает состояние усталости (которое не является сонливостью) или истощения."
                         , medSignTag = Just st22
                         }
 
     sgn8 <- insert sign8
 
-    let sign9 = MedSign { medSignName = "Anorexia"
+    let sign9 = MedSign { medSignName = "Анорексия"
                         , medSignCode = Nothing
                         , medSignIcon = Nothing
-                        , medSignDescr = Just $ Textarea "Anorexia is a medical term for a loss of appetite"
+                        , medSignDescr = Just $ Textarea "Анорексия – медицинский термин, обозначающий потерю аппетита."
                         , medSignTag = Just st22
                         }
 
     sgn9 <- insert sign9
 
-    let sign10 = MedSign { medSignName = "Night sweats"
+    let sign10 = MedSign { medSignName = "Ночная потливость"
                          , medSignCode = Nothing
                          , medSignIcon = Nothing
-                         , medSignDescr = Just $ Textarea "Night sweats or nocturnal hyperhidrosis is the repeated occurrence of excessive sweating during sleep"
+                         , medSignDescr = Just $ Textarea "Ночная потливость или ночной гипергидроз – это неоднократное возникновение чрезмерного потоотделения во время сна."
                          , medSignTag = Just st22
                          }
 
     sgn10 <- insert sign10
 
-    let sign11 = MedSign { medSignName = "Malaise"
+    let sign11 = MedSign { medSignName = "Недомогание"
                          , medSignCode = Nothing
                          , medSignIcon = Nothing
-                         , medSignDescr = Just $ Textarea "As a medical term, malaise is a feeling of general discomfort, uneasiness or lack of wellbeing and often the first sign of an infection or other disease"
+                         , medSignDescr = Just $ Textarea "В медицинском термине недомогание — это чувство общего дискомфорта, беспокойства или плохого самочувствия, которое часто является первым признаком инфекции или другого заболевания."
                          , medSignTag = Just st22
                          }
 
@@ -652,7 +652,7 @@ fillDemoEn appSettings = do
 
     let measurement1211 = Measurement { measurementRecord = r121
                                       , measurementValue = 128
-                                      , measurementName = "Systolic"
+                                      , measurementName = "Систолический"
                                       , measurementUnit = Just u1
                                       }
 
@@ -660,7 +660,7 @@ fillDemoEn appSettings = do
 
     let measurement1212 = Measurement { measurementRecord = r121
                                       , measurementValue = 70
-                                      , measurementName = "Diastolic"
+                                      , measurementName = "Диастолический"
                                       , measurementUnit = Just u1
                                       }
 
@@ -668,7 +668,7 @@ fillDemoEn appSettings = do
 
     let measurement1213 = Measurement { measurementRecord = r121
                                       , measurementValue = 60
-                                      , measurementName = "Pulse"
+                                      , measurementName = "Пульс"
                                       , measurementUnit = Just u2
                                       }
 
@@ -685,7 +685,7 @@ fillDemoEn appSettings = do
 
     let measurement141 = Measurement { measurementRecord = r14
                                      , measurementValue = 15
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u7
                                      }
 
@@ -702,7 +702,7 @@ fillDemoEn appSettings = do
 
     let measurement131 = Measurement { measurementRecord = r13
                                      , measurementValue = 72
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u2
                                      }
 
@@ -719,7 +719,7 @@ fillDemoEn appSettings = do
 
     let measurement2211 = Measurement { measurementRecord = r221
                                       , measurementValue = 128
-                                      , measurementName = "Systolic"
+                                      , measurementName = "Систолический"
                                       , measurementUnit = Just u1
                                       }
 
@@ -727,7 +727,7 @@ fillDemoEn appSettings = do
 
     let measurement2212 = Measurement { measurementRecord = r221
                                       , measurementValue = 70
-                                      , measurementName = "Diastolic"
+                                      , measurementName = "Диастолический"
                                       , measurementUnit = Just u1
                                       }
 
@@ -735,7 +735,7 @@ fillDemoEn appSettings = do
 
     let measurement2213 = Measurement { measurementRecord = r221
                                       , measurementValue = 60
-                                      , measurementName = "Pulse"
+                                      , measurementName = "Пульс"
                                       , measurementUnit = Just u2
                                       }
 
@@ -752,7 +752,7 @@ fillDemoEn appSettings = do
 
     let measurement241 = Measurement { measurementRecord = r24
                                      , measurementValue = 15
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u7
                                      }
 
@@ -769,7 +769,7 @@ fillDemoEn appSettings = do
 
     let measurement231 = Measurement { measurementRecord = r23
                                      , measurementValue = 72
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u2
                                      }
 
@@ -791,7 +791,7 @@ fillDemoEn appSettings = do
 
     let measurement121 = Measurement { measurementRecord = r12
                                      , measurementValue = 127
-                                     , measurementName = "Systolic"
+                                     , measurementName = "Систолический"
                                      , measurementUnit = Just u1
                                      }
 
@@ -799,7 +799,7 @@ fillDemoEn appSettings = do
 
     let measurement122 = Measurement { measurementRecord = r12
                                      , measurementValue = 71
-                                     , measurementName = "Diastolic"
+                                     , measurementName = "Диастолический"
                                      , measurementUnit = Just u1
                                      }
 
@@ -807,7 +807,7 @@ fillDemoEn appSettings = do
 
     let measurement123 = Measurement { measurementRecord = r12
                                      , measurementValue = 64
-                                     , measurementName = "Pulse"
+                                     , measurementName = "Пульс"
                                      , measurementUnit = Just u2
                                      }
 
@@ -824,7 +824,7 @@ fillDemoEn appSettings = do
 
     let measurement141 = Measurement { measurementRecord = r14
                                      , measurementValue = 17
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u7
                                      }
 
@@ -841,7 +841,7 @@ fillDemoEn appSettings = do
 
     let measurement131 = Measurement { measurementRecord = r13
                                      , measurementValue = 69
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u2
                                      }
 
@@ -858,7 +858,7 @@ fillDemoEn appSettings = do
 
     let measurement221 = Measurement { measurementRecord = r22
                                      , measurementValue = 127
-                                     , measurementName = "Systolic"
+                                     , measurementName = "Систолический"
                                      , measurementUnit = Just u1
                                      }
 
@@ -866,7 +866,7 @@ fillDemoEn appSettings = do
 
     let measurement222 = Measurement { measurementRecord = r22
                                      , measurementValue = 71
-                                     , measurementName = "Diastolic"
+                                     , measurementName = "Диастолический"
                                      , measurementUnit = Just u1
                                      }
 
@@ -874,7 +874,7 @@ fillDemoEn appSettings = do
 
     let measurement223 = Measurement { measurementRecord = r22
                                      , measurementValue = 64
-                                     , measurementName = "Pulse"
+                                     , measurementName = "Пульс"
                                      , measurementUnit = Just u2
                                      }
 
@@ -891,7 +891,7 @@ fillDemoEn appSettings = do
 
     let measurement241 = Measurement { measurementRecord = r24
                                      , measurementValue = 17
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u7
                                      }
 
@@ -908,7 +908,7 @@ fillDemoEn appSettings = do
 
     let measurement231 = Measurement { measurementRecord = r23
                                      , measurementValue = 69
-                                     , measurementName = "Value"
+                                     , measurementName = "Значение"
                                      , measurementUnit = Just u2
                                      }
 
@@ -917,7 +917,7 @@ fillDemoEn appSettings = do
     let chat131 = Chat { chatUser = usr1
                        , chatInterlocutor = usr3
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
-                       , chatMessage = "Hi, Dr. Julian Maulsby"
+                       , chatMessage = "Здравствуйте, доктор Смирнов Андрей Васильевич."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -926,7 +926,7 @@ fillDemoEn appSettings = do
     let chat311 = Chat { chatUser = usr3
                        , chatInterlocutor = usr1
                        , chatTimemark = addUTCTime 30 (chatTimemark chat131)
-                       , chatMessage = "Hello, Mary Lopez"
+                       , chatMessage = "Здравствуйте, Буланова Любовь Михайловна."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -935,7 +935,7 @@ fillDemoEn appSettings = do
     let chat312 = Chat { chatUser = usr3
                        , chatInterlocutor = usr1
                        , chatTimemark = addUTCTime 60 (chatTimemark chat311)
-                       , chatMessage = "How are you doing?"
+                       , chatMessage = "Как дела?"
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -944,7 +944,7 @@ fillDemoEn appSettings = do
     let chat132 = Chat { chatUser = usr1
                        , chatInterlocutor = usr3
                        , chatTimemark = addUTCTime 65 (chatTimemark chat312)
-                       , chatMessage = "Overall, it's okay, but I'm worried about the blood pressure."
+                       , chatMessage = "В целом все в порядке, но меня беспокоит артериальное давление."
                        , chatStatus = ChatMessageStatusUnread
                        }
 
@@ -953,7 +953,7 @@ fillDemoEn appSettings = do
     let chat321 = Chat { chatUser = usr3
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime ((-2) * nominalDay) now
-                       , chatMessage = "Hello, John."
+                       , chatMessage = "Здравствуйте, Иван."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -962,7 +962,7 @@ fillDemoEn appSettings = do
     let chat231 = Chat { chatUser = usr2
                        , chatInterlocutor = usr3
                        , chatTimemark = addUTCTime 60 (chatTimemark chat321)
-                       , chatMessage = "Hello, Dr. Julian Maulsby"
+                       , chatMessage = "Здравствуйте, доктор Смирнов Андрей Васильевич."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -971,7 +971,7 @@ fillDemoEn appSettings = do
     let chat322 = Chat { chatUser = usr3
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime 10 (chatTimemark chat231)
-                       , chatMessage = "Is everything okay?"
+                       , chatMessage = "Все в порядке?"
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -980,7 +980,7 @@ fillDemoEn appSettings = do
     let chat232 = Chat { chatUser = usr2
                        , chatInterlocutor = usr3
                        , chatTimemark = addUTCTime 30 (chatTimemark chat322)
-                       , chatMessage = "Yes everything is fine."
+                       , chatMessage = "Да, все в порядке."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -989,7 +989,7 @@ fillDemoEn appSettings = do
     let chat233 = Chat { chatUser = usr2
                        , chatInterlocutor = usr3
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
-                       , chatMessage = "Hello, Dr. Julian Maulsby"
+                       , chatMessage = "Здравствуйте, доктор Смирнов Андрей Васильевич."
                        , chatStatus = ChatMessageStatusRead
                        }
     insert_ chat233
@@ -997,7 +997,7 @@ fillDemoEn appSettings = do
     let chat323 = Chat { chatUser = usr3
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime 65 (chatTimemark chat233)
-                       , chatMessage = "Hi, John"
+                       , chatMessage = "Привет, Иван"
                        , chatStatus = ChatMessageStatusUnread
                        }
 
@@ -1006,7 +1006,7 @@ fillDemoEn appSettings = do
     let chat141 = Chat { chatUser = usr1
                        , chatInterlocutor = usr4
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
-                       , chatMessage = "Hi, Dr. Valentina Schoen"
+                       , chatMessage = "Здравствуйте, доктор Сергеева Александра Владимировна."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1015,7 +1015,7 @@ fillDemoEn appSettings = do
     let chat411 = Chat { chatUser = usr4
                        , chatInterlocutor = usr1
                        , chatTimemark = addUTCTime 30 (chatTimemark chat141)
-                       , chatMessage = "Hello, Mary Lopez"
+                       , chatMessage = "Здравствуйте, Буланова Любовь Михайловна."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1024,7 +1024,7 @@ fillDemoEn appSettings = do
     let chat412 = Chat { chatUser = usr4
                        , chatInterlocutor = usr1
                        , chatTimemark = addUTCTime 60 (chatTimemark chat411)
-                       , chatMessage = "How are you doing?"
+                       , chatMessage = "Как дела?"
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1033,7 +1033,7 @@ fillDemoEn appSettings = do
     let chat142 = Chat { chatUser = usr1
                        , chatInterlocutor = usr4
                        , chatTimemark = addUTCTime 65 (chatTimemark chat412)
-                       , chatMessage = "Overall, it's okay, but I'm worried about the blood pressure."
+                       , chatMessage = "В целом все в порядке, но меня беспокоит артериальное давление."
                        , chatStatus = ChatMessageStatusUnread
                        }
 
@@ -1042,7 +1042,7 @@ fillDemoEn appSettings = do
     let chat421 = Chat { chatUser = usr4
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime ((-2) * nominalDay) now
-                       , chatMessage = "Hello, John."
+                       , chatMessage = "Здравствуйте, Иван."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1051,7 +1051,7 @@ fillDemoEn appSettings = do
     let chat241 = Chat { chatUser = usr2
                        , chatInterlocutor = usr4
                        , chatTimemark = addUTCTime 60 (chatTimemark chat421)
-                       , chatMessage = "Hello, Dr. Valentina Schoen"
+                       , chatMessage = "Здравствуйте, доктор Сергеева Александра Владимировна."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1060,7 +1060,7 @@ fillDemoEn appSettings = do
     let chat422 = Chat { chatUser = usr4
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime 10 (chatTimemark chat241)
-                       , chatMessage = "Is everything okay?"
+                       , chatMessage = "Все в порядке?"
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1069,7 +1069,7 @@ fillDemoEn appSettings = do
     let chat242 = Chat { chatUser = usr2
                        , chatInterlocutor = usr4
                        , chatTimemark = addUTCTime 30 (chatTimemark chat422)
-                       , chatMessage = "Yes everything is fine."
+                       , chatMessage = "Да, все в порядке."
                        , chatStatus = ChatMessageStatusRead
                        }
 
@@ -1078,7 +1078,7 @@ fillDemoEn appSettings = do
     let chat243 = Chat { chatUser = usr2
                        , chatInterlocutor = usr4
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
-                       , chatMessage = "Hello, Dr. Valentina Schoen"
+                       , chatMessage = "Здравствуйте, доктор Сергеева Александра Владимировна."
                        , chatStatus = ChatMessageStatusRead
                        }
     insert_ chat243
@@ -1086,7 +1086,7 @@ fillDemoEn appSettings = do
     let chat423 = Chat { chatUser = usr4
                        , chatInterlocutor = usr2
                        , chatTimemark = addUTCTime 65 (chatTimemark chat243)
-                       , chatMessage = "Hi, John"
+                       , chatMessage = "Привет, Иван"
                        , chatStatus = ChatMessageStatusUnread
                        }
 

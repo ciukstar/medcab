@@ -94,7 +94,7 @@ import Yesod.Auth.Message
       , ConfirmationEmailSentTitle, CurrentPassword, NewPass, ConfirmPass
       , PasswordResetTitle, PasswordResetPrompt, SendPasswordResetEmail, LoginTitle
       )
-    , englishMessage, frenchMessage, russianMessage
+    , englishMessage, frenchMessage, romanianMessage, russianMessage
     )
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
 import Yesod.Core.Types (Logger)
@@ -431,6 +431,7 @@ instance YesodAuth App where
     renderAuthMessage _ [] = englishMessage
     renderAuthMessage _ ("en":_) = englishMessage
     renderAuthMessage _ ("fr":_) = frenchMessage
+    renderAuthMessage _ ("ro":_) = romanianMessage
     renderAuthMessage _ ("ru":_) = russianMessage
     renderAuthMessage app (_:xs) = renderAuthMessage app xs
 

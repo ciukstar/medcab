@@ -135,10 +135,19 @@ import Handler.Users
     
 import ChatRoom ()
 import ChatRoom.Data ( ChatRoom (ChatRoom) )
-import VideoRoom.Data ( VideoRoom (VideoRoom) )
+
 import Demo.DemoEn (fillDemoEn)
-import Yesod.Auth.Email (saltPass)
+import Demo.DemoFr (fillDemoFr)
+import Demo.DemoRo (fillDemoRo)
+import Demo.DemoRu (fillDemoRu)
+
 import qualified Network.Wai as W (Response)
+
+import System.Environment.Blank (getEnv)
+
+import VideoRoom.Data ( VideoRoom (VideoRoom) )
+
+import Yesod.Auth.Email (saltPass)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -193,7 +202,13 @@ makeFoundation appSettings = do
                      , userSuperuser = True
                      , userAdmin = True
                      }
-        fillDemoEn appSettings
+        
+        demo <- liftIO $ getEnv "YESOD_DEMO_LANG"
+        case demo of
+          Just "FR" -> fillDemoFr appSettings
+          Just "RO" -> fillDemoRo appSettings
+          Just "RU" -> fillDemoRu appSettings
+          _ -> fillDemoEn appSettings
 
     -- Return the foundation
     return $ mkFoundation pool
