@@ -44,15 +44,15 @@ import Database.Persist.Sql (toSqlKey, fromSqlKey)
 
 import Foundation
     ( Handler, Form
-    , Route (DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR)
     , DataR
       ( UnitsR, UnitR, UnitAddR, UnitEditR, UnitDeleR, QuantitiesR, QuantityR
       , QuantityAddR, QuantityEditR, QuantityDeleR, QuantityUnitsR
       , QuantityUnitCreateR, QuantityUnitR, QuantityUnitDeleR, QuantityUnitEditR
       )
     , AppMessage
-      ( MsgMeasurementUnits, MsgAdd, MsgSignIn, MsgSignOut, MsgPhoto, MsgName
-      , MsgUserAccount, MsgUnitsOfMeasure, MsgNoDataYet, MsgMeasurementUnit
+      ( MsgMeasurementUnits, MsgAdd, MsgName
+      , MsgUnitsOfMeasure, MsgNoDataYet, MsgMeasurementUnit
       , MsgDescription, MsgSymbol, MsgBack, MsgCancel, MsgSave, MsgRecordCreated
       , MsgInvalidFormData, MsgRecordEdited, MsgConfirmPlease, MsgDescription
       , MsgDeleteAreYouSure, MsgEdit, MsgDele, MsgAlreadyExists, MsgQuantities
@@ -62,9 +62,9 @@ import Foundation
     )
 
 import Material3 (md3mreq, md3textField, md3textareaField, md3mopt, md3selectField)
-import Menu (menu)
+
 import Model
-    ( AvatarColor(AvatarColorLight), statusError, statusSuccess
+    ( statusError, statusSuccess
     , EntityField (UnitName, UnitId, QuantityName, QuantityId, UnitQuantity)
     , UnitId, Unit(Unit, unitName, unitSymbol, unitDescr, unitQuantity)
     , QuantityId, Quantity (Quantity, quantityName, quantityDescr)
@@ -75,7 +75,8 @@ import Settings (widgetFile)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), newIdent, getMessages, redirect
     , SomeMessage (SomeMessage), getMessageRender, addMessageI
@@ -541,7 +542,6 @@ getUnitR uid = do
 
 getUnitsR :: Handler Html
 getUnitsR = do
-    user <- maybeAuth
 
     stati <- reqGetParams <$> getRequest
     let iquantities = filter ((== "quantity") . fst) stati

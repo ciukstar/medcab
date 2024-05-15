@@ -42,13 +42,13 @@ import Database.Persist.Sql ( SqlBackend )
 import Foundation
     ( Handler, Form
     , Route
-      ( AuthR, AccountR, AccountPhotoR, RecordsR, RecordR, RecordNewR
+      ( AuthR, RecordsR, RecordR, RecordNewR
       , RecordEditR, RecordDeleR, RecordMeasurementsR, RecordMeasurementR
       , RecordMeasurementNewR, RecordMeasurementEditR, RecordMeasurementDeleR
       )
     , AppMessage
-      ( MsgElectronicHealthRecord, MsgUserAccount, MsgSignIn, MsgSignOut
-      , MsgPhoto, MsgRecords, MsgNoDataYet, MsgAdd, MsgRecord, MsgMedicalSign
+      ( MsgElectronicHealthRecord
+      , MsgRecords, MsgNoDataYet, MsgAdd, MsgRecord, MsgMedicalSign
       , MsgDate, MsgTime, MsgValue, MsgUnitOfMeasure, MsgRemarks, MsgSave
       , MsgCancel, MsgBack, MsgRecordCreated, MsgDele, MsgDeleteAreYouSure
       , MsgEdit, MsgConfirmPlease, MsgInvalidFormData, MsgRecordDeleted, MsgTabs
@@ -61,9 +61,8 @@ import Material3
     ( md3mreq, md3selectField, md3textareaField, md3mopt, md3doubleField
     , md3datetimeLocalField, md3textField, tsep
     )
-import Menu (menu)
 import Model
-    ( AvatarColor (AvatarColorLight), statusError
+    ( statusError
     , EntityField
       ( RecordUser, RecordSign, MedSignId, UnitId, RecordTime, MedSignName
       , UnitSymbol, RecordId, MeasurementRecord, MeasurementUnit, UnitName
@@ -81,7 +80,9 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+import Widgets (widgetMenu, widgetUser)
+
+import Yesod.Auth (Route (LoginR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, newIdent, SomeMessage (SomeMessage)
     , getMessageRender, MonadHandler (liftHandler), addMessageI, redirect

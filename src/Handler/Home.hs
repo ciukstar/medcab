@@ -5,32 +5,28 @@
 
 module Handler.Home (getHomeR) where
 
-import Database.Persist (Entity(Entity))
-
 import Foundation
     ( Handler
-    , Route (AuthR, AccountPhotoR, AccountR, RecordsR, DoctorsR)
+    , Route (RecordsR, DoctorsR)
     , AppMessage
-      ( MsgWelcome, MsgSignIn, MsgPhoto, MsgSignOut, MsgUserAccount, MsgAppName
-      , MsgFindDoctor, MsgRecordVitalSigns
+      ( MsgWelcome, MsgAppName, MsgFindDoctor, MsgRecordVitalSigns
       )
     )
 
-import Menu (menu)
-import Model (statusError, AvatarColor(AvatarColorLight))
+import Model (statusError)
 
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Yesod.Auth ( Route (LoginR, LogoutR), maybeAuth )
+import Widgets (widgetMenu, widgetUser) 
+
 import Yesod.Core (Yesod(defaultLayout), getMessages, setUltDestCurrent)
 import Yesod.Core.Widget (setTitleI)
 
 
 getHomeR :: Handler Html
 getHomeR = do
-    user <- maybeAuth
     msgs <- getMessages
     defaultLayout $ do
         setUltDestCurrent

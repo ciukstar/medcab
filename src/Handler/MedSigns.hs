@@ -52,9 +52,8 @@ import Material3
     ( md3mreq, md3textField, md3selectField, md3mopt, md3textareaField, tsep
     , md3doubleField
     )
-import Menu (menu)
 import Model
-    ( AvatarColor (AvatarColorLight), statusError, statusSuccess
+    ( statusError, statusSuccess
     , MedSign
       ( MedSign, medSignName, medSignCode, medSignDescr, medSignTag, medSignIcon
       )
@@ -71,7 +70,7 @@ import Model
 
 import Foundation
     ( Handler, Form
-    , Route (DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR)
     , DataR
       ( MedSignsR, MedSignR, MedSignAddR, MedSignEditR, MedSignDeleR, SignTagsR
       , SignTagR, SignTagAddR, SignTagEditR, SignTagDeleR, MedSignNormalsR
@@ -79,8 +78,8 @@ import Foundation
       , MedSignNormalDeleR
       )
     , AppMessage
-      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSignIn, MsgSignOut, MsgSubtags
-      , MsgUserAccount, MsgPhoto, MsgName, MsgDele, MsgDeleteAreYouSure
+      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSubtags
+      , MsgName, MsgDele, MsgDeleteAreYouSure
       , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack, MsgTabs
       , MsgGroup, MsgDescription, MsgUnitOfMeasure, MsgCode, MsgInvalidFormData
       , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
@@ -95,7 +94,8 @@ import Settings (widgetFile)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), addMessageI, redirect, SomeMessage (SomeMessage)
     , getMessageRender, MonadHandler (liftHandler), getRequest
@@ -630,8 +630,6 @@ formDelete extra = return (FormSuccess (), [whamlet|#{extra}|])
 
 getMedSignsR :: Handler Html
 getMedSignsR = do
-
-    user <- maybeAuth
 
     stati <- reqGetParams <$> getRequest
     let itags = filter ((== "tag") . fst) stati

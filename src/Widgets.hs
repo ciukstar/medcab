@@ -1,7 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Menu (menu) where
+module Widgets
+  ( widgetMenu
+  , widgetUser
+  ) where
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, just, val, exists
@@ -11,29 +14,35 @@ import Database.Persist (Entity (Entity))
 
 import Foundation
     ( Widget
-    , Route (HomeR, DataR, DocsR, RecordsR, MyDoctorsR, MyPatientsR)
+    , Route
+      ( HomeR, DataR, DocsR, RecordsR, MyDoctorsR, MyPatientsR, AuthR
+      , AccountR, AccountPhotoR
+      )
     , DataR (UsersR, TokensR, StaffR, SpecialtiesR, UnitsR, MedSignsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors, MsgUsers
       , MsgDocumentation, MsgSourceCode, MsgResources, MsgSpecialties
       , MsgMeasurementUnits, MsgMedicalSigns, MsgRecords, MsgPatients
+      , MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
       )
     )
     
 import Model
     ( Specialties (Specialties), Doctor, User, Patient
+    , AvatarColor (AvatarColorLight)
     , EntityField(DoctorUser, PatientUser, UserId)
     )
 
 import Settings (widgetFile)
 
-import Yesod.Auth (maybeAuth)
+import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core (MonadHandler(liftHandler))
 import Yesod.Core.Handler (getCurrentRoute)
 import Yesod.Persist (YesodPersist(runDB))
 
-menu :: Widget
-menu = do
+
+widgetMenu :: Widget
+widgetMenu = do
     curr <- getCurrentRoute
 
     user <- maybeAuth
@@ -55,4 +64,10 @@ menu = do
         return x
       Nothing -> return Nothing
     
-    $(widgetFile "menu")
+    $(widgetFile "widgets/menu")
+
+
+widgetUser :: Widget
+widgetUser = do
+    user <- maybeAuth
+    $(widgetFile "widgets/user")

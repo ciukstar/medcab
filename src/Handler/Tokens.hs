@@ -38,7 +38,7 @@ import qualified Database.Persist as P ((=.))
 
 import Foundation
     ( Handler, Form, App (appSettings)
-    , Route (DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
       , TokensVapidClearR
@@ -47,15 +47,15 @@ import Foundation
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
       , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
-      , MsgGmailAccount, MsgGoogleSecretManager, MsgSignIn, MsgSignOut
-      , MsgUserAccount, MsgPhoto, MsgGenerate, MsgVapidGenerationWarning
+      , MsgGmailAccount, MsgGoogleSecretManager
+      , MsgGenerate, MsgVapidGenerationWarning
       , MsgInvalidGoogleAPITokens
       )
     )
 import Data.Function ((&))
 
 import Material3 (md3radioField, md3emailField)
-import Menu (menu)
+
 import Model
     ( gmailAccessToken, gmailRefreshToken, apiInfoGoogle
     , StoreType
@@ -63,7 +63,7 @@ import Model
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi, StoreToken, TokenId, StoreKey)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
-    , AvatarColor (AvatarColorLight), secretVolumeGmail, apiInfoVapid, secretVapid
+    , secretVolumeGmail, apiInfoVapid, secretVapid
     )
     
 import Network.Wreq
@@ -83,7 +83,8 @@ import Text.Shakespeare.Text (st)
 
 import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails))
 
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
@@ -183,7 +184,6 @@ postTokensVapidClearR = do
           addMessageI statusSuccess MsgCleared
           redirect $ DataR TokensR
       _otherwise -> do
-          user <- maybeAuth
           (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
           (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
@@ -454,7 +454,6 @@ postTokensGoogleapisClearR = do
           addMessageI statusSuccess MsgCleared
           redirect $ DataR TokensR
       _otherwise -> do
-          user <- maybeAuth
           (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
           (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
@@ -508,7 +507,6 @@ postTokensR = do
           return $ preEscapedToHtml $ decodeUtf8 $ toStrict (r L.^. responseBody)
 
       _otherwise -> do
-          user <- maybeAuth
           (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
           (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
@@ -524,7 +522,6 @@ postTokensR = do
 
 getTokensR :: Handler Html
 getTokensR = do
-    user <- maybeAuth
     
     tokenGmail <- runDB $ selectOne $ do
         x <- from $ table @Token

@@ -18,7 +18,6 @@ module Handler.MyPatients
 
 
 import ChatRoom.Data ( Route(PatientChatRoomR) )
-import VideoRoom.Data ( Route(PushMessageR, WebSoketR), ChanId (ChanId) )
 
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
@@ -43,11 +42,11 @@ import Database.Persist.Sql (fromSqlKey)
 import Foundation
     ( Handler, Form, App
     , Route
-      ( AuthR, AccountPhotoR, MyPatientR, AccountR, MyPatientNewR, MyPatientsR
+      ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR
       )
     , AppMessage
-      ( MsgPatients, MsgUserAccount, MsgSignIn, MsgSignOut, MsgNoPatientsYet
+      ( MsgPatients, MsgNoPatientsYet
       , MsgPhoto, MsgEdit, MsgSinceDate, MsgCancel, MsgSave, MsgBack, MsgPatient
       , MsgRecordCreated, MsgFullName, MsgDele, MsgConfirmPlease, MsgChat
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
@@ -58,12 +57,11 @@ import Foundation
     )
 
 import Material3 (md3switchField, md3mreq)
-import Menu (menu)
 import Model
     ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
-    , AvatarColor (AvatarColorLight, AvatarColorDark)
+    , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeEnd)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
     , PatientId, Patient(Patient, patientUser), Chat
     , PushSubscription (PushSubscription), Token, Store
@@ -92,8 +90,10 @@ import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
     , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
+    
+import Widgets (widgetMenu, widgetUser)
 
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
     , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
@@ -110,7 +110,7 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Network.HTTP.Types.Status (status400)
-import VideoRoom (widgetOutgoingCall)
+import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (PushMessageR))
 import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
 
@@ -305,8 +305,6 @@ formPatients did options extra = do
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
 
-    let polite = True
-
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -339,8 +337,8 @@ getMyPatientR uid did pid = do
           idDialogOutgoingCall <- newIdent
           idButtonOutgoingCallCancel <- newIdent
 
-          let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
-
+          let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
+          
           $(widgetFile "my/patients/patient")
 
           widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR

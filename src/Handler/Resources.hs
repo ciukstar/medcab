@@ -3,14 +3,13 @@
 
 module Handler.Resources (getDocsR) where
 
-import Database.Persist (Entity (Entity))
 import Foundation
     ( Handler
-    , Route (HomeR, AuthR, AccountR, AccountPhotoR, StaticR, DataR)
+    , Route (HomeR, AuthR, StaticR, DataR)
     , DataR (UnitsR)
     , AppMessage
       ( MsgAppDocumentation, MsgDocumentation, MsgAppName, MsgAppDescription
-      , MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto, MsgErDiagram, MsgEmail
+      , MsgErDiagram, MsgEmail
       , MsgSuperuser, MsgUsername, MsgPassword, MsgClientId, MsgClientSecret
       , MsgBasicEntities, MsgUser, MsgDoctor, MsgSpecialty, MsgSourceCode
       , MsgIssueTracking, MsgUnitOfMeasure, MsgSearchEngineOptimization
@@ -20,8 +19,7 @@ import Foundation
       )
     )
     
-import Menu (menu)
-import Model (AvatarColor (AvatarColorLight), statusError)
+import Model (statusError)
 
 import Settings (widgetFile)
 import Settings.StaticFiles (img_ERD_MedCab_svg)
@@ -29,7 +27,9 @@ import Settings.StaticFiles (img_ERD_MedCab_svg)
 import Text.Blaze.Html (preEscapedToHtml)
 import Text.Hamlet (Html)
 
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+import Widgets (widgetMenu, widgetUser)
+
+import Yesod.Auth (Route (LoginR))
 import Yesod.Core
     ( Yesod(defaultLayout), setUltDestCurrent, getMessageRender, getUrlRender
     , getMessages
@@ -39,7 +39,6 @@ import Yesod.Core.Widget (setTitleI)
 
 getDocsR :: Handler Html
 getDocsR = do
-    user <- maybeAuth
     rndr <- getUrlRender
     translate <- (preEscapedToHtml .) <$> getMessageRender
     msgs <- getMessages

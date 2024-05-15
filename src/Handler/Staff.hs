@@ -42,18 +42,17 @@ import Material3
     ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField
     , md3mreq, md3mopt, md3dayField
     )
-import Menu (menu)
 
 import Foundation
     ( Handler, Widget, Form
-    , Route (StaticR, AuthR, AccountR, AccountPhotoR, DataR)
+    , Route (StaticR, DataR)
     , DataR
       ( DoctorCreateR, StaffR, StaffPhotoR, MemberR, DoctorDeleR, DoctorEditR
       , StaffSpecialtiesR, DoctorSpecialtyCreateR, SpecialistR
       , SpecialistDeleR, SpecialistEditR
       )
     , AppMessage
-      ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgEdit
+      ( MsgDoctors, MsgPhoto, MsgEdit
       , MsgNoDoctorsYet, MsgSave, MsgCancel, MsgFullName, MsgMobile, MsgDetails
       , MsgEmailAddress, MsgSpecialization, MsgDoctor, MsgBack, MsgRecordCreated
       , MsgEdit, MsgDele, MsgRecordDeleted, MsgDeleteAreYouSure, MsgConfirmPlease
@@ -62,9 +61,9 @@ import Foundation
       , MsgInvalidFormData, MsgAlreadyExists, MsgPhone, MsgUser
       )
     )
+    
 import Model
-    ( AvatarColor (AvatarColorLight)
-    , Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone, doctorUser)
+    ( Doctor (Doctor, doctorName, doctorMobile, doctorEmail, doctorPhone, doctorUser)
     , DoctorId, DoctorPhoto (DoctorPhoto), User
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoMime, DoctorPhotoPhoto, DoctorId
@@ -77,11 +76,15 @@ import Model
     , Specialist
       (Specialist, specialistCertDate, specialistSpecialty, specialistTitle)
     )
+    
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg )
+
 import Text.Hamlet (Html)
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, newIdent, fileSourceByteString
     , FileInfo (fileContentType), SomeMessage (SomeMessage), getMessageRender
@@ -456,7 +459,6 @@ formDoctor doctor extra = do
 
 getStaffR :: Handler Html
 getStaffR = do
-    user <- maybeAuth
 
     doctors <- (second (join . unValue) <$>) <$> runDB ( select $ do
         x :& h <- from $ table @Doctor

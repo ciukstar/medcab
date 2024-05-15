@@ -37,7 +37,6 @@ import Database.Persist
     )
 
 import Material3 (md3textField, md3textareaField, md3mreq, md3mopt, md3dayField)
-import Menu (menu)
 import Model
     ( Specialty
       ( Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup )
@@ -46,7 +45,7 @@ import Model
       , SpecialistSpecialty, DoctorId, DoctorPhotoDoctor, DoctorPhotoAttribution
       , SpecialistTitle, DoctorName, SpecialistId
       )
-    , AvatarColor (AvatarColorLight), statusSuccess, SpecialtyId, statusError
+    , statusSuccess, SpecialtyId, statusError
     , Specialties (Specialties), Doctor (Doctor)
     , Specialist (Specialist, specialistDoctor, specialistTitle, specialistCertDate)
     , DoctorId, DoctorPhoto, SpecialistId
@@ -54,15 +53,15 @@ import Model
 
 import Foundation
     ( Handler, Widget, Form
-    , Route (DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
       , SpecialtyDeleR, SpecialtyDoctorsR, StaffPhotoR, SpecialtyDoctorR
       , SpecialtyDoctorDeleR, SpecialtyDoctorEditR, SpecialtyDoctorCreateR
       )
     , AppMessage
-      ( MsgSpecialties, MsgUserAccount, MsgNoSpecialtiesYet, MsgSignIn
-      , MsgSignOut, MsgPhoto, MsgEdit, MsgSpecialty, MsgDescription, MsgPhone
+      ( MsgSpecialties, MsgNoSpecialtiesYet
+      , MsgPhoto, MsgEdit, MsgSpecialty, MsgDescription, MsgPhone
       , MsgCode, MsgName, MsgSave, MsgCancel, MsgRecordCreated, MsgTabs
       , MsgBack, MsgDele, MsgRecordEdited, MsgInvalidFormData, MsgRecordDeleted
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgSubspecialties, MsgDetails
@@ -75,7 +74,8 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod (defaultLayout), newIdent, SomeMessage (SomeMessage)
     , getMessageRender, addMessageI, redirect, getMessages, whamlet
@@ -421,7 +421,7 @@ postSpecialtiesR ps@(Specialties sids) = do
 
 getSpecialtiesR :: Specialties -> Handler Html
 getSpecialtiesR ps@(Specialties sids) = do
-    user <- maybeAuth
+    
     specialties <- runDB $ select $ do
         x <- from $ table @Specialty
         unless (null sids) $ where_ $ x ^. SpecialtyGroup ==. just (val (last sids))

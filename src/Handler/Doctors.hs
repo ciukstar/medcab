@@ -23,11 +23,11 @@ import Database.Persist (Entity (Entity))
 import Foundation
     ( Handler
     , Route
-      ( AuthR, AccountR, AccountPhotoR, DoctorPhotoR, StaticR, DoctorR, DoctorsR
+      ( DoctorPhotoR, StaticR, DoctorR, DoctorsR
       , DoctorSpecialtiesR
       )
     , AppMessage
-      ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
+      ( MsgDoctors, MsgPhoto, MsgTabs
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
@@ -35,9 +35,8 @@ import Foundation
       )
     )
 
-import Menu (menu)
 import Model
-    ( statusError, AvatarColor (AvatarColorLight)
+    ( statusError
     , EntityField
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
       , SpecialtyId, SpecialistDoctor
@@ -51,7 +50,8 @@ import Settings.StaticFiles (img_person_FILL0_wght400_GRAD0_opsz24_svg)
 
 import Text.Hamlet (Html)
 
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent )
 import Yesod.Core.Content (TypedContent (TypedContent))
@@ -97,7 +97,6 @@ getDoctorR did = do
 
 getDoctorsR :: Handler Html
 getDoctorsR = do
-    user <- maybeAuth
 
     doctors <- (second (join . unValue) <$>) <$> runDB ( select $ do
         x :& h <- from $ table @Doctor

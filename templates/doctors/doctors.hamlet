@@ -1,25 +1,13 @@
 
 <header.primary>
   <div #headerStart>
-    ^{menu}
+    ^{widgetMenu}
 
     <h1.title-large>
       _{MsgDoctors}
 
-  $maybe Entity uid _ <- user
-    <span style="position:relaive">
-      <md-filled-icon-button type=button aria-label=_{MsgUserAccount} #btnUserAccount
-        onclick="document.getElementById('menuUserAccount').open = !document.getElementById('menuUserAccount').open">
-        <img src=@{AccountPhotoR uid AvatarColorLight} width=24 height=24 alt=_{MsgPhoto}
-             loading=lazy style="clip-path:circle(50%)">
-      <md-menu anchor=btnUserAccount x-offset=16 y-offset=16 #menuUserAccount>
-        <md-menu-item href=@{AccountR uid}>
-          <div slot=headline>_{MsgUserAccount}
-        <md-menu-item href=@{AuthR LogoutR}>
-          <div slot=headline>_{MsgSignOut}
-  $nothing
-    <md-filled-icon-button href=@{AuthR LoginR} aria-label=_{MsgSignIn}>
-      <md-icon>login
+  <span.app-top-app-bar-end>
+    ^{widgetUser}
 
 
 <main>

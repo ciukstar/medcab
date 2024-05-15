@@ -37,11 +37,11 @@ import Database.Persist.Sql (fromSqlKey)
 import Foundation
     ( Handler, Form
     , Route
-      ( AuthR, AccountR, AccountPhotoR, MyDoctorPhotoR, StaticR, ChatR, VideoR
+      ( MyDoctorPhotoR, StaticR, ChatR, VideoR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR
       )
     , AppMessage
-      ( MsgDoctors, MsgUserAccount, MsgSignOut, MsgSignIn, MsgPhoto, MsgTabs
+      ( MsgDoctors, MsgPhoto, MsgTabs
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
@@ -51,11 +51,10 @@ import Foundation
     )
 
 import Material3 (md3mreq, md3switchField)
-import Menu (menu)
 import Model
-    ( statusError, secretVolumeVapid, apiInfoVapid, AvatarColor (AvatarColorLight)
+    ( statusError, secretVolumeVapid, apiInfoVapid
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeEnd)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
     , PatientId, Patient, Chat, Token
     , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
@@ -84,15 +83,16 @@ import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
-import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (WebSoketR))
+import VideoRoom (widgetOutgoingCall, ChanId (ChanId))
 import VideoRoom.Data ( Route(PushMessageR) )
 
 import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
     , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     )
+    
+import Widgets (widgetMenu, widgetUser)
 
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent
     , SomeMessage (SomeMessage), parseCheckJsonBody, returnJson
@@ -224,8 +224,6 @@ getMyDoctorSpecialtiesR pid uid did = do
 getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorR pid uid did = do
 
-    let polite = True
-
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
             `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -256,7 +254,7 @@ getMyDoctorR pid uid did = do
               idDialogOutgoingCall <- newIdent
               idButtonOutgoingCallCancel <- newIdent
 
-              let channelId@(ChanId channel) = ChanId (fromIntegral (fromSqlKey pid))
+              let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
 
               $(widgetFile "my/doctors/doctor")
               widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR
@@ -266,8 +264,6 @@ getMyDoctorR pid uid did = do
 
 getMyDoctorsR :: UserId -> Handler Html
 getMyDoctorsR uid = do
-
-    user <- maybeAuth
 
     patients <- (second (second (bimap (join . unValue) unValue)) <$>) <$> runDB ( select $ do
         x :& d :& h <- from $ table @Patient `innerJoin` table @Doctor
