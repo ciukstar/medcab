@@ -79,7 +79,9 @@ data AppSettings = AppSettings
     , appSuperuserUsername       :: Text
     , appSuperuserPassword       :: Text
     , appMsValidate              :: Maybe Text
+    , appYandexVerification      :: Maybe Text
     , appRtcPeerConnectionConfig :: Maybe Value
+    , appGcloudProjectId         :: Text
     }
 
 
@@ -128,7 +130,9 @@ instance FromJSON AppSettings where
         appSuperuserUsername       <- o .:  "superuser-username"
         appSuperuserPassword       <- o .:  "superuser-password"
         appMsValidate              <- o .:  "msvalidate"
+        appYandexVerification      <- o .:  "yandex-verification"
         appRtcPeerConnectionConfig <- o .:  "rtc-peer-connection-config"
+        appGcloudProjectId         <- o .:  "gcloud-project-id"
                                      
         return AppSettings {..}
 

@@ -5,17 +5,18 @@ module Handler.Resources (getDocsR) where
 
 import Foundation
     ( Handler
-    , Route (HomeR, AuthR, StaticR, DataR)
+    , Route (AuthR, StaticR, HomeR, DataR)
     , DataR (UnitsR)
     , AppMessage
       ( MsgAppDocumentation, MsgDocumentation, MsgAppName, MsgAppDescription
-      , MsgErDiagram, MsgEmail
+      , MsgErDiagram, MsgEmail, MsgOverview
       , MsgSuperuser, MsgUsername, MsgPassword, MsgClientId, MsgClientSecret
       , MsgBasicEntities, MsgUser, MsgDoctor, MsgSpecialty, MsgSourceCode
       , MsgIssueTracking, MsgUnitOfMeasure, MsgSearchEngineOptimization
       , MsgConfiguration
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
-      , MsgDoc007, MsgDoc008, MsgDoc009, MsgDoc010
+      , MsgDoc007, MsgDoc008, MsgDoc009, MsgDoc010, MsgDoc011, MsgDoc012
+      , MsgDoc013, MsgDoc014
       )
     )
     

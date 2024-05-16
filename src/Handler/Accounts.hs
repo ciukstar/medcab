@@ -122,9 +122,7 @@ formUserInfo uid info extra = do
     let r = UserInfo uid <$> bdayR <*> genderR
     let w = [whamlet|
                     #{extra}
-                    <div.app-form-field>
-                      <label.label-large for=#{fvId bdayV}>_{MsgBirthday}
-                      ^{fvInput bdayV}
+                    ^{fvInput bdayV}
                     <fieldset.shape-medium.label-large>
                       <legend>_{MsgGender}
                       ^{fvInput genderV}

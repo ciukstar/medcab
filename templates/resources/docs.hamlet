@@ -15,35 +15,32 @@
   ^{widgetBanner msgs}
       
   <section>
-    <h2.headline-medium>_{MsgAppDescription}
+    <h2.headline-medium>_{MsgAppName}
     <p.body-large>
-      The app #
-      <a href=@{HomeR}>_{MsgAppName} #
-      is under development...
+      _{MsgAppDescription}
+      
+  <section>
+    <h2.headline-medium>_{MsgOverview}
+    <p.body-large>
+      #{translate $ MsgDoc009 (rndr HomeR)}
 
   <section>
-    <h2.headline-medium>_{MsgDoc009}
-    <p.body-large>    
-      ... using #
-      <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">
-        WebSocket
-      
     <h2.headline-medium>_{MsgDoc010}
-    <p.body-large>    
-      ... using
-      <ul>
-        <li.body-large>
-          <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API">
-            WebRTC API
-        <li.body-large>
-          <a href="https://developer.mozilla.org/en-US/docs/Web/API/Push_API">
-            Push API
+    <p.body-large>
+      _{MsgDoc011}
+    <p.body-large>
+      #{translate $ MsgDoc012 "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API"}
+    <p.body-large>
+      #{translate $ MsgDoc013 "https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API"}
     
     <dl>
 
       <dt.label-large>_{MsgConfiguration}
       <dd.body-small>
         <code>&dollar;YESOD_RTC_PEER_CONNECTION_CONFIG
+        
+    <p.body-large>
+      #{translate $ MsgDoc014 "https://developer.mozilla.org/en-US/docs/Web/API/Push_API"}
 
   <section>
     <h2.headline-medium>_{MsgBasicEntities}
@@ -108,6 +105,10 @@
         <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
         <div>
           <code.body-small>&dollar;YESOD_MS_VALIDATE
+      <li.body-large>
+        <a href="https://webmaster.yandex.com/welcome" target=_blank>Yandex SEO
+        <div>
+          <code.body-small>&dollar;YESOD_YANDEX_VERIFICATION
 
   <section>
     <h2.headline-medium>_{MsgErDiagram}

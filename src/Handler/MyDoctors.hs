@@ -52,7 +52,7 @@ import Foundation
 
 import Material3 (md3mreq, md3switchField)
 import Model
-    ( statusError, secretVolumeVapid, apiInfoVapid
+    ( secretVolumeVapid, apiInfoVapid
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
     , PatientId, Patient, Chat, Token

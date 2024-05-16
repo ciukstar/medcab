@@ -1,3 +1,4 @@
+Overview: Overview
 Close: Close
 MissedCall: Missed call
 CallAgain: Call again
@@ -196,10 +197,10 @@ SignUp: Sign up
 Login: Login
 MainMenu: Main menu
 Welcome: Welcome
-AppDescription: Progressive Web App for Healthcare
+AppDescription: Healthcare Web App
 AppName: MedCab
 MetaKeywords: healthcare, progressive, web, app, pwa
-MetaDescription: Progressive Web App for Healthcare
+MetaDescription: Progressive Web App Healthcare
 
 Doc001: Integration with external APIs
 
@@ -217,6 +218,14 @@ Doc007: A superuser (see below) can grant administrator privileges to any regist
 
 Doc008 href@Text: A unit of measurement is defined by providing a name, symbol, and description in the section <a href=#{href}>“Measurement units”</a>.
 
-Doc009: Doctor and patient chat
+Doc009 link@Text: The app <a href=#{link} target=_blank>MedCab</a> offers the ability to record and track vital signs, see their dynamics over time and compare them with normal values.
 
-Doc010: Patient/Doctor Video Call
+Doc010: Online Doctor-Patient consultation
+
+Doc011: If necessary, the patient can choose a doctor to consult by exchanging messages (chat with the doctor) or by video/audio call.
+
+Doc012 link@Text: Chat with a doctor is implemented using the <a href=#{link} target=_blank>WebSockets</a> protocol.
+
+Doc013 link@Text: Video/audio call with doctor is implemented using <a href=#{link} target=_blank>WebRTC API</a>.
+
+Doc014 link@Text: For notifications the <a href=#{link} target=_blank>Web Push API</a> is used.

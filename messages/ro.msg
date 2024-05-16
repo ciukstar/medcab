@@ -1,3 +1,4 @@
+Overview: Prezentare generală
 Close: Închide
 MissedCall: Apel pierdut
 CallAgain: Suna din nou 
@@ -196,7 +197,7 @@ SignUp: Înregistrați-vă
 Login: Autentificare
 MainMenu: Meniu principal
 Welcome: Bine ați venit
-AppDescription: Aplicație web progresivă pentru asistență medicală
+AppDescription: Aplicația web pentru sănătate
 AppName: MedCab
 MetaKeywords: asistență medicală, progresiv, web, aplicație, pwa
 MetaDescription: Aplicație web progresivă pentru asistență medicală
@@ -217,6 +218,14 @@ Doc007: Un superutilizator (vezi mai jos) poate acorda privilegii de administrat
 
 Doc008 href: O unitate de măsură este definită prin furnizarea unui nume, simbol și descriere în secțiunea <a href=#{href}>„Unități de măsură”</a>.
 
-Doc009: Chat pentru medic și pacient
+Doc009 link: Aplicația <a href=#{link} target=_blank>MedCab</a> oferă posibilitatea de a înregistra și urmări semnele vitale, de a vedea dinamica acestora în timp și de a le compara cu valorile normale.
 
-Doc010: Apel video pacient/medic
+Doc010: Consultație online medic-pacient
+
+Doc011: Dacă este necesar, pacientul poate alege un medic pe care să-l consulte prin schimb de mesaje (chat cu medicul) sau prin apel video/audio.
+
+Doc012 link: Chatul cu un medic este implementat folosind protocolul <a href=#{link} target=_blank>WebSockets</a>.
+
+Doc013 link: Apelul video/audio cu medicul este implementat folosind <a href=#{link} target=_blank>API-ul WebRTC</a>.
+
+Doc014 link: Pentru notificări se folosește <a href=#{link} target=_blank>API-ul Web Push</a>.

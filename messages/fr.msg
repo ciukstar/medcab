@@ -1,3 +1,4 @@
+Overview: Aperçu
 Close: Fermer
 MissedCall: Appel manqué
 CallAgain: Appelle encore une fois 
@@ -196,7 +197,7 @@ SignUp: S'inscrire
 Login: Connexion
 MainMenu: Menu principal
 Welcome: Bienvenu
-AppDescription: Application Web progressive pour les soins de santé
+AppDescription: Application Web de soins de santé
 AppName: MedCab
 MetaKeywords: soins de santé, progressif, web, application, pwa
 MetaDescription: Application Web progressive pour les soins de santé
@@ -217,6 +218,14 @@ Doc007: Un superutilisateur (voir ci-dessous) peut accorder des privilèges d'ad
 
 Doc008 href: Une unité de mesure est définie en fournissant un nom, un symbole et une description dans la section <a href=#{href}>« Unités de mesure »</a>.
 
-Doc009: Chat entre médecins et patients
+Doc009 link: L'application <a href=#{link} target=_blank>MedCab</a> offre la possibilité d'enregistrer et de suivre les signes vitaux, de voir leur dynamique au fil du temps et de les comparer aux valeurs normales.
 
-Doc010: Appel vidéo patient/médecin
+Doc010: Consultation médecin-patient en ligne
+
+Doc011: Si nécessaire, le patient peut choisir un médecin à consulter en échangeant des messages (chat avec le médecin) ou par appel vidéo/audio.
+
+Doc012 link: Le chat avec un médecin est implémenté à l'aide du protocole <a href=#{link} target=_blank>WebSockets</a>.
+
+Doc013 link: L'appel vidéo/audio avec le médecin est implémenté à l'aide de <a href=#{link} target=_blank>l'API WebRTC</a>.
+
+Doc014 link: Pour les notifications, <a href=#{link} target=_blank>l'API Web Push</a> est utilisée.

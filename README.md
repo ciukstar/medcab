@@ -1,17 +1,28 @@
-## App MedCab
 
-[This application](https://medcab-jjgwe5ufda-de.a.run.app) is under development...
+[En français](https://github.com/ciukstar/medcab/blob/master/README.fr.md)  
+
+[În română](https://github.com/ciukstar/medcab/blob/master/README.ro.md)  
+
+[На русском](https://github.com/ciukstar/medcab/blob/master/README.ru.md)  
+
+## MedCab
+Healthcare Web App
+
+## Overview
+The app [MedCab](https://medcab-jjgwe5ufda-de.a.run.app) offers the ability to record and track vital signs, see their dynamics over time and compare them with normal values.
 
 
-## Doctor and patient chat
+## Online Doctor-Patient consultation
+If necessary, the patient can choose a doctor to consult by exchanging messages (chat with the doctor) or by video/audio call.
 
-... using [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+Chat with a doctor is implemented using the [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) protocol.
 
-## Patient/Doctor Video Call
+Video/audio call with doctor is implemented using [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API).
 
-... using 
-* [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
-* [Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
+* Configuration
+  * ```$YESOD_RTC_PEER_CONNECTION_CONFIG```
+  
+For notifications the [Web Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) is used.
 
 ## Basic Entities
 
@@ -62,6 +73,10 @@ A superuser account is defined at deployment time. The superuser manages other u
 * [Bing SEO](https://www.bing.com/webmasters)
 
   ```$YESOD_MS_VALIDATE```
+  
+* [Yandex SEO](https://webmaster.yandex.com/welcome)
+
+  ```$YESOD_YANDEX_VERIFICATION```
 
 ## ER Diagram
 

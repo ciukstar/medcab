@@ -47,8 +47,11 @@ superuser-password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
 google-client-id:     "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
 google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
 
+gcloud-project-id: "_env:YESOD_GCLOUD_PROJECT_ID:medcab"
+
 google-site-verification: "_env:YESOD_GOOGLE_SITE_VERIFICATION"
 msvalidate:               "_env:YESOD_MS_VALIDATE"
+yandex-verification:      "_env:YESOD_YANDEX_VERIFICATION"
 
 rtc-peer-connection-config: "_env:YESOD_RTC_PEER_CONNECTION_CONFIG"
 
