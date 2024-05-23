@@ -18,7 +18,6 @@ module VideoRoom
   , wsApp
   , getWebSoketR
   , postPushMessageR
-  , widgetOutgoingCall
   ) where
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -54,7 +53,7 @@ import Model
     , EntityField
       ( UserId, PushSubscriptionUser
       , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, UserPhotoUser
-      ), UserPhoto (UserPhoto)
+      ), UserPhoto (UserPhoto), PatientId, paramBacklink
     )
 
 import Network.HTTP.Client (Manager)
@@ -75,7 +74,7 @@ import Text.Shakespeare.Text (st)
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, IncomingR, OutgoingR, PhotoR)
+    , Route (WebSoketR, PushMessageR, PhotoR, RoomR)
     , VideoRoomMessage
       ( VideoRoomOutgoingCall, VideoRoomIncomingCall, VideoRoomClose
       , VideoRoomCallEnded, VideoRoomVideoSession, VideoRoomNotGeneratedVAPID
@@ -110,6 +109,29 @@ import Data.Text.Encoding (encodeUtf8)
 class YesodVideo m where
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
+
+
+getRoomR :: (Yesod m, YesodVideo m)
+         => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+         => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
+getRoomR sid pid rid polite = do
+    
+    -- let polite = True
+
+    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
+    backlink <- runInputGet (ireq urlField paramBacklink)
+
+    toParent <- getRouteToParent
+
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+
+    liftHandler $ defaultLayout $ do
+        idButtonExitVideoSession <- newIdent
+        idVideoRemote <- newIdent
+        idVideoSelf <- newIdent
+        idButtonEndVideoSession <- newIdent
+        idDialogCallEnded <- newIdent
+        $(widgetFile "video/session")
 
 
 getOutgoingR :: (Yesod m, YesodVideo m)
@@ -162,22 +184,6 @@ getIncomingR = do
         $(widgetFile "video/session")
 
 
-widgetOutgoingCall :: (YesodVideo m, RenderMessage m VideoRoomMessage)
-                   => Text -- ^ Dialog id Outgoing
-                   -> Text -- ^ Button id for cancelig outgoing call
-                   -> UserId -> UserId
-                   -> (Route VideoRoom -> Route m)
-                   -> WidgetFor m ()
-widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid toParent = do
-
-    backlink <- fromMaybe (toParent (OutgoingR sid rid)) <$> getCurrentRoute
-
-    idDialogCallDeclined <- newIdent
-    idDialogVideoSessionEnded <- newIdent
-
-    $(widgetFile "video/outgoing")
-
-
 getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
              => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
 getWebSoketR channelId polite = webSockets (wsApp channelId polite)
@@ -192,6 +198,7 @@ postPushMessageR = do
     messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
         <$> lookupPostParam "messageType"
     icon <- lookupPostParam "icon"
+    targetRoom <- lookupPostParam "targetRoom"
     channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
@@ -240,6 +247,7 @@ postPushMessageR = do
                         & pushMessage .~ object [ "messageType" .= messageType
                                                 , "topic" .= messageType
                                                 , "icon" .= icon
+                                                , "targetRoom" .= targetRoom
                                                 , "channelId" .= channelId
                                                 , "senderId" .= sid
                                                 , "senderName" .= ( (userName . entityVal <$> sender)

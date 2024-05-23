@@ -45,6 +45,7 @@
 /auth   AuthR   Auth   getAuth
 /static StaticR Static appStatic
 
+/sw.js         ServiceWorkerR  GET
 /manifest.json WebAppManifestR GET
 /sitemap.xml   SitemapR        GET
 /favicon.ico   FaviconR        GET

@@ -38,7 +38,7 @@ import Foundation
     ( Handler, Form
     , Route
       ( MyDoctorPhotoR, StaticR, ChatR, VideoR
-      , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR
+      , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR, HomeR
       )
     , AppMessage
       ( MsgDoctors, MsgPhoto, MsgTabs
@@ -54,7 +54,7 @@ import Material3 (md3mreq, md3switchField)
 import Model
     ( secretVolumeVapid, apiInfoVapid
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept)
     , PatientId, Patient, Chat, Token
     , UserId, Doctor(Doctor, doctorUser), DoctorPhoto (DoctorPhoto), DoctorId, Store
     , Specialist (Specialist), Specialty (Specialty)
@@ -83,8 +83,7 @@ import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
-import VideoRoom (widgetOutgoingCall, ChanId (ChanId))
-import VideoRoom.Data ( Route(PushMessageR) )
+import VideoRoom.Data (ChanId (ChanId), Route(PushMessageR, RoomR), VideoRoomMessage (VideoRoomOutgoingCall) )
 
 import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
@@ -96,7 +95,7 @@ import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent
     , SomeMessage (SomeMessage), parseCheckJsonBody, returnJson
-    , sendStatusJSON, ToJSON (toJSON), lookupGetParam, invalidArgsI
+    , sendStatusJSON, ToJSON (toJSON), lookupGetParam, invalidArgsI, getCurrentRoute
     )
 import Yesod.Core.Content (TypedContent (TypedContent))
 import Yesod.Core.Handler (getMessages, setUltDestCurrent)
@@ -107,6 +106,7 @@ import Yesod.Form.Types
     , FieldView (fvInput, fvLabel, fvId)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
+import Data.Maybe (fromMaybe)
 
 
 deleteMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler ()
@@ -224,6 +224,8 @@ getMyDoctorSpecialtiesR pid uid did = do
 getMyDoctorR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorR pid uid did = do
 
+    let polite = True
+    
     doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
             `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -242,6 +244,8 @@ getMyDoctorR pid uid did = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
         return (countRows :: SqlExpr (Value Int)) )
 
+    backlink <- fromMaybe HomeR <$> getCurrentRoute
+
     let sid = uid
     case doctor >>= doctorUser . entityVal . fst of
       Just rid -> do
@@ -253,11 +257,13 @@ getMyDoctorR pid uid did = do
               idButtonVideoCall <- newIdent
               idDialogOutgoingCall <- newIdent
               idButtonOutgoingCallCancel <- newIdent
+              idDialogVideoSessionEnded <- newIdent
+              idDialogCallDeclined <- newIdent
 
               let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
-
+              
               $(widgetFile "my/doctors/doctor")
-              widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR
+              $(widgetFile "video/outgoing")
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

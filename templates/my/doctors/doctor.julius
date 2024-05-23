@@ -1,32 +1,16 @@
 
-document.querySelector('md-tabs').onchange = function (e) {
-  navigator.serviceWorker.ready.then(function (registration) {
-    return registration.pushManager.getSubscription();
-  }).then(function (subscription) {
-    return !subscription
-      ? '@{MyDoctorNotificationsR pid uid did}'
-      : `@{MyDoctorNotificationsR pid uid did}?endpoint=${subscription.endpoint}`
-  }).then(function (endpoint) {
-    window.location.href = e.target.activeTabIndex == 0
-      ? '@{MyDoctorR pid uid did}'
-      : ( e.target.activeTabIndex === 1
-	  ? '@{MyDoctorSpecialtiesR pid uid did}'
-	  : endpoint
-	)
-  });
-};
-
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
 
   fetch('@{VideoR PushMessageR}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeCall},
-      "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
-      "channelId": #{show channel},
-      "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid}
+      messageType: #{show PushMsgTypeCall},
+      icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
+      channelId: #{show channel},
+      senderId: #{show $ fromSqlKey sid},
+      recipientId: #{show $ fromSqlKey rid}
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();

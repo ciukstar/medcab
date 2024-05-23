@@ -20,11 +20,17 @@
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}>
-      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorR pid uid did}>
         _{MsgDetails}
-      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties>
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorSpecialtiesR pid uid did}>
         _{MsgSpecializations}
-      <md-primary-tab #tabNotifications aria-controls=panelNotifications>
+      <md-primary-tab #tabNotifications aria-controls=panelNotifications
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorNotificationsR pid uid did}>
         _{MsgNotifications}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>

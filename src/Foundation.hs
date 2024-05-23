@@ -16,7 +16,7 @@ module Foundation where
 
 import ChatRoom.Data (ChatRoom)
 import VideoRoom.Data
-    ( VideoRoom, Route (PushMessageR, IncomingR), VideoRoomMessage
+    ( VideoRoom, Route (PushMessageR), VideoRoomMessage
     , defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage
     , romanianVideoRoomMessage, russianVideoRoomMessage
     )
@@ -104,6 +104,9 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import Web.WebPush (VAPIDKeys, readVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), vapidPublicKeyBytes)
+import Text.Julius (juliusFile)
+import Text.Read (readMaybe)
 
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -289,6 +292,7 @@ instance Yesod App where
     isAuthorized HomeR _ = return Authorized
 
     isAuthorized DocsR _ = return Authorized
+    isAuthorized ServiceWorkerR _ = return Authorized
     isAuthorized WebAppManifestR _ = return Authorized
     isAuthorized SitemapR _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
@@ -408,6 +412,50 @@ instance Yesod App where
 
     makeLogger :: App -> IO Logger
     makeLogger = return . appLogger
+
+
+getServiceWorkerR :: Handler TypedContent
+getServiceWorkerR = do
+
+    rndr <- getUrlRenderParams
+    -- msgr <- getMessageRender
+    mVAPIDKeys <- getVAPIDKeys
+
+    -- calleeName <- resolveName <$> maybeAuth
+
+    case mVAPIDKeys of
+      Just vapidKeys -> do
+          let applicationServerKey = vapidPublicKeyBytes vapidKeys
+          return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+  where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
+
+
+getVAPIDKeys :: Handler (Maybe VAPIDKeys)
+getVAPIDKeys = do
+
+    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi E.==. val apiInfoVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken E.==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
+
+    return $ readVAPIDKeys <$> details
 
 
 -- How to run database actions.

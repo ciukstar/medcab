@@ -10,7 +10,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       backlink: '@{backlink}'
     });
 
-    window.location.href = `@{toParent (OutgoingR sid rid)}?${params}`;
+    window.location.href = `@{VideoR (RoomR sid pid rid polite)}?${params}`;
     
   } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
 

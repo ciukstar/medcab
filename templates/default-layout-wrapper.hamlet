@@ -53,7 +53,9 @@ $doctype 5
 
     <script>
       document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
+      
   <body.background>
+
     ^{pageBody pc}
 
     $maybe analytics <- appAnalytics $ appSettings master

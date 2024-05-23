@@ -35,6 +35,7 @@ document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
     body: new URLSearchParams({
       "messageType": #{show PushMsgTypeCall},
       "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
       "channelId": #{show channel},
       "senderId": #{show $ fromSqlKey sid},
       "recipientId": #{show $ fromSqlKey rid}

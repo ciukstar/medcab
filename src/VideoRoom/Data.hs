@@ -19,7 +19,7 @@ import Data.Aeson (ToJSON, FromJSON)
 import qualified Data.Map as M
 import Data.Text (Text)
 
-import Model (UserId)
+import Model (UserId, PatientId)
 
 import Yesod.Core (renderRoute, PathPiece)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
@@ -80,6 +80,5 @@ mkYesodSubData "VideoRoom" [parseRoutes|
 /photo/#UserId            PhotoR       GET
 /ws/#ChanId/#Bool         WebSoketR    GET
 /api/push                 PushMessageR POST
-/outgoing/#UserId/#UserId OutgoingR    GET
-/incoming                 IncomingR    GET
+/room/#UserId/#PatientId/#UserId/#Bool RoomR GET
 |]

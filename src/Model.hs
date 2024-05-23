@@ -203,3 +203,8 @@ secretVolumeVapid = "/vapid/vapid_min_details"
 secretVolumeGmail :: String
 secretVolumeGmail = "/grt/gmail_refresh_token"
 
+paramBacklink :: Text
+paramBacklink = "backlink"
+
+paramEndpoint :: Text
+paramEndpoint = "endpoint"

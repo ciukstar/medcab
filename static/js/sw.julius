@@ -1,0 +1,84 @@
+
+self.onpush = function (e) {
+
+  const message = e.data.json();
+  
+  const promise = self.clients.matchAll({ type: 'window' }).then(function (clients) {
+    
+    if (clients.length > 0) {
+      for (const client of clients) {
+        client.postMessage(message);
+      }
+    }
+    
+    return message;
+    
+  }).then(function (message) {
+    var title, body;
+    if (message.messageType === #{show PushMsgTypeDecline}) {
+      
+      title = 'Incoming call declined';
+      body = `Call from user: ${message.senderName} declined`;
+      
+    } else if (message.messageType === #{show PushMsgTypeAccept}) {
+      
+      title = 'Incoming call accepted';
+      body = `Call from user: ${message.senderName} accepted`;
+      
+    } else if (message.messageType === #{show PushMsgTypeCancel}) {
+      
+      title = 'Call Canceled';
+      body = 'Call Canceled';
+      
+    } else if (message.messageType === #{show PushMsgTypeEnd}) {
+      
+      title = 'PushMsgTypeEndVideoSession';
+      body = 'PushMsgTypeEndVideoSession';
+      
+    } else if (message.messageType === #{show PushMsgTypeCall}) {
+      
+      title = 'Incoming call';
+      body = `Call from user: ${message.senderName}`;
+      
+    }
+    
+    return self.registration.showNotification(title, {
+      tag: message.messageType,
+      renotify: true,
+      image: message.senderPhoto,
+      icon: message.icon,
+      body: body
+    });
+  });
+  
+  e.waitUntil(promise);
+  
+};
+
+
+self.addEventListener('fetch', function (e) {
+
+  const url = new URL(e.request.url);
+  const needsEndpoint = e.request.method === 'GET'
+      && url.origin === self.location.origin
+      && !e.request.url.includes('/static/')
+      && !e.request.url.includes('/photo')
+      && !e.request.url.includes('/manifest.json')
+      && !e.request.url.includes('/favicon.ico');
+  
+  if (needsEndpoint) {
+
+    let response = self.registration.pushManager.getSubscription().then(function (subscription) {
+      if (!subscription) {
+	return fetch(e.request);
+      } else {
+	url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
+	return fetch(url.href);
+      }
+    });
+    
+    e.respondWith(response);
+    
+  }
+  
+});

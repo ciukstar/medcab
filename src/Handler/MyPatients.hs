@@ -43,7 +43,7 @@ import Foundation
     ( Handler, Form, App
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR
+      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR, HomeR
       )
     , AppMessage
       ( MsgPatients, MsgNoPatientsYet
@@ -61,7 +61,7 @@ import Model
     ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel)
+    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept)
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
     , PatientId, Patient(Patient, patientUser), Chat
     , PushSubscription (PushSubscription), Token, Store
@@ -97,7 +97,7 @@ import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
     , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
-    , parseCheckJsonBody, returnJson, sendStatusJSON, lookupGetParam
+    , parseCheckJsonBody, returnJson, sendStatusJSON, lookupGetParam, getCurrentRoute
     )
 import Yesod.Form
     ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
@@ -110,8 +110,9 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Network.HTTP.Types.Status (status400)
-import VideoRoom (widgetOutgoingCall, ChanId (ChanId), Route (PushMessageR))
+import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR), VideoRoomMessage (VideoRoomOutgoingCall))
 import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
+import Data.Maybe (fromMaybe)
 
 
 deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
@@ -305,6 +306,8 @@ formPatients did options extra = do
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientR uid did pid = do
 
+    let polite = False
+    
     patient <- (second (second (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -327,6 +330,8 @@ getMyPatientR uid did pid = do
     (fw,et) <- generateFormPost formPatientRemove
     msgs <- getMessages
 
+    backlink <- fromMaybe HomeR <$> getCurrentRoute
+
     let sid = uid
     case patientUser . entityVal . fst <$> patient of
       Just rid ->  defaultLayout $ do
@@ -336,12 +341,13 @@ getMyPatientR uid did pid = do
           idButtonVideoCall <- newIdent
           idDialogOutgoingCall <- newIdent
           idButtonOutgoingCallCancel <- newIdent
+          idDialogVideoSessionEnded <- newIdent
+          idDialogCallDeclined <- newIdent
 
           let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
           
           $(widgetFile "my/patients/patient")
-
-          widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid VideoR
+          $(widgetFile "video/outgoing")
 
       Nothing -> invalidArgsI [MsgNoRecipient]
 

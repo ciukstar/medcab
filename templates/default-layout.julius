@@ -1,5 +1,5 @@
 
-navigator.serviceWorker.register("@{StaticR js_sw_js}", { scope: "/" });
+navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
@@ -11,11 +11,11 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"messageType": #{show PushMsgTypeDecline},
-	"icon": message.data.icon,
-	"channelId": message.data.channelId,
-	"senderId": message.data.recipientId,
-	"recipientId": message.data.senderId
+	messageType: #{show PushMsgTypeDecline},
+	icon: message.data.icon,
+	channelId: message.data.channelId,
+	senderId: message.data.recipientId,
+	recipientId: message.data.senderId
       })
     }).then(function (result) {
       document.getElementById(#{idDialogIncomingCall}).close();
@@ -27,11 +27,11 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"messageType": #{show PushMsgTypeAccept},
-	"icon": message.data.icon,
-	"channelId": message.data.channelId,
-	"senderId": message.data.recipientId,
-	"recipientId": message.data.senderId
+	messageType: #{show PushMsgTypeAccept},
+	icon: message.data.icon,
+	channelId: message.data.channelId,
+	senderId: message.data.recipientId,
+	recipientId: message.data.senderId
       })
     }).then(function (result) {
       
@@ -44,7 +44,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	backlink: '@{backlink}'
       });
       
-      window.location.href = `@{VideoR $ IncomingR}?${params}`;
+      window.location.href = `${message.data.targetRoom}?${params}`;
             
     });
   };
