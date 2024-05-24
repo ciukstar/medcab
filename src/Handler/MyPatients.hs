@@ -39,8 +39,9 @@ import Database.Persist
 import qualified Database.Persist as P (delete)
 import Database.Persist.Sql (fromSqlKey)
 
-import Foundation
-    ( Handler, Form, App
+import Foundation (Form)
+import Foundation.Data
+    ( Handler, App
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR, HomeR
@@ -52,11 +53,12 @@ import Foundation
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
       , MsgNotifications, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgNoRecipient
+      , MsgNoRecipient, MsgOutgoingCall
       )
     )
 
 import Material3 (md3switchField, md3mreq)
+
 import Model
     ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorDark)
@@ -110,7 +112,7 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Network.HTTP.Types.Status (status400)
-import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR), VideoRoomMessage (VideoRoomOutgoingCall))
+import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
 import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 import Data.Maybe (fromMaybe)
 

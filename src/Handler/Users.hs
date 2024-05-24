@@ -28,8 +28,9 @@ import Database.Persist
     ( Entity (Entity), PersistStoreWrite (delete), PersistUniqueWrite (upsert) )
 import qualified Database.Persist as P ((=.))
 
-import Foundation
-    ( Handler, Widget, Form
+import Foundation (Form)
+import Foundation.Data
+    ( Handler, Widget
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage

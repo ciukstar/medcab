@@ -37,10 +37,17 @@ import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A (Value)
 import Data.Bifunctor (Bifunctor(bimap))
-import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
+import Data.Maybe (fromMaybe)
 import Data.Text (Text, unpack)
+import Data.Text.Encoding (encodeUtf8)
+
+import Foundation.Data
+    ( AppMessage
+      ( MsgOutgoingCall, MsgNotGeneratedVAPID, MsgVideoSession
+      , MsgClose, MsgCallEnded)
+    )
 
 import Model
     ( UserId, User (userEmail, userName)
@@ -48,7 +55,7 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, apiInfoVapid, secretVolumeVapid
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEnd
+      ( PushMsgTypeCall, PushMsgTypeEnd
       )
     , EntityField
       ( UserId, PushSubscriptionUser
@@ -75,10 +82,6 @@ import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
     , Route (WebSoketR, PushMessageR, PhotoR, RoomR)
-    , VideoRoomMessage
-      ( VideoRoomOutgoingCall, VideoRoomIncomingCall, VideoRoomClose
-      , VideoRoomCallEnded, VideoRoomVideoSession, VideoRoomNotGeneratedVAPID
-      )
     )
 
 import Web.WebPush
@@ -91,19 +94,16 @@ import Yesod
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
     , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
-    , getCurrentRoute
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
 import Yesod.Core.Handler (invalidArgsI, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Core.Widget (WidgetFor)
 import Yesod.Form.Input (runInputGet, ireq)
 import Yesod.Form.Fields (intField, urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Data.Text.Encoding (encodeUtf8)
 
 
 class YesodVideo m where
@@ -112,64 +112,12 @@ class YesodVideo m where
 
 
 getRoomR :: (Yesod m, YesodVideo m)
-         => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+         => (RenderMessage m AppMessage, RenderMessage m FormMessage)
          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
 getRoomR sid pid rid polite = do
-    
-    -- let polite = True
 
-    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
+    let channelId@(ChanId channel) = ChanId (fromIntegral $ fromSqlKey pid)
     backlink <- runInputGet (ireq urlField paramBacklink)
-
-    toParent <- getRouteToParent
-
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
-    liftHandler $ defaultLayout $ do
-        idButtonExitVideoSession <- newIdent
-        idVideoRemote <- newIdent
-        idVideoSelf <- newIdent
-        idButtonEndVideoSession <- newIdent
-        idDialogCallEnded <- newIdent
-        $(widgetFile "video/session")
-
-
-getOutgoingR :: (Yesod m, YesodVideo m)
-             => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-             => UserId -> UserId -> SubHandlerFor VideoRoom m Html
-getOutgoingR sid rid = do
-
-    let polite = True
-
-    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
-    backlink <- runInputGet (ireq urlField "backlink")
-
-    toParent <- getRouteToParent
-
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
-    liftHandler $ defaultLayout $ do
-        idButtonExitVideoSession <- newIdent
-        idVideoRemote <- newIdent
-        idVideoSelf <- newIdent
-        idButtonEndVideoSession <- newIdent
-        idDialogCallEnded <- newIdent
-        $(widgetFile "video/session")
-
-
-getIncomingR :: (Yesod m, YesodVideo m)
-             => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-             => SubHandlerFor VideoRoom m Html
-getIncomingR = do
-
-    let polite = False
-
-    (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
-    (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
-
-    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
-    backlink <- runInputGet (ireq urlField "backlink")
 
     toParent <- getRouteToParent
 
@@ -191,7 +139,7 @@ getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                 => (RenderMessage m FormMessage, RenderMessage m VideoRoomMessage)
+                 => (RenderMessage m FormMessage, RenderMessage m AppMessage)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
 
@@ -266,7 +214,7 @@ postPushMessageR = do
                       liftIO $ print ex
                   Right () -> return ()
 
-      Nothing -> liftHandler $ invalidArgsI [VideoRoomNotGeneratedVAPID]
+      Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -326,9 +274,9 @@ getPhotoR uid = do
       Nothing -> TypedContent "image/svg+xml" $ toContent [st|<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/></svg>|]
 
 
-instance ( Yesod m, YesodVideo m, RenderMessage m VideoRoomMessage
+instance ( Yesod m, YesodVideo m
          , YesodPersist m, YesodPersistBackend m ~ SqlBackend
-         , RenderMessage m FormMessage
+         , RenderMessage m AppMessage, RenderMessage m FormMessage
          ) => YesodSubDispatch VideoRoom m where
     yesodSubDispatch :: YesodSubRunnerEnv VideoRoom m -> Application
     yesodSubDispatch = $(mkYesodSubDispatch resourcesVideoRoom)

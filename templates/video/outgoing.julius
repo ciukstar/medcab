@@ -6,7 +6,6 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idDialogOutgoingCall}).close();
     
     const params = new URLSearchParams({
-      channel: message.data.channelId,
       backlink: '@{backlink}'
     });
 

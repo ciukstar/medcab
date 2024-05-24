@@ -5,7 +5,8 @@
 
 module Handler.Home (getHomeR) where
 
-import Foundation
+import Foundation ()
+import Foundation.Data
     ( Handler
     , Route (RecordsR, DoctorsR)
     , AppMessage

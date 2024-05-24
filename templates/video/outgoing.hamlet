@@ -1,10 +1,10 @@
 
 <md-dialog ##{idDialogOutgoingCall}>
   <div slot=headline>
-    _{VideoRoomOutgoingCall}
+    _{MsgOutgoingCall}
 
   <form slot=content method=dialog>
-    <p.body-large>_{VideoRoomOutgoingCall} ...
+    <p.body-large>_{MsgOutgoingCall} ...
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
@@ -20,5 +20,17 @@
 
   <div slot=actions>
     <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
+      <md-icon slot=icon>close
+      Close
+      
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    Call declined
+
+  <form slot=content method=dialog>
+    <p.body-large>Call declined ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
       <md-icon slot=icon>close
       Close

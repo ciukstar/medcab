@@ -21,6 +21,7 @@ import Data.Aeson (object, (.=))
 import Data.Aeson.Lens (key, AsValue (_String))
 import qualified Data.ByteString.Base64 as B64 (encode)
 import Data.ByteString.Lazy (toStrict)
+import Data.Function ((&))
 import qualified Data.List.Safe as LS (last)
 import Data.Text (Text, pack, unpack, splitOn)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
@@ -36,8 +37,9 @@ import Database.Persist
     )
 import qualified Database.Persist as P ((=.))
 
-import Foundation
-    ( Handler, Form, App (appSettings)
+import Foundation (Form)
+import Foundation.Data
+    ( Handler, App (appSettings)
     , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
@@ -52,7 +54,6 @@ import Foundation
       , MsgInvalidGoogleAPITokens
       )
     )
-import Data.Function ((&))
 
 import Material3 (md3radioField, md3emailField)
 

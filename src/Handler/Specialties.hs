@@ -36,23 +36,9 @@ import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_, replace)
     )
 
-import Material3 (md3textField, md3textareaField, md3mreq, md3mopt, md3dayField)
-import Model
-    ( Specialty
-      ( Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup )
-    , EntityField
-      ( SpecialtyName, SpecialtyId, SpecialtyGroup, SpecialistDoctor
-      , SpecialistSpecialty, DoctorId, DoctorPhotoDoctor, DoctorPhotoAttribution
-      , SpecialistTitle, DoctorName, SpecialistId
-      )
-    , statusSuccess, SpecialtyId, statusError
-    , Specialties (Specialties), Doctor (Doctor)
-    , Specialist (Specialist, specialistDoctor, specialistTitle, specialistCertDate)
-    , DoctorId, DoctorPhoto, SpecialistId
-    )
-
-import Foundation
-    ( Handler, Widget, Form
+import Foundation (Form)
+import Foundation.Data
+    ( Handler, Widget
     , Route (DataR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
@@ -70,6 +56,22 @@ import Foundation
       , MsgSpecialtyTitle, MsgCertificateDate
       )
     )
+
+import Material3 (md3textField, md3textareaField, md3mreq, md3mopt, md3dayField)
+import Model
+    ( Specialty
+      ( Specialty, specialtyName, specialtyCode, specialtyDescr, specialtyGroup )
+    , EntityField
+      ( SpecialtyName, SpecialtyId, SpecialtyGroup, SpecialistDoctor
+      , SpecialistSpecialty, DoctorId, DoctorPhotoDoctor, DoctorPhotoAttribution
+      , SpecialistTitle, DoctorName, SpecialistId
+      )
+    , statusSuccess, SpecialtyId, statusError
+    , Specialties (Specialties), Doctor (Doctor)
+    , Specialist (Specialist, specialistDoctor, specialistTitle, specialistCertDate)
+    , DoctorId, DoctorPhoto, SpecialistId
+    )
+    
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)

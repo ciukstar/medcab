@@ -1,3 +1,5 @@
+CallEnded: Call ended
+VideoSession: Video Session
 Overview: Overview
 Close: Close
 MissedCall: Missed call

@@ -1,3 +1,5 @@
+CallEnded: Звонок окончен
+VideoSession: Видеосессия
 Overview: Обзор
 Close: Закрыть
 MissedCall: Пропущенный звонок

@@ -4,7 +4,7 @@
     <md-icon>arrow_back
 
   <h1.title-large>
-    _{VideoRoomVideoSession}
+    _{MsgVideoSession}
 
 <main>
 
@@ -18,13 +18,13 @@
 
 <md-dialog ##{idDialogCallEnded}>
   <div slot=headline>
-    _{VideoRoomCallEnded}
+    _{MsgCallEnded}
 
   <form slot=content method=dialog>
-    _{VideoRoomCallEnded}
+    _{MsgCallEnded}
 
   <div slot=actions>
 
     <md-filled-button has-icon type=link href=#{backlink}>
       <md-icon slot=icon>close
-      _{VideoRoomClose}
+      _{MsgClose}

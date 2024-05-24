@@ -20,7 +20,8 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist (Entity (Entity))
 
-import Foundation
+import Foundation ()
+import Foundation.Data
     ( Handler
     , Route
       ( DoctorPhotoR, StaticR, DoctorR, DoctorsR

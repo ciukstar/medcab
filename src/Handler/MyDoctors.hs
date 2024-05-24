@@ -34,8 +34,9 @@ import Database.Esqueleto.Experimental
 import Database.Persist (Entity (Entity), upsertBy, (=.))
 import Database.Persist.Sql (fromSqlKey)
 
-import Foundation
-    ( Handler, Form
+import Foundation (Form)
+import Foundation.Data
+    ( Handler
     , Route
       ( MyDoctorPhotoR, StaticR, ChatR, VideoR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR, HomeR
@@ -46,11 +47,12 @@ import Foundation
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
-      , MsgNotGeneratedVAPID, MsgNoRecipient
+      , MsgNotGeneratedVAPID, MsgNoRecipient, MsgOutgoingCall
       )
     )
 
 import Material3 (md3mreq, md3switchField)
+
 import Model
     ( secretVolumeVapid, apiInfoVapid
     , ChatMessageStatus (ChatMessageStatusUnread)
@@ -83,7 +85,7 @@ import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
-import VideoRoom.Data (ChanId (ChanId), Route(PushMessageR, RoomR), VideoRoomMessage (VideoRoomOutgoingCall) )
+import VideoRoom.Data (ChanId (ChanId), Route(PushMessageR, RoomR) )
 
 import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys

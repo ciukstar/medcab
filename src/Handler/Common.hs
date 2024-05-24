@@ -8,18 +8,24 @@ module Handler.Common
   ) where
 
 import Control.Monad ( Monad(return) )
+
 import Data.Aeson (object, (.=), Value (String))
 import Data.Conduit (yield)
 import Data.FileEmbed (embedFile)
 import Data.Function (($))
 import Data.Maybe (Maybe (Nothing, Just))
-import Prelude ((*))
-import Foundation
+
+import Foundation ()
+import Foundation.Data
     ( Handler
     , Route (HomeR, StaticR, FaviconR, DocsR)
     , AppMessage (MsgAppName, MsgMetaDescription)
     )
+    
+import Prelude ((*))
+
 import Settings.StaticFiles (img_medical_services_FILL0_wght400_GRAD0_opsz512_png)
+
 import Yesod.Core.Content
     ( TypedContent (TypedContent), typePlain, ToContent (toContent) )
 import Yesod.Core.Handler

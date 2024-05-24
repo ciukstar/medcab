@@ -3,7 +3,8 @@
 
 module Handler.Resources (getDocsR) where
 
-import Foundation
+import Foundation ()
+import Foundation.Data
     ( Handler
     , Route (AuthR, StaticR, HomeR, DataR)
     , DataR (UnitsR)

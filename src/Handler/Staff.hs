@@ -38,13 +38,9 @@ import Database.Esqueleto.Experimental
     , where_, orderBy, asc, Value (unValue), update, set, just, leftJoin, desc
     )
 
-import Material3
-    ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField
-    , md3mreq, md3mopt, md3dayField
-    )
-
-import Foundation
-    ( Handler, Widget, Form
+import Foundation (Form)
+import Foundation.Data
+    ( Handler, Widget
     , Route (StaticR, DataR)
     , DataR
       ( DoctorCreateR, StaffR, StaffPhotoR, MemberR, DoctorDeleR, DoctorEditR
@@ -60,6 +56,11 @@ import Foundation
       , MsgAttribution, MsgSpecialtyTitle, MsgSpecializations, MsgCertificateDate
       , MsgInvalidFormData, MsgAlreadyExists, MsgPhone, MsgUser
       )
+    )
+
+import Material3
+    ( md3textField, md3telField, md3emailField, md3selectField, md3htmlField
+    , md3mreq, md3mopt, md3dayField
     )
     
 import Model

@@ -1,3 +1,5 @@
+CallEnded: Apel terminat
+VideoSession: Sesiune video
 Overview: Prezentare generală
 Close: Închide
 MissedCall: Apel pierdut

@@ -39,8 +39,9 @@ import Database.Persist
     (Entity (Entity), PersistStoreWrite (insert, insert_, delete, replace))
 import Database.Persist.Sql ( SqlBackend )
 
-import Foundation
-    ( Handler, Form
+import Foundation (Form)
+import Foundation.Data
+    ( Handler
     , Route
       ( AuthR, RecordsR, RecordR, RecordNewR
       , RecordEditR, RecordDeleR, RecordMeasurementsR, RecordMeasurementR

@@ -1,3 +1,5 @@
+CallEnded: Appel terminé
+VideoSession: Séance vidéo
 Overview: Aperçu
 Close: Fermer
 MissedCall: Appel manqué

@@ -15,6 +15,7 @@ module Handler.Accounts
   ) where
 
 import Control.Monad (void)
+
 import Database.Persist
     ( Entity(Entity, entityVal), PersistUniqueWrite (upsert))
 import qualified Database.Persist as P ((=.))
@@ -24,7 +25,9 @@ import Database.Esqueleto.Experimental
     )
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+
 import Material3 ( md3textField, md3radioField, md3mopt, md3dayField )
+
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
@@ -35,7 +38,9 @@ import Model
     , UserInfo (UserInfo, userInfoBirthDate, userInfoGender)
     , Gender (GenderFemale, GenderMale, GenderOther)
     )
-import Foundation
+
+import Foundation ()
+import Foundation.Data
     ( Handler, Widget
     , Route
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
@@ -48,6 +53,7 @@ import Foundation
       , MsgSuperuser, MsgAdministrator
       )
     )
+    
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_white_svg
@@ -55,7 +61,9 @@ import Settings.StaticFiles
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_white_svg
     )
+    
 import Text.Hamlet (Html)
+
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender

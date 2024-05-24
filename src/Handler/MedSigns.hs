@@ -48,6 +48,28 @@ import Database.Persist
     )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
+import Foundation (Form)
+import Foundation.Data
+    ( Handler
+    , Route (DataR)
+    , DataR
+      ( MedSignsR, MedSignR, MedSignAddR, MedSignEditR, MedSignDeleR, SignTagsR
+      , SignTagR, SignTagAddR, SignTagEditR, SignTagDeleR, MedSignNormalsR
+      , MedSignNormalR, MedSignNormalAddR, MedSignNormalEditR
+      , MedSignNormalDeleR
+      )
+    , AppMessage
+      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSubtags
+      , MsgName, MsgDele, MsgDeleteAreYouSure
+      , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack, MsgTabs
+      , MsgGroup, MsgDescription, MsgUnitOfMeasure, MsgCode, MsgInvalidFormData
+      , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
+      , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails, MsgNone, MsgIcon
+      , MsgNormalValues, MsgNormalValue, MsgLowerBound, MsgUpperBound
+      , MsgInvalidRangeBoundaries
+      )
+    )
+
 import Material3
     ( md3mreq, md3textField, md3selectField, md3mopt, md3textareaField, tsep
     , md3doubleField
@@ -66,27 +88,6 @@ import Model
     , SignTagId, SignTag (SignTag, signTagName, signTagDescr, signTagGroup)
     , SignTags (SignTags), NormalId
     , Normal (Normal, normalName, normalLowerBound, normalUnit, normalUpperBound)
-    )
-
-import Foundation
-    ( Handler, Form
-    , Route (DataR)
-    , DataR
-      ( MedSignsR, MedSignR, MedSignAddR, MedSignEditR, MedSignDeleR, SignTagsR
-      , SignTagR, SignTagAddR, SignTagEditR, SignTagDeleR, MedSignNormalsR
-      , MedSignNormalR, MedSignNormalAddR, MedSignNormalEditR
-      , MedSignNormalDeleR
-      )
-    , AppMessage
-      ( MsgMedicalSigns, MsgNoDataYet, MsgAdd, MsgSubtags
-      , MsgName, MsgDele, MsgDeleteAreYouSure
-      , MsgCancel, MsgConfirmPlease, MsgEdit, MsgMedicalSign, MsgBack, MsgTabs
-      , MsgGroup, MsgDescription, MsgUnitOfMeasure, MsgCode, MsgInvalidFormData
-      , MsgRecordDeleted, MsgSave, MsgRecordCreated, MsgRecordEdited, MsgTag
-      , MsgAlreadyExists, MsgTags, MsgConfigure, MsgDetails, MsgNone, MsgIcon
-      , MsgNormalValues, MsgNormalValue, MsgLowerBound, MsgUpperBound
-      , MsgInvalidRangeBoundaries
-      )
     )
 
 import Settings (widgetFile)

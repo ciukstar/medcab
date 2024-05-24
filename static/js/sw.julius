@@ -58,8 +58,8 @@ self.onpush = function (e) {
 
 self.addEventListener('fetch', function (e) {
 
-  const url = new URL(e.request.url);
-  const needsEndpoint = e.request.method === 'GET'
+  let url = new URL(e.request.url);
+  let needsEndpoint = e.request.method === 'GET'
       && url.origin === self.location.origin
       && !e.request.url.includes('/static/')
       && !e.request.url.includes('/photo')
@@ -67,17 +67,19 @@ self.addEventListener('fetch', function (e) {
       && !e.request.url.includes('/favicon.ico');
   
   if (needsEndpoint) {
-
-    let response = self.registration.pushManager.getSubscription().then(function (subscription) {
-      if (!subscription) {
-	return fetch(e.request);
-      } else {
-	url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
-	return fetch(url.href);
-      }
-    });
     
-    e.respondWith(response);
+    e.respondWith(
+      self.registration.pushManager.getSubscription().then(function (subscription) {
+	
+	if (!subscription) {
+	  return fetch(e.request);
+	} else {
+	  url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
+	  return fetch(url);
+	}
+	
+      })
+    );
     
   }
   
