@@ -17,7 +17,7 @@ main
     display: flex
     flex-direction: column
     figure
-      text-align: center
+        text-align: center
     md-tabs
       z-index: 0
     ##{idPanelDetails}

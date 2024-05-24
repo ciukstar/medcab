@@ -12,7 +12,7 @@
   $maybe (Entity did (Doctor name mobile email phone _),attrib) <- doctor
 
     <figure>
-      <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      <img.photo src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-small>
         $maybe attrib <- attrib
           #{attrib}

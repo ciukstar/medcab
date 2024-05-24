@@ -28,10 +28,18 @@
 
   ^{widgetBanner msgs}
 
-  $maybe (Entity _ (Patient _ _ since),(Entity iid (User email _ _ _ _ name _ _),attrib)) <- patient
+  $maybe (Entity _ (Patient _ _ since),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
     
     <figure>
-      <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 height= loading=lazy alt=_{MsgPhoto}>
+      <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      $with (subscribed,looping,accessible) <- (bs,bl,ba)
+        $if not subscribed
+          <md-icon.connection-status>notifications_off
+        $elseif looping
+          <md-icon.connection-status>repeat
+        $elseif not accessible
+          <md-icon.connection-status>phone_disabled
+          
       <figcaption.body-medium>
         $maybe attrib <- attrib
           <small.app-attribution.body-small>
@@ -40,9 +48,13 @@
           _{MsgPhoto}
 
     <md-tabs aria-label=_{MsgTabs}>
-      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true>
+      <md-primary-tab #tabDetails aria-controls=#{idPanelDetails} active=true
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyPatientR uid did pid}>
         _{MsgDetails}
-      <md-primary-tab #tabNotifications aria-controls=panelNotifications>
+      <md-primary-tab #tabNotifications aria-controls=panelNotifications
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyPatientNotificationsR uid did pid}>
         _{MsgNotifications}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>

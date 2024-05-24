@@ -22,6 +22,11 @@ main
         
     figure
         text-align: center
+        .connection-status
+            position: absolute
+            color: white
+            background-color: red
+            clip-path: circle(50%)
     dl
         margin: 1rem 2rem 0 2rem
         dt + dd
