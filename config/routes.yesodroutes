@@ -10,7 +10,7 @@
 /patients/#UserId/doctors/#DoctorId/photo       	   MyDoctorPhotoR 	  GET
 /patients/#UserId/doctors 				   MyDoctorsR	     	  GET
 
-/users/#UserId/doctors/#DoctorId/patients/#PatientId/notifs MyPatientNotificationsR GET POST DELETE
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/notifs MyPatientNotificationsR GET POST
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/remove MyPatientRemoveR 	    POST
 /form/doctors/#DoctorId/patients/new                 	    MyPatientNewR    	    GET
 /users/#UserId/doctors/#DoctorId/patients/#PatientId 	    MyPatientR       	    GET

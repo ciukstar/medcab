@@ -26,8 +26,6 @@
 
 <main>
 
-  ^{widgetBanner msgs}
-
   $maybe (Entity _ (Patient _ _ since),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
     
     <figure>
@@ -58,6 +56,8 @@
         _{MsgNotifications}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
+
+      ^{widgetBanner msgs}
 
       <dl>
 
@@ -93,6 +93,6 @@
             <md-icon slot=icon>call
             _{MsgAudioCall}
 
-    <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
+      ^{widgetSnackbar msgs}
 
-^{widgetSnackbar msgs}
+    <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>

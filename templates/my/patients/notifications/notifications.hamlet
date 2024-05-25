@@ -37,7 +37,10 @@
       <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
 
       <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
-        <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et}>
+
+        ^{widgetBanner msgs}
+      
+        <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et} ##{idFormSubscription}>
           ^{fw}
 
         $if ((||) ((||) (not subscribed) (looping)) (not accessible))
@@ -68,3 +71,5 @@
                   _{MsgUserUnavailable name}
                 $nothing
                   _{MsgUserUnavailable email}
+
+        ^{widgetSnackbar msgs}

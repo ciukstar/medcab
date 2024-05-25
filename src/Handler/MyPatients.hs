@@ -13,7 +13,6 @@ module Handler.MyPatients
   , postMyPatientRemoveR
   , getMyPatientNotificationsR
   , postMyPatientNotificationsR
-  , deleteMyPatientNotificationsR
   ) where
 
 
@@ -22,10 +21,8 @@ import ChatRoom.Data ( Route(PatientChatRoomR) )
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
-import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Data.Bifunctor (Bifunctor(second, bimap))
-import Data.Maybe (fromMaybe)
-import Data.Text (pack, unpack)
+import Data.Maybe (fromMaybe, isJust)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
@@ -41,7 +38,7 @@ import Database.Persist
 import qualified Database.Persist as P (delete)
 import Database.Persist.Sql (fromSqlKey)
 
-import Foundation (Form)
+import Foundation (Form, getVAPIDKeys)
 import Foundation.Data
     ( Handler, App
     , Route
@@ -56,64 +53,60 @@ import Foundation.Data
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
       , MsgNotifications, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
       , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromPatient
-      , MsgYouAndUserSubscribedOnSameDevice, MsgUserUnavailable, MsgAllowUserToSendYouNotifications
+      , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
+      , MsgUserUnavailable
       )
     )
 
 import Material3 (md3switchField, md3mreq)
 
 import Model
-    ( statusError, statusSuccess, paramEndpoint, secretVolumeVapid, apiInfoVapid
+    ( statusError, statusSuccess, paramEndpoint
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
-    , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept)
+    , PushMsgType
+      ( PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline
+      , PushMsgTypeAccept
+      )
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
     , PatientId, Patient(Patient, patientUser), Chat
-    , PushSubscription (PushSubscription), Token, Store
-    , StoreType
-      ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
+    , PushSubscription
+      ( PushSubscription, pushSubscriptionEndpoint, pushSubscriptionP256dh
+      , pushSubscriptionAuth
+      )
     , Unique (UniquePushSubscription)
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
-      , ChatStatus, ChatUser, PushSubscriptionUser, TokenApi, TokenId
-      , TokenStore, StoreToken, StoreVal, PushSubscriptionP256dh
+      , ChatStatus, ChatUser, PushSubscriptionUser
+      , PushSubscriptionP256dh
       , PushSubscriptionAuth, PushSubscriptionEndpoint, DoctorUser
       )
     )
-    
-import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile)
 import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
-import System.IO (readFile')
-
-import Text.Read (readMaybe)
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS))
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
 
-import Web.WebPush
-    ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
-    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
-    )
+import Web.WebPush ( vapidPublicKeyBytes, VAPIDKeys )
     
 import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core
-    ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
-    , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
-    , parseCheckJsonBody, returnJson, sendStatusJSON, lookupGetParam
-    , getCurrentRoute, lookupGetParam, MonadHandler (liftHandler)
+    ( Yesod(defaultLayout), MonadHandler (liftHandler), ToJSON (toJSON)
+    , setTitleI, getMessages, newIdent, addMessageI, redirect, whamlet
+    , handlerToWidget, invalidArgsI, lookupGetParam, getCurrentRoute
+    , lookupGetParam
     )
 import Yesod.Form
     ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
     , Field (fieldView), OptionList (olOptions)
-    , multiSelectField, optionsPairs
+    , multiSelectField, optionsPairs, hiddenField
     , Option (optionInternalValue, optionExternalValue, optionDisplay)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
@@ -121,57 +114,52 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 
 
-deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
-deleteMyPatientNotificationsR uid _did _pid = do
-    endpoint <- lookupGetParam "endpoint"
-    case endpoint of
-      Just x -> runDB $ delete $ do
-          y <- from $ table @PushSubscription
-          where_ $ y ^. PushSubscriptionUser ==. val uid
-          where_ $ y ^. PushSubscriptionEndpoint ==. val x
-      Nothing -> return ()
+postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
+postMyPatientNotificationsR uid did pid = do
+    vapidKeys <- getVAPIDKeys
+    case vapidKeys of
+      Just vapid -> do
+          
+          endpoint <- lookupGetParam paramEndpoint
 
+          subscription <- runDB ( selectOne $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
+              return x )
+              
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid subscription
 
-postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler A.Value
-postMyPatientNotificationsR _uid _did _pid = do
-    result <- parseCheckJsonBody
-    case result of
-
-      A.Success ps@(PushSubscription uid' psEndpoint psKeyP256dh psKeyAuth) -> do
-          _ <- runDB $ upsertBy (UniquePushSubscription psEndpoint) ps [ PushSubscriptionUser =. uid'
-                                                                       , PushSubscriptionP256dh =. psKeyP256dh
-                                                                       , PushSubscriptionAuth =. psKeyAuth
-                                                                       ]
-          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
-
-      A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
+          case fr of
+            FormSuccess (True, ps@(PushSubscription uid' endpoint' keyP256dh' keyAuth')) -> do
+                _ <- runDB $ upsertBy (UniquePushSubscription endpoint') ps [ PushSubscriptionUser =. uid'
+                                                                            , PushSubscriptionP256dh =. keyP256dh'
+                                                                            , PushSubscriptionAuth =. keyAuth'
+                                                                            ]
+                redirect $ MyPatientNotificationsR uid did pid
+                
+            FormSuccess (False, PushSubscription uid' endpoint' _ _) -> do
+                _ <- runDB $ delete $ do
+                    y <- from $ table @PushSubscription
+                    where_ $ y ^. PushSubscriptionUser ==. val uid'
+                    where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
+                addMessageI statusSuccess MsgRecordDeleted
+                redirect $ MyPatientNotificationsR uid did pid
+                
+            _otherwise -> do
+                addMessageI statusError MsgInvalidFormData
+                redirect $ MyPatientNotificationsR uid did pid
+                
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 getMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
 getMyPatientNotificationsR uid did pid = do
 
-    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
+    vapidKeys <- getVAPIDKeys
 
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
-
-    case details of
-      Just vapidKeysMinDetails -> do
+    case vapidKeys of
+      Just vapid -> do
 
           endpoint <- lookupGetParam paramEndpoint
           
@@ -205,18 +193,18 @@ getMyPatientNotificationsR uid did pid = do
               where_ $ x ^. PatientId ==. val pid
               return (x, (u, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
-          permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
+          subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionUser ==. val uid
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
-          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw,et) <- generateFormPost $ formNotifications vapidKeys uid did pid permission
-
+          (fw,et) <- generateFormPost $ formNotifications vapid uid subscription
+          msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgPatient
               idPanelNotifications <- newIdent
+              idFormSubscription <- newIdent
               $(widgetFile "my/patients/notifications/notifications")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
@@ -224,10 +212,10 @@ getMyPatientNotificationsR uid did pid = do
       unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
 
 
-formNotifications :: VAPIDKeys -> UserId -> DoctorId -> PatientId -> Bool -> Form Bool
-formNotifications vapidKeys uid did pid permission extra = do
+formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity PushSubscription)
+                  -> Form (Bool, PushSubscription)
+formNotifications vapidKeys uid subscription extra = do
 
-    let userId = pack $ show (fromSqlKey uid)
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
 
     user <- liftHandler $ runDB $ selectOne $ do
@@ -235,13 +223,19 @@ formNotifications vapidKeys uid did pid permission extra = do
         where_ $ x ^. UserId ==. val uid
         return x
 
-    (r,v) <- md3mreq md3switchField FieldSettings
+    (subscribedR,subscribedV) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
-        } ( pure permission )
+        } ( pure (isJust subscription) )
 
-    return (r,$(widgetFile "my/patients/notifications/form"))
+    (endpointR,endpointV) <- mreq hiddenField "" (pushSubscriptionEndpoint . entityVal <$> subscription)
+    (p256dhR,p256dhV) <- mreq hiddenField "" (pushSubscriptionP256dh . entityVal <$> subscription)
+    (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)    
+
+    let r = (,) <$> subscribedR <*> (PushSubscription uid <$> endpointR <*> p256dhR <*> authR)
+    idFormContentWrapper <- newIdent
+    return (r, $(widgetFile "my/patients/notifications/form"))
 
 
 postMyPatientRemoveR :: UserId -> DoctorId -> PatientId -> Handler Html

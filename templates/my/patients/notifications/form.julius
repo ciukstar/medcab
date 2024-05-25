@@ -1,78 +1,60 @@
 
-function saveSubscription (subscription) {
-
-  const subscr = JSON.parse(JSON.stringify(subscription));
-  subscr.user = #{rawJS userId};
-  
-  fetch('@{MyPatientNotificationsR uid did pid}', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(subscr)
-  }).then(function (response) {
-    if (!response.ok) {
-      throw new Error('Bad status code from server.');
-    }
-    return response.json();
-  }).then(function (responseData) {
-    if (!(responseData.data && responseData.data.success)) {
-      throw new Error('Bad response from server.');
-    }
-  }); 
-};
-
-function subscribeToPushService (registration) {
-  return registration.pushManager.getSubscription().then(function (subscription) {
-    if (!subscription) {
-      return registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-      });
-    } else {
-      return subscription.unsubscribe().then(function (success) {
-        return registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-        });
-      });
-    }
-  });
-};
-
-document.getElementById(#{fvId v}).onchange = function (e) {
+document.getElementById(#{fvId subscribedV}).onchange = function (e) {
   
   if (this.selected) {
 
     Notification.requestPermission().then(function (permission) {
       if (permission === 'granted') {
-        return navigator.serviceWorker.ready;
-      }
-    }).then(function (registration) {
-      if (registration) {
-        return subscribeToPushService(registration);
-      }
-    }).then(function (subscription) {
-      if (subscription) {
-        saveSubscription(subscription);
+
+	document.getElementById(#{idFormContentWrapper}).appendChild(progress());
+	
+        navigator.serviceWorker.ready.then((registration) => {
+	  registration.pushManager.getSubscription().then(function (subscription) {
+	    
+	    if (subscription) {
+	      
+	      const s = subscription.toJSON();
+	      document.getElementById(#{fvId endpointV}).value = s.endpoint;
+	      document.getElementById(#{fvId p256dhV}).value = s.keys.p256dh;
+	      document.getElementById(#{fvId authV}).value = s.keys.auth;
+	      e.target.form.submit();
+	      
+	    } else {
+	      
+	      registration.pushManager.subscribe({
+		userVisibleOnly: true,
+		applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+	      }).then((subscription) => {
+		const s = subscription.toJSON();
+		document.getElementById(#{fvId endpointV}).value = s.endpoint;
+		document.getElementById(#{fvId p256dhV}).value = s.keys.p256dh;
+		document.getElementById(#{fvId authV}).value = s.keys.auth;
+		e.target.form.submit();
+	      });
+	      
+	    }
+	    
+	  });
+	});
+	
       }
     });
     
   } else {
     
-    navigator.serviceWorker.ready.then(function (registration) {
-      return registration.pushManager.getSubscription();
-    }).then(function (subscription) {
-      if (subscription) {
-        subscription.unsubscribe();
-        return subscription;
-      }
-    }).then(function (subscription) {
-      if (subscription) {
-        fetch(`@{MyPatientNotificationsR uid did pid}?endpoint=${subscription.endpoint}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription)   
-        });
-      }
-    });
+    e.target.form.submit();
+    
   }
+};
+
+progress = function () {
+  const progress = document.createElement('md-circular-progress');
+  progress.setAttribute('indeterminate','');
+  progress.style.position = 'absolute';
+  progress.style.top = 0;
+  progress.style.right = 0;
+  progress.style.bottom = 0;
+  progress.style.left = 0;
+  progress.style.margin = 'auto';
+  return progress;
 };
