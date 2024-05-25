@@ -1,3 +1,4 @@
+
 <header.app-top-app-bar.background>
   <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
     <md-icon>arrow_back
@@ -5,38 +6,65 @@
   <h1.title-large>
     _{MsgPatient}
 
-
 <main>
 
-  $maybe (Entity _ (Patient _ _ _),(Entity iid (User _ _ _ _ _ _ _ _),(attrib,(bs,(bl,ba))))) <- patient
-
-    <figure>
-      <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-      $with (subscribed,looping,accessible) <- (bs,bl,ba)
+  $maybe (Entity _ (Patient _ _ _),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
+    $with (subscribed,looping,accessible) <- (bs,bl,ba)
+      <figure>
+        <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
         $if not subscribed
           <md-icon.connection-status>notifications_off
         $elseif looping
           <md-icon.connection-status>repeat
         $elseif not accessible
           <md-icon.connection-status>phone_disabled
-      <figcaption.body-small>
-        $maybe attrib <- attrib
-          #{attrib}
-        $nothing
-          _{MsgPhoto}
+        <figcaption.body-small>
+          $maybe attrib <- attrib
+            #{attrib}
+          $nothing
+            _{MsgPhoto}
 
-    <md-tabs aria-label=_{MsgTabs}>
-      <md-primary-tab #tabDetails aria-controls=panelDetails
-        onclick="this.querySelector('a').click()">
-        <a href=@{MyPatientR uid did pid}>
-        _{MsgDetails}
-      <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true
-        onclick="this.querySelector('a').click()">
-        <a href=@{MyPatientNotificationsR uid did pid}>
-        _{MsgNotifications}
+      <md-tabs aria-label=_{MsgTabs}>
+        <md-primary-tab #tabDetails aria-controls=panelDetails
+          onclick="this.querySelector('a').click()">
+          <a href=@{MyPatientR uid did pid}>
+          _{MsgDetails}
+        <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true
+          onclick="this.querySelector('a').click()">
+          <a href=@{MyPatientNotificationsR uid did pid}>
+          _{MsgNotifications}
 
-    <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+      <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
 
-    <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
-      <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et}>
-        ^{fw}
+      <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+        <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et}>
+          ^{fw}
+
+        $if ((||) ((||) (not subscribed) (looping)) (not accessible))
+          <dl>
+            $if not subscribed
+              <dt>
+                <md-icon.connection-status>notifications_off
+              <dd.body-small>
+                $maybe name <- name
+                  _{MsgNotSubscribedToNotificationsFromPatient name}
+                $nothing
+                  _{MsgNotSubscribedToNotificationsFromPatient email}
+                  
+            $if looping
+              <dt>
+                <md-icon.connection-status>repeat
+              <dd.body-small>
+                $maybe name <- name
+                  _{MsgYouAndUserSubscribedOnSameDevice name}
+                $nothing
+                  _{MsgYouAndUserSubscribedOnSameDevice email}
+                  
+            $if not accessible
+              <dt>
+                <md-icon.connection-status>phone_disabled
+              <dd.body-small>
+                $maybe name <- name
+                  _{MsgUserUnavailable name}
+                $nothing
+                  _{MsgUserUnavailable email}

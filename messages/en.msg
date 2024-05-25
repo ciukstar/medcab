@@ -1,3 +1,7 @@
+AllowUserToSendYouNotifications user@Text: Allow #{user} to send you notifications about incoming calls
+UserUnavailable user@Text: It appears that #{user} is unavailable. #{user} is not yet subscribed to notifications
+YouAndUserSubscribedOnSameDevice user@Text: It appears that you and #{user} were subscribed to notifications on the same device
+NotSubscribedToNotificationsFromPatient patient@Text: You are not subscribed to notifications from #{patient}
 CallEnded: Call ended
 VideoSession: Video Session
 Overview: Overview

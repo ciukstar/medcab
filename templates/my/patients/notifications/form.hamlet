@@ -1,7 +1,15 @@
 
 #{extra}
-<div style="display:flex;align-items:center;gap:1rem">
-  ^{fvInput v}
-  <label.body-large for=#{fvId v}>
-    #{fvLabel v}
+<dl>
+  <dt style="display:flex;align-items:center;gap:1rem">
+    ^{fvInput v}
+    <label.body-large for=#{fvId v}>
+      #{fvLabel v}
+
+  $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+    <dd.body-small style="margin-top:1rem">
+      $maybe name <- name
+        _{MsgAllowUserToSendYouNotifications name}
+      $nothing
+        _{MsgAllowUserToSendYouNotifications email}
                     

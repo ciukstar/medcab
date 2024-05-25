@@ -1,3 +1,7 @@
+AllowUserToSendYouNotifications user: Разрешите #{user} отправлять вам уведомления о входящих звонках
+UserUnavailable user: Похоже, #{user} недоступна. #{user} пока не подписана на уведомления
+YouAndUserSubscribedOnSameDevice user: Похоже, что вы и #{user} были подписаны на уведомления на одном устройстве
+NotSubscribedToNotificationsFromPatient patient: Вы не подписаны на уведомления от #{patient}
 CallEnded: Звонок окончен
 VideoSession: Видеосессия
 Overview: Обзор

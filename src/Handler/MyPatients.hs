@@ -22,15 +22,17 @@ import ChatRoom.Data ( Route(PatientChatRoomR) )
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
+import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
 import Data.Bifunctor (Bifunctor(second, bimap))
+import Data.Maybe (fromMaybe)
 import Data.Text (pack, unpack)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
     ( select, selectOne, from, table, where_, val, innerJoin, on, just
     , (^.), (?.), (==.), (!=.), (:&) ((:&))
-    , SqlExpr, Value (unValue, Value), leftJoin, not_, exists, countRows, subSelect
-    , subSelectCount, delete, subSelectMaybe
+    , SqlExpr, Value (unValue), leftJoin, not_, exists, countRows, subSelect
+    , subSelectCount, delete
     )
 import Database.Persist
     ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_)
@@ -53,20 +55,21 @@ import Foundation.Data
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
       , MsgNotifications, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgNoRecipient, MsgOutgoingCall
+      , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromPatient
+      , MsgYouAndUserSubscribedOnSameDevice, MsgUserUnavailable, MsgAllowUserToSendYouNotifications
       )
     )
 
 import Material3 (md3switchField, md3mreq)
 
 import Model
-    ( statusError, statusSuccess, secretVolumeVapid, apiInfoVapid
+    ( statusError, statusSuccess, paramEndpoint, secretVolumeVapid, apiInfoVapid
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType (PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept)
-    , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)
+    , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
     , PatientId, Patient(Patient, patientUser), Chat
-    , PushSubscriptionId, PushSubscription (PushSubscription), Token, Store
+    , PushSubscription (PushSubscription), Token, Store
     , StoreType
       ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
     , Unique (UniquePushSubscription)
@@ -75,11 +78,14 @@ import Model
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
       , ChatStatus, ChatUser, PushSubscriptionUser, TokenApi, TokenId
       , TokenStore, StoreToken, StoreVal, PushSubscriptionP256dh
-      , PushSubscriptionAuth, PushSubscriptionEndpoint, PushSubscriptionId, DoctorUser
-      ), paramEndpoint
+      , PushSubscriptionAuth, PushSubscriptionEndpoint, DoctorUser
+      )
     )
+    
+import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile)
+import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
 
 import System.IO (readFile')
 
@@ -87,6 +93,8 @@ import Text.Read (readMaybe)
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
+
+import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
 
 import Web.WebPush
     ( readVAPIDKeys, vapidPublicKeyBytes, VAPIDKeys
@@ -100,7 +108,7 @@ import Yesod.Core
     ( Yesod(defaultLayout), setTitleI, getMessages, newIdent, addMessageI
     , redirect, whamlet, handlerToWidget, ToJSON (toJSON), invalidArgsI
     , parseCheckJsonBody, returnJson, sendStatusJSON, lookupGetParam
-    , getCurrentRoute, lookupGetParam
+    , getCurrentRoute, lookupGetParam, MonadHandler (liftHandler)
     )
 import Yesod.Form
     ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
@@ -111,12 +119,6 @@ import Yesod.Form
     )
 import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
-import qualified Data.Aeson as A (object, Value (Bool), Result (Success, Error), (.=))
-import Network.HTTP.Types.Status (status400)
-import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
-import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
-import Data.Maybe (fromMaybe)
-import Text.Shakespeare (ShakespeareSettings(unwrap))
 
 
 deleteMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler ()
@@ -227,6 +229,11 @@ formNotifications vapidKeys uid did pid permission extra = do
 
     let userId = pack $ show (fromSqlKey uid)
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
+
+    user <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val uid
+        return x
 
     (r,v) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
