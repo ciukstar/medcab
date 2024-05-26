@@ -338,6 +338,10 @@ instance Yesod App where
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
+    
+    isAuthorized (DataR (UserSubscriptionR _ _)) _ = isAdmin
+    isAuthorized (DataR (UserSubscriptionsR _)) _ = isAdmin
+    isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin
 
     isAuthorized (DataR (UserPhotoR _)) _ = isAdmin
     isAuthorized (DataR (UserDeleR _)) _ = isAdmin

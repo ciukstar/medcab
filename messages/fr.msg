@@ -1,3 +1,7 @@
+Endpoint: Point de terminaison
+NoUserHasSubscribedYet: Aucun utilisateur n'est encore abonné aux notifications push
+NoSubscriptionsYet: Il n’y a pas encore d’abonnements
+Subscriptions: Abonnements
 Subscription: Abonnement
 NoDataFound: Aucune donnée disponible
 DoctorDoesNotHaveUserAccount doctor: Le docteur #{doctor} n'a pas de compte utilisateur

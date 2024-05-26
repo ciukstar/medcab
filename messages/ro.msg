@@ -1,3 +1,7 @@
+Endpoint: Punctul final
+NoUserHasSubscribedYet: Niciun utilizator nu s-a abonat încă la notificări push
+NoSubscriptionsYet: Nu există încă abonamente
+Subscriptions: Abonamente
 Subscription: Abonament
 NoDataFound: Nu s-au gasit date
 DoctorDoesNotHaveUserAccount doctor: Doctorul #{doctor} nu are cont de utilizator

@@ -1,0 +1,41 @@
+
+<header.primary>
+  <div #headerStart>
+    ^{widgetMenu}
+
+    <h1.title-large>
+      _{MsgSubscriptions}
+
+  <span.app-top-app-bar-end>
+    ^{widgetUser}
+
+
+<main>
+
+  ^{widgetBanner msgs}
+
+  $if null subscriptions
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoUserHasSubscribedYet}
+  $else
+    <md-list>
+      $forall (Entity sid (PushSubscription _ endpoint _ _), (Entity uid (User email _ _ _ _ name _ _),attrib)) <- subscriptions
+        <md-list-item type=link href=@{DataR $ UserSubscriptionsR uid}>
+          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+          <div slot=headline style="white-space:nowrap">
+            $maybe name <- name
+              #{name}
+            $nothing
+              #{email}
+          <div slot=supporting-text style="white-space:nowrap">
+            #{endpoint}
+          <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
+        <md-divider>
+
+^{widgetSnackbar msgs}

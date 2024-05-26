@@ -1,3 +1,7 @@
+Endpoint: Endpoint
+NoUserHasSubscribedYet: No user has subscribed to push notifications yet
+NoSubscriptionsYet: There are no subscriptions yet
+Subscriptions: Subscriptions
 Subscription: Subscription
 NoDataFound: No data found
 DoctorDoesNotHaveUserAccount doctor@Text: Doctor #{doctor} doesn't have a user account

@@ -34,7 +34,7 @@
   $maybe (Entity uid (User email authType _ verkey verified name super admin),attrib) <- user
     
     <figure>
-      <img src=@{DataR $ UserPhotoR uid} width=auto height=56 height= loading=lazy alt=_{MsgPhoto}>
+      <img src=@{DataR $ UserPhotoR uid} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
         $maybe attrib <- attrib
           <small.app-attribution.body-small>

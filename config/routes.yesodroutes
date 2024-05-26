@@ -124,6 +124,9 @@
     /tokens/hook  	TokensGoogleapisHookR  GET
     /tokens 	  	TokensR      	       GET POST
 
+    /subscriptions/#UserId/#PushSubscriptionId UserSubscriptionR  GET POST
+    /subscriptions/#UserId 		       UserSubscriptionsR GET
+    /subscriptions 	   		       SubscriptionsR     GET
 
     /users/#UserId/photo UserPhotoR  GET
     /users/#UserId/dele  UserDeleR   POST

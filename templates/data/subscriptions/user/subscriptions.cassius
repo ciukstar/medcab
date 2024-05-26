@@ -1,0 +1,18 @@
+
+header
+    position: sticky
+    top: 0
+    z-index: 1
+    padding: 0.5rem 1rem
+    display: flex
+    justify-content: flex-start
+    align-items: center
+    gap: 0.5rem
+    
+main
+
+    display: flex
+    flex-direction: column
+    
+    figure
+        text-align: center

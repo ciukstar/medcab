@@ -22,12 +22,12 @@ import Foundation.Data
       ( HomeR, DataR, DocsR, RecordsR, MyDoctorsR, MyPatientsR, AuthR
       , AccountR, AccountPhotoR
       )
-    , DataR (UsersR, TokensR, StaffR, SpecialtiesR, UnitsR, MedSignsR)
+    , DataR (UsersR, SubscriptionsR, TokensR, StaffR, SpecialtiesR, UnitsR, MedSignsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgDoctors, MsgUsers
       , MsgDocumentation, MsgSourceCode, MsgResources, MsgSpecialties
       , MsgMeasurementUnits, MsgMedicalSigns, MsgRecords, MsgPatients
-      , MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto
+      , MsgSignIn, MsgSignOut, MsgUserAccount, MsgPhoto, MsgSubscriptions
       )
     )
     

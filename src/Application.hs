@@ -133,6 +133,9 @@ import Handler.Tokens
     , postTokensVapidR, postTokensVapidClearR
     )
 
+import Handler.Subscriptions
+  ( getSubscriptionsR, getUserSubscriptionsR, getUserSubscriptionR, postUserSubscriptionR )
+
 import Handler.Users
     ( getUsersR, getUserR, postUserDeleR, getUserEditR
     , getUserPhotoR, postUserR
