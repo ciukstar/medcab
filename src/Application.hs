@@ -59,7 +59,6 @@ import System.Log.FastLogger
 import Handler.MyDoctors
     ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR
     , getMyDoctorNotificationsR, postMyDoctorNotificationsR
-    , deleteMyDoctorNotificationsR
     )
 
 import Handler.MyPatients

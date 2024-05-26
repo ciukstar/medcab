@@ -7,10 +7,17 @@
 
 <main>
 
-  $maybe (_,attrib) <- doctor
+  $maybe (_, (attrib, (bs, (bl, ba)))) <- doctor
 
     <figure>
       <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      $with (subscribed,looping,accessible) <- (bs,bl,ba)
+        $if not subscribed
+          <md-icon.connection-status>notifications_off
+        $elseif looping
+          <md-icon.connection-status>repeat
+        $elseif not accessible
+          <md-icon.connection-status>phone_disabled
       <figcaption.body-small>
         $maybe attrib <- attrib
           #{attrib}

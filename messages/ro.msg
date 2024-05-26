@@ -1,3 +1,5 @@
+NoDataFound: Nu s-au gasit date
+DoctorDoesNotHaveUserAccount doctor: Doctorul #{doctor} nu are cont de utilizator
 AllowUserToSendYouNotifications user: Permiteți-i lui #{user} să vă trimită notificări despre apelurile primite
 UserUnavailable user: Se pare că #{user} nu este disponibilă. #{user} nu este încă abonată la notificări
 YouAndUserSubscribedOnSameDevice user: Se pare că d-voastră şi Mary Lopez aţi fost abonat la notificări de pe acelaşi dispozitiv

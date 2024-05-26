@@ -1,3 +1,5 @@
+NoDataFound: Aucune donnée disponible
+DoctorDoesNotHaveUserAccount doctor: Le docteur #{doctor} n'a pas de compte utilisateur
 AllowUserToSendYouNotifications user: Autorisez #{user} à vous envoyer des notifications sur les appels entrants
 UserUnavailable user: Il semblerait que #{user} ne soit pas disponible. #{user} n'est pas encore abonnée aux notifications
 YouAndUserSubscribedOnSameDevice user: Il semble que vous et #{user} étiez abonnés aux notifications sur le même appareil

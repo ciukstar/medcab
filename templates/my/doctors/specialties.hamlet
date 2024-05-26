@@ -8,13 +8,21 @@
 
 <main>
 
-  <figure>
-    <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-small>
-      $maybe attrib <- attrib
-        #{attrib}
-      $nothing
-        _{MsgPhoto}
+  $maybe (Entity did _,(attrib,(bs,(bl,ba)))) <- doctor
+    <figure>
+      <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      $with (subscribed,looping,accessible) <- (bs,bl,ba)
+        $if not subscribed
+          <md-icon.connection-status>notifications_off
+        $elseif looping
+          <md-icon.connection-status>repeat
+        $elseif not accessible
+          <md-icon.connection-status>phone_disabled
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
 
   <md-tabs aria-label=_{MsgTabs}>
     <md-primary-tab #tabDetails aria-controls=panelDetails onclick="this.querySelector('a').click()">
