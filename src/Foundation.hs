@@ -222,13 +222,13 @@ instance Yesod App where
     isAuthorized (VideoR _) _ = isAuthenticated
 
 
-    isAuthorized (MyDoctorNotificationsR _ uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyDoctorSubscriptionsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
 
-    isAuthorized (MyPatientNotificationsR _ did _) _ = isDoctorSelf did
+    isAuthorized (MyPatientSubscriptionsR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
     isAuthorized (MyPatientR _ did _) _ = isDoctorSelf did

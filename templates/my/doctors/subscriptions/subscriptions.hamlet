@@ -1,0 +1,69 @@
+<header.app-top-app-bar.background>
+  <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgDoctor}
+
+<main>
+
+  $maybe (Entity did (Doctor name _ _ _ _), (_, (attrib, (subscribed, (looping, accessible))))) <- doctor
+
+    <figure>
+      <img src=@{MyDoctorPhotoR uid did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      $if not subscribed
+        <md-icon.connection-status>notifications_off
+      $elseif looping
+        <md-icon.connection-status>repeat
+      $elseif not accessible
+        <md-icon.connection-status>phone_disabled
+      <figcaption.body-small>
+        $maybe attrib <- attrib
+          #{attrib}
+        $nothing
+          _{MsgPhoto}
+
+    <md-tabs aria-label=_{MsgTabs}>
+      <md-primary-tab #tabDetails aria-controls=panelDetails onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorR pid uid did}>
+        _{MsgDetails}
+      <md-primary-tab #tabSpecialties aria-controls=panelSpecialties onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorSpecialtiesR pid uid did}>
+        _{MsgSpecializations}
+      <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true
+        onclick="this.querySelector('a').click()">
+        <a href=@{MyDoctorSubscriptionsR pid uid did}>
+        _{MsgSubscription}
+
+    <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
+
+    <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
+
+    <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+
+      ^{widgetBanner msgs}
+        
+      <form method=post action=@{MyDoctorSubscriptionsR pid uid did} enctype=#{et}>
+        ^{fw}
+
+        $if ((||) ((||) (not subscribed) (looping)) (not accessible))
+          <dl>
+            $if not subscribed
+              <dt>
+                <md-icon.connection-status>notifications_off
+              <dd.body-small>
+                _{MsgNotSubscribedToNotificationsFromUser name}
+                  
+            $if looping
+              <dt>
+                <md-icon.connection-status>repeat
+              <dd.body-small>
+                _{MsgYouAndUserSubscribedOnSameDevice name}
+                  
+            $if not accessible
+              <dt>
+                <md-icon.connection-status>phone_disabled
+              <dd.body-small>
+                _{MsgUserUnavailable name}
+
+        ^{widgetSnackbar msgs}

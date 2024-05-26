@@ -1,9 +1,10 @@
+Subscription: Подписка
 NoDataFound: Данные не найдены
 DoctorDoesNotHaveUserAccount doctor: Доктор #{doctor} не имеет учетной записи пользователя
 AllowUserToSendYouNotifications user: Разрешите #{user} отправлять вам уведомления о входящих звонках
-UserUnavailable user: Похоже, #{user} недоступна. #{user} пока не подписана на уведомления
+UserUnavailable user: Похоже, пользователь #{user} недоступен. Пользователь #{user} еще не подписан на получение от вас уведомлений
 YouAndUserSubscribedOnSameDevice user: Похоже, что вы и #{user} были подписаны на уведомления на одном устройстве
-NotSubscribedToNotificationsFromPatient patient: Вы не подписаны на уведомления от #{patient}
+NotSubscribedToNotificationsFromUser user: Вы не подписаны на уведомления от #{user}
 CallEnded: Звонок окончен
 VideoSession: Видеосессия
 Overview: Обзор

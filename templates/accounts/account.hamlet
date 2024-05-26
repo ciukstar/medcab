@@ -12,11 +12,12 @@
       
 <main>
   
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{AccountR uid}' : '@{AccountInfoR uid}'">
-    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true>
+  <md-tabs aria-label=Tabs>
+    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true onclick="this.querySelector('a').click()">
+      <a href=@{AccountR uid}>
       _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=panelInfo>
+    <md-primary-tab #tabInfo aria-controls=panelInfo onclick="this.querySelector('a').click()">
+      <a href=@{AccountInfoR uid}>
       _{MsgPersonalInfo}
 
   <div ##{idPanelAccount} role=tabpanel aria-labelledby=tabAccount>

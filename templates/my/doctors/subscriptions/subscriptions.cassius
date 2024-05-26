@@ -16,14 +16,16 @@ main
 
     display: flex
     flex-direction: column
+
+    .connection-status
+        color: white
+        background-color: red
+        clip-path: circle(50%)
     
     figure
         text-align: center
         .connection-status
             position: absolute
-            color: white
-            background-color: red
-            clip-path: circle(50%)
             
     ##{idPanelNotifications}
       form

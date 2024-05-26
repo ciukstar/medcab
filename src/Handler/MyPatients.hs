@@ -11,8 +11,8 @@ module Handler.MyPatients
   , getMyPatientNewR
   , postMyPatientsR
   , postMyPatientRemoveR
-  , getMyPatientNotificationsR
-  , postMyPatientNotificationsR
+  , getMyPatientSubscriptionsR
+  , postMyPatientSubscriptionsR
   ) where
 
 
@@ -43,7 +43,7 @@ import Foundation.Data
     ( Handler, App
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR
-      , MyPatientRemoveR, ChatR, VideoR, MyPatientNotificationsR, StaticR, HomeR
+      , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
       )
     , AppMessage
       ( MsgPatients, MsgNoPatientsYet
@@ -51,8 +51,8 @@ import Foundation.Data
       , MsgRecordCreated, MsgFullName, MsgDele, MsgConfirmPlease, MsgChat
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
-      , MsgNotifications, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromPatient
+      , MsgSubscription, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
+      , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
       , MsgUserUnavailable
       )
@@ -98,7 +98,7 @@ import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core
-    ( Yesod(defaultLayout), MonadHandler (liftHandler), ToJSON (toJSON)
+    ( Yesod(defaultLayout), ToJSON (toJSON)
     , setTitleI, getMessages, newIdent, addMessageI, redirect, whamlet
     , handlerToWidget, invalidArgsI, lookupGetParam, getCurrentRoute
     , lookupGetParam
@@ -114,13 +114,19 @@ import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
 
 
-postMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
-postMyPatientNotificationsR uid did pid = do
+postMyPatientSubscriptionsR :: UserId -> DoctorId -> PatientId -> Handler Html
+postMyPatientSubscriptionsR uid did pid = do
     vapidKeys <- getVAPIDKeys
     case vapidKeys of
       Just vapid -> do
           
           endpoint <- lookupGetParam paramEndpoint
+
+          patient <- runDB $ selectOne $ do
+              x :& u <- from $ table @Patient
+                  `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
+              where_ $ x ^. PatientId ==. val pid
+              return u
 
           subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
@@ -128,7 +134,7 @@ postMyPatientNotificationsR uid did pid = do
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
               
-          ((fr,_),_) <- runFormPost $ formNotifications vapid uid subscription
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid patient subscription
 
           case fr of
             FormSuccess (True, ps@(PushSubscription uid' endpoint' keyP256dh' keyAuth')) -> do
@@ -136,7 +142,7 @@ postMyPatientNotificationsR uid did pid = do
                                                                             , PushSubscriptionP256dh =. keyP256dh'
                                                                             , PushSubscriptionAuth =. keyAuth'
                                                                             ]
-                redirect $ MyPatientNotificationsR uid did pid
+                redirect $ MyPatientSubscriptionsR uid did pid
                 
             FormSuccess (False, PushSubscription uid' endpoint' _ _) -> do
                 _ <- runDB $ delete $ do
@@ -144,17 +150,17 @@ postMyPatientNotificationsR uid did pid = do
                     where_ $ y ^. PushSubscriptionUser ==. val uid'
                     where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
                 addMessageI statusSuccess MsgRecordDeleted
-                redirect $ MyPatientNotificationsR uid did pid
+                redirect $ MyPatientSubscriptionsR uid did pid
                 
             _otherwise -> do
                 addMessageI statusError MsgInvalidFormData
-                redirect $ MyPatientNotificationsR uid did pid
+                redirect $ MyPatientSubscriptionsR uid did pid
                 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-getMyPatientNotificationsR :: UserId -> DoctorId -> PatientId -> Handler Html
-getMyPatientNotificationsR uid did pid = do
+getMyPatientSubscriptionsR :: UserId -> DoctorId -> PatientId -> Handler Html
+getMyPatientSubscriptionsR uid did pid = do
 
     vapidKeys <- getVAPIDKeys
 
@@ -199,29 +205,24 @@ getMyPatientNotificationsR uid did pid = do
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
-          (fw,et) <- generateFormPost $ formNotifications vapid uid subscription
+          (fw,et) <- generateFormPost $ formNotifications vapid uid (fst . snd <$> patient) subscription
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgPatient
               idPanelNotifications <- newIdent
               idFormSubscription <- newIdent
-              $(widgetFile "my/patients/notifications/notifications")
+              $(widgetFile "my/patients/subscriptions/subscriptions")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
   where
       unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
 
 
-formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity PushSubscription)
+formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity User) -> Maybe (Entity PushSubscription)
                   -> Form (Bool, PushSubscription)
-formNotifications vapidKeys uid subscription extra = do
+formNotifications vapidKeys uid patient subscription extra = do
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
-
-    user <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @User
-        where_ $ x ^. UserId ==. val uid
-        return x
 
     (subscribedR,subscribedV) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
@@ -235,7 +236,7 @@ formNotifications vapidKeys uid subscription extra = do
 
     let r = (,) <$> subscribedR <*> (PushSubscription uid <$> endpointR <*> p256dhR <*> authR)
     idFormContentWrapper <- newIdent
-    return (r, $(widgetFile "my/patients/notifications/form"))
+    return (r, $(widgetFile "my/patients/subscriptions/form"))
 
 
 postMyPatientRemoveR :: UserId -> DoctorId -> PatientId -> Handler Html

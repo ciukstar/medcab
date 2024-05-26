@@ -52,8 +52,8 @@
         _{MsgDetails}
       <md-primary-tab #tabNotifications aria-controls=panelNotifications
         onclick="this.querySelector('a').click()">
-        <a href=@{MyPatientNotificationsR uid did pid}>
-        _{MsgNotifications}
+        <a href=@{MyPatientSubscriptionsR uid did pid}>
+        _{MsgSubscription}
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
 

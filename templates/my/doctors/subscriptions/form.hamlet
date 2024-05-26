@@ -7,7 +7,7 @@
       <label.body-large for=#{fvId subscribedV}>
         #{fvLabel subscribedV}
 
-    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+    $maybe Entity _ (User email _ _ _ _ name _ _) <- doctor
       <dd.body-small style="margin-top:1rem">
         $maybe name <- name
           _{MsgAllowUserToSendYouNotifications name}

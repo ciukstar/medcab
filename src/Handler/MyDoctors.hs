@@ -9,15 +9,14 @@ module Handler.MyDoctors
   , getMyDoctorPhotoR
   , getMyDoctorR
   , getMyDoctorSpecialtiesR
-  , getMyDoctorNotificationsR
-  , postMyDoctorNotificationsR
+  , getMyDoctorSubscriptionsR
+  , postMyDoctorSubscriptionsR
   ) where
 
 import ChatRoom.Data ( Route(DoctorChatRoomR) )
 
 import Control.Monad (join)
 
-import qualified Data.Aeson as A ( Value )
 import Data.Bifunctor (Bifunctor(second, bimap))
 import Data.Text.Encoding (encodeUtf8)
 
@@ -35,17 +34,18 @@ import Foundation.Data
     ( Handler
     , Route
       ( MyDoctorPhotoR, StaticR, ChatR, VideoR
-      , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorNotificationsR, MyDoctorR, HomeR
+      , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorSubscriptionsR, MyDoctorR, HomeR
       )
     , AppMessage
       ( MsgDoctors, MsgPhoto, MsgTabs
       , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
-      , MsgPhone, MsgChat, MsgNotifications, MsgSubscribeToNotifications
+      , MsgPhone, MsgChat, MsgSubscription, MsgSubscribeToNotifications
       , MsgNotGeneratedVAPID, MsgNoRecipient, MsgAllowUserToSendYouNotifications
       , MsgRecordDeleted, MsgInvalidFormData, MsgDoctorDoesNotHaveUserAccount
-      , MsgOutgoingCall, MsgNoDataFound
+      , MsgOutgoingCall, MsgNoDataFound, MsgYouAndUserSubscribedOnSameDevice
+      , MsgNotSubscribedToNotificationsFromUser, MsgUserUnavailable
       )
     )
 
@@ -83,13 +83,13 @@ import Text.Hamlet (Html)
 import VideoRoom.Data (ChanId (ChanId), Route(PushMessageR, RoomR) )
 
 import Web.WebPush (vapidPublicKeyBytes, VAPIDKeys)
-    
+
 import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core
     ( Yesod(defaultLayout), ToContent (toContent), redirect, newIdent
     , SomeMessage (SomeMessage), ToJSON (toJSON), lookupGetParam, invalidArgsI
-    , getCurrentRoute, MonadHandler (liftHandler), addMessageI
+    , getCurrentRoute, addMessageI
     )
 import Yesod.Core.Content (TypedContent (TypedContent))
 import Yesod.Core.Handler (getMessages, setUltDestCurrent)
@@ -104,21 +104,27 @@ import Data.Maybe (fromMaybe, isJust)
 import Yesod.Form.Fields (hiddenField)
 
 
-postMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler A.Value
-postMyDoctorNotificationsR pid uid did = do
+postMyDoctorSubscriptionsR :: PatientId -> UserId -> DoctorId -> Handler ()
+postMyDoctorSubscriptionsR pid uid did = do
     vapidKeys <- getVAPIDKeys
     case vapidKeys of
       Just vapid -> do
-          
+
           endpoint <- lookupGetParam paramEndpoint
+
+          user <- join <$> runDB ( selectOne $ do
+              x :& u <- from $ table @Doctor
+                  `leftJoin` table @User `on` (\(x :& u) -> x ^. DoctorUser ==. u ?. UserId)
+              where_ $ x ^. DoctorId ==. val did
+              return u )
 
           subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionUser ==. val uid
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
-              
-          ((fr,_),_) <- runFormPost $ formNotifications vapid uid subscription
+
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid user subscription
 
           case fr of
             FormSuccess (True, ps@(PushSubscription uid' endpoint' keyP256dh' keyAuth')) -> do
@@ -126,31 +132,32 @@ postMyDoctorNotificationsR pid uid did = do
                                                                             , PushSubscriptionP256dh =. keyP256dh'
                                                                             , PushSubscriptionAuth =. keyAuth'
                                                                             ]
-                redirect $ MyDoctorNotificationsR pid uid did
-                
+                redirect $ MyDoctorSubscriptionsR pid uid did
+
             FormSuccess (False, PushSubscription uid' endpoint' _ _) -> do
                 _ <- runDB $ delete $ do
                     y <- from $ table @PushSubscription
                     where_ $ y ^. PushSubscriptionUser ==. val uid'
                     where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
                 addMessageI statusSuccess MsgRecordDeleted
-                redirect $ MyDoctorNotificationsR pid uid did
-                
+                redirect $ MyDoctorSubscriptionsR pid uid did
+
             _otherwise -> do
                 addMessageI statusError MsgInvalidFormData
-                redirect $ MyDoctorNotificationsR pid uid did
-                
+                redirect $ MyDoctorSubscriptionsR pid uid did
+
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-getMyDoctorNotificationsR :: PatientId -> UserId -> DoctorId -> Handler Html
-getMyDoctorNotificationsR pid uid did = do
+getMyDoctorSubscriptionsR :: PatientId -> UserId -> DoctorId -> Handler Html
+getMyDoctorSubscriptionsR pid uid did = do
 
     endpoint <- lookupGetParam paramEndpoint
-    
+
     doctor <- (unwrap <$>) <$> runDB ( selectOne $ do
-        x :& h <- from $ table @Doctor `leftJoin` table @DoctorPhoto
-            `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+        x :& u :& h <- from $ table @Doctor
+            `leftJoin` table @User `on` (\(x :& u) -> x ^. DoctorUser ==. u ?. UserId)
+            `leftJoin` table @DoctorPhoto `on` (\(x :& _ :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
 
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
@@ -172,14 +179,14 @@ getMyDoctorNotificationsR pid uid did = do
                 where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
-                
+
         where_ $ x ^. DoctorId ==. val did
-        return (x, (h ?. DoctorPhotoAttribution, (subscriptions, (loops, accessible)))) )
+        return (x, (u, (h ?. DoctorPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
     vapidKeys <- getVAPIDKeys
 
     case (doctor, vapidKeys) of
-      (Just (Entity _ (Doctor _ _ _ _ (Just duid)),_), Just vapid) -> do
+      (Just (_, (Just user, _)), Just vapid) -> do
 
           subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
@@ -187,32 +194,29 @@ getMyDoctorNotificationsR pid uid did = do
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
-          (fw,et) <- generateFormPost $ formNotifications vapid duid subscription
-
+          (fw,et) <- generateFormPost $ formNotifications vapid uid (pure user) subscription
+          
+          msgs <- getMessages
+          
           defaultLayout $ do
               setTitleI MsgDoctor
               idPanelNotifications <- newIdent
-              $(widgetFile "my/doctors/notifications/notifications")
+              $(widgetFile "my/doctors/subscriptions/subscriptions")
 
-      (Just (Entity _ (Doctor name _ _ _ Nothing),_), _) -> invalidArgsI [MsgDoctorDoesNotHaveUserAccount name]
+      (Just (Entity _ (Doctor name _ _ _ _), (Nothing, _)), _) -> invalidArgsI [MsgDoctorDoesNotHaveUserAccount name]
 
       (Nothing, _) -> invalidArgsI [MsgNoDataFound]
 
       (_, Nothing) -> invalidArgsI [MsgNotGeneratedVAPID]
   where
-      unwrap = second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue))))
+      unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
 
 
-formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity PushSubscription)
+formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity User) -> Maybe (Entity PushSubscription)
                   -> Form (Bool, PushSubscription)
-formNotifications vapidKeys uid subscription extra = do
+formNotifications vapidKeys uid doctor subscription extra = do
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
-
-    user <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @User
-        where_ $ x ^. UserId ==. val uid
-        return x
 
     (subscribedR,subscribedV) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
@@ -222,18 +226,18 @@ formNotifications vapidKeys uid subscription extra = do
 
     (endpointR,endpointV) <- mreq hiddenField "" (pushSubscriptionEndpoint . entityVal <$> subscription)
     (p256dhR,p256dhV) <- mreq hiddenField "" (pushSubscriptionP256dh . entityVal <$> subscription)
-    (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)    
+    (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)
 
     let r = (,) <$> subscribedR <*> (PushSubscription uid <$> endpointR <*> p256dhR <*> authR)
     idFormContentWrapper <- newIdent
-    return (r, $(widgetFile "my/doctors/notifications/form"))
+    return (r, $(widgetFile "my/doctors/subscriptions/form"))
 
 
 getMyDoctorSpecialtiesR :: PatientId -> UserId -> DoctorId -> Handler Html
 getMyDoctorSpecialtiesR pid uid did = do
 
     endpoint <- lookupGetParam paramEndpoint
-    
+
     doctor <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -258,7 +262,7 @@ getMyDoctorSpecialtiesR pid uid did = do
                 where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
-                
+
         where_ $ x ^. DoctorId ==. val did
         return (x, (h ?. DoctorPhotoAttribution, (subscriptions, (loops, accessible)))) )
 
@@ -282,7 +286,7 @@ getMyDoctorR pid uid did = do
     let polite = True
 
     endpoint <- lookupGetParam paramEndpoint
-    
+
     doctor <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -307,7 +311,7 @@ getMyDoctorR pid uid did = do
                 where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
-                
+
         where_ $ x ^. DoctorId ==. val did
         return (x, (h ?. DoctorPhotoAttribution, (subscriptions, (loops, accessible)))) )
 
@@ -340,7 +344,7 @@ getMyDoctorR pid uid did = do
               idDialogCallDeclined <- newIdent
 
               let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
-              
+
               $(widgetFile "my/doctors/doctor")
               $(widgetFile "video/outgoing")
 

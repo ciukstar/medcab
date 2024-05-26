@@ -1,9 +1,10 @@
+Subscription: Subscription
 NoDataFound: No data found
 DoctorDoesNotHaveUserAccount doctor@Text: Doctor #{doctor} doesn't have a user account
 AllowUserToSendYouNotifications user@Text: Allow #{user} to send you notifications about incoming calls
-UserUnavailable user@Text: It appears that #{user} is unavailable. #{user} is not yet subscribed to notifications
+UserUnavailable user@Text: It appears that #{user} is unavailable. #{user} is not yet subscribed to receive notifications from you
 YouAndUserSubscribedOnSameDevice user@Text: It appears that you and #{user} were subscribed to notifications on the same device
-NotSubscribedToNotificationsFromPatient patient@Text: You are not subscribed to notifications from #{patient}
+NotSubscribedToNotificationsFromUser user@Text: You are not subscribed to notifications from #{user}
 CallEnded: Call ended
 VideoSession: Video Session
 Overview: Overview

@@ -4,17 +4,17 @@
 
 /channels ChatR ChatRoom getChatRoom
 
-/patients/#PatientId/#UserId/doctors/#DoctorId/notifs      MyDoctorNotificationsR GET POST
-/patients/#PatientId/#UserId/doctors/#DoctorId/specialties MyDoctorSpecialtiesR   GET
-/patients/#PatientId/#UserId/doctors/#DoctorId/doctor 	   MyDoctorR	     	  GET
-/patients/#UserId/doctors/#DoctorId/photo       	   MyDoctorPhotoR 	  GET
-/patients/#UserId/doctors 				   MyDoctorsR	     	  GET
+/patients/#PatientId/#UserId/doctors/#DoctorId/subscriptions MyDoctorSubscriptionsR GET POST
+/patients/#PatientId/#UserId/doctors/#DoctorId/specialties   MyDoctorSpecialtiesR   GET
+/patients/#PatientId/#UserId/doctors/#DoctorId/doctor 	     MyDoctorR		    GET
+/patients/#UserId/doctors/#DoctorId/photo       	     MyDoctorPhotoR 	    GET
+/patients/#UserId/doctors 				     MyDoctorsR	     	    GET
 
-/users/#UserId/doctors/#DoctorId/patients/#PatientId/notifs MyPatientNotificationsR GET POST
-/users/#UserId/doctors/#DoctorId/patients/#PatientId/remove MyPatientRemoveR 	    POST
-/form/doctors/#DoctorId/patients/new                 	    MyPatientNewR    	    GET
-/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    MyPatientR       	    GET
-/doctors/#DoctorId/patients            	             	    MyPatientsR      	    GET POST
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/subscriptions MyPatientSubscriptionsR GET POST
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/remove 	   MyPatientRemoveR 	   POST
+/form/doctors/#DoctorId/patients/new                 	    	   MyPatientNewR    	   GET
+/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    	   MyPatientR       	   GET
+/doctors/#DoctorId/patients            	             	    	   MyPatientsR      	   GET POST
 
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
 /doctors/#DoctorId 	       DoctorR      	  GET

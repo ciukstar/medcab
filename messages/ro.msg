@@ -1,9 +1,10 @@
+Subscription: Abonament
 NoDataFound: Nu s-au gasit date
 DoctorDoesNotHaveUserAccount doctor: Doctorul #{doctor} nu are cont de utilizator
 AllowUserToSendYouNotifications user: Permiteți-i lui #{user} să vă trimită notificări despre apelurile primite
-UserUnavailable user: Se pare că #{user} nu este disponibilă. #{user} nu este încă abonată la notificări
+UserUnavailable user: Se pare că utilizatorul #{user} nu este disponibil. Utilizatorul #{user} nu este încă abonat să primească notificări de la dvs
 YouAndUserSubscribedOnSameDevice user: Se pare că d-voastră şi Mary Lopez aţi fost abonat la notificări de pe acelaşi dispozitiv
-NotSubscribedToNotificationsFromPatient patient: Nu sunteți abonat la notificările de la #{patient}
+NotSubscribedToNotificationsFromUser user: Nu sunteți abonat la notificările de la #{user}
 CallEnded: Apel terminat
 VideoSession: Sesiune video
 Overview: Prezentare generală

@@ -8,7 +8,7 @@
 
 <main>
 
-  $maybe (Entity _ (Patient _ _ _),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
+  $maybe (_,(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
     $with (subscribed,looping,accessible) <- (bs,bl,ba)
       <figure>
         <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
@@ -31,8 +31,8 @@
           _{MsgDetails}
         <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true
           onclick="this.querySelector('a').click()">
-          <a href=@{MyPatientNotificationsR uid did pid}>
-          _{MsgNotifications}
+          <a href=@{MyPatientSubscriptionsR uid did pid}>
+          _{MsgSubscription}
 
       <div #panelDetails role=tabpanel aria-labelledby=tabDetails hidden>
 
@@ -40,7 +40,7 @@
 
         ^{widgetBanner msgs}
       
-        <form method=post action=@{MyPatientNotificationsR uid did pid} enctype=#{et} ##{idFormSubscription}>
+        <form method=post action=@{MyPatientSubscriptionsR uid did pid} enctype=#{et} ##{idFormSubscription}>
           ^{fw}
 
         $if ((||) ((||) (not subscribed) (looping)) (not accessible))
@@ -50,9 +50,9 @@
                 <md-icon.connection-status>notifications_off
               <dd.body-small>
                 $maybe name <- name
-                  _{MsgNotSubscribedToNotificationsFromPatient name}
+                  _{MsgNotSubscribedToNotificationsFromUser name}
                 $nothing
-                  _{MsgNotSubscribedToNotificationsFromPatient email}
+                  _{MsgNotSubscribedToNotificationsFromUser email}
                   
             $if looping
               <dt>
