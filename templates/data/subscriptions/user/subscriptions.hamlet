@@ -9,7 +9,7 @@
 
   ^{widgetBanner msgs}
 
-  $maybe (Entity _ (User email _ _ _ _ name _ _),attrib) <- user
+  $maybe (Entity _ (User email _ _ _ _ name _ _),attrib) <- subscriber
     <figure>
       <img src=@{DataR $ UserPhotoR uid} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption.body-medium>
@@ -31,11 +31,21 @@
         _{MsgNoSubscriptionsYet}
   $else
     <md-list>
-      $forall Entity sid (PushSubscription _ endpoint _ _) <- subscriptions
+      $forall (Entity sid (PushSubscription _ _ endpoint _ _), (Entity publisher (User email _ _ _ _ name _ _), attrib)) <- subscriptions
         <md-list-item type=link href=@{DataR $ UserSubscriptionR uid sid}>
+          <img slot=start src=@{DataR $ UserPhotoR publisher} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
           <div slot=headline style="white-space:nowrap">
+            $maybe name <- name
+              #{name}
+            $nothing
+              #{email}
+          <div slot=supporting-text style="white-space:nowrap">
             #{endpoint}
           <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
         <md-divider>
 
 ^{widgetSnackbar msgs}

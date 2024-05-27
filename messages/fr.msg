@@ -1,3 +1,4 @@
+NoPublisherFound: Aucun éditeur trouvé
 Endpoint: Point de terminaison
 NoUserHasSubscribedYet: Aucun utilisateur n'est encore abonné aux notifications push
 NoSubscriptionsYet: Il n’y a pas encore d’abonnements

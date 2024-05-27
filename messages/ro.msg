@@ -1,3 +1,4 @@
+NoPublisherFound: Nu a fost găsit niciun editor
 Endpoint: Punctul final
 NoUserHasSubscribedYet: Niciun utilizator nu s-a abonat încă la notificări push
 NoSubscriptionsYet: Nu există încă abonamente

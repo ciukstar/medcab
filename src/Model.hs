@@ -116,17 +116,6 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
 
 
-instance FromJSON PushSubscription where
-    parseJSON :: Value -> Parser PushSubscription
-    parseJSON = withObject "PushSubscription" $ \v -> do
-        user <- v .: "user"
-        endpoint <- v .: "endpoint"
-        keys <- v .: "keys"
-        keyP256dh <- keys .: "p256dh"
-        keyAuth <- keys .: "auth"
-        return $ PushSubscription user endpoint keyP256dh keyAuth
-
-
 webPushEndpoint :: Text
 webPushEndpoint = "webPushEndpoint"
 

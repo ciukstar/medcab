@@ -21,7 +21,7 @@
         _{MsgNoUserHasSubscribedYet}
   $else
     <md-list>
-      $forall (Entity sid (PushSubscription _ endpoint _ _), (Entity uid (User email _ _ _ _ name _ _),attrib)) <- subscriptions
+      $forall ((Entity uid (User email _ _ _ _ name _ _), (attrib, ns))) <- subscriptions
         <md-list-item type=link href=@{DataR $ UserSubscriptionsR uid}>
           <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
           <div slot=headline style="white-space:nowrap">
@@ -30,7 +30,7 @@
             $nothing
               #{email}
           <div slot=supporting-text style="white-space:nowrap">
-            #{endpoint}
+            _{MsgSubscriptions}: #{ns}
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>

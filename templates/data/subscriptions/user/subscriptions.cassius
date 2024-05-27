@@ -16,3 +16,15 @@ main
     
     figure
         text-align: center
+        
+    .app-attribution
+        position: relative
+        margin: 0
+        padding: 0
+        line-height: 0
+
+        .app-attribution-wrapper
+            position: absolute
+            bottom: 0
+            left: 0.4rem
+            font-size: 0.5rem

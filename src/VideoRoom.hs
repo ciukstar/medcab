@@ -58,7 +58,7 @@ import Model
       ( PushMsgTypeCall, PushMsgTypeEnd
       )
     , EntityField
-      ( UserId, PushSubscriptionUser
+      ( UserId, PushSubscriptionSubscriber
       , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, UserPhotoUser
       ), UserPhoto (UserPhoto), PatientId, paramBacklink
     )
@@ -158,7 +158,7 @@ postPushMessageR = do
 
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription
-        where_ $ just (x ^. PushSubscriptionUser) ==. val rid
+        where_ $ just (x ^. PushSubscriptionSubscriber) ==. val rid
         return x
 
     manager <- liftHandler getAppHttpManager
@@ -190,7 +190,7 @@ postPushMessageR = do
       Just vapidKeysMinDetails -> do
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
 
-          forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
+          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
                                                 , "topic" .= messageType

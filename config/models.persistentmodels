@@ -94,11 +94,12 @@ Chat json
     status ChatMessageStatus
 
 PushSubscription
-    user UserId OnDeleteCascade
+    subscriber UserId OnDeleteCascade
+    publisher UserId OnDeleteCascade
     endpoint Text
     p256dh Text
     auth Text
-    UniquePushSubscription endpoint
+    UniquePushSubscription subscriber publisher
 
 
 UserPhoto

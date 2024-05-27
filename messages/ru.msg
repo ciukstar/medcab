@@ -1,3 +1,4 @@
+NoPublisherFound: Издатель не найден
 Endpoint: Конечная точка
 NoUserHasSubscribedYet: Ни один пользователь еще не подписался на push-уведомления
 NoSubscriptionsYet: Подписок пока нет

@@ -1,3 +1,4 @@
+NoPublisherFound: No publisher found
 Endpoint: Endpoint
 NoUserHasSubscribedYet: No user has subscribed to push notifications yet
 NoSubscriptionsYet: There are no subscriptions yet

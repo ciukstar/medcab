@@ -67,8 +67,8 @@ import Model
       ( DoctorPhotoDoctor, DoctorPhotoAttribution, DoctorId, SpecialistSpecialty
       , SpecialtyId, SpecialistDoctor, PatientDoctor, PatientUser, DoctorUser
       , ChatInterlocutor, ChatStatus, ChatUser, PushSubscriptionEndpoint
-      , PushSubscriptionUser, PushSubscriptionP256dh, PushSubscriptionAuth
-      , UserId
+      , PushSubscriptionSubscriber, PushSubscriptionP256dh, PushSubscriptionAuth
+      , UserId, PushSubscriptionPublisher
       )
     )
 
@@ -107,37 +107,40 @@ import Yesod.Form.Fields (hiddenField)
 postMyDoctorSubscriptionsR :: PatientId -> UserId -> DoctorId -> Handler ()
 postMyDoctorSubscriptionsR pid uid did = do
     vapidKeys <- getVAPIDKeys
-    case vapidKeys of
-      Just vapid -> do
+
+    user <- runDB ( selectOne $ do
+        x :& u <- from $ table @Doctor
+            `leftJoin` table @User `on` (\(x :& u) -> x ^. DoctorUser ==. u ?. UserId)
+        where_ $ x ^. DoctorId ==. val did
+        return (x, u) )
+
+    case (user, vapidKeys) of
+      (Just (_, doctor@(Just (Entity publisher _))), Just vapid) -> do
 
           endpoint <- lookupGetParam paramEndpoint
 
-          user <- join <$> runDB ( selectOne $ do
-              x :& u <- from $ table @Doctor
-                  `leftJoin` table @User `on` (\(x :& u) -> x ^. DoctorUser ==. u ?. UserId)
-              where_ $ x ^. DoctorId ==. val did
-              return u )
-
           subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+              where_ $ x ^. PushSubscriptionPublisher ==. val publisher
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
-          ((fr,_),_) <- runFormPost $ formNotifications vapid uid user subscription
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher doctor subscription
 
           case fr of
-            FormSuccess (True, ps@(PushSubscription uid' endpoint' keyP256dh' keyAuth')) -> do
-                _ <- runDB $ upsertBy (UniquePushSubscription endpoint') ps [ PushSubscriptionUser =. uid'
+            FormSuccess (True, ps@(PushSubscription uid' pid' endpoint' keyP256dh' keyAuth')) -> do
+                _ <- runDB $ upsertBy (UniquePushSubscription uid' pid') ps [ PushSubscriptionEndpoint =. endpoint'
                                                                             , PushSubscriptionP256dh =. keyP256dh'
                                                                             , PushSubscriptionAuth =. keyAuth'
                                                                             ]
                 redirect $ MyDoctorSubscriptionsR pid uid did
 
-            FormSuccess (False, PushSubscription uid' endpoint' _ _) -> do
+            FormSuccess (False, PushSubscription uid' pid' endpoint' _ _) -> do
                 _ <- runDB $ delete $ do
                     y <- from $ table @PushSubscription
-                    where_ $ y ^. PushSubscriptionUser ==. val uid'
+                    where_ $ y ^. PushSubscriptionSubscriber ==. val uid'
+                    where_ $ y ^. PushSubscriptionPublisher ==. val pid'
                     where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
                 addMessageI statusSuccess MsgRecordDeleted
                 redirect $ MyDoctorSubscriptionsR pid uid did
@@ -146,7 +149,11 @@ postMyDoctorSubscriptionsR pid uid did = do
                 addMessageI statusError MsgInvalidFormData
                 redirect $ MyDoctorSubscriptionsR pid uid did
 
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+      (Just (Entity _ (Doctor name _ _ _ _), Nothing), _) -> invalidArgsI [MsgDoctorDoesNotHaveUserAccount name]
+      
+      (Nothing, _) -> invalidArgsI [MsgInvalidFormData]
+      
+      (_, Nothing) -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 getMyDoctorSubscriptionsR :: PatientId -> UserId -> DoctorId -> Handler Html
@@ -162,21 +169,21 @@ getMyDoctorSubscriptionsR pid uid did = do
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ y ^. PushSubscriptionUser ==. val uid
+                where_ $ y ^. PushSubscriptionSubscriber ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let loops :: SqlExpr (Value Int)
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let accessible :: SqlExpr (Value Int)
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 
@@ -186,15 +193,16 @@ getMyDoctorSubscriptionsR pid uid did = do
     vapidKeys <- getVAPIDKeys
 
     case (doctor, vapidKeys) of
-      (Just (_, (Just user, _)), Just vapid) -> do
+      (Just (_, (Just user@(Entity publisher _), _)), Just vapid) -> do
 
           subscription <- runDB ( selectOne $ do
               x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+              where_ $ x ^. PushSubscriptionPublisher ==. val publisher
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
-          (fw,et) <- generateFormPost $ formNotifications vapid uid (pure user) subscription
+          (fw,et) <- generateFormPost $ formNotifications vapid uid publisher (pure user) subscription
           
           msgs <- getMessages
           
@@ -212,9 +220,9 @@ getMyDoctorSubscriptionsR pid uid did = do
       unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
 
 
-formNotifications :: VAPIDKeys -> UserId -> Maybe (Entity User) -> Maybe (Entity PushSubscription)
+formNotifications :: VAPIDKeys -> UserId -> UserId -> Maybe (Entity User) -> Maybe (Entity PushSubscription)
                   -> Form (Bool, PushSubscription)
-formNotifications vapidKeys uid doctor subscription extra = do
+formNotifications vapidKeys uid pid doctor subscription extra = do
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
 
@@ -228,7 +236,7 @@ formNotifications vapidKeys uid doctor subscription extra = do
     (p256dhR,p256dhV) <- mreq hiddenField "" (pushSubscriptionP256dh . entityVal <$> subscription)
     (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)
 
-    let r = (,) <$> subscribedR <*> (PushSubscription uid <$> endpointR <*> p256dhR <*> authR)
+    let r = (,) <$> subscribedR <*> (PushSubscription uid pid <$> endpointR <*> p256dhR <*> authR)
     idFormContentWrapper <- newIdent
     return (r, $(widgetFile "my/doctors/subscriptions/form"))
 
@@ -245,21 +253,21 @@ getMyDoctorSpecialtiesR pid uid did = do
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ y ^. PushSubscriptionUser ==. val uid
+                where_ $ y ^. PushSubscriptionSubscriber ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let loops :: SqlExpr (Value Int)
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let accessible :: SqlExpr (Value Int)
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 
@@ -294,21 +302,21 @@ getMyDoctorR pid uid did = do
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ y ^. PushSubscriptionUser ==. val uid
+                where_ $ y ^. PushSubscriptionSubscriber ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let loops :: SqlExpr (Value Int)
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
         let accessible :: SqlExpr (Value Int)
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionUser) ==. x ^. DoctorUser
+                where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 

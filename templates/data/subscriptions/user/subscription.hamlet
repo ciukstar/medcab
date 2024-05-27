@@ -28,7 +28,7 @@
 
   ^{widgetBanner msgs}
 
-  $maybe Entity _ (PushSubscription _ endpoint _ _) <- subscription
+  $maybe Entity _ (PushSubscription _ _ endpoint _ _) <- subscription
     <dl>
       <dt.label-large>
         _{MsgEndpoint}

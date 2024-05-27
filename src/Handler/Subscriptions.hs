@@ -11,12 +11,12 @@ module Handler.Subscriptions
 
 import Control.Monad (join)
 
-import Data.Bifunctor (Bifunctor(second))
+import Data.Bifunctor (Bifunctor(second, bimap))
 
 import Database.Esqueleto.Experimental
-    ( select, from, table, where_, innerJoin, leftJoin, on
+    ( SqlExpr, Value (unValue), select, from, table, where_, leftJoin
     , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), just, val, selectOne
+    , on, just, val, selectOne, subSelectCount, exists, innerJoin
     )
 import Database.Persist (Entity (Entity))
 import Database.Persist as P (PersistStoreWrite (delete))
@@ -36,10 +36,10 @@ import Foundation.Data
 import Model
     ( statusError, statusSuccess
     , PushSubscriptionId, PushSubscription(PushSubscription)
-    , UserId, User (User), UserPhoto
+    , UserId, User (User), UserPhoto (UserPhoto)
     , EntityField
-      ( PushSubscriptionUser, UserId, UserPhotoUser, UserPhotoAttribution
-      , PushSubscriptionId
+      ( PushSubscriptionSubscriber, UserId, UserPhotoUser, UserPhotoAttribution
+      , PushSubscriptionId, PushSubscriptionPublisher
       )
     )
 
@@ -92,18 +92,22 @@ getUserSubscriptionR uid sid = do
 getUserSubscriptionsR :: UserId -> Handler Html
 getUserSubscriptionsR uid = do
 
-    user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+    subscriber <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+            
         where_ $ x ^. UserId ==. val uid
         return (x, h ?. UserPhotoAttribution) )
 
-    subscriptions <- runDB $ select $ do
-        x <- from $ table @PushSubscription
-        where_ $ x ^. PushSubscriptionUser ==. val uid
-        return x
+    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& u :& h <- from $ table @PushSubscription
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+        where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+        return (x, (u, h ?. UserPhotoAttribution)) )
     
     msgs <- getMessages
+    
     defaultLayout $ do
         setTitleI MsgSubscriptions
         $(widgetFile "data/subscriptions/user/subscriptions")
@@ -112,11 +116,20 @@ getUserSubscriptionsR uid = do
 getSubscriptionsR :: Handler Html
 getSubscriptionsR = do
 
-    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
-        x :& u :& h <- from $ table @PushSubscription
-            `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionUser ==. u ^. UserId)
-            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
-        return (x, (u, h ?. UserPhotoAttribution)) )
+    subscriptions <- (second (bimap (join . unValue) unValue) <$>) <$> runDB ( select $ do
+        x :& h <- from $ table @User
+            `leftJoin` table @UserPhoto `on` (\(u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+
+        let subscriptions :: SqlExpr (Value Int)
+            subscriptions = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. UserId
+
+        where_ $ exists $ do
+            y <- from $ table @PushSubscription
+            where_ $ y ^. PushSubscriptionSubscriber ==. x ^. UserId
+        
+        return (x, (h ?. UserPhotoAttribution, subscriptions)) )
     
     msgs <- getMessages
     defaultLayout $ do
