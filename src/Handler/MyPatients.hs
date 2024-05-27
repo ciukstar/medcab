@@ -78,9 +78,8 @@ import Model
     , EntityField
       ( PatientUser, UserId, PatientDoctor, UserPhotoUser, PatientId
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
-      , ChatStatus, ChatUser, PushSubscriptionSubscriber
-      , PushSubscriptionP256dh
-      , PushSubscriptionAuth, PushSubscriptionEndpoint, DoctorUser, PushSubscriptionPublisher
+      , ChatStatus, ChatUser, PushSubscriptionSubscriber, PushSubscriptionP256dh
+      , PushSubscriptionAuth, PushSubscriptionEndpoint, PushSubscriptionPublisher
       )
     )
 
@@ -172,15 +171,15 @@ getMyPatientSubscriptionsR uid did pid = do
     endpoint <- lookupGetParam paramEndpoint
 
     patient <- (unwrap <$>) <$> runDB ( selectOne $ do
-        x :& u :& h :& d <- from $ table @Patient
+        x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
-            `innerJoin` table @Doctor `on` (\(x :& _ :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
 
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionSubscriber) ==. d ^. DoctorUser
+                where_ $ y ^. PushSubscriptionSubscriber ==. val uid
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. PatientUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -188,6 +187,7 @@ getMyPatientSubscriptionsR uid did pid = do
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. PatientUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -195,6 +195,7 @@ getMyPatientSubscriptionsR uid did pid = do
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. PatientUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 
@@ -352,15 +353,15 @@ getMyPatientR uid did pid = do
     endpoint <- lookupGetParam paramEndpoint
     
     patient <- (unwrap <$>) <$> runDB ( selectOne $ do
-        x :& u :& h :& d <- from $ table @Patient
+        x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
-            `innerJoin` table @Doctor `on` (\(x :& _ :& _ :& d) -> x ^. PatientDoctor ==. d ^. DoctorId)
 
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
-                where_ $ just (y ^. PushSubscriptionSubscriber) ==. d ^. DoctorUser
+                where_ $ y ^. PushSubscriptionSubscriber ==. val uid
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. PatientUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -368,6 +369,7 @@ getMyPatientR uid did pid = do
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. PatientUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -375,6 +377,7 @@ getMyPatientR uid did pid = do
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. PatientUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
             

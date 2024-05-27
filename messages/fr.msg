@@ -1,3 +1,6 @@
+NoDoctorHasRegisteredYouAsPatientYet: Aucun médecin ne vous a encore enregistré comme patient
+MyDoctors: Mes médecins
+MyPatients: Mes patients
 NoPublisherFound: Aucun éditeur trouvé
 Endpoint: Point de terminaison
 NoUserHasSubscribedYet: Aucun utilisateur n'est encore abonné aux notifications push

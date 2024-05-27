@@ -1,3 +1,6 @@
+NoDoctorHasRegisteredYouAsPatientYet: Niciun doctor nu v-a înregistrat încă ca pacient
+MyDoctors: Doctorii mei
+MyPatients: Pacienții mei
 NoPublisherFound: Nu a fost găsit niciun editor
 Endpoint: Punctul final
 NoUserHasSubscribedYet: Niciun utilizator nu s-a abonat încă la notificări push

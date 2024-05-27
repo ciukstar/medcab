@@ -37,15 +37,15 @@ import Foundation.Data
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorSubscriptionsR, MyDoctorR, HomeR
       )
     , AppMessage
-      ( MsgDoctors, MsgPhoto, MsgTabs
-      , MsgNoDoctorsYet, MsgDoctor, MsgSpecializations, MsgMobile, MsgFullName
+      ( MsgDoctors, MsgPhoto, MsgTabs, MsgDoctor, MsgSpecializations, MsgMobile
       , MsgEmailAddress, MsgDetails, MsgBack, MsgBookAppointment, MsgAudioCall
       , MsgVideoCall, MsgNoSpecialtiesYet, MsgSpecialty, MsgCertificateDate
       , MsgPhone, MsgChat, MsgSubscription, MsgSubscribeToNotifications
       , MsgNotGeneratedVAPID, MsgNoRecipient, MsgAllowUserToSendYouNotifications
       , MsgRecordDeleted, MsgInvalidFormData, MsgDoctorDoesNotHaveUserAccount
       , MsgOutgoingCall, MsgNoDataFound, MsgYouAndUserSubscribedOnSameDevice
-      , MsgNotSubscribedToNotificationsFromUser, MsgUserUnavailable
+      , MsgNotSubscribedToNotificationsFromUser, MsgUserUnavailable, MsgFullName
+      , MsgNoDoctorHasRegisteredYouAsPatientYet
       )
     )
 
@@ -170,6 +170,7 @@ getMyDoctorSubscriptionsR pid uid did = do
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. val uid
+                where_ $ just (y ^. PushSubscriptionPublisher) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -177,6 +178,7 @@ getMyDoctorSubscriptionsR pid uid did = do
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -184,6 +186,7 @@ getMyDoctorSubscriptionsR pid uid did = do
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 
@@ -254,6 +257,7 @@ getMyDoctorSpecialtiesR pid uid did = do
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. val uid
+                where_ $ just (y ^. PushSubscriptionPublisher) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -261,6 +265,7 @@ getMyDoctorSpecialtiesR pid uid did = do
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -268,6 +273,7 @@ getMyDoctorSpecialtiesR pid uid did = do
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 
@@ -303,6 +309,7 @@ getMyDoctorR pid uid did = do
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. val uid
+                where_ $ just (y ^. PushSubscriptionPublisher) ==. x ^. DoctorUser
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -310,6 +317,7 @@ getMyDoctorR pid uid did = do
             loops = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
                 return y
 
@@ -317,6 +325,7 @@ getMyDoctorR pid uid did = do
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ just (y ^. PushSubscriptionSubscriber) ==. x ^. DoctorUser
+                where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
 

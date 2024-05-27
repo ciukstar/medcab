@@ -36,7 +36,7 @@ import Foundation.Data
 import Model
     ( statusError, statusSuccess
     , PushSubscriptionId, PushSubscription(PushSubscription)
-    , UserId, User (User), UserPhoto (UserPhoto)
+    , UserId, User (User), UserPhoto
     , EntityField
       ( PushSubscriptionSubscriber, UserId, UserPhotoUser, UserPhotoAttribution
       , PushSubscriptionId, PushSubscriptionPublisher
@@ -63,7 +63,7 @@ postUserSubscriptionR uid sid = do
       FormSuccess () -> do
           runDB $ P.delete sid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR $ UserSubscriptionR uid sid
+          redirect $ DataR $ UserSubscriptionsR uid
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
           redirect $ DataR $ UserSubscriptionR uid sid

@@ -13,7 +13,7 @@ header
     flex-direction: row
     justify-content: flex-start
     align-items: center
-    gap: 1rem
+    gap: 0.5rem
 
 main
   md-list

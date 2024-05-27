@@ -1,3 +1,6 @@
+NoDoctorHasRegisteredYouAsPatientYet: Ни один врач еще не зарегистрировал вас в качестве пациента
+MyDoctors: Мои врачи
+MyPatients: Мои пациенты
 NoPublisherFound: Издатель не найден
 Endpoint: Конечная точка
 NoUserHasSubscribedYet: Ни один пользователь еще не подписался на push-уведомления

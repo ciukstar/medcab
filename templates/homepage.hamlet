@@ -20,11 +20,17 @@
       _{MsgAppName}
 
   <nav>
-    <md-filled-tonal-button type=link href=@{DoctorsR}>
-      _{MsgFindDoctor}
+
+    $maybe Entity did _ <- doctor
+      <md-filled-tonal-button type=link href=@{MyPatientsR did}>
+        _{MsgMyPatients}
 
     <md-filled-tonal-button type=link href=@{RecordsR}>
       _{MsgRecordVitalSigns}
+
+    $maybe Entity uid _ <- user
+      <md-filled-tonal-button type=link href=@{MyDoctorsR uid}>
+        _{MsgMyDoctors}
 
     <md-filled-tonal-button disabled>
       Health Activity Tracking

@@ -63,7 +63,7 @@
                 $nothing
                   _{MsgYouAndUserSubscribedOnSameDevice email}
                   
-            $if not accessible
+            $elseif not accessible
               <dt>
                 <md-icon.connection-status>phone_disabled
               <dd.body-small>
