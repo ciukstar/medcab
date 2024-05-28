@@ -45,8 +45,7 @@ import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
     ( AppMessage
-      ( MsgOutgoingCall, MsgNotGeneratedVAPID, MsgVideoSession
-      , MsgClose, MsgCallEnded)
+      ( MsgNotGeneratedVAPID, MsgVideoSession, MsgClose, MsgCallEnded )
     )
 
 import Model
@@ -100,7 +99,7 @@ import Yesod.Core.Content (TypedContent (TypedContent), toContent)
 import Yesod.Core.Handler (invalidArgsI, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Input (runInputGet, ireq)
-import Yesod.Form.Fields (intField, urlField)
+import Yesod.Form.Fields (urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)

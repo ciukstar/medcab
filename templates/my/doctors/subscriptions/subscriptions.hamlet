@@ -47,24 +47,29 @@
       <form method=post action=@{MyDoctorSubscriptionsR pid uid did} enctype=#{et}>
         ^{fw}
 
-        $if ((||) ((||) (not subscribed) (looping)) (not accessible))
-          <dl>
-            $if not subscribed
-              <dt>
-                <md-icon.connection-status>notifications_off
-              <dd.body-small>
-                _{MsgNotSubscribedToNotificationsFromUser name}
-                  
-            $if looping
-              <dt>
-                <md-icon.connection-status>repeat
-              <dd.body-small>
-                _{MsgYouAndUserSubscribedOnSameDevice name}
-                  
-            $elseif not accessible
-              <dt>
-                <md-icon.connection-status>phone_disabled
-              <dd.body-small>
-                _{MsgUserUnavailable name}
+      $if ((||) ((||) (not subscribed) (looping)) (not accessible))
+        <dl>
+          $if not subscribed
+            <dt>
+              <md-icon.connection-status>notifications_off
+            <dd.body-small>
+              _{MsgNotSubscribedToNotificationsFromUser name}
 
-        ^{widgetSnackbar msgs}
+          $if looping
+            <dt>
+              <md-icon.connection-status>repeat
+            <dd.body-small>
+              _{MsgYouAndUserSubscribedOnSameDevice name}
+
+            <form method=post action=@{MyDoctorUnsubscribeR pid uid did} enctype=#{et2}>
+              ^{fw2}
+              <md-text-button type=submit>
+                _{MsgUnsubscribe}
+
+          $elseif not accessible
+            <dt>
+              <md-icon.connection-status>phone_disabled
+            <dd.body-small>
+              _{MsgUserUnavailable name}
+
+      ^{widgetSnackbar msgs}

@@ -1,3 +1,4 @@
+Unsubscribe: Отписать
 NoDoctorHasRegisteredYouAsPatientYet: Ни один врач еще не зарегистрировал вас в качестве пациента
 MyDoctors: Мои врачи
 MyPatients: Мои пациенты

@@ -1,3 +1,4 @@
+
 <header.app-top-app-bar.background>
   <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
@@ -88,3 +89,75 @@
 
 
 ^{widgetSnackbar msgs}
+
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{MsgOutgoingCall} ...
+
+  <div slot=content>
+  
+    <figure.app-photo>
+      $maybe (Entity _ (Doctor dname _ _ _ _),(_,(subscribed,(_,_)))) <- doctor
+        $maybe (Entity _ (User email _ _ _ _ name _ _),attrib) <- patient
+          <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 loading=lazy alt=#{fromMaybe email name}>
+          $if ((||) (isJust attrib) (not subscribed))
+            <figcaption.body-small>
+              $maybe attribution <- attrib
+                #{attribution}
+              $if not subscribed
+                <p.body-small>
+                  _{MsgNotSubscribedToNotificationsFromUser dname}
+        $nothing
+          <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+      
+    <figure.app-icon>
+      $maybe (Entity _ (Doctor name _ _ _ _),(_,(_,(looping,_)))) <- doctor
+        $if looping
+          <md-icon>repeat
+          <figcaption.body-small>
+            _{MsgYouAndUserSubscribedOnSameDevice name}
+        $else
+          <md-icon>double_arrow
+      $nothing
+        <md-icon>double_arrow
+      
+    <figure.app-photo>
+      $maybe (Entity did (Doctor name _ _ _ _),(attrib,(_,(looping,accessible)))) <- doctor
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=#{name}>
+        $if ((||) (isJust attrib) ((&&) (not looping) (not accessible)))
+          <figcaption.body-small>
+            $maybe attribution <- attrib
+              ^{attribution}
+            $if (&&) (not looping) (not accessible)
+              <p.body-small>_{MsgUserUnavailable name}
+      $nothing
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
+      <md-icon slot=icon>call_end
+      _{MsgCancel}
+      
+<md-dialog ##{idDialogVideoSessionEnded}>
+  <div slot=headline>
+    _{MsgCallEnded}
+
+  <form slot=content method=dialog>
+    <p.body-large>_{MsgCallEnded} ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
+      <md-icon slot=icon>close
+      _{MsgClose}
+      
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    _{MsgCallDeclined}
+
+  <form slot=content method=dialog>
+    <p.body-large>_{MsgCallDeclined} ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>close
+      _{MsgClose}

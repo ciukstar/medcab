@@ -96,3 +96,84 @@
       ^{widgetSnackbar msgs}
 
     <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
+
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{MsgOutgoingCall} ...
+
+  <div slot=content>
+    <figure.app-photo>
+      $maybe (Entity _ (Doctor dname _ _ _ _),attrib) <- doctor
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=#{dname}>
+        $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(subscribed,(_,_))))) <- patient
+          $if (||) (isJust attrib) (not subscribed)
+            <figcaption.body-small>
+              $maybe attribution <- attrib
+                #{attribution}
+              $if not subscribed
+                <p.body-small>
+                  $maybe name <- name
+                    _{MsgNotSubscribedToNotificationsFromUser name}
+                  $nothing
+                    _{MsgNotSubscribedToNotificationsFromUser email}
+      $nothing
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=_{MsgPhoto}>
+
+    <figure.app-icon>
+      $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(_,(looping,_))))) <- patient
+        $if looping
+          <md-icon>repeat
+          <figcaption.body-small>
+            $maybe name <- name
+              _{MsgYouAndUserSubscribedOnSameDevice name}
+            $nothing
+              _{MsgYouAndUserSubscribedOnSameDevice email}
+        $else
+          <md-icon>double_arrow
+      $nothing
+        <md-icon>double_arrow
+      
+    <figure.app-photo>
+      $maybe (_,(Entity uid (User email _ _ _ _ name _ _),(attrib,(_,(looping,accessible))))) <- patient
+        <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 alt=#{fromMaybe email name}>
+        $if (||) (isJust attrib) ((&&) (not looping) (not accessible))
+          <figcaption.body-small>
+            $maybe attribution <- attrib
+              #{attribution}
+            $if (&&) (not looping) (not accessible)
+              <p.body-small>
+                $maybe name <- name
+                  _{MsgUserUnavailable name}
+                $nothing
+                  _{MsgUserUnavailable email}
+      $nothing
+        <img src=@{AccountPhotoR rid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto}>
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
+      <md-icon slot=icon>call_end
+      _{MsgCancel}
+      
+<md-dialog ##{idDialogVideoSessionEnded}>
+  <div slot=headline>
+    _{MsgCallEnded}
+
+  <form slot=content method=dialog>
+    <p.body-large>_{MsgCallEnded} ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
+      <md-icon slot=icon>close
+      _{MsgClose}
+      
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    _{MsgCallDeclined}
+
+  <form slot=content method=dialog>
+    <p.body-large>_{MsgCallDeclined} ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>close
+      _{MsgClose}

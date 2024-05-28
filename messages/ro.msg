@@ -1,3 +1,4 @@
+Unsubscribe: Dezabonați
 NoDoctorHasRegisteredYouAsPatientYet: Niciun doctor nu v-a înregistrat încă ca pacient
 MyDoctors: Doctorii mei
 MyPatients: Pacienții mei

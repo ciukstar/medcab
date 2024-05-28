@@ -1,3 +1,4 @@
+Unsubscribe: Unsubscribe
 NoDoctorHasRegisteredYouAsPatientYet: No doctor has registered you as a patient yet
 MyDoctors: My doctors
 MyPatients: My patients

@@ -59,11 +59,13 @@ import System.Log.FastLogger
 import Handler.MyDoctors
     ( getMyDoctorsR, getMyDoctorPhotoR, getMyDoctorR, getMyDoctorSpecialtiesR
     , getMyDoctorSubscriptionsR, postMyDoctorSubscriptionsR
+    , postMyDoctorUnsubscribeR
     )
 
 import Handler.MyPatients
     ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
     , postMyPatientRemoveR, getMyPatientSubscriptionsR, postMyPatientSubscriptionsR
+    , postMyPatientUnsubscribeR
     )
 
 import Handler.Doctors

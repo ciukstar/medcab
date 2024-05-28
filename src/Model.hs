@@ -17,18 +17,18 @@
 module Model where
 
 import Control.Applicative (pure)
-import Control.Monad (mapM, return)
+import Control.Monad (mapM)
 import ClassyPrelude.Yesod
     ( Ord, Read, Typeable, Bool, ByteString, Text, Double, derivePersistField
     , mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
 import Data.Aeson
-    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON, withObject, (.:)
+    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON
     )
 import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 import Data.Eq (Eq ((==)))
-import Data.Function ((.), ($))
+import Data.Function ((.))
 import Data.Functor ((<$>))
 import Data.Maybe (Maybe)
 import Data.String (String)

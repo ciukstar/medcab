@@ -13,6 +13,7 @@ module Handler.MyPatients
   , postMyPatientRemoveR
   , getMyPatientSubscriptionsR
   , postMyPatientSubscriptionsR
+  , postMyPatientUnsubscribeR
   ) where
 
 
@@ -23,6 +24,7 @@ import Control.Monad.IO.Class (liftIO)
 
 import Data.Bifunctor (Bifunctor(second, bimap))
 import Data.Maybe (fromMaybe, isJust)
+import Data.Text (Text)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
@@ -42,11 +44,12 @@ import Foundation (Form, getVAPIDKeys)
 import Foundation.Data
     ( Handler, App
     , Route
-      ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR
+      ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR, MyDoctorPhotoR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
+      , MyPatientUnsubscribeR
       )
     , AppMessage
-      ( MsgPatients, MsgNoPatientsYet
+      ( MsgPatients, MsgNoPatientsYet, MsgClose, MsgCallEnded, MsgCallDeclined
       , MsgPhoto, MsgEdit, MsgSinceDate, MsgCancel, MsgSave, MsgBack, MsgPatient
       , MsgRecordCreated, MsgFullName, MsgDele, MsgConfirmPlease, MsgChat
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
@@ -54,7 +57,7 @@ import Foundation.Data
       , MsgSubscription, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
       , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
-      , MsgUserUnavailable, MsgNoPublisherFound
+      , MsgUserUnavailable, MsgNoPublisherFound, MsgUnsubscribe
       )
     )
 
@@ -68,8 +71,8 @@ import Model
       ( PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline
       , PushMsgTypeAccept
       )
-    , UserId, User (User, userName), UserPhoto, DoctorId, Doctor
-    , PatientId, Patient(Patient, patientUser), Chat
+    , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)
+    , PatientId, Patient(Patient, patientUser), Chat, DoctorPhoto
     , PushSubscription
       ( PushSubscription, pushSubscriptionEndpoint, pushSubscriptionP256dh
       , pushSubscriptionAuth
@@ -80,6 +83,7 @@ import Model
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
       , ChatStatus, ChatUser, PushSubscriptionSubscriber, PushSubscriptionP256dh
       , PushSubscriptionAuth, PushSubscriptionEndpoint, PushSubscriptionPublisher
+      , DoctorPhotoDoctor, DoctorPhotoAttribution
       )
     )
 
@@ -111,6 +115,32 @@ import Yesod.Form
     )
 import Yesod.Form.Functions (generateFormPost, mreq)
 import Yesod.Persist (YesodPersist(runDB))
+
+
+postMyPatientUnsubscribeR :: UserId -> DoctorId -> PatientId -> Handler ()
+postMyPatientUnsubscribeR uid did pid = do
+    
+    ((fr2,_),_) <- runFormPost formUnsubscribePatient
+
+    patient <- runDB $ selectOne $ do
+        x <- from $ table @Patient
+        where_ $ x ^. PatientId ==. val pid
+        return x
+    
+    case (fr2,patient) of
+      (FormSuccess endpoint,Just (Entity _ (Patient publisher _ _))) -> do
+          
+          runDB $ delete $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionSubscriber ==. val publisher
+              where_ $ x ^. PushSubscriptionPublisher ==. val uid
+              where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
+              
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ MyPatientSubscriptionsR uid did pid
+      _otherwise -> do
+          addMessageI statusError MsgInvalidFormData
+          redirect $ MyPatientSubscriptionsR uid did pid
 
 
 postMyPatientSubscriptionsR :: UserId -> DoctorId -> PatientId -> Handler Html
@@ -213,6 +243,7 @@ getMyPatientSubscriptionsR uid did pid = do
               return x )
 
           (fw,et) <- generateFormPost $ formNotifications vapid uid publisher (fst . snd <$> patient) subscription
+          (fw2,et2) <- generateFormPost formUnsubscribePatient
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgPatient
@@ -226,6 +257,13 @@ getMyPatientSubscriptionsR uid did pid = do
       
   where
       unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
+
+
+formUnsubscribePatient :: Form Text
+formUnsubscribePatient extra = do
+    endpoint <- lookupGetParam paramEndpoint
+    (endpointR,endpointV) <- mreq hiddenField "" endpoint
+    return (endpointR, [whamlet|^{extra} ^{fvInput endpointV}|])
 
 
 formNotifications :: VAPIDKeys -> UserId -> UserId -> Maybe (Entity User) -> Maybe (Entity PushSubscription)
@@ -351,6 +389,12 @@ getMyPatientR uid did pid = do
     let polite = False
 
     endpoint <- lookupGetParam paramEndpoint
+
+    doctor <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+        x :& h <- from $ table @Doctor
+            `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
+        where_ $ x ^. DoctorId ==. val did
+        return (x, h ?. DoctorPhotoAttribution) )
     
     patient <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
@@ -416,7 +460,6 @@ getMyPatientR uid did pid = do
           let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
           
           $(widgetFile "my/patients/patient")
-          $(widgetFile "video/outgoing")
 
       Nothing -> invalidArgsI [MsgNoRecipient]
   where

@@ -4,12 +4,14 @@
 
 /channels ChatR ChatRoom getChatRoom
 
+/patients/#PatientId/#UserId/doctors/#DoctorId/unsubscribe   MyDoctorUnsubscribeR   POST
 /patients/#PatientId/#UserId/doctors/#DoctorId/subscriptions MyDoctorSubscriptionsR GET POST
 /patients/#PatientId/#UserId/doctors/#DoctorId/specialties   MyDoctorSpecialtiesR   GET
 /patients/#PatientId/#UserId/doctors/#DoctorId/doctor 	     MyDoctorR		    GET
 /patients/#UserId/doctors/#DoctorId/photo       	     MyDoctorPhotoR 	    GET
 /patients/#UserId/doctors 				     MyDoctorsR	     	    GET
 
+/users/#UserId/doctors/#DoctorId/patients/#PatientId/unsubscribe   MyPatientUnsubscribeR   POST
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/subscriptions MyPatientSubscriptionsR GET POST
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/remove 	   MyPatientRemoveR 	   POST
 /form/doctors/#DoctorId/patients/new                 	    	   MyPatientNewR    	   GET

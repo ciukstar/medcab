@@ -62,6 +62,11 @@
                   _{MsgYouAndUserSubscribedOnSameDevice name}
                 $nothing
                   _{MsgYouAndUserSubscribedOnSameDevice email}
+
+              <form method=post action=@{MyPatientUnsubscribeR uid did pid} enctype=#{et2}>
+                ^{fw2}
+                <md-text-button type=submit>
+                  _{MsgUnsubscribe}
                   
             $elseif not accessible
               <dt>
