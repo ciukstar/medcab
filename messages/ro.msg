@@ -1,3 +1,4 @@
+CalleeDeclinedTheCall callee: #{callee} a refuzat apelul
 Unsubscribe: Dezabonați
 NoDoctorHasRegisteredYouAsPatientYet: Niciun doctor nu v-a înregistrat încă ca pacient
 MyDoctors: Doctorii mei
@@ -247,3 +248,7 @@ Doc012 link: Chatul cu un medic este implementat folosind protocolul <a href=#{l
 Doc013 link: Apelul video/audio cu medicul este implementat folosind <a href=#{link} target=_blank>API-ul WebRTC</a>.
 
 Doc014 link: Pentru notificări se folosește <a href=#{link} target=_blank>API-ul Web Push</a>.
+
+Doc015 link: Un medic trebuie să fie înregistrat de un administrator în subsecțiunea <a href=#{link} target=_blank>„Medici”</a> sub meniul „Date” și i se poate atribui un cont de utilizator corespunzător al noului medic.
+
+Doc016: Un medic poate desemna utilizatori ca fiind pacienți adăugându-i la lista de pacienți.

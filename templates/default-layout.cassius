@@ -39,6 +39,8 @@ html body
         
         ##{idFigurePhoto}
             text-align: center
+            ##{idImgPhoto}
+                clip-path: circle(50%)
 
         ##{idButtonDecline}
           --md-sys-color-primary: red

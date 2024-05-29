@@ -41,8 +41,9 @@ connection-pool:
   idle-timeout: "_env:YESOD_CONNECTION_POOL_IDLETIMEOUT:1200"
   size:         "_env:YESOD_CONNECTION_POOL_POOLSIZE:1"
 
-superuser-username: "_env:YESOD_SUPERUSER_USERNAME:superuser@gmail.com"
-superuser-password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
+superuser:
+  username: "_env:YESOD_SUPERUSER_USERNAME:superuser@gmail.com"
+  password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
 
 google-client-id:     "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
 google-client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"

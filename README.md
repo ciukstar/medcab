@@ -40,7 +40,9 @@ A unit of measurement is defined by providing a name, symbol, and description in
 
 ### Doctor
 
-...
+A doctor must be registered by an administrator in the subsection ["Doctors"](https://medcab-jjgwe5ufda-de.a.run.app/data/staff) under the menu entry "Data" and a corresponding user account of the new doctor can be assigned to him.
+
+A doctor can designate users as patients by adding them to the patient list.
 
 ### Specialty
 

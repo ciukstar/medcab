@@ -1,3 +1,4 @@
+CalleeDeclinedTheCall callee@Text: #{callee} declined the call
 Unsubscribe: Unsubscribe
 NoDoctorHasRegisteredYouAsPatientYet: No doctor has registered you as a patient yet
 MyDoctors: My doctors
@@ -247,3 +248,7 @@ Doc012 link@Text: Chat with a doctor is implemented using the <a href=#{link} ta
 Doc013 link@Text: Video/audio call with doctor is implemented using <a href=#{link} target=_blank>WebRTC API</a>.
 
 Doc014 link@Text: For notifications the <a href=#{link} target=_blank>Web Push API</a> is used.
+
+Doc015 link@Text: A doctor must be registered by an administrator in the subsection <a href=#{link} target=_blank>"Doctors"</a> under the menu entry "Data" and a corresponding user account of the new doctor can be assigned to him.
+
+Doc016: A doctor can designate users as patients by adding them to the patient list.

@@ -40,7 +40,9 @@ O unitate de măsură este definită prin furnizarea unui nume, simbol și descr
 
 ### Doctor
 
-...
+Un medic trebuie să fie înregistrat de un administrator în subsecțiunea [„Medici”](https://medcabro-jjgwe5ufda-de.a.run.app/data/staff) sub meniul „Date” și i se poate atribui un cont de utilizator corespunzător al noului medic.
+
+Un medic poate desemna utilizatori ca fiind pacienți adăugându-i la lista de pacienți.
 
 ### Specialitatea
 

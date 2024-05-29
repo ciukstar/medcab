@@ -14,7 +14,10 @@
 
 module VideoRoom
   ( module VideoRoom.Data
-  , YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+  , YesodVideo
+    ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager
+    , getVapidKeys
+    )
   , wsApp
   , getWebSoketR
   , postPushMessageR
@@ -23,11 +26,11 @@ module VideoRoom
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
 import Control.Applicative ((<|>))
-import Control.Lens ((.~))
+import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, Value (unValue), from, table, where_, val
+    ( selectOne, from, table, where_, val
     , (^.), (==.)
     , select, just
     )
@@ -36,11 +39,10 @@ import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A (Value)
-import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Maybe (fromMaybe)
-import Data.Text (Text, unpack)
+import Data.Text (unpack, pack)
 import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
@@ -49,17 +51,15 @@ import Foundation.Data
     )
 
 import Model
-    ( UserId, User (userEmail, userName)
-    , PushSubscription (PushSubscription), Token
-    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store, apiInfoVapid, secretVolumeVapid
+    ( paramBacklink
+    , UserId, User (userEmail, userName), UserPhoto (UserPhoto)
+    , PatientId, PushSubscription (PushSubscription)
     , PushMsgType
       ( PushMsgTypeCall, PushMsgTypeEnd
       )
     , EntityField
-      ( UserId, PushSubscriptionSubscriber
-      , TokenApi, TokenId, TokenStore, StoreToken, StoreVal, UserPhotoUser
-      ), UserPhoto (UserPhoto), PatientId, paramBacklink
+      ( UserId, PushSubscriptionSubscriber, UserPhotoUser
+      )
     )
 
 import Network.HTTP.Client (Manager)
@@ -68,9 +68,10 @@ import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
     (atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue)
 
-import Settings (widgetFile)
-
-import System.IO (readFile')
+import Settings
+    ( widgetFile, AppSettings (appSuperuser)
+    , Superuser (Superuser, superuserUsername)
+    )
 
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
@@ -84,8 +85,9 @@ import VideoRoom.Data
     )
 
 import Web.WebPush
-    ( VAPIDKeysMinDetails(VAPIDKeysMinDetails), readVAPIDKeys, mkPushNotification
-    , pushMessage, pushSenderEmail, pushExpireInSeconds, sendPushNotification
+    ( VAPIDKeys, PushTopic (PushTopic), PushUrgency (PushUrgencyHigh)
+    , mkPushNotification, pushMessage, pushSenderEmail, pushExpireInSeconds
+    , sendPushNotification, pushUrgency, pushTopic
     )
 
 import Yesod
@@ -105,9 +107,12 @@ import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 
 
+
 class YesodVideo m where
+    getAppSettings :: HandlerFor m AppSettings
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
+    getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
 getRoomR :: (Yesod m, YesodVideo m)
@@ -161,38 +166,18 @@ postPushMessageR = do
         return x
 
     manager <- liftHandler getAppHttpManager
-
-    storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
-
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
+    vapidKeys <- liftHandler getVapidKeys
 
     toParent <- getRouteToParent
     urlRender <- getUrlRender
 
-    case details of
-      Just vapidKeysMinDetails -> do
-          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+    case vapidKeys of
+      Just vapid -> do
+          Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
-                                                , "topic" .= messageType
                                                 , "icon" .= icon
                                                 , "targetRoom" .= targetRoom
                                                 , "channelId" .= channelId
@@ -203,10 +188,12 @@ postPushMessageR = do
                                                 , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
                                                 , "recipientId" .= rid
                                                 ]
-                        & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                        & pushSenderEmail .~ superuserUsername
                         & pushExpireInSeconds .~ 60 * 60
+                        & pushUrgency ?~ PushUrgencyHigh
+                        & pushTopic .~ (PushTopic . pack . show <$> messageType)
 
-                result <- sendPushNotification vapidKeys manager notification
+                result <- sendPushNotification vapid manager notification
 
                 case result of
                   Left ex -> do

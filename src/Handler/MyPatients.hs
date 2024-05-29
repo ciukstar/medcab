@@ -57,7 +57,8 @@ import Foundation.Data
       , MsgSubscription, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
       , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
-      , MsgUserUnavailable, MsgNoPublisherFound, MsgUnsubscribe
+      , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
+      , MsgUnsubscribe
       )
     )
 
@@ -96,7 +97,7 @@ import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
 
 import Web.WebPush ( vapidPublicKeyBytes, VAPIDKeys )
-    
+
 import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
@@ -119,23 +120,23 @@ import Yesod.Persist (YesodPersist(runDB))
 
 postMyPatientUnsubscribeR :: UserId -> DoctorId -> PatientId -> Handler ()
 postMyPatientUnsubscribeR uid did pid = do
-    
+
     ((fr2,_),_) <- runFormPost formUnsubscribePatient
 
     patient <- runDB $ selectOne $ do
         x <- from $ table @Patient
         where_ $ x ^. PatientId ==. val pid
         return x
-    
+
     case (fr2,patient) of
       (FormSuccess endpoint,Just (Entity _ (Patient publisher _ _))) -> do
-          
+
           runDB $ delete $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionSubscriber ==. val publisher
               where_ $ x ^. PushSubscriptionPublisher ==. val uid
               where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
-              
+
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ MyPatientSubscriptionsR uid did pid
       _otherwise -> do
@@ -152,10 +153,10 @@ postMyPatientSubscriptionsR uid did pid = do
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
         where_ $ x ^. PatientId ==. val pid
         return u
-              
+
     case (patient, vapidKeys) of
       (Just (Entity publisher _), Just vapid) -> do
-          
+
           endpoint <- lookupGetParam paramEndpoint
 
           subscription <- runDB ( selectOne $ do
@@ -164,7 +165,7 @@ postMyPatientSubscriptionsR uid did pid = do
               where_ $ x ^. PushSubscriptionPublisher ==. val publisher
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
-              
+
           ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher patient subscription
 
           case fr of
@@ -174,7 +175,7 @@ postMyPatientSubscriptionsR uid did pid = do
                                                                             , PushSubscriptionAuth =. keyAuth'
                                                                             ]
                 redirect $ MyPatientSubscriptionsR uid did pid
-                
+
             FormSuccess (False, PushSubscription uid' pid' endpoint' _ _) -> do
                 _ <- runDB $ delete $ do
                     y <- from $ table @PushSubscription
@@ -183,13 +184,13 @@ postMyPatientSubscriptionsR uid did pid = do
                     where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
                 addMessageI statusSuccess MsgRecordDeleted
                 redirect $ MyPatientSubscriptionsR uid did pid
-                
+
             _otherwise -> do
                 addMessageI statusError MsgInvalidFormData
                 redirect $ MyPatientSubscriptionsR uid did pid
-                
+
       (Nothing, _) -> invalidArgsI [MsgNoPublisherFound]
-      
+
       (_, Nothing) -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -254,7 +255,7 @@ getMyPatientSubscriptionsR uid did pid = do
       (Nothing, _) -> invalidArgsI [MsgNoPublisherFound]
 
       (_, Nothing) -> invalidArgsI [MsgNotGeneratedVAPID]
-      
+
   where
       unwrap = second (second (bimap (join . unValue) (bimap ((> 0) . unValue) (bimap ((> 0) . unValue) ((> 0) . unValue)))))
 
@@ -280,7 +281,7 @@ formNotifications vapidKeys uid pid patient subscription extra = do
 
     (endpointR,endpointV) <- mreq hiddenField "" (pushSubscriptionEndpoint . entityVal <$> subscription)
     (p256dhR,p256dhV) <- mreq hiddenField "" (pushSubscriptionP256dh . entityVal <$> subscription)
-    (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)    
+    (authR,authV) <- mreq hiddenField "" (pushSubscriptionAuth . entityVal <$> subscription)
 
     let r = (,) <$> subscribedR <*> (PushSubscription uid pid <$> endpointR <*> p256dhR <*> authR)
     idFormContentWrapper <- newIdent
@@ -395,7 +396,7 @@ getMyPatientR uid did pid = do
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. DoctorId ==. val did
         return (x, h ?. DoctorPhotoAttribution) )
-    
+
     patient <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PatientUser ==. u ^. UserId)
@@ -424,7 +425,7 @@ getMyPatientR uid did pid = do
                 where_ $ y ^. PushSubscriptionPublisher ==. val uid
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
                 return y
-            
+
         where_ $ x ^. PatientId ==. val pid
         return (x, (u, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
@@ -458,7 +459,7 @@ getMyPatientR uid did pid = do
           idDialogCallDeclined <- newIdent
 
           let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
-          
+
           $(widgetFile "my/patients/patient")
 
       Nothing -> invalidArgsI [MsgNoRecipient]

@@ -7,7 +7,7 @@ import Foundation ()
 import Foundation.Data
     ( Handler
     , Route (AuthR, StaticR, HomeR, DataR)
-    , DataR (UnitsR)
+    , DataR (UnitsR, StaffR)
     , AppMessage
       ( MsgAppDocumentation, MsgDocumentation, MsgAppName, MsgAppDescription
       , MsgErDiagram, MsgEmail, MsgOverview
@@ -17,7 +17,7 @@ import Foundation.Data
       , MsgConfiguration
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
       , MsgDoc007, MsgDoc008, MsgDoc009, MsgDoc010, MsgDoc011, MsgDoc012
-      , MsgDoc013, MsgDoc014
+      , MsgDoc013, MsgDoc014, MsgDoc015, MsgDoc016
       )
     )
     

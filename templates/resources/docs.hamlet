@@ -9,7 +9,6 @@
   <span.app-top-app-bar-end>
     ^{widgetUser}
 
-
 <main>
 
   ^{widgetBanner msgs}
@@ -57,7 +56,8 @@
 
     <section>
       <h3.headline-small>_{MsgDoctor}
-      ...
+      <p.body-medium>#{translate $ MsgDoc015 (rndr $ DataR StaffR)}
+      <p.body-medium>_{MsgDoc016}
 
     <section>
       <h3.headline-small>_{MsgSpecialty}

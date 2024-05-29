@@ -30,6 +30,12 @@ import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
 
+
+
+data Superuser = Superuser { superuserUsername :: Text
+                           , superuserPassword :: Text
+                           }
+
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
@@ -76,8 +82,7 @@ data AppSettings = AppSettings
     , appGoogleSiteVerification  :: Maybe Text
     , appGoogleClientId          :: Text
     , appGoogleClientSecret      :: Text
-    , appSuperuserUsername       :: Text
-    , appSuperuserPassword       :: Text
+    , appSuperuser               :: Superuser
     , appMsValidate              :: Maybe Text
     , appYandexVerification      :: Maybe Text
     , appRtcPeerConnectionConfig :: Maybe Value
@@ -93,6 +98,14 @@ instance FromJSON ConnectionPoolConfig where
         connectionPoolConfigSize        <- o .: "size"
         return ConnectionPoolConfig {..}
 
+
+instance FromJSON Superuser where
+    parseJSON :: Value -> Parser Superuser
+    parseJSON = withObject "Superuser" $ \o -> do
+        superuserUsername <- o .: "username"
+        superuserPassword <- o .: "password"
+        return Superuser {..}
+        
 
 instance FromJSON AppSettings where
     parseJSON :: Value -> Parser AppSettings
@@ -127,8 +140,7 @@ instance FromJSON AppSettings where
         appGoogleSiteVerification  <- o .:  "google-site-verification"
         appGoogleClientId          <- o .:  "google-client-id"
         appGoogleClientSecret      <- o .:  "google-client-secret"
-        appSuperuserUsername       <- o .:  "superuser-username"
-        appSuperuserPassword       <- o .:  "superuser-password"
+        appSuperuser               <- o .:  "superuser"
         appMsValidate              <- o .:  "msvalidate"
         appYandexVerification      <- o .:  "yandex-verification"
         appRtcPeerConnectionConfig <- o .:  "rtc-peer-connection-config"

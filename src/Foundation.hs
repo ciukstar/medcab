@@ -69,7 +69,8 @@ import Text.Read (readMaybe)
 import Text.Shakespeare.Text (stext)
 
 import VideoRoom
-    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+    ( YesodVideo
+      ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys)
     )
     
 import Web.WebPush
@@ -118,11 +119,17 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 
 
 instance YesodVideo App where
+    getAppSettings :: HandlerFor App AppSettings
+    getAppSettings = appSettings <$> getYesod
+    
     getRtcPeerConnectionConfig :: HandlerFor App (Maybe A.Value)
     getRtcPeerConnectionConfig = appRtcPeerConnectionConfig . appSettings <$> getYesod
 
     getAppHttpManager :: HandlerFor App Manager
     getAppHttpManager = appHttpManager <$> getYesod
+    
+    getVapidKeys :: HandlerFor App (Maybe VAPIDKeys)
+    getVapidKeys = getVAPIDKeys
 
 
 -- Please see the documentation for the Yesod typeclass. There are a number

@@ -40,7 +40,9 @@ Une unité de mesure est définie en fournissant un nom, un symbole et une descr
 
 ### Médecin
 
-...
+Un médecin doit être enregistré par un administrateur dans la sous-section [« Médecins »](https://medcabfr-jjgwe5ufda-de.a.run.app/data/staff) sous l'entrée de menu « Données » et un compte utilisateur correspondant du nouveau médecin peut lui être attribué.
+
+Un médecin peut désigner des utilisateurs comme patients en les ajoutant à la liste des patients.
 
 ### Spécialité
 

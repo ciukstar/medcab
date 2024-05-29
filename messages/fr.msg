@@ -1,3 +1,4 @@
+CalleeDeclinedTheCall callee: #{callee} a décliné l'appel
 Unsubscribe: Désinscrire
 NoDoctorHasRegisteredYouAsPatientYet: Aucun médecin ne vous a encore enregistré comme patient
 MyDoctors: Mes médecins
@@ -247,3 +248,7 @@ Doc012 link: Le chat avec un médecin est implémenté à l'aide du protocole <a
 Doc013 link: L'appel vidéo/audio avec le médecin est implémenté à l'aide de <a href=#{link} target=_blank>l'API WebRTC</a>.
 
 Doc014 link: Pour les notifications, <a href=#{link} target=_blank>l'API Web Push</a> est utilisée.
+
+Doc015 link: Un médecin doit être enregistré par un administrateur dans la sous-section <a href=#{link} target=_blank>« Médecins »</a> sous l'entrée de menu « Données » et un compte utilisateur correspondant du nouveau médecin peut lui être attribué.
+
+Doc016: Un médecin peut désigner des utilisateurs comme patients en les ajoutant à la liste des patients.

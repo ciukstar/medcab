@@ -50,7 +50,7 @@ import Foundation.Data
       , MsgNotSubscribedToNotificationsFromUser, MsgUserUnavailable, MsgFullName
       , MsgNoDoctorHasRegisteredYouAsPatientYet, MsgCancel, MsgCallEnded
       , MsgClose, MsgCallDeclined, MsgNotSubscribedToNotificationsFromUser
-      , MsgUnsubscribe
+      , MsgUnsubscribe, MsgCalleeDeclinedTheCall
       )
     )
 

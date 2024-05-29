@@ -5,15 +5,15 @@
 
 packages:
 - completed:
-    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    commit: f52808bd5cf1c9a730d1b5a1569642787a413944
     git: https://github.com/sarthakbagaria/web-push.git
     name: web-push
     pantry-tree:
-      sha256: 6a95d33c838e6987e68225cb66693c8d5825fc3c248c33fa996a895e47130d61
+      sha256: 549a464b6a42e2ca787824691310eb995a9bb77d593b961c7f18c21a71dbd8c5
       size: 1110
     version: '0.4'
   original:
-    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    commit: f52808bd5cf1c9a730d1b5a1569642787a413944
     git: https://github.com/sarthakbagaria/web-push.git
 snapshots:
 - completed:

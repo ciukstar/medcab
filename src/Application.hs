@@ -202,8 +202,8 @@ makeFoundation appSettings = do
     flip runLoggingT logFunc $ flip runSqlPool pool $ do
         runMigration migrateAll
         
-        superpass <- liftIO $ saltPass (appSuperuserPassword appSettings)
-        insert_ User { userEmail = appSuperuserUsername appSettings
+        superpass <- liftIO $ saltPass (superuserPassword . appSuperuser $ appSettings)
+        insert_ User { userEmail = superuserUsername . appSuperuser $ appSettings
                      , userAuthType = UserAuthTypePassword
                      , userPassword = Just superpass
                      , userVerkey = Nothing

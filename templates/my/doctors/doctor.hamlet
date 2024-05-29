@@ -154,10 +154,13 @@
   <div slot=headline>
     _{MsgCallDeclined}
 
-  <form slot=content method=dialog>
-    <p.body-large>_{MsgCallDeclined} ...
+  <div slot=content>
+    $maybe (Entity _ (Doctor name _ _ _ _),_) <- doctor
+      _{MsgCalleeDeclinedTheCall name}
+    $nothing
+      _{MsgCallDeclined}
 
   <div slot=actions>
-    <md-filled-button has-icon type=button>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogCallDeclined}').close()">
       <md-icon slot=icon>close
       _{MsgClose}
