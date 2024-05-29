@@ -87,7 +87,7 @@ navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function 
   });
 
   navigator.serviceWorker.addEventListener('message', function (message) {
-    if (message.data.messageType === #{show PushMsgTypeEnd}) {
+    if (message.data.messageType === #{PushMsgTypeEnd}) {
       stream.getTracks().forEach(function (track) { track.stop(); });
     }
   }, { once: true });
@@ -99,7 +99,7 @@ navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function 
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeEnd}) {
+  if (message.data.messageType === #{PushMsgTypeEnd}) {
     pc.close();
     ws.close();
     document.getElementById(#{idDialogCallEnded}).show();
@@ -113,7 +113,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"messageType": #{show PushMsgTypeEnd},
+	"messageType": #{PushMsgTypeEnd},
 	"channelId": #{show channel},
 	"senderId": #{show $ fromSqlKey sid},
 	"recipientId": #{show $ fromSqlKey rid}

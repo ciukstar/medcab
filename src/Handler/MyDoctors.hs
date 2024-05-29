@@ -61,7 +61,7 @@ import Model
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline
+      ( PushMsgTypeVideoCall, PushMsgTypeCancel, PushMsgTypeDecline
       , PushMsgTypeAccept
       )
     , PatientId, Patient, Chat
@@ -122,16 +122,16 @@ postMyDoctorUnsubscribeR pid uid did = do
         x <- from $ table @Doctor
         where_ $ x ^. DoctorId ==. val did
         return x
-    
+
     case (fr2,doctor) of
       (FormSuccess endpoint, Just (Entity _ (Doctor _ _ _ _ (Just publisher)))) -> do
-          
+
           runDB $ delete $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionSubscriber ==. val publisher
               where_ $ x ^. PushSubscriptionPublisher ==. val uid
               where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
-              
+
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ MyDoctorSubscriptionsR pid uid did
       _otherwise -> do
@@ -249,7 +249,7 @@ getMyDoctorSubscriptionsR pid uid did = do
 
           (fw,et) <- generateFormPost $ formNotifications vapid uid publisher (pure user) subscription
           (fw2,et2) <- generateFormPost formUnsubscribeDoctor
-          
+
           msgs <- getMessages
 
           defaultLayout $ do

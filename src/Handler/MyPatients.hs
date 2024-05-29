@@ -69,7 +69,7 @@ import Model
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeCancel, PushMsgTypeDecline
+      ( PushMsgTypeVideoCall, PushMsgTypeCancel, PushMsgTypeDecline
       , PushMsgTypeAccept
       )
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)

@@ -55,7 +55,7 @@ import Model
     , UserId, User (userEmail, userName), UserPhoto (UserPhoto)
     , PatientId, PushSubscription (PushSubscription)
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeEnd
+      ( PushMsgTypeEnd
       )
     , EntityField
       ( UserId, PushSubscriptionSubscriber, UserPhotoUser
@@ -147,8 +147,7 @@ postPushMessageR :: (Yesod m, YesodVideo m)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
 
-    messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
-        <$> lookupPostParam "messageType"
+    messageType <- (readMaybe @PushMsgType . unpack =<<) <$> lookupPostParam "messageType"
     icon <- lookupPostParam "icon"
     targetRoom <- lookupPostParam "targetRoom"
     channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"

@@ -1,3 +1,4 @@
+IncomingVideoCall: Appel vidéo entrant
 CalleeDeclinedTheCall callee: #{callee} a décliné l'appel
 Unsubscribe: Désinscrire
 NoDoctorHasRegisteredYouAsPatientYet: Aucun médecin ne vous a encore enregistré comme patient

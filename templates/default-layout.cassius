@@ -35,19 +35,19 @@ html body
     margin: 0
     padding: 0
 
-    ##{idDialogIncomingCall}
+    ##{idDialogIncomingVideoCall}
         
-        ##{idFigurePhoto}
+        ##{idFigurePhotoIncomingVideoCall}
             text-align: center
-            ##{idImgPhoto}
+            ##{idImgPhotoIncomingVideoCall}
                 clip-path: circle(50%)
 
-        ##{idButtonDecline}
+        ##{idButtonDeclineIncomingVideoCall}
           --md-sys-color-primary: red
           --md-sys-color-on-primary: #FFFFFF
           tab-index: 2
 
-        ##{idButtonAccept}
+        ##{idButtonAcceptIncomingVideoCall}
           --md-sys-color-primary: green
           --md-sys-color-on-primary: #FFFFFF
           tab-index: 1

@@ -1,3 +1,4 @@
+IncomingVideoCall: Incoming video call
 CalleeDeclinedTheCall callee@Text: #{callee} declined the call
 Unsubscribe: Unsubscribe
 NoDoctorHasRegisteredYouAsPatientYet: No doctor has registered you as a patient yet

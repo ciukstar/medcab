@@ -1,3 +1,4 @@
+IncomingVideoCall: Apel video de intrare
 CalleeDeclinedTheCall callee: #{callee} a refuzat apelul
 Unsubscribe: Dezabonați
 NoDoctorHasRegisteredYouAsPatientYet: Niciun doctor nu v-a înregistrat încă ca pacient

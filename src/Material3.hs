@@ -79,7 +79,7 @@ md3checkboxesField ioptlist = (multiSelectField ioptlist)
 md3switchField :: Monad m => Field m Bool
 md3switchField = checkBoxField
     { fieldView = \theId name attrs x _ -> [whamlet|
-<md-switch ##{theId} *{attrs} name=#{name} :showVal id x:value=yes :showVal id x:selected>
+<md-switch ##{theId} *{attrs} name=#{name} :showVal id x:value=on :showVal id x:selected>
 |] }
     where
       showVal = either (const False)

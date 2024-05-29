@@ -42,7 +42,7 @@ import Database.Esqueleto.Experimental
 import qualified Database.Esqueleto.Experimental as E ((==.), exists)
 import Database.Persist.Sql (runSqlPool)
 
-import Foundation.Data 
+import Foundation.Data
 
 import Material3 (md3emailField, md3passwordField)
 
@@ -72,7 +72,7 @@ import VideoRoom
     ( YesodVideo
       ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys)
     )
-    
+
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     , readVAPIDKeys, vapidPublicKeyBytes
@@ -121,13 +121,13 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 instance YesodVideo App where
     getAppSettings :: HandlerFor App AppSettings
     getAppSettings = appSettings <$> getYesod
-    
+
     getRtcPeerConnectionConfig :: HandlerFor App (Maybe A.Value)
     getRtcPeerConnectionConfig = appRtcPeerConnectionConfig . appSettings <$> getYesod
 
     getAppHttpManager :: HandlerFor App Manager
     getAppHttpManager = appHttpManager <$> getYesod
-    
+
     getVapidKeys :: HandlerFor App (Maybe VAPIDKeys)
     getVapidKeys = getVAPIDKeys
 
@@ -203,13 +203,12 @@ instance Yesod App where
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
 
-            idDialogIncomingCall <- newIdent
-            idFormIncomingCall <- newIdent
-            idFigurePhoto <- newIdent
-            idImgPhoto <- newIdent
-            idFigcaptionPhoto <- newIdent
-            idButtonDecline <- newIdent
-            idButtonAccept <- newIdent
+            idDialogIncomingVideoCall <- newIdent
+            idFigurePhotoIncomingVideoCall <- newIdent
+            idImgPhotoIncomingVideoCall <- newIdent
+            idFigcaptionPhotoIncomingVideoCall <- newIdent
+            idButtonDeclineIncomingVideoCall <- newIdent
+            idButtonAcceptIncomingVideoCall <- newIdent
 
             idDialogMissedCall <- newIdent
             idMissedCallCaller <- newIdent
@@ -228,7 +227,7 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
 
-    
+
     isAuthorized (MyDoctorUnsubscribeR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSubscriptionsR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSpecialtiesR _ uid _) _ = isAuthenticatedSelf uid
@@ -236,7 +235,7 @@ instance Yesod App where
     isAuthorized (MyDoctorPhotoR uid _) _ = isAuthenticatedSelf uid
     isAuthorized r@(MyDoctorsR uid) _ = setUltDest r >> isAuthenticatedSelf uid
 
-    
+
     isAuthorized (MyPatientUnsubscribeR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientSubscriptionsR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
@@ -348,7 +347,7 @@ instance Yesod App where
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
-    
+
     isAuthorized (DataR (UserSubscriptionR _ _)) _ = isAdmin
     isAuthorized (DataR (UserSubscriptionsR _)) _ = isAdmin
     isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin

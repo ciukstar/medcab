@@ -5,7 +5,7 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      messageType: #{show PushMsgTypeCall},
+      messageType: #{PushMsgTypeVideoCall},
       icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
       targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
       channelId: #{show channel},
@@ -26,7 +26,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeCancel},
+      "messageType": #{PushMsgTypeCancel},
       "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
       "channelId": #{show channel},
       "senderId": #{show $ fromSqlKey sid},
@@ -42,7 +42,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+  if (message.data.messageType === #{PushMsgTypeAccept}) {
     
     document.getElementById(#{idDialogOutgoingCall}).close();
     
@@ -52,7 +52,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
     window.location.href = `@{VideoR (RoomR sid pid rid polite)}?${params}`;
     
-  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+  } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
     document.getElementById(#{idDialogOutgoingCall}).close();
     document.getElementById(#{idDialogCallDeclined}).show();

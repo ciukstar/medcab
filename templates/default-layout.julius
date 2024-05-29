@@ -3,31 +3,31 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  document.getElementById(#{idImgPhoto}).src = message.data.senderPhoto;
-  document.getElementById(#{idFigcaptionPhoto}).textContent = message.data.senderName;
+  document.getElementById(#{idImgPhotoIncomingVideoCall}).src = message.data.senderPhoto;
+  document.getElementById(#{idFigcaptionPhotoIncomingVideoCall}).textContent = message.data.senderName;
   
-  document.getElementById(#{idButtonDecline}).onclick = function (event) {
+  document.getElementById(#{idButtonDeclineIncomingVideoCall}).onclick = function (event) {
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: #{show PushMsgTypeDecline},
+	messageType: #{PushMsgTypeDecline},
 	icon: message.data.icon,
 	channelId: message.data.channelId,
 	senderId: message.data.recipientId,
 	recipientId: message.data.senderId
       })
     }).then(function (result) {
-      document.getElementById(#{idDialogIncomingCall}).close();
+      document.getElementById(#{idDialogIncomingVideoCall}).close();
     });
   };
   
-  document.getElementById(#{idButtonAccept}).onclick = function (event) {
+  document.getElementById(#{idButtonAcceptIncomingVideoCall}).onclick = function (event) {
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: #{show PushMsgTypeAccept},
+	messageType: #{PushMsgTypeAccept},
 	icon: message.data.icon,
 	channelId: message.data.channelId,
 	senderId: message.data.recipientId,
@@ -35,7 +35,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       })
     }).then(function (result) {
       
-      document.getElementById(#{idDialogIncomingCall}).close();
+      document.getElementById(#{idDialogIncomingVideoCall}).close();
       
       const params = new URLSearchParams({
 	senderId: message.data.recipientId,
@@ -53,17 +53,17 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  if (message.data.messageType === #{show PushMsgTypeCancel}) {
+  if (message.data.messageType === #{PushMsgTypeCancel}) {
     
-    document.getElementById(#{idDialogIncomingCall}).close();
+    document.getElementById(#{idDialogIncomingVideoCall}).close();
     
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
     
     document.getElementById(#{idDialogMissedCall}).show();
     
-  } else if (message.data.messageType === #{show PushMsgTypeCall}) {
+  } else if (message.data.messageType === #{PushMsgTypeVideoCall}) {
     
-    document.getElementById(#{idDialogIncomingCall}).show();
+    document.getElementById(#{idDialogIncomingVideoCall}).show();
     
   }
   

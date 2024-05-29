@@ -1,3 +1,4 @@
+IncomingVideoCall: Входящий видеозвонок
 CalleeDeclinedTheCall callee: #{callee} отклонил(а) звонок
 Unsubscribe: Отписать
 NoDoctorHasRegisteredYouAsPatientYet: Ни один врач еще не зарегистрировал вас в качестве пациента

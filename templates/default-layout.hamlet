@@ -2,23 +2,23 @@
 ^{widget}
 
 
-<md-dialog ##{idDialogIncomingCall}>
+<md-dialog ##{idDialogIncomingVideoCall}>
   <div slot=headline>
-    _{MsgIncomingCall}
+    _{MsgIncomingVideoCall} ...
 
-  <form slot=content method=dialog ##{idFormIncomingCall}>
+  <div slot=content>
 
-    <figure ##{idFigurePhoto}>
-      <img ##{idImgPhoto} width=64 height=64 loading=lazy>
-      <figcaption.body-large ##{idFigcaptionPhoto}>
+    <figure ##{idFigurePhotoIncomingVideoCall}>
+      <img ##{idImgPhotoIncomingVideoCall} width=64 height=64 loading=lazy>
+      <figcaption.body-large ##{idFigcaptionPhotoIncomingVideoCall}>
 
   <div slot=actions>
 
-    <md-filled-button has-icon ##{idButtonDecline}>
+    <md-filled-button has-icon ##{idButtonDeclineIncomingVideoCall}>
       <md-icon slot=icon>call_end
       _{MsgDecline}
 
-    <md-filled-button has-icon type=button ##{idButtonAccept}>
+    <md-filled-button has-icon type=button ##{idButtonAcceptIncomingVideoCall}>
       <md-icon slot=icon>call
       _{MsgAccept}
 

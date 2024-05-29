@@ -49,20 +49,22 @@ import Yesod.Core.Dispatch
     , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
     )
 import Yesod.Form (Textarea)
+import Text.Julius (ToJavascript (toJavascript), Javascript)
 
 
-data PushMsgType = PushMsgTypeCall | PushMsgTypeAccept | PushMsgTypeDecline
-                 | PushMsgTypeCancel | PushMsgTypeEnd
+data PushMsgType = PushMsgTypeVideoCall | PushMsgTypeAccept | PushMsgTypeDecline
+                 | PushMsgTypeCancel | PushMsgTypeEnd | PushMsgTypeRefresh
     deriving (Eq, Show, Read)
 
 
 instance ToJSON PushMsgType where
     toJSON :: PushMsgType -> Data.Aeson.Value
-    toJSON PushMsgTypeCall = String "PushMsgTypeCall"
-    toJSON PushMsgTypeAccept = String "PushMsgTypeAccept"
-    toJSON PushMsgTypeDecline = String "PushMsgTypeDecline"
-    toJSON PushMsgTypeCancel = String "PushMsgTypeCancel"
-    toJSON PushMsgTypeEnd = String "PushMsgTypeEnd"
+    toJSON = String . pack . show
+
+    
+instance ToJavascript PushMsgType where
+    toJavascript :: PushMsgType -> Javascript
+    toJavascript = toJavascript . String . pack . show
 
 
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
