@@ -57,6 +57,10 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idDialogOutgoingCall}).close();
     document.getElementById(#{idDialogCallDeclined}).show();
         
+  } else if (message.data.messageType === #{PushMsgTypeRefresh}) {
+    
+    window.location.reload();
+    
   }
   
 });

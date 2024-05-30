@@ -1,3 +1,7 @@
+DismissNotification: Închide
+UserIsNoLongerAvailable user: Utilizatorul #{user} nu mai este disponibil
+UserIsNowAvailable user: #{user} este acum disponibil
+RefreshPage: Reîmprospătare pagină
 IncomingVideoCall: Apel video de intrare
 CalleeDeclinedTheCall callee: #{callee} a refuzat apelul
 Unsubscribe: Dezabonați

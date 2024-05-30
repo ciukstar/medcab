@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Handler.MyPatients
   ( getMyPatientsR
@@ -19,12 +20,15 @@ module Handler.MyPatients
 
 import ChatRoom.Data ( Route(PatientChatRoomR) )
 
-import Control.Monad (join, forM_)
+import Control.Lens ((.~),(?~))
+import Control.Monad (join, forM_, void)
 import Control.Monad.IO.Class (liftIO)
 
+import Data.Aeson (object, (.=))
 import Data.Bifunctor (Bifunctor(second, bimap))
+import Data.Function ((&))
 import Data.Maybe (fromMaybe, isJust)
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import Data.Time.Clock (getCurrentTime)
 
 import Database.Esqueleto.Experimental
@@ -42,7 +46,7 @@ import Database.Persist.Sql (fromSqlKey)
 
 import Foundation (Form, getVAPIDKeys)
 import Foundation.Data
-    ( Handler, App
+    ( Handler, App (appHttpManager, appSettings)
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR, MyDoctorPhotoR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
@@ -58,7 +62,7 @@ import Foundation.Data
       , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
       , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
-      , MsgUnsubscribe
+      , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable
       )
     )
 
@@ -70,7 +74,7 @@ import Model
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeCancel, PushMsgTypeDecline
-      , PushMsgTypeAccept
+      , PushMsgTypeAccept, PushMsgTypeRefresh
       )
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)
     , PatientId, Patient(Patient, patientUser), Chat, DoctorPhoto
@@ -88,15 +92,26 @@ import Model
       )
     )
 
-import Settings (widgetFile)
-import Settings.StaticFiles (img_call_FILL0_wght400_GRAD0_opsz24_svg)
+import Settings
+    ( widgetFile, Superuser (Superuser, superuserUsername)
+    , AppSettings (appSuperuser)
+    )
+import Settings.StaticFiles
+    ( img_call_FILL0_wght400_GRAD0_opsz24_svg
+    , img_notifications_off_24dp_FILL0_wght400_GRAD0_opsz24_svg
+    , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
+    )
 
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
 
-import Web.WebPush ( vapidPublicKeyBytes, VAPIDKeys )
+import Web.WebPush
+    ( PushUrgency (PushUrgencyHigh), PushTopic (PushTopic), VAPIDKeys
+    , pushMessage, sendPushNotification, vapidPublicKeyBytes, pushSenderEmail
+    , pushExpireInSeconds, pushTopic, mkPushNotification, pushUrgency
+    )
 
 import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
@@ -105,7 +120,7 @@ import Yesod.Core
     ( Yesod(defaultLayout), ToJSON (toJSON)
     , setTitleI, getMessages, newIdent, addMessageI, redirect, whamlet
     , handlerToWidget, invalidArgsI, lookupGetParam, getCurrentRoute
-    , lookupGetParam
+    , lookupGetParam, getMessageRender, getYesod, getUrlRender
     )
 import Yesod.Form
     ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
@@ -155,7 +170,7 @@ postMyPatientSubscriptionsR uid did pid = do
         return u
 
     case (patient, vapidKeys) of
-      (Just (Entity publisher _), Just vapid) -> do
+      (Just (Entity publisher (User email _ _ _ _ name _ _)), Just vapid) -> do
 
           endpoint <- lookupGetParam paramEndpoint
 
@@ -170,19 +185,75 @@ postMyPatientSubscriptionsR uid did pid = do
 
           case fr of
             FormSuccess (True, ps@(PushSubscription uid' pid' endpoint' keyP256dh' keyAuth')) -> do
-                _ <- runDB $ upsertBy (UniquePushSubscription uid' pid') ps [ PushSubscriptionEndpoint =. endpoint'
-                                                                            , PushSubscriptionP256dh =. keyP256dh'
-                                                                            , PushSubscriptionAuth =. keyAuth'
-                                                                            ]
+                void $ runDB $ upsertBy (UniquePushSubscription uid' pid') ps [ PushSubscriptionEndpoint =. endpoint'
+                                                                              , PushSubscriptionP256dh =. keyP256dh'
+                                                                              , PushSubscriptionAuth =. keyAuth'
+                                                                              ]
+
+                publishers <- runDB $ select $ do
+                    x <- from $ table @PushSubscription
+                    where_ $ x ^. PushSubscriptionSubscriber ==. val pid'
+                    where_ $ x ^. PushSubscriptionPublisher ==. val uid'
+                    return x
+
+                msgr <- getMessageRender
+                rndr <- getUrlRender
+                manager <- appHttpManager <$> getYesod
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+
+                forM_ publishers $ \(Entity _ (PushSubscription _ _ endpoint'' p256dh'' auth'')) -> do
+                    let notification = mkPushNotification endpoint'' p256dh'' auth''
+                            & pushMessage .~ object [ "messageType" .= PushMsgTypeRefresh
+                                                    , "title" .= msgr MsgAppName
+                                                    , "icon" .= rndr
+                                                      (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                                    , "body" .= msgr (MsgUserIsNowAvailable (fromMaybe email name))
+                                                    ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 60
+                            & pushUrgency ?~ PushUrgencyHigh
+                            & pushTopic .~ (pure . PushTopic . pack . show $ PushMsgTypeRefresh)
+
+                    void $ sendPushNotification vapid manager notification
+
                 redirect $ MyPatientSubscriptionsR uid did pid
 
             FormSuccess (False, PushSubscription uid' pid' endpoint' _ _) -> do
-                _ <- runDB $ delete $ do
+
+                void $ runDB $ delete $ do
                     y <- from $ table @PushSubscription
                     where_ $ y ^. PushSubscriptionSubscriber ==. val uid'
                     where_ $ y ^. PushSubscriptionPublisher ==. val pid'
                     where_ $ y ^. PushSubscriptionEndpoint ==. val endpoint'
+
                 addMessageI statusSuccess MsgRecordDeleted
+
+                publishers <- runDB $ select $ do
+                    x <- from $ table @PushSubscription
+                    where_ $ x ^. PushSubscriptionSubscriber ==. val pid'
+                    where_ $ x ^. PushSubscriptionPublisher ==. val uid'
+                    return x
+
+                msgr <- getMessageRender
+                rndr <- getUrlRender
+                manager <- appHttpManager <$> getYesod
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+
+                forM_ publishers $ \(Entity _ (PushSubscription _ _ endpoint'' p256dh'' auth'')) -> do
+                    let notification = mkPushNotification endpoint'' p256dh'' auth''
+                            & pushMessage .~ object [ "messageType" .= PushMsgTypeRefresh
+                                                    , "title" .= msgr MsgAppName
+                                                    , "icon" .= rndr
+                                                      (StaticR img_notifications_off_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                                    , "body" .= msgr (MsgUserIsNoLongerAvailable (fromMaybe email name))
+                                                    ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 60
+                            & pushUrgency ?~ PushUrgencyHigh
+                            & pushTopic .~ (pure . PushTopic . pack . show $ PushMsgTypeRefresh)
+
+                    void $ sendPushNotification vapid manager notification
+
                 redirect $ MyPatientSubscriptionsR uid did pid
 
             _otherwise -> do

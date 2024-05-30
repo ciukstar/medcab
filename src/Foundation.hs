@@ -400,7 +400,7 @@ getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
 
     rndr <- getUrlRenderParams
-    -- msgr <- getMessageRender
+    msgr <- getMessageRender
     mVAPIDKeys <- getVAPIDKeys
 
     -- calleeName <- resolveName <$> maybeAuth

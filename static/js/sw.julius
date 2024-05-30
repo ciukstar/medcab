@@ -8,11 +8,17 @@ self.onpush = function (e) {
     const focused = clients.filter(client => client.focused);
     focused.forEach(client => { client.postMessage(message); });
     
-    return [clients.length < 1, message];
+    return [focused.length < 1, message];
     
   }).then(([notify,message]) => {
 
-    const actions = [];
+    let actions;
+    
+    if (message.messageType === #{PushMsgTypeRefresh}) {
+      actions = [ { action: 'dismissNotifcationRefresh', title: #{msgr MsgDismissNotification} }];
+    } else {
+      actions = [];
+    }
     
     return !notify
       ? Promise.resolve()
@@ -32,6 +38,14 @@ self.onpush = function (e) {
   e.waitUntil(promise);
   
 };
+
+self.addEventListener('notificationclick', function (e) {
+  
+  if (e.action === 'dismissNotifcationRefresh') {
+    e.notification.close();
+  }
+    
+});
 
 
 self.addEventListener('fetch', function (e) {

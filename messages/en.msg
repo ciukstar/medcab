@@ -1,3 +1,7 @@
+DismissNotification: Dismiss
+UserIsNoLongerAvailable user@Text: #{user} is no longer available
+UserIsNowAvailable user@Text: #{user} is now available
+RefreshPage: Refresh page
 IncomingVideoCall: Incoming video call
 CalleeDeclinedTheCall callee@Text: #{callee} declined the call
 Unsubscribe: Unsubscribe

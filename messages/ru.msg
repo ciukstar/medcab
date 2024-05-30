@@ -1,3 +1,7 @@
+DismissNotification: Закрыть
+UserIsNoLongerAvailable user: Пользователь #{user} больше недоступен
+UserIsNowAvailable user: Пользователь #{user} теперь доступен
+RefreshPage: Обновить страницу
 IncomingVideoCall: Входящий видеозвонок
 CalleeDeclinedTheCall callee: #{callee} отклонил(а) звонок
 Unsubscribe: Отписать

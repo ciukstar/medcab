@@ -1,3 +1,7 @@
+DismissNotification: Fermer
+UserIsNoLongerAvailable user: L'utilisateur #{user} n'est plus disponible
+UserIsNowAvailable user: #{user} est maintenant disponible
+RefreshPage: Rafraîchir la page
 IncomingVideoCall: Appel vidéo entrant
 CalleeDeclinedTheCall callee: #{callee} a décliné l'appel
 Unsubscribe: Désinscrire

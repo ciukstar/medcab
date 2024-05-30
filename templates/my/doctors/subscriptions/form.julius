@@ -6,7 +6,7 @@ document.getElementById(#{fvId subscribedV}).onchange = function (e) {
     Notification.requestPermission().then(function (permission) {
       if (permission === 'granted') {
 
-	document.getElementById(#{idFormContentWrapper}).appendChild(progress());
+	document.getElementById(#{idFormContentWrapper}).appendChild(mdCircularProgress());
 	
         navigator.serviceWorker.ready.then((registration) => {
 	  registration.pushManager.getSubscription().then(function (subscription) {
@@ -47,7 +47,7 @@ document.getElementById(#{fvId subscribedV}).onchange = function (e) {
   }
 };
 
-progress = function () {
+var mdCircularProgress = function () {
   const progress = document.createElement('md-circular-progress');
   progress.setAttribute('indeterminate','');
   progress.style.position = 'absolute';
