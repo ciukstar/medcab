@@ -16,7 +16,7 @@ module VideoRoom
   ( module VideoRoom.Data
   , YesodVideo
     ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager
-    , getVapidKeys
+    , getVapidKeys, getStaticRoute
     )
   , wsApp
   , getWebSoketR
@@ -25,17 +25,15 @@ module VideoRoom
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
-import Control.Applicative ((<|>))
 import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val
+    ( selectOne, select, from, table, where_, val
     , (^.), (==.)
-    , select, just
     )
-import Database.Persist (Entity (Entity, entityVal))
-import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
+import Database.Persist (Entity (Entity))
+import Database.Persist.Sql (SqlBackend, fromSqlKey)
 
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A (Value)
@@ -47,18 +45,20 @@ import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
     ( AppMessage
-      ( MsgNotGeneratedVAPID, MsgVideoSession, MsgClose, MsgCallEnded )
+      ( MsgNotGeneratedVAPID, MsgVideoSession, MsgClose, MsgCallEnded, MsgAppName
+      , MsgUserCallIsOver
+      )
     )
 
 import Model
     ( paramBacklink
-    , UserId, User (userEmail, userName), UserPhoto (UserPhoto)
+    , UserId, User (User), UserPhoto (UserPhoto)
     , PatientId, PushSubscription (PushSubscription)
     , PushMsgType
       ( PushMsgTypeEnd
       )
     , EntityField
-      ( UserId, PushSubscriptionSubscriber, UserPhotoUser
+      ( PushSubscriptionSubscriber, UserPhotoUser, UserId
       )
     )
 
@@ -95,38 +95,53 @@ import Yesod
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
     , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
+    , getMessageRender
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
-import Yesod.Core.Handler (invalidArgsI, getUrlRender)
+import Yesod.Core.Handler (invalidArgsI)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Input (runInputGet, ireq)
 import Yesod.Form.Fields (urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+import Yesod.Static (StaticRoute)
+import Settings.StaticFiles (img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg)
 
 
 
 class YesodVideo m where
     getAppSettings :: HandlerFor m AppSettings
+    getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
     getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
 getRoomR :: (Yesod m, YesodVideo m)
+         => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
          => (RenderMessage m AppMessage, RenderMessage m FormMessage)
          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
 getRoomR sid pid rid polite = do
 
-    let channelId@(ChanId channel) = ChanId (fromIntegral $ fromSqlKey pid)
+    let channelId = ChanId (fromIntegral $ fromSqlKey pid)
     backlink <- runInputGet (ireq urlField paramBacklink)
 
     toParent <- getRouteToParent
 
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
+    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg
+
+    let extractName (Entity _ (User email _ _ _ _ name _ _)) = fromMaybe email name
+
+    terminator <- liftHandler $ (extractName <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val sid
+        return x )
+
+    msgr <- getMessageRender
     liftHandler $ defaultLayout $ do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
@@ -144,31 +159,25 @@ getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
                  => (RenderMessage m FormMessage, RenderMessage m AppMessage)
-                 => SubHandlerFor VideoRoom m ()
-postPushMessageR = do
+                 => UserId -> UserId -> SubHandlerFor VideoRoom m ()
+postPushMessageR sid rid = do
 
     messageType <- (readMaybe @PushMsgType . unpack =<<) <$> lookupPostParam "messageType"
     icon <- lookupPostParam "icon"
+    image <- lookupPostParam "image"
+    body <- lookupPostParam "body"
     targetRoom <- lookupPostParam "targetRoom"
-    channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
-    sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
-    rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
-
-    sender <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @User
-        where_ $ just (x ^. UserId) ==. val sid
-        return x
+    targetPush <- lookupPostParam "targetPush"
 
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription
-        where_ $ just (x ^. PushSubscriptionSubscriber) ==. val rid
+        where_ $ x ^. PushSubscriptionSubscriber ==. val rid
         return x
 
     manager <- liftHandler getAppHttpManager
     vapidKeys <- liftHandler getVapidKeys
 
-    toParent <- getRouteToParent
-    urlRender <- getUrlRender
+    msgr <- getMessageRender
 
     case vapidKeys of
       Just vapid -> do
@@ -177,15 +186,12 @@ postPushMessageR = do
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "messageType" .= messageType
+                                                , "title" .= msgr MsgAppName
                                                 , "icon" .= icon
+                                                , "image" .= image
+                                                , "body" .= body
                                                 , "targetRoom" .= targetRoom
-                                                , "channelId" .= channelId
-                                                , "senderId" .= sid
-                                                , "senderName" .= ( (userName . entityVal <$> sender)
-                                                                    <|> (Just . userEmail . entityVal <$> sender)
-                                                                  )
-                                                , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
-                                                , "recipientId" .= rid
+                                                , "targetPush" .= targetPush
                                                 ]
                         & pushSenderEmail .~ superuserUsername
                         & pushExpireInSeconds .~ 60 * 60

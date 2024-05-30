@@ -44,6 +44,10 @@ A doctor must be registered by an administrator in the subsection ["Doctors"](ht
 
 A doctor can designate users as patients by adding them to the patient list.
 
+### Patient
+
+A patient is a user that a doctor has designated as his or her patient.
+
 ### Specialty
 
 ...

@@ -1,16 +1,16 @@
 
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
 
-  fetch('@{VideoR PushMessageR}', {
+  fetch('@{VideoR $ PushMessageR sid rid}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       messageType: #{PushMsgTypeVideoCall},
       icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      image: '@{AccountPhotoR uid AvatarColorDark}',
+      body: #{msgr $ MsgIncomingVideoCallFrom callerName},
       targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
-      channelId: #{show channel},
-      senderId: #{show $ fromSqlKey sid},
-      recipientId: #{show $ fromSqlKey rid}
+      targetPush: '@{VideoR $ PushMessageR rid sid}'
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -22,12 +22,13 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
 
 document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click', function (event) {
 
-  fetch('@{VideoR PushMessageR}', {
+  fetch('@{VideoR $ PushMessageR sid rid}', {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       "messageType": #{PushMsgTypeCancel},
       "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+      targetPush: '@{VideoR $ PushMessageR rid sid}',
       "channelId": #{show channel},
       "senderId": #{show $ fromSqlKey sid},
       "recipientId": #{show $ fromSqlKey rid}

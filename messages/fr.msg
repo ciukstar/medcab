@@ -1,3 +1,6 @@
+UserCallIsOver user: L'appel est terminé. #{user} a raccroché.
+CallAccepted: Appel accepté
+IncomingVideoCallFrom caller: Appel vidéo entrant de #{caller}
 DismissNotification: Fermer
 UserIsNoLongerAvailable user: L'utilisateur #{user} n'est plus disponible
 UserIsNowAvailable user: #{user} est maintenant disponible
@@ -257,3 +260,5 @@ Doc014 link: Pour les notifications, <a href=#{link} target=_blank>l'API Web Pus
 Doc015 link: Un médecin doit être enregistré par un administrateur dans la sous-section <a href=#{link} target=_blank>« Médecins »</a> sous l'entrée de menu « Données » et un compte utilisateur correspondant du nouveau médecin peut lui être attribué.
 
 Doc016: Un médecin peut désigner des utilisateurs comme patients en les ajoutant à la liste des patients.
+
+Doc017: Un patient est un utilisateur qu'un médecin a désigné comme son patient.

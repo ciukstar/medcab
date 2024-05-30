@@ -20,7 +20,7 @@
   <div slot=headline>
     _{MsgCallEnded}
 
-  <form slot=content method=dialog>
+  <div slot=content>
     _{MsgCallEnded}
 
   <div slot=actions>

@@ -44,6 +44,11 @@ Un medic trebuie să fie înregistrat de un administrator în subsecțiunea [„
 
 Un medic poate desemna utilizatori ca fiind pacienți adăugându-i la lista de pacienți.
 
+### Pacient
+
+Un pacient este un utilizator pe care un medic l-a desemnat ca fiind pacientul său.
+
+
 ### Specialitatea
 
 ...

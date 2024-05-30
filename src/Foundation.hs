@@ -70,7 +70,9 @@ import Text.Shakespeare.Text (stext)
 
 import VideoRoom
     ( YesodVideo
-      ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys)
+      ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys
+      , getStaticRoute
+      )
     )
 
 import Web.WebPush
@@ -121,6 +123,9 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 instance YesodVideo App where
     getAppSettings :: HandlerFor App AppSettings
     getAppSettings = appSettings <$> getYesod
+
+    getStaticRoute :: StaticRoute -> HandlerFor App (Route App)
+    getStaticRoute = return . StaticR
 
     getRtcPeerConnectionConfig :: HandlerFor App (Maybe A.Value)
     getRtcPeerConnectionConfig = appRtcPeerConnectionConfig . appSettings <$> getYesod

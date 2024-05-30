@@ -57,7 +57,7 @@ import Foundation.Data
       , MsgNoDoctorHasRegisteredYouAsPatientYet, MsgCancel, MsgCallEnded
       , MsgClose, MsgCallDeclined, MsgNotSubscribedToNotificationsFromUser
       , MsgUnsubscribe, MsgCalleeDeclinedTheCall, MsgUserIsNoLongerAvailable
-      , MsgAppName, MsgUserIsNowAvailable
+      , MsgAppName, MsgUserIsNowAvailable, MsgIncomingVideoCallFrom
       )
     )
 
@@ -422,6 +422,11 @@ getMyDoctorR pid uid did = do
         where_ $ x ^. UserId ==. val uid
         return (x, h ?. UserPhotoAttribution) )
 
+    let callerName = case patient of
+          Just (Entity _ (User _ _ _ _ _ (Just name) _ _),_) -> name
+          Just (Entity _ (User email _ _ _ _ Nothing _ _),_) -> email
+          Nothing -> "???"
+
     doctor <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @Doctor
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
@@ -470,6 +475,7 @@ getMyDoctorR pid uid did = do
     let sid = uid
     case doctor >>= doctorUser . entityVal . fst of
       Just rid -> do
+          msgr <- getMessageRender
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgDoctor
@@ -482,7 +488,7 @@ getMyDoctorR pid uid did = do
               idDialogCallDeclined <- newIdent
 
               let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
-
+              
               $(widgetFile "my/doctors/doctor")
 
       Nothing -> invalidArgsI [MsgNoRecipient]

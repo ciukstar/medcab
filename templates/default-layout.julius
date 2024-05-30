@@ -3,19 +3,15 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  document.getElementById(#{idImgPhotoIncomingVideoCall}).src = message.data.senderPhoto;
-  document.getElementById(#{idFigcaptionPhotoIncomingVideoCall}).textContent = message.data.senderName;
-  
   document.getElementById(#{idButtonDeclineIncomingVideoCall}).onclick = function (event) {
-    fetch('@{VideoR PushMessageR}', {
+    fetch(message.data.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
 	messageType: #{PushMsgTypeDecline},
-	icon: message.data.icon,
-	channelId: message.data.channelId,
-	senderId: message.data.recipientId,
-	recipientId: message.data.senderId
+	title: message.data.title,
+	icon: '@{StaticR img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+	body: #{rndrMsg MsgCallDeclined}
       })
     }).then(function (result) {
       document.getElementById(#{idDialogIncomingVideoCall}).close();
@@ -23,24 +19,20 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   };
   
   document.getElementById(#{idButtonAcceptIncomingVideoCall}).onclick = function (event) {
-    fetch('@{VideoR PushMessageR}', {
+    fetch(message.data.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
 	messageType: #{PushMsgTypeAccept},
+	title: message.data.title,
 	icon: message.data.icon,
-	channelId: message.data.channelId,
-	senderId: message.data.recipientId,
-	recipientId: message.data.senderId
+	body: #{rndrMsg MsgCallAccepted}
       })
     }).then(function (result) {
       
       document.getElementById(#{idDialogIncomingVideoCall}).close();
       
       const params = new URLSearchParams({
-	senderId: message.data.recipientId,
-	recipientId: message.data.senderId,
-	channel: message.data.channelId,
 	backlink: '@{backlink}'
       });
       
@@ -56,13 +48,13 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{PushMsgTypeCancel}) {
     
     document.getElementById(#{idDialogIncomingVideoCall}).close();
-    
-    document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
-    
+    document.getElementById(#{idMissedCallCaller}).textContent = message.data.body;
     document.getElementById(#{idDialogMissedCall}).show();
     
   } else if (message.data.messageType === #{PushMsgTypeVideoCall}) {
-    
+  
+    document.getElementById(#{idImgPhotoIncomingVideoCall}).src = message.data.image;
+    document.getElementById(#{idFigcaptionPhotoIncomingVideoCall}).textContent = message.data.body;
     document.getElementById(#{idDialogIncomingVideoCall}).show();
     
   }

@@ -44,6 +44,10 @@ Un médecin doit être enregistré par un administrateur dans la sous-section [�
 
 Un médecin peut désigner des utilisateurs comme patients en les ajoutant à la liste des patients.
 
+### Patient
+
+Un patient est un utilisateur qu'un médecin a désigné comme son patient.
+
 ### Spécialité
 
 ...

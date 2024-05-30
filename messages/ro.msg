@@ -1,3 +1,6 @@
+UserCallIsOver user: Apelul sa încheiat. #{user} a închis.
+CallAccepted: Apel acceptat
+IncomingVideoCallFrom caller: Apel video primit de la #{caller}
 DismissNotification: Închide
 UserIsNoLongerAvailable user: Utilizatorul #{user} nu mai este disponibil
 UserIsNowAvailable user: #{user} este acum disponibil
@@ -257,3 +260,5 @@ Doc014 link: Pentru notificări se folosește <a href=#{link} target=_blank>API-
 Doc015 link: Un medic trebuie să fie înregistrat de un administrator în subsecțiunea <a href=#{link} target=_blank>„Medici”</a> sub meniul „Date” și i se poate atribui un cont de utilizator corespunzător al noului medic.
 
 Doc016: Un medic poate desemna utilizatori ca fiind pacienți adăugându-i la lista de pacienți.
+
+Doc017: Un pacient este un utilizator pe care un medic l-a desemnat ca fiind pacientul său.

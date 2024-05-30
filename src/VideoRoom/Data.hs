@@ -36,6 +36,6 @@ newtype VideoRoom = VideoRoom
 mkYesodSubData "VideoRoom" [parseRoutes|
 /photo/#UserId                         PhotoR       GET
 /ws/#ChanId/#Bool                      WebSoketR    GET
-/api/push                              PushMessageR POST
+/push/#UserId/#UserId                  PushMessageR POST
 /room/#UserId/#PatientId/#UserId/#Bool RoomR        GET
 |]

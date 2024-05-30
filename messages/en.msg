@@ -1,3 +1,6 @@
+UserCallIsOver user@Text: The call is over. #{user} hung up.
+CallAccepted: Call accepted
+IncomingVideoCallFrom caller@Text: Incoming video call from #{caller}
 DismissNotification: Dismiss
 UserIsNoLongerAvailable user@Text: #{user} is no longer available
 UserIsNowAvailable user@Text: #{user} is now available
@@ -257,3 +260,5 @@ Doc014 link@Text: For notifications the <a href=#{link} target=_blank>Web Push A
 Doc015 link@Text: A doctor must be registered by an administrator in the subsection <a href=#{link} target=_blank>"Doctors"</a> under the menu entry "Data" and a corresponding user account of the new doctor can be assigned to him.
 
 Doc016: A doctor can designate users as patients by adding them to the patient list.
+
+Doc017: A patient is a user that a doctor has designated as his or her patient.

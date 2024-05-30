@@ -62,7 +62,7 @@ import Foundation.Data
       , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
       , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
-      , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable
+      , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable, MsgIncomingVideoCallFrom
       )
     )
 
@@ -161,6 +161,7 @@ postMyPatientUnsubscribeR uid did pid = do
 
 postMyPatientSubscriptionsR :: UserId -> DoctorId -> PatientId -> Handler Html
 postMyPatientSubscriptionsR uid did pid = do
+    
     vapidKeys <- getVAPIDKeys
 
     patient <- runDB $ selectOne $ do
@@ -467,6 +468,10 @@ getMyPatientR uid did pid = do
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. DoctorId ==. val did
         return (x, h ?. DoctorPhotoAttribution) )
+    
+    let callerName = case doctor of
+          Just (Entity _ (Doctor name _ _ _ _),_) -> name
+          Nothing -> "???"
 
     patient <- (unwrap <$>) <$> runDB ( selectOne $ do
         x :& u :& h <- from $ table @Patient
@@ -513,11 +518,12 @@ getMyPatientR uid did pid = do
         return (countRows :: SqlExpr (Value Int)) )
 
     (fw,et) <- generateFormPost formPatientRemove
-    msgs <- getMessages
 
     backlink <- fromMaybe HomeR <$> getCurrentRoute
 
     let sid = uid
+    msgr <- getMessageRender
+    msgs <- getMessages
     case patientUser . entityVal . fst <$> patient of
       Just rid ->  defaultLayout $ do
           setTitleI MsgPatient

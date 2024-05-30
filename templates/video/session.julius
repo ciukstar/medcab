@@ -100,23 +100,28 @@ navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
   if (message.data.messageType === #{PushMsgTypeEnd}) {
+    
     pc.close();
     ws.close();
-    document.getElementById(#{idDialogCallEnded}).show();
+    
+    const dlg = document.getElementById(#{idDialogCallEnded});
+    dlg.querySelector('div[slot=content]').textContent = message.data.body;
+    dlg.show();
+    
   }
 
 });
 
 [#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
   document.getElementById(x).addEventListener('click', (e) => {
-    fetch('@{toParent PushMessageR}', {
+    fetch('@{toParent $ PushMessageR sid rid}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"messageType": #{PushMsgTypeEnd},
-	"channelId": #{show channel},
-	"senderId": #{show $ fromSqlKey sid},
-	"recipientId": #{show $ fromSqlKey rid}
+	messageType: #{PushMsgTypeEnd},
+	title: #{msgr MsgAppName},
+	icon: '@{iconCallEnd}',
+	body: #{msgr $ MsgUserCallIsOver (fromMaybe "???" terminator)}
       })
     }).then((result) => {
       pc.close();
