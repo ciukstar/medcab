@@ -15,8 +15,7 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist (Entity (Entity))
 
-import Foundation ()
-import Foundation.Data
+import Foundation
     ( Widget
     , Route
       ( HomeR, DataR, DocsR, RecordsR, MyDoctorsR, MyPatientsR, AuthR

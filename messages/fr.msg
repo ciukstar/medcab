@@ -1,3 +1,8 @@
+OutgoingAudioCall: Appel audio sortant
+OutgoingVideoCall: Appel vidéo sortant
+IncomingAudioCall: Appel audio entrant
+AudioSession: Séance audio
+IncomingAudioCallFrom caller: Appel audio entrant de #{caller}
 UserCallIsOver user: L'appel est terminé. #{user} a raccroché.
 CallAccepted: Appel accepté
 IncomingVideoCallFrom caller: Appel vidéo entrant de #{caller}

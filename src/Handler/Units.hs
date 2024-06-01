@@ -42,9 +42,8 @@ import Database.Persist
     )
 import Database.Persist.Sql (toSqlKey, fromSqlKey)
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler
+import Foundation
+    ( Handler, Form
     , Route (DataR)
     , DataR
       ( UnitsR, UnitR, UnitAddR, UnitEditR, UnitDeleR, QuantitiesR, QuantityR

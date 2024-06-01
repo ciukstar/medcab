@@ -48,9 +48,8 @@ import Database.Persist
     )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler
+import Foundation
+    ( Handler, Form
     , Route (DataR)
     , DataR
       ( MedSignsR, MedSignR, MedSignAddR, MedSignEditR, MedSignDeleR, SignTagsR

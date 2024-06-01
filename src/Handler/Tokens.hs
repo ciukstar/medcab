@@ -37,9 +37,8 @@ import Database.Persist
     )
 import qualified Database.Persist as P ((=.))
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler, App (appSettings)
+import Foundation
+    ( App (appSettings), Handler, Form
     , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR

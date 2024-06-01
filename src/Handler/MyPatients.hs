@@ -42,11 +42,9 @@ import Database.Persist
     , PersistUniqueWrite (upsertBy), (=.)
     )
 import qualified Database.Persist as P (delete)
-import Database.Persist.Sql (fromSqlKey)
 
-import Foundation (Form, getVAPIDKeys)
-import Foundation.Data
-    ( Handler, App (appHttpManager, appSettings)
+import Foundation
+    ( Handler, Form, App (appHttpManager, appSettings), getVAPIDKeys
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR, MyDoctorPhotoR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
@@ -59,10 +57,12 @@ import Foundation.Data
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
       , MsgSubscription, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgNoRecipient, MsgOutgoingCall, MsgNotSubscribedToNotificationsFromUser
+      , MsgNoRecipient, MsgNotSubscribedToNotificationsFromUser
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
       , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
-      , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable, MsgIncomingVideoCallFrom
+      , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable
+      , MsgIncomingVideoCallFrom, MsgIncomingAudioCallFrom, MsgOutgoingVideoCall
+      , MsgOutgoingAudioCall
       )
     )
 
@@ -73,8 +73,10 @@ import Model
     , AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusUnread)
     , PushMsgType
-      ( PushMsgTypeVideoCall, PushMsgTypeCancel, PushMsgTypeDecline
-      , PushMsgTypeAccept, PushMsgTypeRefresh
+      ( PushMsgTypeVideoCall, PushMsgTypeAudioCall
+      , PushMsgTypeAcceptVideoCall, PushMsgTypeAcceptAudioCall
+      , PushMsgTypeDeclineVideoCall, PushMsgTypeDeclineAudioCall
+      , PushMsgTypeCancel, PushMsgTypeRefresh
       )
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)
     , PatientId, Patient(Patient, patientUser), Chat, DoctorPhoto
@@ -105,7 +107,7 @@ import Settings.StaticFiles
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
-import VideoRoom.Data (ChanId (ChanId), Route (PushMessageR, RoomR))
+import VideoRoom.Data (Route (PushMessageR, RoomR, AudioR))
 
 import Web.WebPush
     ( PushUrgency (PushUrgencyHigh), PushTopic (PushTopic), VAPIDKeys
@@ -529,13 +531,18 @@ getMyPatientR uid did pid = do
           setTitleI MsgPatient
 
           idPanelDetails <- newIdent
+
           idButtonVideoCall <- newIdent
-          idDialogOutgoingCall <- newIdent
-          idButtonOutgoingCallCancel <- newIdent
+          idButtonAudioCall <- newIdent
+          
+          idDialogOutgoingVideoCall <- newIdent
+          idButtonOutgoingVideoCallCancel <- newIdent
+          
+          idDialogOutgoingAudioCall <- newIdent
+          idButtonOutgoingAudioCallCancel <- newIdent
+          
           idDialogVideoSessionEnded <- newIdent
           idDialogCallDeclined <- newIdent
-
-          let ChanId channel = ChanId (fromIntegral (fromSqlKey pid))
 
           $(widgetFile "my/patients/patient")
 

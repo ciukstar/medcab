@@ -30,11 +30,6 @@ import qualified Data.Map as M (empty)
 
 import Import
 
-import Foundation.Data
-    ( resourcesApp, Handler
-    , App (..), Route (..), DataR (..)
-    )
-
 import Language.Haskell.TH.Syntax ( qLocation )
 
 import Network.HTTP.Client.TLS ( getGlobalManager )

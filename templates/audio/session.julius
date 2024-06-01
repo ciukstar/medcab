@@ -1,0 +1,132 @@
+
+let ws = new WebSocket(
+  '@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:")
+);
+
+
+let pc = new RTCPeerConnection(#{config});
+
+pc.ontrack = ({track, streams}) => {
+  track.onunmute = () => {
+    const remoteVideo = document.getElementById(#{idAudioRemote});
+    if ( ! remoteVideo.srcObject ) {
+      remoteVideo.srcObject = streams[0];
+    }
+  }
+};
+
+let makingOffer = false;
+
+ws.addEventListener('open', (e) => {
+  
+  pc.onnegotiationneeded = async () => {
+    try {
+      makingOffer = true;
+      await pc.setLocalDescription();
+      ws.send(JSON.stringify({ description: pc.localDescription }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      makingOffer = false;
+    }
+  };
+
+  pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+  
+});
+
+let ignoreOffer = false;
+
+ws.onmessage = async (e) => {
+
+  const { description, candidate } = JSON.parse(e.data);
+
+  try {
+    if (description) {
+      const offerCollision = description.type === "offer" && (makingOffer || pc.signalingState !== "stable");
+
+      ignoreOffer = ( #{rawJS polite} ) && offerCollision;
+      if (ignoreOffer) {
+	return;
+      }
+
+      await pc.setRemoteDescription(description);
+      if (description.type === "offer") {
+	await pc.setLocalDescription();
+	ws.send(JSON.stringify({ description: pc.localDescription }));
+      }
+
+    } else if (candidate) {
+
+      try {
+	await pc.addIceCandidate(candidate);
+      } catch (err) {
+	if ( ! ignoreOffer ) {
+	  throw err;
+	}
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (stream) {
+
+  stream.getTracks().forEach(function (track) { pc.addTrack(track, stream); });
+  document.getElementById(#{idAudioSelf}).srcObject = stream;
+  return stream;
+
+}).then(function (stream) {
+
+  [#{idButtonExitAudioSession}, #{idButtonEndAudioSession}].forEach((x) => {
+    document.getElementById(x).addEventListener('click', function (event) {
+      stream.getTracks().forEach(function (track) { track.stop(); });
+    }, { once: true });
+  });
+
+  navigator.serviceWorker.addEventListener('message', function (message) {
+    if (message.data.messageType === #{PushMsgTypeEnd}) {
+      stream.getTracks().forEach(function (track) { track.stop(); });
+    }
+  }, { once: true });
+
+}).catch(function (err) {
+  console.error(err);
+});
+
+
+navigator.serviceWorker.addEventListener('message', function (message) {
+
+  if (message.data.messageType === #{PushMsgTypeEnd}) {
+    
+    pc.close();
+    ws.close();
+    
+    const dlg = document.getElementById(#{idDialogCallEnded});
+    dlg.querySelector('div[slot=content]').textContent = message.data.body;
+    dlg.show();
+    
+  }
+
+});
+
+[#{idButtonExitAudioSession}, #{idButtonEndAudioSession}].forEach((x) => {
+  document.getElementById(x).addEventListener('click', (e) => {
+    fetch('@{toParent $ PushMessageR sid rid}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	messageType: #{PushMsgTypeEnd},
+	title: #{msgr MsgAppName},
+	icon: '@{iconCallEnd}',
+	body: #{msgr $ MsgUserCallIsOver (fromMaybe "???" terminator)}
+      })
+    }).then((result) => {
+      pc.close();
+      ws.close();
+      window.location.href = #{backlink};      
+    });
+  });
+});

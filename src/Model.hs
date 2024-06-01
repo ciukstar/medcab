@@ -52,8 +52,11 @@ import Yesod.Form (Textarea)
 import Text.Julius (ToJavascript (toJavascript), Javascript)
 
 
-data PushMsgType = PushMsgTypeVideoCall | PushMsgTypeAccept | PushMsgTypeDecline
-                 | PushMsgTypeCancel | PushMsgTypeEnd | PushMsgTypeRefresh
+data PushMsgType = PushMsgTypeVideoCall | PushMsgTypeAudioCall
+                 | PushMsgTypeAcceptVideoCall | PushMsgTypeAcceptAudioCall
+                 | PushMsgTypeDeclineVideoCall | PushMsgTypeDeclineAudioCall
+                 | PushMsgTypeCancel | PushMsgTypeEnd
+                 | PushMsgTypeRefresh
     deriving (Eq, Show, Read)
 
 

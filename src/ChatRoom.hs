@@ -39,8 +39,7 @@ import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toLis
 import Data.Text (pack)
 import Data.Text.Lazy (toStrict)
 
-import Foundation ()
-import Foundation.Data
+import Foundation
     ( App, Route (MyDoctorR, DoctorPhotoR, MyPatientR, AccountPhotoR)
     , AppMessage
       ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined )

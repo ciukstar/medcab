@@ -6,6 +6,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module ChatRoom.Data where
 
@@ -17,11 +18,15 @@ import Data.Text (Text)
 
 import Model (PatientId, UserId)
 
-import Yesod.Core (renderRoute)
+import Text.Shakespeare.I18N (renderMessage)
+
+import Yesod.Core (renderRoute, mkMessage)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
 
 
 newtype ChatRoom = ChatRoom (TVar (M.Map Text (TChan Text, Int)))
+
+mkMessage "ChatRoom" "messages" "en"
 
 mkYesodSubData "ChatRoom" [parseRoutes|
 /#PatientId/#UserId/doctor/chat  DoctorChatRoomR  GET

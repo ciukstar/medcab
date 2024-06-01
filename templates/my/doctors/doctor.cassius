@@ -42,7 +42,7 @@ main
           flex-direction: column
           gap: 1rem
 
-##{idDialogOutgoingCall}
+##{idDialogOutgoingVideoCall}
     div[slot=content]
         display: flex
         justify-content: space-around
@@ -63,6 +63,32 @@ main
                 --md-icon-size: 56px
                 
     div[slot=actions]
-        ##{idButtonOutgoingCallCancel}
+        ##{idButtonOutgoingVideoCallCancel}
+            --md-sys-color-primary: red
+            --md-sys-color-on-primary: white
+
+
+##{idDialogOutgoingAudioCall}
+    div[slot=content]
+        display: flex
+        justify-content: space-around
+        
+        figure
+            margin: 0
+            padding: 0
+            text-align: center
+
+        figure.app-photo
+            flex: 1
+            img
+                clip-path: circle(50%)
+
+        figure.app-icon
+            flex: 0
+            md-icon
+                --md-icon-size: 56px
+                
+    div[slot=actions]
+        ##{idButtonOutgoingAudioCallCancel}
             --md-sys-color-primary: red
             --md-sys-color-on-primary: white

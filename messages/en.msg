@@ -1,3 +1,8 @@
+OutgoingAudioCall: Outgoing audio call
+OutgoingVideoCall: Outgoing video call
+IncomingAudioCall: Incoming audio call
+AudioSession: Audio session
+IncomingAudioCallFrom caller@Text: Incoming audio call from #{caller}
 UserCallIsOver user@Text: The call is over. #{user} hung up.
 CallAccepted: Call accepted
 IncomingVideoCallFrom caller@Text: Incoming video call from #{caller}

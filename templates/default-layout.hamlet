@@ -22,6 +22,27 @@
       <md-icon slot=icon>call
       _{MsgAccept}
 
+
+<md-dialog ##{idDialogIncomingAudioCall}>
+  <div slot=headline>
+    _{MsgIncomingAudioCall} ...
+
+  <div slot=content>
+
+    <figure ##{idFigurePhotoIncomingAudioCall}>
+      <img ##{idImgPhotoIncomingAudioCall} width=64 height=64 loading=lazy>
+      <figcaption.body-large ##{idFigcaptionPhotoIncomingAudioCall}>
+
+  <div slot=actions>
+
+    <md-filled-button has-icon ##{idButtonDeclineIncomingAudioCall}>
+      <md-icon slot=icon>call_end
+      _{MsgDecline}
+
+    <md-filled-button has-icon type=button ##{idButtonAcceptIncomingAudioCall}>
+      <md-icon slot=icon>call
+      _{MsgAccept}
+
       
 <md-dialog ##{idDialogMissedCall}>
   <div slot=headline>

@@ -1,6 +1,6 @@
 
 
-/video VideoR VideoRoom getVideoRoom
+/rtc VideoR VideoRoom getVideoRoom
 
 /channels ChatR ChatRoom getChatRoom
 

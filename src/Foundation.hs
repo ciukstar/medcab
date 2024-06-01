@@ -14,7 +14,7 @@
 
 module Foundation where
 
-import VideoRoom.Data (Route (PushMessageR))
+import ChatRoom.Data (ChatRoom)
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -40,9 +40,7 @@ import Database.Esqueleto.Experimental
     , Value (unValue), select, orderBy, in_
     )
 import qualified Database.Esqueleto.Experimental as E ((==.), exists)
-import Database.Persist.Sql (runSqlPool)
-
-import Foundation.Data
+import Database.Persist.Sql (runSqlPool, ConnectionPool)
 
 import Material3 (md3emailField, md3passwordField)
 
@@ -74,6 +72,8 @@ import VideoRoom
       , getStaticRoute
       )
     )
+import VideoRoom.Data
+    ( VideoRoom, VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage )
 
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
@@ -112,13 +112,45 @@ import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
+
+-- | The foundation datatype for your application. This can be a good place to
+-- keep settings and values requiring initialization before your application
+-- starts running, such as database connections. Every handler will have
+-- access to the data present here.
+data App = App
+    { appSettings    :: AppSettings
+    , appStatic      :: Static -- ^ Settings for static file serving.
+    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
+    , appHttpManager :: Manager
+    , appLogger      :: Logger
+    , getChatRoom    :: ChatRoom
+    , getVideoRoom   :: VideoRoom
+    }
+
+mkMessage "App" "messages" "en"
+
+-- This is where we define all of the routes in our application. For a full
+-- explanation of the syntax, please see:
+-- http://www.yesodweb.com/book/routing-and-handlers
+--
+-- Note that this is really half the story; in Application.hs, mkYesodDispatch
+-- generates the rest of the code. Please see the following documentation
+-- for an explanation for this split:
+-- http://www.yesodweb.com/book/scaffolding-and-the-site-template#scaffolding-and-the-site-template_foundation_and_application_modules
+--
+-- This function also generates the following type synonyms:
+-- type Handler = HandlerFor App
+-- type Widget = WidgetFor App ()
+mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
+
 -- | A convenient synonym for creating forms.
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
 
 -- | A convenient synonym for database access functions.
 type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
-
+   
+    
 
 instance YesodVideo App where
     getAppSettings :: HandlerFor App AppSettings
@@ -214,6 +246,13 @@ instance Yesod App where
             idFigcaptionPhotoIncomingVideoCall <- newIdent
             idButtonDeclineIncomingVideoCall <- newIdent
             idButtonAcceptIncomingVideoCall <- newIdent
+
+            idDialogIncomingAudioCall <- newIdent
+            idFigurePhotoIncomingAudioCall <- newIdent
+            idImgPhotoIncomingAudioCall <- newIdent
+            idFigcaptionPhotoIncomingAudioCall <- newIdent
+            idButtonDeclineIncomingAudioCall <- newIdent
+            idButtonAcceptIncomingAudioCall <- newIdent
 
             idDialogMissedCall <- newIdent
             idMissedCallCaller <- newIdent
@@ -1012,6 +1051,16 @@ isDoctorSelf did = do
 
 
 instance YesodAuthPersist App
+
+
+instance RenderMessage App VideoRoomMessage where
+    renderMessage :: App -> [Lang] -> VideoRoomMessage -> Text
+    renderMessage _ [] = defaultVideoRoomMessage
+    renderMessage _ ("en":_) = englishVideoRoomMessage
+    renderMessage _ ("fr":_) = frenchVideoRoomMessage
+    renderMessage _ ("ro":_) = romanianVideoRoomMessage
+    renderMessage _ ("ru":_) = russianVideoRoomMessage
+    renderMessage app (_:xs) = renderMessage app xs
 
 
 -- This instance is required to use forms. You can modify renderMessage to

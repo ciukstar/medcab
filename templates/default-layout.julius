@@ -2,44 +2,70 @@
 navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
+
+  [ { button: #{idButtonDeclineIncomingVideoCall},
+      messageType: #{PushMsgTypeDeclineVideoCall},
+      body: #{rndrMsg MsgCallDeclined},
+      dialog: #{idDialogIncomingVideoCall}
+    },
+    { button: #{idButtonDeclineIncomingAudioCall},
+      messageType: #{PushMsgTypeDeclineAudioCall},
+      body: #{rndrMsg MsgCallDeclined},
+      dialog: #{idDialogIncomingAudioCall}
+    }
+  ].forEach(({ button, messageType, body }) => {
   
-  document.getElementById(#{idButtonDeclineIncomingVideoCall}).onclick = function (event) {
-    fetch(message.data.targetPush, {
-      method: 'POST',
-      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-	messageType: #{PushMsgTypeDecline},
-	title: message.data.title,
-	icon: '@{StaticR img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
-	body: #{rndrMsg MsgCallDeclined}
-      })
-    }).then(function (result) {
-      document.getElementById(#{idDialogIncomingVideoCall}).close();
-    });
-  };
-  
-  document.getElementById(#{idButtonAcceptIncomingVideoCall}).onclick = function (event) {
-    fetch(message.data.targetPush, {
-      method: 'POST',
-      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-	messageType: #{PushMsgTypeAccept},
-	title: message.data.title,
-	icon: message.data.icon,
-	body: #{rndrMsg MsgCallAccepted}
-      })
-    }).then(function (result) {
-      
-      document.getElementById(#{idDialogIncomingVideoCall}).close();
-      
-      const params = new URLSearchParams({
-	backlink: '@{backlink}'
+    document.getElementById(button).onclick = function (event) {
+      fetch(message.data.targetPush, {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+	  messageType: messageType,
+	  title: message.data.title,
+	  icon: '@{StaticR img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+	  body: body
+	})
+      }).then(function (result) {
+	document.getElementById(dialog).close();
       });
-      
-      window.location.href = `${message.data.targetRoom}?${params}`;
-            
-    });
-  };
+    };
+    
+  });
+
+  [ { button: #{idButtonAcceptIncomingVideoCall},
+      messageType: #{PushMsgTypeAcceptVideoCall},
+      dialog: #{idDialogIncomingVideoCall}
+    },
+    { button: #{idButtonAcceptIncomingAudioCall},
+      messageType: #{PushMsgTypeAcceptAudioCall},
+      dialog: #{idDialogIncomingAudioCall}
+    }
+  ].forEach(({ button, messageType, dialog }) => {
+    
+    document.getElementById(button).onclick = function (event) {
+      fetch(message.data.targetPush, {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+	  messageType: messageType,
+	  title: message.data.title,
+	  icon: message.data.icon,
+	  body: #{rndrMsg MsgCallAccepted}
+	})
+      }).then(function (result) {
+	
+	document.getElementById(dialog).close();
+	
+	const params = new URLSearchParams({
+	  backlink: '@{backlink}'
+	});
+	
+	window.location.href = `${message.data.targetRoom}?${params}`;
+        
+      });
+    };
+    
+  });
   
 });
 
@@ -56,6 +82,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idImgPhotoIncomingVideoCall}).src = message.data.image;
     document.getElementById(#{idFigcaptionPhotoIncomingVideoCall}).textContent = message.data.body;
     document.getElementById(#{idDialogIncomingVideoCall}).show();
+    
+  } else if (message.data.messageType === #{PushMsgTypeAudioCall}) {
+  
+    document.getElementById(#{idImgPhotoIncomingAudioCall}).src = message.data.image;
+    document.getElementById(#{idFigcaptionPhotoIncomingAudioCall}).textContent = message.data.body;
+    document.getElementById(#{idDialogIncomingAudioCall}).show();
     
   }
   

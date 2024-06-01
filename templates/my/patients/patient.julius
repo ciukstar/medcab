@@ -13,53 +13,78 @@ Array.from(
   );
 });
 
-document.getElementById(#{idButtonVideoCall}).onclick = function (event) {
+[ { button: #{idButtonVideoCall},
+    messageType: #{PushMsgTypeVideoCall},
+    body: #{msgr $ MsgIncomingVideoCallFrom callerName},
+    targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
+    dialog: #{idDialogOutgoingVideoCall}
+  },
+  { button: #{idButtonAudioCall},
+    messageType: #{PushMsgTypeAudioCall},
+    body: #{msgr $ MsgIncomingAudioCallFrom callerName},
+    targetRoom: '@{VideoR $ AudioR rid pid sid (not polite)}',
+    dialog: #{idDialogOutgoingAudioCall}
+  }
+].forEach(({ button, messageType, body, targetRoom, dialog }) => {
 
-  fetch('@{VideoR $ PushMessageR sid rid}', {
-    method: 'POST',
-    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      messageType: #{PushMsgTypeVideoCall},
-      icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
-      image: '@{AccountPhotoR uid AvatarColorDark}',
-      body: #{msgr $ MsgIncomingVideoCallFrom callerName},
-      targetRoom: '@{VideoR $ RoomR rid pid sid (not polite)}',
-      targetPush: '@{VideoR $ PushMessageR rid sid}'
-    })
-  }).then(function (result) {
-    document.getElementById(#{idDialogOutgoingCall}).show();
-  }).catch(function (err) {
-    console.error(err);
-  });
-  
-};
+  document.getElementById(button).onclick = function (event) {
 
-document.getElementById(#{idButtonOutgoingCallCancel}).onclick = function (event) {
+    fetch('@{VideoR $ PushMessageR sid rid}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	messageType: messageType,
+	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+	image: '@{AccountPhotoR uid AvatarColorDark}',
+	body: body,
+	targetRoom: targetRoom,
+	targetPush: '@{VideoR $ PushMessageR rid sid}'
+      })
+    }).then(function (result) {
+      document.getElementById(dialog).show();
+    }).catch(function (err) {
+      console.error(err);
+    });
+    
+  };
 
-  fetch('@{VideoR $ PushMessageR sid rid}', {
-    method: 'POST',
-    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      "messageType": #{PushMsgTypeCancel},
-      "icon": '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
-      targetPush: '@{VideoR $ PushMessageR rid sid}',
-      "channelId": #{show channel},
-      "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid}
-    })
-  }).then(function (result) {
-    document.getElementById(#{idDialogOutgoingCall}).close();
-  }).catch(function (err) {
-    console.error(err);
-  });
-  
-};
+});
+
+[ { button: #{idButtonOutgoingVideoCallCancel},
+    messageType: #{PushMsgTypeCancel},
+    dialog: #{idDialogOutgoingVideoCall}
+  },
+  { button: #{idButtonOutgoingAudioCallCancel},
+    messageType: #{PushMsgTypeCancel},
+    dialog: #{idDialogOutgoingAudioCall}
+  }
+].forEach(({ button, messageType, dialog }) => {
+
+  document.getElementById(button).onclick = function (event) {
+
+    fetch('@{VideoR $ PushMessageR sid rid}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	messageType: messageType,
+	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+	targetPush: '@{VideoR $ PushMessageR rid sid}'
+      })
+    }).then(function (result) {
+      document.getElementById(dialog).close();
+    }).catch(function (err) {
+      console.error(err);
+    });
+    
+  };
+
+});
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  if (message.data.messageType === #{PushMsgTypeAccept}) {
+  if (message.data.messageType === #{PushMsgTypeAcceptVideoCall}) {
     
-    document.getElementById(#{idDialogOutgoingCall}).close();
+    document.getElementById(#{idDialogOutgoingVideoCall}).close();
     
     const params = new URLSearchParams({
       backlink: '@{backlink}'
@@ -67,9 +92,24 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
     window.location.href = `@{VideoR (RoomR sid pid rid polite)}?${params}`;
     
-  } else if (message.data.messageType === #{PushMsgTypeDecline}) {
+  } else if (message.data.messageType === #{PushMsgTypeAcceptAudioCall}) {
+    
+    document.getElementById(#{idDialogOutgoingAudioCall}).close();
+    
+    const params = new URLSearchParams({
+      backlink: '@{backlink}'
+    });
 
-    document.getElementById(#{idDialogOutgoingCall}).close();
+    window.location.href = `@{VideoR (AudioR sid pid rid polite)}?${params}`;
+    
+  } else if (message.data.messageType === #{PushMsgTypeDeclineVideoCall}) {
+
+    document.getElementById(#{idDialogOutgoingVideoCall}).close();
+    document.getElementById(#{idDialogCallDeclined}).show();
+        
+  } else if (message.data.messageType === #{PushMsgTypeDeclineAudioCall}) {
+
+    document.getElementById(#{idDialogOutgoingAudioCall}).close();
     document.getElementById(#{idDialogCallDeclined}).show();
         
   } else if (message.data.messageType === #{PushMsgTypeRefresh}) {

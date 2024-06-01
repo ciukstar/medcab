@@ -1,3 +1,8 @@
+OutgoingAudioCall: Apel audio de ieșire
+OutgoingVideoCall: Apel video de ieșire
+IncomingAudioCall: Apel audio de intrare
+AudioSession: Sesiune audio
+IncomingAudioCallFrom caller: Apel audio primit de la #{caller}
 UserCallIsOver user: Apelul sa încheiat. #{user} a închis.
 CallAccepted: Apel acceptat
 IncomingVideoCallFrom caller: Apel video primit de la #{caller}

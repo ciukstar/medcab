@@ -38,9 +38,8 @@ import Database.Esqueleto.Experimental
     , where_, orderBy, asc, Value (unValue), update, set, just, leftJoin, desc
     )
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler, Widget
+import Foundation
+    ( Handler, Form, Widget
     , Route (StaticR, DataR)
     , DataR
       ( DoctorCreateR, StaffR, StaffPhotoR, MemberR, DoctorDeleR, DoctorEditR

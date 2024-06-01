@@ -52,3 +52,21 @@ html body
           --md-sys-color-on-primary: #FFFFFF
           tab-index: 1
           margin-left: 1rem
+
+    ##{idDialogIncomingAudioCall}
+        
+        ##{idFigurePhotoIncomingAudioCall}
+            text-align: center
+            ##{idImgPhotoIncomingAudioCall}
+                clip-path: circle(50%)
+
+        ##{idButtonDeclineIncomingAudioCall}
+          --md-sys-color-primary: red
+          --md-sys-color-on-primary: #FFFFFF
+          tab-index: 2
+
+        ##{idButtonAcceptIncomingAudioCall}
+          --md-sys-color-primary: green
+          --md-sys-color-on-primary: #FFFFFF
+          tab-index: 1
+          margin-left: 1rem

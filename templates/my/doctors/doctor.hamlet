@@ -71,11 +71,11 @@
           $if unread > 0
             \ (#{unread})
           
-        <md-filled-tonal-button ##{idButtonVideoCall} type=button>
+        <md-filled-tonal-button type=button ##{idButtonVideoCall}>
           <md-icon slot=icon>video_call
           _{MsgVideoCall}
 
-        <md-filled-tonal-button type=button>
+        <md-filled-tonal-button type=button ##{idButtonAudioCall}>
           <md-icon slot=icon>call
           _{MsgAudioCall}
 
@@ -90,9 +90,9 @@
 
 ^{widgetSnackbar msgs}
 
-<md-dialog ##{idDialogOutgoingCall}>
+<md-dialog ##{idDialogOutgoingVideoCall}>
   <div slot=headline>
-    _{MsgOutgoingCall} ...
+    _{MsgOutgoingVideoCall} ...
 
   <div slot=content>
   
@@ -134,9 +134,59 @@
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
 
   <div slot=actions>
-    <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
+    <md-filled-button has-icon type=button ##{idButtonOutgoingVideoCallCancel}>
       <md-icon slot=icon>call_end
       _{MsgCancel}
+
+
+<md-dialog ##{idDialogOutgoingAudioCall}>
+  <div slot=headline>
+    _{MsgOutgoingAudioCall} ...
+
+  <div slot=content>
+  
+    <figure.app-photo>
+      $maybe (Entity _ (Doctor dname _ _ _ _),(_,(subscribed,(_,_)))) <- doctor
+        $maybe (Entity _ (User email _ _ _ _ name _ _),attrib) <- patient
+          <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 loading=lazy alt=#{fromMaybe email name}>
+          $if ((||) (isJust attrib) (not subscribed))
+            <figcaption.body-small>
+              $maybe attribution <- attrib
+                #{attribution}
+              $if not subscribed
+                <p.body-small>
+                  _{MsgNotSubscribedToNotificationsFromUser dname}
+        $nothing
+          <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+      
+    <figure.app-icon>
+      $maybe (Entity _ (Doctor name _ _ _ _),(_,(_,(looping,_)))) <- doctor
+        $if looping
+          <md-icon>repeat
+          <figcaption.body-small>
+            _{MsgYouAndUserSubscribedOnSameDevice name}
+        $else
+          <md-icon>double_arrow
+      $nothing
+        <md-icon>double_arrow
+      
+    <figure.app-photo>
+      $maybe (Entity did (Doctor name _ _ _ _),(attrib,(_,(looping,accessible)))) <- doctor
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=#{name}>
+        $if ((||) (isJust attrib) ((&&) (not looping) (not accessible)))
+          <figcaption.body-small>
+            $maybe attribution <- attrib
+              ^{attribution}
+            $if (&&) (not looping) (not accessible)
+              <p.body-small>_{MsgUserUnavailable name}
+      $nothing
+        <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button ##{idButtonOutgoingAudioCallCancel}>
+      <md-icon slot=icon>call_end
+      _{MsgCancel}
+
       
 <md-dialog ##{idDialogVideoSessionEnded}>
   <div slot=headline>

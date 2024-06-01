@@ -1,3 +1,8 @@
+OutgoingAudioCall: Исходящий аудиовызов
+OutgoingVideoCall: Исходящий видеозвонок
+IncomingAudioCall: Входящий аудиовызов
+AudioSession: Аудиосессия
+IncomingAudioCallFrom caller: Входящий аудиовызов от #{caller}
 UserCallIsOver user: Звонок окончен. #{user} повесил(а) трубку.
 CallAccepted: Звонок принят
 IncomingVideoCallFrom caller: Входящий видеозвонок, #{caller}

@@ -43,13 +43,6 @@ import Data.Maybe (fromMaybe)
 import Data.Text (unpack, pack)
 import Data.Text.Encoding (encodeUtf8)
 
-import Foundation.Data
-    ( AppMessage
-      ( MsgNotGeneratedVAPID, MsgVideoSession, MsgClose, MsgCallEnded, MsgAppName
-      , MsgUserCallIsOver
-      )
-    )
-
 import Model
     ( paramBacklink
     , UserId, User (User), UserPhoto (UserPhoto)
@@ -81,7 +74,11 @@ import Text.Shakespeare.Text (st)
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, PhotoR, RoomR)
+    , Route (WebSoketR, PushMessageR, PhotoR, RoomR, AudioR)
+    , VideoRoomMessage
+      ( MsgNotGeneratedVAPID, MsgVideoSession, MsgAudioSession, MsgClose
+      , MsgCallEnded, MsgAppName, MsgUserCallIsOver, MsgBack
+      )
     )
 
 import Web.WebPush
@@ -119,9 +116,41 @@ class YesodVideo m where
     getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
+getAudioR :: (Yesod m, YesodVideo m)
+          => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+          => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
+          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
+getAudioR sid pid rid polite = do
+
+    let channelId = ChanId (fromIntegral $ fromSqlKey pid)
+    backlink <- runInputGet (ireq urlField paramBacklink)
+
+    toParent <- getRouteToParent
+
+    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
+
+    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg
+
+    let extractName (Entity _ (User email _ _ _ _ name _ _)) = fromMaybe email name
+
+    terminator <- liftHandler $ (extractName <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val sid
+        return x )
+
+    msgr <- liftHandler getMessageRender
+    liftHandler $ defaultLayout $ do
+        idButtonExitAudioSession <- newIdent
+        idAudioRemote <- newIdent
+        idAudioSelf <- newIdent
+        idButtonEndAudioSession <- newIdent
+        idDialogCallEnded <- newIdent
+        $(widgetFile "audio/session")
+
+
 getRoomR :: (Yesod m, YesodVideo m)
          => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-         => (RenderMessage m AppMessage, RenderMessage m FormMessage)
+         => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
 getRoomR sid pid rid polite = do
 
@@ -141,7 +170,7 @@ getRoomR sid pid rid polite = do
         where_ $ x ^. UserId ==. val sid
         return x )
 
-    msgr <- getMessageRender
+    msgr <- liftHandler getMessageRender
     liftHandler $ defaultLayout $ do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
@@ -158,7 +187,7 @@ getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                 => (RenderMessage m FormMessage, RenderMessage m AppMessage)
+                 => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
                  => UserId -> UserId -> SubHandlerFor VideoRoom m ()
 postPushMessageR sid rid = do
 
@@ -264,10 +293,9 @@ getPhotoR uid = do
       Just (Entity _ (UserPhoto _ mime bs _)) -> TypedContent (encodeUtf8 mime) $ toContent bs
       Nothing -> TypedContent "image/svg+xml" $ toContent [st|<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/></svg>|]
 
-
 instance ( Yesod m, YesodVideo m
          , YesodPersist m, YesodPersistBackend m ~ SqlBackend
-         , RenderMessage m AppMessage, RenderMessage m FormMessage
+         , RenderMessage m VideoRoomMessage, RenderMessage m FormMessage
          ) => YesodSubDispatch VideoRoom m where
     yesodSubDispatch :: YesodSubRunnerEnv VideoRoom m -> Application
     yesodSubDispatch = $(mkYesodSubDispatch resourcesVideoRoom)

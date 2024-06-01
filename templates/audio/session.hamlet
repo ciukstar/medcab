@@ -1,19 +1,19 @@
 
 <header.app-top-app-bar.background>
-  <md-icon-button href=#{backlink} aria-label=_{MsgBack} ##{idButtonExitVideoSession}>
+  <md-icon-button href=#{backlink} aria-label=_{MsgBack} ##{idButtonExitAudioSession}>
     <md-icon>arrow_back
 
   <h1.title-large>
-    _{MsgVideoSession}
+    _{MsgAudioSession}
 
-  <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
+  <md-filled-icon-button has-icon ##{idButtonEndAudioSession}>
     <md-icon>call_end
 
 <main>
 
-  <video autoplay ##{idVideoRemote}>
+  <audio controls autoplay ##{idAudioRemote}>
 
-  <video autoplay muted ##{idVideoSelf}>
+  <audio controls autoplay muted ##{idAudioSelf}>
 
 
 <md-dialog ##{idDialogCallEnded}>

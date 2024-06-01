@@ -15,8 +15,7 @@ import Data.FileEmbed (embedFile)
 import Data.Function (($))
 import Data.Maybe (Maybe (Nothing, Just))
 
-import Foundation ()
-import Foundation.Data
+import Foundation
     ( Handler
     , Route (HomeR, StaticR, FaviconR, DocsR)
     , AppMessage (MsgAppName, MsgMetaDescription)

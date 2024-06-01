@@ -36,9 +36,8 @@ import Database.Persist
     ( Entity (Entity), PersistStoreWrite (replace, delete, insert_, replace)
     )
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler, Widget
+import Foundation
+    ( Handler, Form, Widget
     , Route (DataR)
     , DataR
       ( SpecialtiesR, SpecialtyCreateR, SpecialtyR, SpecialtyEditR
