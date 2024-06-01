@@ -271,3 +271,11 @@ Doc015 link@Text: A doctor must be registered by an administrator in the subsect
 Doc016: A doctor can designate users as patients by adding them to the patient list.
 
 Doc017: A patient is a user that a doctor has designated as his or her patient.
+
+Doc018 link@Text: A medical specialty can be added by an administrator by providing its name, code and description in the <a href=#{link} target=_blank>"Specialties"</a> section under the "Data" menu item.
+
+Doc019: Subspecialties for a specialty can also be defined in a hierarchical order.
+
+Doc020: One or more doctors can be assigned to each specialty.
+
+Doc021: A doctor may have one or more specialties.

@@ -271,3 +271,11 @@ Doc015 link: Un médecin doit être enregistré par un administrateur dans la so
 Doc016: Un médecin peut désigner des utilisateurs comme patients en les ajoutant à la liste des patients.
 
 Doc017: Un patient est un utilisateur qu'un médecin a désigné comme son patient.
+
+Doc018 link: Une spécialité médicale peut être ajoutée par un administrateur en fournissant son nom, son code et sa description dans la section <a href=#{link} target=_blank>« Spécialités »</a> sous l'élément de menu « Données ».
+
+Doc019: Des sous-spécialités pour une spécialité peuvent également être définies de manière hiérarchique.
+
+Doc020: A chaque spécialité peuvent être affectés un ou plusieurs médecins.
+
+Doc021: Un médecin peut avoir une ou plusieurs spécialités.

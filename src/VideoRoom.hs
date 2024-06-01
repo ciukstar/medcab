@@ -65,6 +65,8 @@ import Settings
     ( widgetFile, AppSettings (appSuperuser)
     , Superuser (Superuser, superuserUsername)
     )
+import Settings.StaticFiles
+    ( img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg )
 
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
@@ -105,7 +107,6 @@ import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 import Yesod.Static (StaticRoute)
-import Settings.StaticFiles (img_call_end_24dp_FILL0_wght400_GRAD0_opsz24_svg)
 
 
 

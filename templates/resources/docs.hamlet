@@ -58,6 +58,7 @@
       <h3.headline-small>_{MsgDoctor}
       <p.body-medium>#{translate $ MsgDoc015 (rndr $ DataR StaffR)}
       <p.body-medium>_{MsgDoc016}
+      <p.body-medium>_{MsgDoc021}
       
     <section>
       <h3.headline-small>_{MsgPatient}
@@ -65,7 +66,9 @@
 
     <section>
       <h3.headline-small>_{MsgSpecialty}
-      ...
+      <p.body-medium>#{translate $ MsgDoc018 (rndr $ DataR $ SpecialtiesR (Specialties []))}
+      <p.body-medium>_{MsgDoc019}
+      <p.body-medium>_{MsgDoc020}
 
   <section>
     <h2.headline-medium>_{MsgSuperuser}

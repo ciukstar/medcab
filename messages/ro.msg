@@ -271,3 +271,11 @@ Doc015 link: Un medic trebuie să fie înregistrat de un administrator în subse
 Doc016: Un medic poate desemna utilizatori ca fiind pacienți adăugându-i la lista de pacienți.
 
 Doc017: Un pacient este un utilizator pe care un medic l-a desemnat ca fiind pacientul său.
+
+Doc018 link: O specialitate medicală poate fi adăugată de către un administrator, furnizând numele, codul și descrierea acesteia în secțiunea <a href=#{link} target=_blank>„Specialități”</a> din secțiunea de meniu „Date”.
+
+Doc019: De asemenea, pot fi definite subspecialități pentru o specialitate în mod ierarhic.
+
+Doc020: Pentru fiecare specialitate pot fi repartizați unul sau mai mulți medici.
+
+Doc021: Un medic poate avea una sau mai multe specialități.
