@@ -20,3 +20,16 @@ header
         --md-sys-color-primary: red
         --md-sys-color-on-primary: #FFFFFF
         margin-left: auto
+
+main
+
+    figure
+        position: relative
+        text-align: center
+        ##{idImgPosterRemote}, ##{idImgPosterSelf}
+            clip-path: circle(50%)
+        ##{idImgPosterSelf}
+            position: absolute
+            top: 0
+            right: 0
+            clip-path: circle(50%)

@@ -1,3 +1,7 @@
+UserOnCall user: #{user} la telefon
+Unknown: Necunoscut
+UserCanceledAudioCall user: #{user} a anulat apelul audio
+UserCanceledVideoCall user: #{user} a anulat apelul video
 OutgoingAudioCall: Apel audio de ieșire
 OutgoingVideoCall: Apel video de ieșire
 IncomingAudioCall: Apel audio de intrare

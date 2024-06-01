@@ -48,10 +48,9 @@
   <div slot=headline>
     _{MsgMissedCall}
 
-  <form slot=content method=dialog>
-    <p.body-large>
-      _{MsgMissedCall}: 
-      <span ##{idMissedCallCaller}>
+  <div slot=content>
+    <p.body-large ##{idMissedCallCaller}>
+      _{MsgMissedCall}
 
   <div slot=actions>
     <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">

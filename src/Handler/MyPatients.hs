@@ -62,7 +62,7 @@ import Foundation
       , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
       , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable
       , MsgIncomingVideoCallFrom, MsgIncomingAudioCallFrom, MsgOutgoingVideoCall
-      , MsgOutgoingAudioCall
+      , MsgOutgoingAudioCall, MsgUserCanceledVideoCall, MsgUserCanceledAudioCall
       )
     )
 
@@ -163,7 +163,7 @@ postMyPatientUnsubscribeR uid did pid = do
 
 postMyPatientSubscriptionsR :: UserId -> DoctorId -> PatientId -> Handler Html
 postMyPatientSubscriptionsR uid did pid = do
-    
+
     vapidKeys <- getVAPIDKeys
 
     patient <- runDB $ selectOne $ do
@@ -470,7 +470,7 @@ getMyPatientR uid did pid = do
             `leftJoin` table @DoctorPhoto `on` (\(x :& h) -> just (x ^. DoctorId) ==. h ?. DoctorPhotoDoctor)
         where_ $ x ^. DoctorId ==. val did
         return (x, h ?. DoctorPhotoAttribution) )
-    
+
     let callerName = case doctor of
           Just (Entity _ (Doctor name _ _ _ _),_) -> name
           Nothing -> "???"
@@ -534,13 +534,13 @@ getMyPatientR uid did pid = do
 
           idButtonVideoCall <- newIdent
           idButtonAudioCall <- newIdent
-          
+
           idDialogOutgoingVideoCall <- newIdent
           idButtonOutgoingVideoCallCancel <- newIdent
-          
+
           idDialogOutgoingAudioCall <- newIdent
           idButtonOutgoingAudioCallCancel <- newIdent
-          
+
           idDialogVideoSessionEnded <- newIdent
           idDialogCallDeclined <- newIdent
 

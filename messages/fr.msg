@@ -1,3 +1,7 @@
+UserOnCall user: #{user} sur appel
+Unknown: Inconnu
+UserCanceledAudioCall user: #{user} a annulé l'appel audio
+UserCanceledVideoCall user: #{user} a annulé l'appel vidéo
 OutgoingAudioCall: Appel audio sortant
 OutgoingVideoCall: Appel vidéo sortant
 IncomingAudioCall: Appel audio entrant

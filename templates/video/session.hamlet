@@ -11,9 +11,11 @@
 
 <main>
 
-  <video autoplay ##{idVideoRemote}>
+  <video autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}
+    controlslist="nofullscreen noremoteplayback" disablepictureinpicture>
 
-  <video autoplay muted ##{idVideoSelf}>
+  <video autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}
+    controlslist="nofullscreen noremoteplayback" disablepictureinpicture>
 
 
 <md-dialog ##{idDialogCallEnded}>

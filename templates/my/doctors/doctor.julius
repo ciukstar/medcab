@@ -38,15 +38,17 @@
 
 [ { button: #{idButtonOutgoingVideoCallCancel},
     messageType: #{PushMsgTypeCancel},
+    body: #{msgr $ MsgUserCanceledVideoCall callerName},
     dialog: #{idDialogOutgoingVideoCall}
   },
   { button: #{idButtonOutgoingAudioCallCancel},
     messageType: #{PushMsgTypeCancel},
+    body: #{msgr $ MsgUserCanceledAudioCall callerName},
     dialog: #{idDialogOutgoingAudioCall}
   }
-].forEach(({ button, messageType, dialog }) => {
+].forEach(({ button, messageType, body, dialog }) => {
 
-  document.getElementById(button).addEventListener('click', function (event) {
+  document.getElementById(button).addEventListener('click', (event) => {
 
     fetch('@{VideoR $ PushMessageR sid rid}', {
       method: 'POST',
@@ -54,6 +56,7 @@
       body: new URLSearchParams({
 	messageType: messageType,
 	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+	body: body,
 	targetPush: '@{VideoR $ PushMessageR rid sid}'
       })
     }).then(function (result) {

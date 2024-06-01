@@ -13,7 +13,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       body: #{rndrMsg MsgCallDeclined},
       dialog: #{idDialogIncomingAudioCall}
     }
-  ].forEach(({ button, messageType, body }) => {
+  ].forEach(({ button, messageType, body, dialog }) => {
   
     document.getElementById(button).onclick = function (event) {
       fetch(message.data.targetPush, {
@@ -74,6 +74,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{PushMsgTypeCancel}) {
     
     document.getElementById(#{idDialogIncomingVideoCall}).close();
+    document.getElementById(#{idDialogIncomingAudioCall}).close();
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.body;
     document.getElementById(#{idDialogMissedCall}).show();
     

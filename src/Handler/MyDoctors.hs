@@ -56,7 +56,8 @@ import Foundation
       , MsgClose, MsgCallDeclined, MsgNotSubscribedToNotificationsFromUser
       , MsgUnsubscribe, MsgCalleeDeclinedTheCall, MsgUserIsNoLongerAvailable
       , MsgUserIsNowAvailable, MsgIncomingVideoCallFrom, MsgIncomingAudioCallFrom
-      , MsgAppName, MsgOutgoingVideoCall, MsgOutgoingAudioCall
+      , MsgOutgoingVideoCall, MsgOutgoingAudioCall, MsgUserCanceledVideoCall
+      , MsgAppName, MsgUserCanceledAudioCall
       )
     )
 

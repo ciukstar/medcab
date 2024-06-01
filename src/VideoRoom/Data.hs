@@ -51,6 +51,8 @@ data VideoRoomMessage = MsgAppName
                       | MsgClose
                       | MsgUserCallIsOver Text
                       | MsgNotGeneratedVAPID
+                      | MsgUnknown
+                      | MsgUserOnCall Text
 
 englishVideoRoomMessage :: VideoRoomMessage -> Text
 englishVideoRoomMessage MsgAppName = "MedCab"
@@ -61,6 +63,8 @@ englishVideoRoomMessage MsgCallEnded = "Call ended"
 englishVideoRoomMessage MsgClose = "Close"
 englishVideoRoomMessage (MsgUserCallIsOver user) = [st|The call is over. #{user} hung up.|]
 englishVideoRoomMessage MsgNotGeneratedVAPID = "VAPID not generated"
+englishVideoRoomMessage MsgUnknown = "Unknown"
+englishVideoRoomMessage (MsgUserOnCall user) = [st|#{user} on call|]
 
 frenchVideoRoomMessage :: VideoRoomMessage -> Text
 frenchVideoRoomMessage MsgAppName = "MedCab"
@@ -71,6 +75,8 @@ frenchVideoRoomMessage MsgCallEnded = "Appel terminé"
 frenchVideoRoomMessage MsgClose = "Fermer"
 frenchVideoRoomMessage (MsgUserCallIsOver user) = [st|L'appel est terminé. #{user} a raccroché.|]
 frenchVideoRoomMessage MsgNotGeneratedVAPID = "Le VAPID n'a pas été généré"
+frenchVideoRoomMessage MsgUnknown = "Inconnu"
+frenchVideoRoomMessage (MsgUserOnCall user) = [st|#{user} sur appel|]
 
 romanianVideoRoomMessage :: VideoRoomMessage -> Text
 romanianVideoRoomMessage MsgAppName = "MedCab"
@@ -81,6 +87,8 @@ romanianVideoRoomMessage MsgCallEnded = "Apel terminat"
 romanianVideoRoomMessage MsgClose = "Închide"
 romanianVideoRoomMessage (MsgUserCallIsOver user) = [st|Apelul sa încheiat. #{user} a închis.|]
 romanianVideoRoomMessage MsgNotGeneratedVAPID = "VAPID nu a fost generat"
+romanianVideoRoomMessage MsgUnknown = "Necunoscut"
+romanianVideoRoomMessage (MsgUserOnCall user) = [st|#{user} la telefon|]
 
 russianVideoRoomMessage :: VideoRoomMessage -> Text
 russianVideoRoomMessage MsgAppName = "MedCab"
@@ -91,6 +99,8 @@ russianVideoRoomMessage MsgCallEnded = "Звонок окончен"
 russianVideoRoomMessage MsgClose = "Закрыть"
 russianVideoRoomMessage (MsgUserCallIsOver user) = [st|Звонок окончен. #{user} повесил(а) трубку.|]
 russianVideoRoomMessage MsgNotGeneratedVAPID = "VAPID не был создан"
+russianVideoRoomMessage MsgUnknown = "Неизвестный"
+russianVideoRoomMessage (MsgUserOnCall user) = [st|#{user} на связи|]
 
 defaultVideoRoomMessage :: VideoRoomMessage -> Text
 defaultVideoRoomMessage = englishVideoRoomMessage

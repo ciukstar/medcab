@@ -77,7 +77,8 @@ import VideoRoom.Data
     , Route (WebSoketR, PushMessageR, PhotoR, RoomR, AudioR)
     , VideoRoomMessage
       ( MsgNotGeneratedVAPID, MsgVideoSession, MsgAudioSession, MsgClose
-      , MsgCallEnded, MsgAppName, MsgUserCallIsOver, MsgBack
+      , MsgCallEnded, MsgAppName, MsgUserCallIsOver, MsgBack, MsgUnknown
+      , MsgUserOnCall
       )
     )
 
@@ -137,11 +138,18 @@ getAudioR sid pid rid polite = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val sid
         return x )
+    
+    callerName <- liftHandler $ (extractName <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val rid
+        return x )
 
     msgr <- liftHandler getMessageRender
     liftHandler $ defaultLayout $ do
         idButtonExitAudioSession <- newIdent
+        idImgPosterRemote <- newIdent
         idAudioRemote <- newIdent
+        idImgPosterSelf <- newIdent
         idAudioSelf <- newIdent
         idButtonEndAudioSession <- newIdent
         idDialogCallEnded <- newIdent

@@ -11,9 +11,20 @@
 
 <main>
 
-  <audio controls autoplay ##{idAudioRemote}>
+  
+  <audio autoplay ##{idAudioRemote}>
+  <figure>
+    <img src=@{toParent $ PhotoR rid} loading=lazy height=128 width=128 ##{idImgPosterRemote}>
+    <img src=@{toParent $ PhotoR sid} loading=lazy height=24 width=24 ##{idImgPosterSelf}>
+    <figcaption>
+      <p.body-large>
+        $maybe name <- callerName
+          _{MsgUserOnCall name}
+        $nothing
+          _{MsgUnknown}
 
-  <audio controls autoplay muted ##{idAudioSelf}>
+  <audio autoplay muted ##{idAudioSelf}>
+      
 
 
 <md-dialog ##{idDialogCallEnded}>

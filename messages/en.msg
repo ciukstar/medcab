@@ -1,3 +1,7 @@
+UserOnCall user@Text: #{user} on call
+Unknown: Unknown
+UserCanceledAudioCall user@Text: #{user} canceled the audio call
+UserCanceledVideoCall user@Text: #{user} canceled the video call
 OutgoingAudioCall: Outgoing audio call
 OutgoingVideoCall: Outgoing video call
 IncomingAudioCall: Incoming audio call

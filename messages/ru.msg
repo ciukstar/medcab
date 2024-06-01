@@ -1,3 +1,7 @@
+UserOnCall user: #{user} на связи
+Unknown: Неизвестный
+UserCanceledAudioCall user: #{user} отменил(а) аудиозвонок
+UserCanceledVideoCall user: #{user} отменил(а) видеозвонок
 OutgoingAudioCall: Исходящий аудиовызов
 OutgoingVideoCall: Исходящий видеозвонок
 IncomingAudioCall: Входящий аудиовызов
