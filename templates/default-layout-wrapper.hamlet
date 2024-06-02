@@ -5,8 +5,8 @@ $doctype 5
     <meta charset="UTF-8">
 
     <title>#{pageTitle pc}
-    <meta name=description content=#{rndrMsg MsgMetaDescription}>
-    <meta name=keywords content=#{rndrMsg MsgMetaKeywords}>
+    <meta name=description content=#{msgr MsgMetaDescription}>
+    <meta name=keywords content=#{msgr MsgMetaKeywords}>
     <meta name=author content="Sergiu Starciuc, ciukstar@gmail.com">
     <meta name="theme-color" content="rgb(101 85 143)">
     <meta name="color-scheme" content="light dark">

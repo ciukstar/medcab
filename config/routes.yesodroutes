@@ -1,8 +1,9 @@
 
-
 /rtc VideoR VideoRoom getVideoRoom
 
 /channels ChatR ChatRoom getChatRoom
+
+/pushsubscriptionchange PushSubscriptionEndpointR PUT
 
 /patients/#PatientId/#UserId/doctors/#DoctorId/unsubscribe   MyDoctorUnsubscribeR   POST
 /patients/#PatientId/#UserId/doctors/#DoctorId/subscriptions MyDoctorSubscriptionsR GET POST

@@ -39,7 +39,8 @@ import Database.Esqueleto.Experimental
     , (^.)
     , Value (unValue), select, orderBy, in_
     )
-import qualified Database.Esqueleto.Experimental as E ((==.), exists)
+import qualified Database.Esqueleto.Experimental as E
+    ((==.), exists, update, set, (=.))
 import Database.Persist.Sql (runSqlPool, ConnectionPool)
 
 import Material3 (md3emailField, md3passwordField)
@@ -229,7 +230,7 @@ instance Yesod App where
     defaultLayout widget = do
         master <- getYesod
         lang <- fromMaybe "en" . LS.head <$> languages
-        rndrMsg <- getMessageRender
+        msgr <- getMessageRender
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
         -- default-layout-wrapper is the entire page. Since the final
@@ -258,7 +259,7 @@ instance Yesod App where
             idMissedCallCaller <- newIdent
 
             backlink <- fromMaybe HomeR <$> getCurrentRoute
-
+            calleeName <- fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<) <$> maybeAuth
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -271,6 +272,8 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
 
+    
+    isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
     isAuthorized (MyDoctorUnsubscribeR _ uid _) _ = isAuthenticatedSelf uid
     isAuthorized (MyDoctorSubscriptionsR _ uid _) _ = isAuthenticatedSelf uid
@@ -440,6 +443,21 @@ instance Yesod App where
     makeLogger = return . appLogger
 
 
+putPushSubscriptionEndpointR :: Handler ()
+putPushSubscriptionEndpointR = do
+    endpoint' <- runInputPost $ ireq urlField paramEndpoint
+    p256dh' <- runInputPost $ ireq textField "p256dh"
+    auth' <- runInputPost $ ireq textField "auth"
+    oldEndpoint' <- runInputPost $ ireq urlField "oldendpoint"
+
+    runDB $ E.update $ \x -> do
+        E.set x [ PushSubscriptionEndpoint E.=. val endpoint'
+                , PushSubscriptionP256dh E.=. val p256dh'
+                , PushSubscriptionAuth E.=. val auth'
+                ]
+        where_ $ x ^. PushSubscriptionEndpoint E.==. val oldEndpoint'
+        
+
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
 
@@ -447,11 +465,17 @@ getServiceWorkerR = do
     msgr <- getMessageRender
     mVAPIDKeys <- getVAPIDKeys
 
-    -- calleeName <- resolveName <$> maybeAuth
+    calleeName <- resolveName <$> maybeAuth
 
     case mVAPIDKeys of
       Just vapidKeys -> do
           let applicationServerKey = vapidPublicKeyBytes vapidKeys
+          dismissNotifcation <- newIdent
+          declineVideoCall <- newIdent
+          acceptVideoCall <- newIdent
+          declineAudioCall <- newIdent
+          acceptAudioCall <- newIdent
+          
           return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
   where

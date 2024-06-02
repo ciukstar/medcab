@@ -1,3 +1,4 @@
+UserStartedSession user: #{user} начал(а) сеанс
 UserOnCall user: #{user} на связи
 Unknown: Неизвестный
 UserCanceledAudioCall user: #{user} отменил(а) аудиозвонок

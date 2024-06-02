@@ -1,10 +1,11 @@
 
 
 navigator.serviceWorker.addEventListener('message', function (message) {
-  console.log('message: ', message);
+
   if (message.data.messageType === #{PushMsgTypeRefresh}) {
     window.location.reload();
   }
+
 });
 
 

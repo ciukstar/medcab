@@ -202,3 +202,6 @@ paramBacklink = "backlink"
 
 paramEndpoint :: Text
 paramEndpoint = "endpoint"
+
+keyWebPushSubscriptionEndpoint :: Text
+keyWebPushSubscriptionEndpoint = "MEDCAB_WEB_PUSH_SUBSCRIPTION_ENDPOINT"

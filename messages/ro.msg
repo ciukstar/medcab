@@ -1,3 +1,4 @@
+UserStartedSession user: #{user} a început sesiunea
 UserOnCall user: #{user} la telefon
 Unknown: Necunoscut
 UserCanceledAudioCall user: #{user} a anulat apelul audio

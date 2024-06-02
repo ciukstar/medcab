@@ -1,3 +1,4 @@
+UserStartedSession user: #{user} a commencé la session
 UserOnCall user: #{user} sur appel
 Unknown: Inconnu
 UserCanceledAudioCall user: #{user} a annulé l'appel audio

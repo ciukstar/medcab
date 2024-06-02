@@ -12,17 +12,39 @@ self.onpush = function (e) {
     
   }).then(([notify,message]) => {
 
-    let actions;
-    
-    if (message.messageType === #{PushMsgTypeRefresh}) {
-      actions = [ { action: 'dismissNotifcationRefresh', title: #{msgr MsgDismissNotification} }];
-    } else {
-      actions = [];
-    }
-    
-    return !notify
-      ? Promise.resolve()
-      : self.registration.showNotification(message.title, {
+    if (notify) {
+      
+      let actions;
+      
+      if (message.messageType === #{PushMsgTypeRefresh}) {
+	
+	actions = [ { action: #{dismissNotifcation}, title: #{msgr MsgDismissNotification} }];
+	
+      } else if (message.messageType === #{PushMsgTypeDeclineVideoCall}) {
+	
+	actions = [ { action: #{dismissNotifcation}, title: #{msgr MsgDismissNotification} } ];
+	
+      } else if (message.messageType === #{PushMsgTypeDeclineAudioCall}) {
+	
+	actions = [ { action: #{dismissNotifcation}, title: #{msgr MsgDismissNotification} } ];
+	
+      } else if (message.messageType === #{PushMsgTypeVideoCall}) {
+	
+	actions = [ { action: #{declineVideoCall}, title: #{msgr MsgDecline} },
+		    { action: #{acceptVideoCall}, title: #{msgr MsgAccept} }
+		  ];
+	
+      } else if (message.messageType === #{PushMsgTypeAudioCall}) {
+	
+	actions = [ { action: #{declineAudioCall}, title: #{msgr MsgDecline} },
+		    { action: #{acceptAudioCall}, title: #{msgr MsgAccept} }
+		  ];
+	
+      } else {
+	actions = [];
+      }
+
+      self.registration.showNotification(message.title, {
 	requireInteraction: true,
 	tag: message.messageType,
 	renotify: true,
@@ -32,6 +54,12 @@ self.onpush = function (e) {
 	data: message,
 	actions: actions
       });
+      
+    } else {
+      
+      return Promise.resolve();
+      
+    }
     
   });
   
@@ -41,7 +69,207 @@ self.onpush = function (e) {
 
 self.addEventListener('notificationclick', function (e) {
   
-  if (e.action === 'dismissNotifcationRefresh') {
+  if (e.action === #{dismissNotifcation}) {
+    
+    e.notification.close();
+    
+  } else if (e.action === #{declineVideoCall}) {
+    
+    e.notification.close();
+
+    fetch(e.notification.data.targetPush, {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        messageType: #{PushMsgTypeDeclineVideoCall},
+        title: #{msgr MsgAppName},
+        icon: '@{StaticR img_phone_missed_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+        body: #{msgr $ MsgCalleeDeclinedTheCall calleeName}
+      })
+    });
+    
+  } else if (e.action === #{acceptVideoCall}) {
+    
+    e.notification.close();
+
+    const promise = self.clients.matchAll(
+      { type: 'window', includeUncontrolled: true }
+    ).then((clients) => {
+      
+      return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
+
+    }).then(([targets, clients]) => {
+
+      if (targets.length > 0) {
+
+        targets[0].focus().then((client) => {
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              messageType: #{PushMsgTypeAcceptVideoCall},
+              title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+              body: #{msgr $ MsgUserStartedSession calleeName},
+              backlink: client.url
+            })
+          });
+
+	  const params = new URLSearchParams({
+            backlink: client.url
+          });
+
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+
+        });
+
+      } else if (clients.length > 0) {
+	
+	clients[0].focus().then((client) => {
+
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              messageType: #{PushMsgTypeAcceptVideoCall},
+              title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+              body: #{msgr $ MsgUserStartedSession calleeName},
+              backlink: client.url
+            })
+          });
+
+          const params = new URLSearchParams({
+            backlink: client.url
+          });
+
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+
+        });
+
+      } else {
+
+        fetch(e.notification.data.targetPush, {
+          method: 'POST',
+          headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            messageType: #{PushMsgTypeAcceptVideoCall},
+            title: #{msgr MsgAppName},
+            icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+            body: #{msgr $ MsgUserStartedSession calleeName},
+            backlink: self.location.origin
+          })
+        });
+
+        const params = new URLSearchParams({
+          backlink: self.location.origin
+        });
+
+        return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
+
+      }
+    });
+
+    e.waitUntil(promise);
+    
+  } else if (e.action === #{declineAudioCall}) {
+    
+    e.notification.close();
+
+    fetch(e.notification.data.targetPush, {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        messageType: #{PushMsgTypeDeclineAudioCall},
+        title: #{msgr MsgAppName},
+        icon: '@{StaticR img_phone_missed_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+        body: #{msgr $ MsgCalleeDeclinedTheCall calleeName}
+      })
+    });
+    
+  } else if (e.action === #{acceptAudioCall}) {
+    
+    e.notification.close();
+
+    const promise = self.clients.matchAll({ type: 'window' }).then((clients) => {
+      
+      return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
+
+    }).then(([targets, clients]) => {
+
+      if (targets.length > 0) {
+
+        targets[0].focus().then((client) => {
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              messageType: #{PushMsgTypeAcceptAudioCall},
+              title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+              body: #{msgr $ MsgUserStartedSession calleeName},
+              backlink: client.url
+            })
+          });
+
+	  const params = new URLSearchParams({
+            backlink: client.url
+          });
+
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+
+        });
+
+      } else if (clients.length > 0) {
+	
+	clients[0].focus().then((client) => {
+
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              messageType: #{PushMsgTypeAcceptAudioCall},
+              title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+              body: #{msgr $ MsgUserStartedSession calleeName},
+              backlink: client.url
+            })
+          });
+
+          const params = new URLSearchParams({
+            backlink: client.url
+          });
+
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+
+        });
+
+      } else {
+
+        fetch(e.notification.data.targetPush, {
+          method: 'POST',
+          headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            messageType: #{PushMsgTypeAcceptAudioCall},
+            title: #{msgr MsgAppName},
+            icon: '@{StaticR img_phone_in_talk_24dp_FILL0_wght400_GRAD0_opsz24_svg}',
+            body: #{msgr $ MsgUserStartedSession calleeName},
+            backlink: self.location.origin
+          })
+        });
+
+        const params = new URLSearchParams({
+          backlink: self.location.origin
+        });
+
+        return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
+
+      }
+    });
+
+    e.waitUntil(promise);
+    
+  } else {
     e.notification.close();
   }
     
@@ -75,4 +303,68 @@ self.addEventListener('fetch', function (e) {
     
   }
   
+});
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+
+  Notification.requestPermission().then(function (permission) {
+
+    if (permission === 'granted') {
+
+      registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+      }).then((subscription) => {
+
+        const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+        const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+
+        fetch('@{PushSubscriptionEndpointR}', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            endpoint: newSubscr.endpoint,
+            p256dh: newSubscr.keys.p256dh,
+            auth: newSubscr.keys.auth,
+            oldendpoint: oldSubscr.endpoint
+          })
+        }).then((response) => {
+          localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+        });
+
+      }).catch((err) => {
+
+        registration.pushManager.getSubscription().then((subscription) => {
+          subscription.unsubscribe().then((sccess) => {
+            registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+            }).then((subscription) => {
+
+              const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+              const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+
+              fetch('@{PushSubscriptionEndpointR}', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                  endpoint: newSubscr.endpoint,
+                  p256dh: newSubscr.keys.p256dh,
+                  auth: newSubscr.keys.auth,
+                  oldendpoint: oldSubscr.endpoint
+                })
+              }).then((response) => {
+                localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+              });
+
+            });
+          });
+        });
+
+      });
+
+    }
+
+  });
+
 });

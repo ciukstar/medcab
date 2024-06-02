@@ -1,3 +1,4 @@
+UserStartedSession user@Text: #{user} started the session
 UserOnCall user@Text: #{user} on call
 Unknown: Unknown
 UserCanceledAudioCall user@Text: #{user} canceled the audio call

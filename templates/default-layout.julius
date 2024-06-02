@@ -5,12 +5,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
   [ { button: #{idButtonDeclineIncomingVideoCall},
       messageType: #{PushMsgTypeDeclineVideoCall},
-      body: #{rndrMsg MsgCallDeclined},
+      body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
       dialog: #{idDialogIncomingVideoCall}
     },
     { button: #{idButtonDeclineIncomingAudioCall},
       messageType: #{PushMsgTypeDeclineAudioCall},
-      body: #{rndrMsg MsgCallDeclined},
+      body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
       dialog: #{idDialogIncomingAudioCall}
     }
   ].forEach(({ button, messageType, body, dialog }) => {
@@ -50,7 +50,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	  messageType: messageType,
 	  title: message.data.title,
 	  icon: message.data.icon,
-	  body: #{rndrMsg MsgCallAccepted}
+	  body: #{msgr MsgCallAccepted}
 	})
       }).then(function (result) {
 	
