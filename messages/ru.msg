@@ -1,3 +1,4 @@
+EndSession: Завершить сеанс
 UserStartedSession user: #{user} начал(а) сеанс
 UserOnCall user: #{user} на связи
 Unknown: Неизвестный

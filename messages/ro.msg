@@ -1,3 +1,4 @@
+EndSession: Termină sesiunea
 UserStartedSession user: #{user} a început sesiunea
 UserOnCall user: #{user} la telefon
 Unknown: Necunoscut

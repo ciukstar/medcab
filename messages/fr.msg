@@ -1,3 +1,4 @@
+EndSession: Terminer la séance
 UserStartedSession user: #{user} a commencé la session
 UserOnCall user: #{user} sur appel
 Unknown: Inconnu

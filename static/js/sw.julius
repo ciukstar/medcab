@@ -40,11 +40,17 @@ self.onpush = function (e) {
 		    { action: #{acceptAudioCall}, title: #{msgr MsgAccept} }
 		  ];
 	
+      } else if (message.messageType === #{PushMsgTypeEnd}) {
+	
+	actions = [ { action: #{dismissNotifcation}, title: #{msgr MsgDismissNotification} },
+		    { action: #{endCallSession}, title: #{msgr MsgEndSession} }
+		  ];
+
       } else {
 	actions = [];
       }
 
-      self.registration.showNotification(message.title, {
+      return self.registration.showNotification(message.title, {
 	requireInteraction: true,
 	tag: message.messageType,
 	renotify: true,
@@ -265,6 +271,16 @@ self.addEventListener('notificationclick', function (e) {
         return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
 
       }
+    });
+
+    e.waitUntil(promise);
+    
+  } else if (e.action === #{endCallSession}) {
+    
+    e.notification.close();
+
+    const promise = self.clients.matchAll({ type: 'window' }).then((clients) => {
+      clients.forEach(client => { client.postMessage(e.notification.data); });;
     });
 
     e.waitUntil(promise);

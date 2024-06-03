@@ -150,8 +150,8 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
 -- | A convenient synonym for database access functions.
 type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
-   
-    
+
+
 
 instance YesodVideo App where
     getAppSettings :: HandlerFor App AppSettings
@@ -272,7 +272,7 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
     isAuthorized (VideoR _) _ = isAuthenticated
 
-    
+
     isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
     isAuthorized (MyDoctorUnsubscribeR _ uid _) _ = isAuthenticatedSelf uid
@@ -456,7 +456,7 @@ putPushSubscriptionEndpointR = do
                 , PushSubscriptionAuth E.=. val auth'
                 ]
         where_ $ x ^. PushSubscriptionEndpoint E.==. val oldEndpoint'
-        
+
 
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
@@ -475,7 +475,8 @@ getServiceWorkerR = do
           acceptVideoCall <- newIdent
           declineAudioCall <- newIdent
           acceptAudioCall <- newIdent
-          
+          endCallSession <- newIdent
+
           return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
   where

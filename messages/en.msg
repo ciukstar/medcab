@@ -1,3 +1,4 @@
+EndSession: End session
 UserStartedSession user@Text: #{user} started the session
 UserOnCall user@Text: #{user} on call
 Unknown: Unknown
