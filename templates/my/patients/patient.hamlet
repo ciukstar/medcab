@@ -7,8 +7,11 @@
     _{MsgPatient}
       
   <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
-    onclick="document.getElementById('idDialogDelete').open = true">
+    onclick="document.getElementById('idDialogDelete').show()">
     <md-icon>delete
+      
+  <md-icon-button type=link href=@{MyPatientEditR uid did pid} aria-label=_{MsgEdit}>
+    <md-icon>edit
 
 <md-dialog #idDialogDelete>
   <div slot=headline>
@@ -26,7 +29,7 @@
 
 <main>
 
-  $maybe (Entity _ (Patient _ _ since),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
+  $maybe (Entity _ (Patient _ _ since mobile phone),(Entity iid (User email _ _ _ _ name _ _),(attrib,(bs,(bl,ba))))) <- patient
     
     <figure>
       <img src=@{AccountPhotoR iid AvatarColorDark} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
@@ -71,11 +74,41 @@
           $maybe name <- name
             #{name}
 
+        $maybe mobile <- mobile
+          <dt.label-large scope=row>_{MsgMobile}
+          <dd.with-actions>
+            <span.body-medium>#{mobile}
+            <md-filled-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
+              <md-icon>smartphone
+        $nothing
+          $maybe Entity _ (UserInfo _ _ _ mobile _) <- patientInfo
+            $maybe mobile <- mobile
+              <dt.label-large scope=row>_{MsgMobile}
+              <dd.with-actions>
+                <span.body-medium>#{mobile}
+                <md-filled-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
+                  <md-icon>smartphone
+
+        $maybe phone <- phone
+          <dt.label-large scope=row>_{MsgPhone}
+          <dd.with-actions>
+            <span.body-medium>#{phone}
+            <md-filled-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
+              <md-icon>phone
+        $nothing
+          $maybe Entity _ (UserInfo _ _ _ _ phone) <- patientInfo
+            $maybe phone <- phone
+              <dt.label-large scope=row>_{MsgPhone}
+              <dd.with-actions>
+                <span.body-medium>#{phone}
+                <md-filled-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
+                  <md-icon>phone
+
         <dt.label-large>_{MsgEmailAddress}
-        <dd.body-medium>
-          <md-text-button type=link href="mailto:#{email}" trailing-icon>
-            #{email}
-            <md-icon slot=icon>mail
+        <dd.with-actions>
+          <span.body-medium>#{email}
+          <md-filled-icon-button type=link href="mailto:#{email}" aria-label=_{MsgSendEmail}>
+            <md-icon>mail
 
         <div #actions>
 

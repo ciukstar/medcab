@@ -1,3 +1,6 @@
+SendEmail: Envoyer un e-mail
+MakeACall: Passer un appel
+InvalidPatient: Patient non valide
 EndSession: Terminer la séance
 UserStartedSession user: #{user} a commencé la session
 UserOnCall user: #{user} sur appel

@@ -26,17 +26,21 @@ import Database.Esqueleto.Experimental
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 
-import Material3 ( md3textField, md3radioField, md3mopt, md3dayField )
+import Material3 ( md3textField, md3radioField, md3mopt, md3dayField, md3telField )
 
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
+    , User (User, userName), AvatarColor (AvatarColorDark, AvatarColorLight)
+    , UserInfo
+      ( UserInfo, userInfoBirthDate, userInfoGender, userInfoMobile
+      , userInfoPhone
+      )
+    , Gender (GenderFemale, GenderMale, GenderOther)
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
       , UserInfoUser, UserInfoBirthDate, UserInfoGender, UserSuperuser
+      , UserInfoMobile, UserInfoPhone
       )
-    , User (User, userName), AvatarColor (AvatarColorDark, AvatarColorLight)
-    , UserInfo (UserInfo, userInfoBirthDate, userInfoGender)
-    , Gender (GenderFemale, GenderMale, GenderOther)
     )
 
 import Foundation
@@ -49,10 +53,10 @@ import Foundation
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
       , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
       , MsgFemale, MsgMale, MsgOther, MsgGender, MsgBirthday, MsgNotIndicated
-      , MsgSuperuser, MsgAdministrator
+      , MsgSuperuser, MsgAdministrator, MsgMobile, MsgPhone
       )
     )
-    
+
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_white_svg
@@ -60,14 +64,16 @@ import Settings.StaticFiles
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_white_svg
     )
-    
+
 import Text.Hamlet (Html)
+
+import Widgets (widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
     , MonadHandler (liftHandler), redirect, FileInfo (fileContentType)
-    , newIdent, fileSourceByteString, addMessageI, whamlet
+    , newIdent, fileSourceByteString, addMessageI, whamlet, getMessages
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
@@ -85,9 +91,11 @@ postAccountInfoR :: UserId -> Handler Html
 postAccountInfoR uid = do
     ((fr,fw),et) <- runFormPost $ formUserInfo uid Nothing
     case fr of
-      FormSuccess r@(UserInfo _ bday gender) -> do
+      FormSuccess r@(UserInfo _ bday gender mobile phone) -> do
           void $ runDB $ upsert r [ UserInfoBirthDate P.=. bday
                                   , UserInfoGender P.=. gender
+                                  , UserInfoMobile P.=. mobile
+                                  , UserInfoPhone P.=. phone
                                   ]
           addMessageI statusSuccess MsgRecordEdited
           redirect $ AccountInfoR uid
@@ -113,6 +121,19 @@ formUserInfo :: UserId -> Maybe (Entity UserInfo)
              -> Html -> MForm Handler (FormResult UserInfo, Widget)
 formUserInfo uid info extra = do
     rndr <- getMessageRender
+
+    (mobileR,mobileV) <- md3mopt md3telField FieldSettings
+        { fsLabel = SomeMessage MsgMobile
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgMobile)]
+        } (userInfoMobile . entityVal <$> info)
+
+    (phoneR,phoneV) <- md3mopt md3telField FieldSettings
+        { fsLabel = SomeMessage MsgPhone
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", rndr MsgPhone)]
+        } (userInfoPhone . entityVal <$> info)
+
     (bdayR,bdayV) <- md3mopt md3dayField FieldSettings
         { fsLabel = SomeMessage MsgBirthday
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -126,9 +147,11 @@ formUserInfo uid info extra = do
                     ]
         } (userInfoGender . entityVal <$> info)
 
-    let r = UserInfo uid <$> bdayR <*> genderR
+    let r = UserInfo uid <$> bdayR <*> genderR <*> mobileR <*> phoneR
     let w = [whamlet|
                     #{extra}
+                    ^{fvInput mobileV}
+                    ^{fvInput phoneV}
                     ^{fvInput bdayV}
                     <fieldset.shape-medium.label-large>
                       <legend>_{MsgGender}
@@ -152,6 +175,7 @@ getAccountInfoR uid = do
 
     (fw,et) <- generateFormPost $ formUserInfo uid info
 
+    msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgPersonalInfo
         idPanelInfo <- newIdent
@@ -181,7 +205,10 @@ postAccountR uid = do
 
 getAccountR :: UserId -> Handler Html
 getAccountR uid = do
+
     user <- maybeAuth
+    msgs <- getMessages
+
     defaultLayout $ do
         setTitleI MsgUserAccount
         idPanelAccount <- newIdent

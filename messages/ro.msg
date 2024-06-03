@@ -1,3 +1,6 @@
+SendEmail: Trimite email
+MakeACall: Efectuați un apel
+InvalidPatient: Pacient nevalid
 EndSession: Termină sesiunea
 UserStartedSession user: #{user} a început sesiunea
 UserOnCall user: #{user} la telefon

@@ -13,41 +13,71 @@
       
 <main>
 
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{AccountR uid}' : '@{AccountInfoR uid}'">
-    <md-primary-tab #tabAccount aria-controls=panelAccount>
+  <md-tabs aria-label=Tabs>
+  
+    <md-primary-tab #tabAccount aria-controls=panelAccount
+      onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountR uid}>
       _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=#{idPanelInfo} active=true>
+      
+    <md-primary-tab #tabInfo aria-controls=#{idPanelInfo} active=true
+       onclick="this.querySelector('a[href]').click()">
+       <a href=@{AccountInfoR uid}>
       _{MsgPersonalInfo}
 
   <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
 
   <div ##{idPanelInfo} role=tabpanel aria-labelledby=tabInfo>
-    $maybe Entity _ (UserInfo _ bday gender) <- info
-      <p>
-        <label.label-large>
-          _{MsgBirthday}: #
-          <span.body-medium>
-            $maybe bday <- bday
-              #{show bday}
-            $nothing
-              _{MsgNotIndicated}
-      <p>
-        <label.label-large>
-          _{MsgGender}: #
-          <span.body-medium>
+
+    ^{widgetBanner msgs}
+    
+    $maybe Entity _ (UserInfo _ bday gender mobile phone) <- info
+      <dl>
+        <dt.label-large>
+          _{MsgMobile}
           
-            $maybe gender <- gender
-              $case gender
-                $of GenderFemale
-                  _{MsgFemale}
-                $of GenderMale
-                  _{MsgMale}
-                $of _
-                  _{MsgOther}
-                  
-            $nothing
-              _{MsgNotIndicated}
+        <dd>
+          $maybe mobile <- mobile
+            <span.body-medium>#{mobile}
+          $nothing
+            <i.body-small>_{MsgNotIndicated}
+     
+        <dt.label-large>
+          _{MsgPhone}
+          
+        <dd>
+          $maybe phone <- phone
+            <span.body-medium>#{phone}
+          $nothing
+            <i.body-small>_{MsgNotIndicated}
+     
+        <dt.label-large>
+          _{MsgBirthday}
+          
+        <dd>
+          $maybe bd <- show <$> bday
+            <time.body-medium datetime=#{bd}>#{bd}
+          $nothing
+            <i.body-small>_{MsgNotIndicated}
+     
+        <dt.label-large>
+          _{MsgGender}
+          
+        <dd>
+          $maybe gender <- gender
+            $case gender
+              $of GenderFemale
+                <span.body-medium>_{MsgFemale}
+              $of GenderMale
+                <span.body-medium>_{MsgMale}
+              $of _
+                <span.body-medium>_{MsgOther}
+
+          $nothing
+            <i.body-small>_{MsgNotIndicated}
+
+      ^{widgetSnackbar msgs}
+                
     $nothing
       <form method=post action=@{AccountInfoR uid} enctype=#{et}>
         ^{fw}

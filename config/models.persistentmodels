@@ -62,6 +62,8 @@ Patient
     user UserId
     doctor DoctorId
     since UTCTime
+    mobile Text Maybe
+    phone Text Maybe
     UniquePatient user doctor
 
 
@@ -120,6 +122,8 @@ UserInfo
     user UserId OnDeleteCascade
     birthDate Day Maybe
     gender Gender Maybe
+    mobile Text Maybe
+    phone Text Maybe
     UniqueUserInfo user
     
 

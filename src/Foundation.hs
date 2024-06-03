@@ -286,6 +286,7 @@ instance Yesod App where
     isAuthorized (MyPatientUnsubscribeR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientSubscriptionsR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientRemoveR _ did _) _ = isDoctorSelf did
+    isAuthorized (MyPatientEditR _ did _) _ = isDoctorSelf did
     isAuthorized (MyPatientNewR did) _ = isDoctorSelf did
     isAuthorized (MyPatientR _ did _) _ = isDoctorSelf did
     isAuthorized r@(MyPatientsR did) _ = setUltDest r >> isDoctorSelf did

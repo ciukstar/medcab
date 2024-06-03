@@ -9,12 +9,14 @@
 module Handler.MyPatients
   ( getMyPatientsR
   , getMyPatientR
+  , postMyPatientR
   , getMyPatientNewR
   , postMyPatientsR
   , postMyPatientRemoveR
   , getMyPatientSubscriptionsR
   , postMyPatientSubscriptionsR
   , postMyPatientUnsubscribeR
+  , getMyPatientEditR
   ) where
 
 
@@ -30,6 +32,7 @@ import Data.Function ((&))
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text, pack)
 import Data.Time.Clock (getCurrentTime)
+import Data.Time.LocalTime (localTimeToUTC, utc, utcToLocalTime)
 
 import Database.Esqueleto.Experimental
     ( select, selectOne, from, table, where_, val, innerJoin, on, just
@@ -38,7 +41,8 @@ import Database.Esqueleto.Experimental
     , subSelectCount, delete
     )
 import Database.Persist
-    ( Entity (Entity, entityKey, entityVal), PersistStoreWrite (insert_)
+    ( Entity (Entity, entityKey, entityVal)
+    , PersistStoreWrite (insert_, replace)
     , PersistUniqueWrite (upsertBy), (=.)
     )
 import qualified Database.Persist as P (delete)
@@ -48,7 +52,7 @@ import Foundation
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR, MyDoctorPhotoR
       , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
-      , MyPatientUnsubscribeR
+      , MyPatientUnsubscribeR, MyPatientEditR
       )
     , AppMessage
       ( MsgPatients, MsgNoPatientsYet, MsgClose, MsgCallEnded, MsgCallDeclined
@@ -57,16 +61,18 @@ import Foundation
       , MsgEmailAddress, MsgRemoveAreYouSure, MsgAudioCall, MsgInvalidFormData
       , MsgVideoCall, MsgRecordDeleted, MsgRemove, MsgDetails, MsgTabs
       , MsgSubscription, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgNoRecipient, MsgNotSubscribedToNotificationsFromUser
+      , MsgNoRecipient, MsgNotSubscribedToNotificationsFromUser, MsgSendEmail
       , MsgYouAndUserSubscribedOnSameDevice, MsgAllowUserToSendYouNotifications
       , MsgUserUnavailable, MsgNoPublisherFound, MsgCalleeDeclinedTheCall
       , MsgUnsubscribe, MsgAppName, MsgUserIsNowAvailable, MsgUserIsNoLongerAvailable
       , MsgIncomingVideoCallFrom, MsgIncomingAudioCallFrom, MsgOutgoingVideoCall
       , MsgOutgoingAudioCall, MsgUserCanceledVideoCall, MsgUserCanceledAudioCall
+      , MsgMobile, MsgPhone, MsgInvalidPatient, MsgMakeACall
       )
     )
 
-import Material3 (md3switchField, md3mreq)
+import Material3
+    ( md3switchField, md3mreq, md3mopt, md3datetimeLocalField, md3telField )
 
 import Model
     ( statusError, statusSuccess, paramEndpoint
@@ -79,7 +85,9 @@ import Model
       , PushMsgTypeCancel, PushMsgTypeRefresh
       )
     , UserId, User (User, userName), UserPhoto, DoctorId, Doctor (Doctor)
-    , PatientId, Patient(Patient, patientUser), Chat, DoctorPhoto
+    , PatientId
+    , Patient(Patient, patientUser, patientSince, patientMobile, patientPhone)
+    , Chat, DoctorPhoto
     , PushSubscription
       ( PushSubscription, pushSubscriptionEndpoint, pushSubscriptionP256dh
       , pushSubscriptionAuth
@@ -90,8 +98,8 @@ import Model
       , UserPhotoAttribution, UserSuperuser, DoctorId, ChatInterlocutor
       , ChatStatus, ChatUser, PushSubscriptionSubscriber, PushSubscriptionP256dh
       , PushSubscriptionAuth, PushSubscriptionEndpoint, PushSubscriptionPublisher
-      , DoctorPhotoDoctor, DoctorPhotoAttribution
-      )
+      , DoctorPhotoDoctor, DoctorPhotoAttribution, UserInfoUser
+      ), UserInfo (UserInfo)
     )
 
 import Settings
@@ -125,7 +133,7 @@ import Yesod.Core
     , lookupGetParam, getMessageRender, getYesod, getUrlRender
     )
 import Yesod.Form
-    ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess), runFormPost
+    ( FieldView (fvInput, fvLabel, fvId), FormResult (FormSuccess, FormFailure), runFormPost
     , Field (fieldView), OptionList (olOptions)
     , multiSelectField, optionsPairs, hiddenField
     , Option (optionInternalValue, optionExternalValue, optionDisplay)
@@ -146,7 +154,7 @@ postMyPatientUnsubscribeR uid did pid = do
         return x
 
     case (fr2,patient) of
-      (FormSuccess endpoint,Just (Entity _ (Patient publisher _ _))) -> do
+      (FormSuccess endpoint,Just (Entity _ (Patient publisher _ _ _ _))) -> do
 
           runDB $ delete $ do
               x <- from $ table @PushSubscription
@@ -424,7 +432,10 @@ formPatients did options extra = do
 
     (usersR,usersV) <- mreq (usersFieldList (option <$> options)) "" Nothing
 
-    let r = (<*>) <$> ((<*>) . (Patient <$>) <$> ((entityKey <$>) <$> usersR) <*> pure (pure did)) <*> pure (pure now)
+    let r = (<*>) <$> ((<*>) <$> ((<*>) <$> ((<*>) . (Patient <$>) <$> ((entityKey <$>) <$> usersR) <*> pure (pure did))
+            <*> pure (pure now) )
+            <*> pure (pure Nothing) )
+            <*> pure (pure Nothing)
     let w = $(widgetFile "my/patients/form")
     return (r,w)
   where
@@ -456,6 +467,75 @@ formPatients did options extra = do
                         name=#{name} value=#{optionExternalValue opt} *{attrs} :optselected eval opt:checked>
               |]
           }
+
+
+postMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
+postMyPatientR uid did pid = do
+    
+    patient <- runDB $ selectOne $ do
+        x <- from $ table @Patient
+        where_ $ x ^. PatientId ==. val pid
+        return x
+
+    ((fr,fw),et) <- runFormPost $ formPatient patient
+    case fr of
+      FormSuccess r -> do
+          runDB $ replace pid r
+          redirect $ MyPatientR uid did pid
+      _otherwise -> do
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgPatient
+              $(widgetFile "my/patients/edit")
+    
+
+
+getMyPatientEditR :: UserId -> DoctorId -> PatientId -> Handler Html
+getMyPatientEditR uid did pid = do
+    
+    patient <- runDB $ selectOne $ do
+        x <- from $ table @Patient
+        where_ $ x ^. PatientId ==. val pid
+        return x
+        
+    (fw,et) <- generateFormPost $ formPatient patient
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgPatient
+        $(widgetFile "my/patients/edit")
+
+
+formPatient :: Maybe (Entity Patient) -> Form Patient
+formPatient patient extra = case patient of
+  Just (Entity _ (Patient uid did _ _ _)) -> do
+    
+    msgr <- getMessageRender
+    
+    (sinceR,sinceV) <- md3mreq md3datetimeLocalField FieldSettings
+        { fsLabel = SomeMessage MsgSinceDate
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", msgr MsgSinceDate)]
+        } (utcToLocalTime utc . patientSince . entityVal <$> patient)
+        
+    (mobileR,mobileV) <- md3mopt md3telField FieldSettings
+        { fsLabel = SomeMessage MsgMobile
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", msgr MsgMobile)]
+        } (patientMobile . entityVal <$> patient)
+        
+    (phoneR,phoneV) <- md3mopt md3telField FieldSettings
+        { fsLabel = SomeMessage MsgPhone
+        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
+        , fsAttrs = [("label", msgr MsgPhone)]
+        } (patientPhone . entityVal <$> patient)
+    
+    let r = Patient uid did <$> (localTimeToUTC utc <$> sinceR) <*> mobileR <*> phoneR
+    let w = [whamlet|#{extra} ^{fvInput sinceV} ^{fvInput mobileV} ^{fvInput phoneV}|]
+    return (r,w)
+    
+  Nothing -> do
+      msg <- getMessageRender >>= \r -> return $ r MsgInvalidPatient
+      return (FormFailure [msg], [whamlet|<p>#{msg}|])
 
 
 getMyPatientR :: UserId -> DoctorId -> PatientId -> Handler Html
@@ -506,6 +586,12 @@ getMyPatientR uid did pid = do
 
         where_ $ x ^. PatientId ==. val pid
         return (x, (u, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
+
+    patientInfo <- runDB $ selectOne $ do
+        x :& i <- from $ table @Patient
+            `innerJoin` table @UserInfo `on` (\(x :& i) -> x ^. PatientUser ==. i ^. UserInfoUser)
+        where_ $ x ^. PatientId ==. val pid
+        return i
 
     unread <- maybe 0 unValue <$> runDB ( selectOne $ do
         x <- from $ table @Chat

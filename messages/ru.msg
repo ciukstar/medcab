@@ -1,3 +1,6 @@
+SendEmail: Отправить письмо
+MakeACall: Позвонить
+InvalidPatient: Недействительный пациент
 EndSession: Завершить сеанс
 UserStartedSession user: #{user} начал(а) сеанс
 UserOnCall user: #{user} на связи

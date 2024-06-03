@@ -52,12 +52,19 @@ import Model
       ( Normal, normalName, normalLowerBound, normalUpperBound, normalUnit
       , normalSign
       )
-    , Patient (Patient, patientUser, patientDoctor, patientSince)
+    , Patient
+      ( Patient, patientUser, patientDoctor, patientSince, patientMobile
+      , patientPhone
+      )
     , Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus)
     , ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
     , Token (Token, tokenApi, tokenStore), apiInfoVapid, apiInfoGoogle
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase)
     , Store (Store, storeKey, storeToken, storeVal)
+    , UserInfo
+      ( UserInfo, userInfoUser, userInfoBirthDate, userInfoGender, userInfoMobile
+      , userInfoPhone
+      )
     )
 
 import Text.Hamlet (shamlet)
@@ -117,6 +124,13 @@ fillDemoRo appSettings = do
                                                               Freepik
                                                             |]
                       }
+
+    insert_ UserInfo { userInfoUser = usr1
+                     , userInfoBirthDate = Nothing
+                     , userInfoGender = Nothing
+                     , userInfoMobile = Just "+18056594960"
+                     , userInfoPhone = Just "+18056594960"
+                     }
 
     pass2 <- liftIO $ saltPass "ionescuav"
     let user2 = User { userEmail = "ionescuav@xmail.ro"
@@ -616,6 +630,8 @@ fillDemoRo appSettings = do
     let patient11 = Patient { patientUser = usr1
                             , patientDoctor = d1
                             , patientSince = addUTCTime ((-7) * nominalDay) now
+                            , patientMobile = Nothing
+                            , patientPhone = Nothing
                             }
 
     insert_ patient11
@@ -623,6 +639,8 @@ fillDemoRo appSettings = do
     let patient12 = Patient { patientUser = usr1
                             , patientDoctor = d2
                             , patientSince = addUTCTime ((-6) * nominalDay) now
+                            , patientMobile = Just "+12258813837"
+                            , patientPhone = Just "+13029222541"
                             }
 
     insert_ patient12
@@ -630,6 +648,8 @@ fillDemoRo appSettings = do
     let patient21 = Patient { patientUser = usr2
                             , patientDoctor = d1
                             , patientSince = addUTCTime ((-3) * nominalDay) now
+                            , patientMobile = Nothing
+                            , patientPhone = Nothing
                             }
 
     insert_ patient21
@@ -637,6 +657,8 @@ fillDemoRo appSettings = do
     let patient22 = Patient { patientUser = usr2
                             , patientDoctor = d2
                             , patientSince = addUTCTime ((-2) * nominalDay) now
+                            , patientMobile = Nothing
+                            , patientPhone = Nothing
                             }
 
     insert_ patient22

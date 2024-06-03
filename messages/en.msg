@@ -1,3 +1,6 @@
+SendEmail: Send email
+MakeACall: Make a call
+InvalidPatient: Invalid patient
 EndSession: End session
 UserStartedSession user@Text: #{user} started the session
 UserOnCall user@Text: #{user} on call

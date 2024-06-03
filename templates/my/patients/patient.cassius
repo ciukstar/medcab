@@ -31,6 +31,10 @@ main
         margin: 1rem 2rem 0 2rem
         dt + dd
             margin-bottom: 1rem
+        dd.with-actions
+            display: flex
+            align-items: center
+            justify-content: space-between
 
     #actions
         padding: 0 2rem

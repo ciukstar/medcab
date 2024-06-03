@@ -60,7 +60,7 @@ import Handler.MyDoctors
 import Handler.MyPatients
     ( getMyPatientsR, getMyPatientR, getMyPatientNewR, postMyPatientsR
     , postMyPatientRemoveR, getMyPatientSubscriptionsR, postMyPatientSubscriptionsR
-    , postMyPatientUnsubscribeR
+    , postMyPatientUnsubscribeR, getMyPatientEditR, postMyPatientR
     )
 
 import Handler.Doctors

@@ -22,7 +22,7 @@
   $else
     $maybe Entity uid _ <- user
       <md-list>
-        $forall (Entity pid (Patient _ did _),(Entity iid (User email _ _ _ _ name _ _),(attrib,unread))) <- patients
+        $forall (Entity pid (Patient _ did _ _ _),(Entity iid (User email _ _ _ _ name _ _),(attrib,unread))) <- patients
           <md-list-item type=link href=@{MyPatientR uid did pid}>
             <img slot=start src=@{AccountPhotoR iid AvatarColorDark} width=56 height=56 alt=_{MsgPhoto} loading=lazy>
             <div slot=headline>

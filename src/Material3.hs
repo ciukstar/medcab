@@ -188,7 +188,7 @@ md3datetimeLocalField = datetimeLocalField { fieldView = \theId name attrs ex re
         <md-icon>schedule
 |] }
   where
-    showVal = pack . iso8601Show
+    showVal = pack . takeWhile (/= '.') . iso8601Show
 
 
 md3textareaField :: RenderMessage m FormMessage => Field (HandlerFor m) Textarea

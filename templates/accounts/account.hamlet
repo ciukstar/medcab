@@ -13,14 +13,21 @@
 <main>
   
   <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true onclick="this.querySelector('a').click()">
+  
+    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true
+      onclick="this.querySelector('a[href]').click()">
       <a href=@{AccountR uid}>
       _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=panelInfo onclick="this.querySelector('a').click()">
+      
+    <md-primary-tab #tabInfo aria-controls=panelInfo 
+      onclick="this.querySelector('a[href]').click()">
       <a href=@{AccountInfoR uid}>
       _{MsgPersonalInfo}
 
   <div ##{idPanelAccount} role=tabpanel aria-labelledby=tabAccount>
+
+    ^{widgetBanner msgs}
+    
     <figure>
       <img src=@{AccountPhotoR uid AvatarColorDark} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
       <figcation>
@@ -35,5 +42,7 @@
                   _{role} #
 
     <md-text-button href=@{AuthR LogoutR}>_{MsgSignOut}
+
+    ^{widgetSnackbar msgs}
 
   <div #panelInfo role=tabpanel aria-labelledby=tabInfo hidden>

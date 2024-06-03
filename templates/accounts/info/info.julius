@@ -1,0 +1,12 @@
+
+Array.from(
+  document.body.querySelectorAll('time[datetime]')
+).forEach(function (x) {
+  x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
+    navigator.language,
+    { year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }
+  );
+});

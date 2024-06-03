@@ -15,8 +15,9 @@
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/unsubscribe   MyPatientUnsubscribeR   POST
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/subscriptions MyPatientSubscriptionsR GET POST
 /users/#UserId/doctors/#DoctorId/patients/#PatientId/remove 	   MyPatientRemoveR 	   POST
+/form/users/#UserId/doctors/#DoctorId/patients/#PatientId/edit     MyPatientEditR    	   GET
 /form/doctors/#DoctorId/patients/new                 	    	   MyPatientNewR    	   GET
-/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    	   MyPatientR       	   GET
+/users/#UserId/doctors/#DoctorId/patients/#PatientId 	    	   MyPatientR       	   GET POST
 /doctors/#DoctorId/patients            	             	    	   MyPatientsR      	   GET POST
 
 /doctors/#DoctorId/specialties DoctorSpecialtiesR GET
