@@ -78,7 +78,7 @@
           <dt.label-large scope=row>_{MsgMobile}
           <dd.with-actions>
             <span.body-medium>#{mobile}
-            <md-filled-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
+            <md-filled-tonal-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
               <md-icon>smartphone
         $nothing
           $maybe Entity _ (UserInfo _ _ _ mobile _) <- patientInfo
@@ -86,14 +86,14 @@
               <dt.label-large scope=row>_{MsgMobile}
               <dd.with-actions>
                 <span.body-medium>#{mobile}
-                <md-filled-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
+                <md-filled-tonal-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
                   <md-icon>smartphone
 
         $maybe phone <- phone
           <dt.label-large scope=row>_{MsgPhone}
           <dd.with-actions>
             <span.body-medium>#{phone}
-            <md-filled-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
+            <md-filled-tonal-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
               <md-icon>phone
         $nothing
           $maybe Entity _ (UserInfo _ _ _ _ phone) <- patientInfo
@@ -101,13 +101,13 @@
               <dt.label-large scope=row>_{MsgPhone}
               <dd.with-actions>
                 <span.body-medium>#{phone}
-                <md-filled-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
+                <md-filled-tonal-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
                   <md-icon>phone
 
         <dt.label-large>_{MsgEmailAddress}
         <dd.with-actions>
           <span.body-medium>#{email}
-          <md-filled-icon-button type=link href="mailto:#{email}" aria-label=_{MsgSendEmail}>
+          <md-filled-tonal-icon-button type=link href="mailto:#{email}" aria-label=_{MsgSendEmail}>
             <md-icon>mail
 
         <div #actions>

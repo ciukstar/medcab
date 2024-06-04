@@ -21,6 +21,7 @@ import '@material/web/icon/icon.js';
 
 import '@material/web/iconbutton/icon-button.js';
 import '@material/web/iconbutton/filled-icon-button.js';
+import '@material/web/iconbutton/filled-tonal-icon-button.js';
 
 import '@material/web/list/list.js';
 import '@material/web/list/list-item.js';
