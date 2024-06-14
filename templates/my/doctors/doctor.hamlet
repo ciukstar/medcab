@@ -117,9 +117,9 @@
           <figcaption.body-small>
             _{MsgYouAndUserSubscribedOnSameDevice name}
         $else
-          <md-icon>double_arrow
+          <md-icon.callarrow>double_arrow
       $nothing
-        <md-icon>double_arrow
+        <md-icon.callarrow>double_arrow
       
     <figure.app-photo>
       $maybe (Entity did (Doctor name _ _ _ _),(attrib,(_,(looping,accessible)))) <- doctor
@@ -132,6 +132,9 @@
               <p.body-small>_{MsgUserUnavailable name}
       $nothing
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+
+  <audio loop ##{idAudioOutgoingVideoCallRingtone} preload=none>
+    <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingVideoCallCancel}>
@@ -166,9 +169,9 @@
           <figcaption.body-small>
             _{MsgYouAndUserSubscribedOnSameDevice name}
         $else
-          <md-icon>double_arrow
+          <md-icon.callarrow>double_arrow
       $nothing
-        <md-icon>double_arrow
+        <md-icon.callarrow>double_arrow
       
     <figure.app-photo>
       $maybe (Entity did (Doctor name _ _ _ _),(attrib,(_,(looping,accessible)))) <- doctor
@@ -181,6 +184,9 @@
               <p.body-small>_{MsgUserUnavailable name}
       $nothing
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
+
+  <audio loop ##{idAudioOutgoingAudioCallRingtone} preload=none>
+    <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingAudioCallCancel}>

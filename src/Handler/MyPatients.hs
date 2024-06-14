@@ -183,16 +183,7 @@ postMyPatientSubscriptionsR uid did pid = do
     case (patient, vapidKeys) of
       (Just (Entity publisher (User email _ _ _ _ name _ _)), Just vapid) -> do
 
-          endpoint <- lookupGetParam paramEndpoint
-
-          subscription <- runDB ( selectOne $ do
-              x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionSubscriber ==. val uid
-              where_ $ x ^. PushSubscriptionPublisher ==. val publisher
-              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
-              return x )
-
-          ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher patient subscription
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher patient Nothing
 
           case fr of
             FormSuccess (True, ps@(PushSubscription uid' pid' endpoint' keyP256dh' keyAuth')) -> do

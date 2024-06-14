@@ -101,6 +101,7 @@ import Settings.StaticFiles
     , img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
     , img_notifications_off_24dp_FILL0_wght400_GRAD0_opsz24_svg
+    , ringtones_outgoing_call_mp3
     )
 
 import Text.Hamlet (Html)
@@ -159,8 +160,7 @@ postMyDoctorUnsubscribeR pid uid did = do
 
 formUnsubscribeDoctor :: Form Text
 formUnsubscribeDoctor extra = do
-    endpoint <- lookupGetParam paramEndpoint
-    (endpointR,endpointV) <- mreq hiddenField "" endpoint
+    (endpointR,endpointV) <- mreq hiddenField "" Nothing
     return (endpointR, [whamlet|^{extra} ^{fvInput endpointV}|])
 
 
@@ -178,16 +178,7 @@ postMyDoctorSubscriptionsR pid uid did = do
     case (user, vapidKeys) of
       (Just (Entity _ (Doctor name _ _ _ _), doctor@(Just (Entity publisher _))), Just vapid) -> do
 
-          endpoint <- lookupGetParam paramEndpoint
-
-          subscription <- runDB ( selectOne $ do
-              x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionSubscriber ==. val uid
-              where_ $ x ^. PushSubscriptionPublisher ==. val publisher
-              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
-              return x )
-
-          ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher doctor subscription
+          ((fr,_),_) <- runFormPost $ formNotifications vapid uid publisher doctor Nothing
 
           case fr of
             FormSuccess (True, ps@(PushSubscription uid' pid' endpoint' keyP256dh' keyAuth')) -> do
@@ -488,9 +479,11 @@ getMyDoctorR pid uid did = do
               idButtonAudioCall <- newIdent
 
               idDialogOutgoingVideoCall <- newIdent
+              idAudioOutgoingVideoCallRingtone <- newIdent
               idButtonOutgoingVideoCallCancel <- newIdent
 
               idDialogOutgoingAudioCall <- newIdent
+              idAudioOutgoingAudioCallRingtone <- newIdent
               idButtonOutgoingAudioCallCancel <- newIdent
               
               idDialogVideoSessionEnded <- newIdent

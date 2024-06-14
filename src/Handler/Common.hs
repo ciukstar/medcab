@@ -17,7 +17,7 @@ import Data.Maybe (Maybe (Nothing, Just))
 
 import Foundation
     ( Handler
-    , Route (HomeR, StaticR, FaviconR, DocsR)
+    , Route (HomeR, StaticR, DocsR)
     , AppMessage (MsgAppName, MsgMetaDescription)
     )
     
@@ -64,7 +64,6 @@ getSitemapR :: Handler TypedContent
 getSitemapR = sitemap $ do
     yield $ SitemapUrl HomeR Nothing (Just Monthly) (Just 1.0)
     yield $ SitemapUrl DocsR Nothing (Just Monthly) (Just 1.0)
-    yield $ SitemapUrl FaviconR Nothing (Just Monthly) (Just 0.5)
 
 
 getRobotsR :: Handler TypedContent
