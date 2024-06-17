@@ -63,6 +63,11 @@ conn.onmessage = function (e) {
   bubble.appendChild(bubbleTailOut);
   output.appendChild(bubble);
   output.scrollTop = output.scrollHeight;
+
+  if (data.user != #{pack $ show $ fromSqlKey uid}) {
+    setTimeout(() => { document.getElementById(#{idAudioIncomingChat}).play(); }, 0);
+  }
+  
 };
 
 conn.onerror = function (e) {
@@ -70,9 +75,13 @@ conn.onerror = function (e) {
 }; 
 
 form.addEventListener("submit", function(e) {
+  
   conn.send(input.value);
   input.value = "";
   var btnSubmit = this.querySelector('md-filled-icon-button');
   btnSubmit.disabled = true;
   e.preventDefault();
+  
+  setTimeout(() => document.getElementById(#{idAudioOutgoingChat}).play(), 0);
+  
 });

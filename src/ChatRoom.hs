@@ -8,15 +8,23 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module ChatRoom
   ( module ChatRoom.Data
   , getDoctorChatRoomR
+  , YesodChat
+    ( getStaticRoute, getMyDoctorRoute, getMyPatientRoute, getDoctorPhotoRoute
+    , getAccountPhotoRoute
+    )
   ) where
 
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route (DoctorChatRoomR, PatientChatRoomR)
+    , ChatRoomMessage 
+      ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined )
     )
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -24,6 +32,8 @@ import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 import Control.Monad (forever)
 import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
+
+import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, innerJoin, on, update, set
@@ -39,16 +49,11 @@ import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toLis
 import Data.Text (pack)
 import Data.Text.Lazy (toStrict)
 
-import Foundation
-    ( App, Route (MyDoctorR, DoctorPhotoR, MyPatientR, AccountPhotoR)
-    , AppMessage
-      ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined )
-    )
-
 import Model
     ( AvatarColor (AvatarColorDark)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
-    , Doctor (Doctor), PatientId, Patient, UserId, User (User)
+    , DoctorId, Doctor (Doctor)
+    , PatientId, Patient, UserId, User (User)
     , Chat (Chat)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
@@ -60,6 +65,10 @@ import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
 import Settings (widgetFile)
+import Settings.StaticFiles
+    ( ringtones_outgoing_chat_mp3, ringtones_incoming_chat_mp3 )
+
+import Text.Shakespeare.I18N (RenderMessage)
 
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
@@ -67,13 +76,21 @@ import Yesod
     , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
     , invalidArgsI
     )
-import Yesod.Auth (maybeAuth)
-import Yesod.Core.Handler (newIdent)
+import Yesod.Core.Handler (newIdent, HandlerFor)
 import Yesod.Core.Types (YesodSubRunnerEnv)
+import Yesod.Form.Types (FormMessage)
 import Yesod.Persist (YesodPersist(runDB))
+import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
+
+
+class YesodChat m where
+    getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
+    getMyDoctorRoute :: PatientId -> UserId -> DoctorId -> HandlerFor m (Route m)
+    getMyPatientRoute :: UserId -> DoctorId -> PatientId -> HandlerFor m (Route m)
+    getDoctorPhotoRoute :: DoctorId -> HandlerFor m (Route m)
+    getAccountPhotoRoute :: UserId -> AvatarColor -> HandlerFor m (Route m)
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -139,10 +156,11 @@ chatApp pid (Entity uid _) (Entity iid _) = do
 
 
 
-getDoctorChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
-getDoctorChatRoomR pid uid = do
-
-    user <- maybeAuth
+getDoctorChatRoomR :: (Yesod m, YesodChat m)
+                   => RenderMessage m ChatRoomMessage
+                   => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                   => PatientId -> UserId -> SubHandlerFor ChatRoom m Html
+getDoctorChatRoomR pid uid' = do
 
     patient <- liftHandler $ runDB $ selectOne $ do
         x :& u :& d :& l <- from $ table @Patient
@@ -154,7 +172,7 @@ getDoctorChatRoomR pid uid = do
 
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatStatus =. val ChatMessageStatusRead]
-        where_ $ x ^. ChatInterlocutor ==. val uid
+        where_ $ x ^. ChatInterlocutor ==. val uid'
         where_ $ just ( just (x ^. ChatUser)) ==. subSelect
             ( do
                   y :& d <- from $ table @Patient `innerJoin` table @Doctor
@@ -164,19 +182,19 @@ getDoctorChatRoomR pid uid = do
             )
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
-    case (user,patient) of
-      (Just u, Just (_,_,interlocutor,_)) -> webSockets (chatApp pid u interlocutor)
+    case patient of
+      Just (_,user,interlocutor,_) -> webSockets (chatApp pid user interlocutor)
       _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
 
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
-        where_ $ ( (x ^. ChatUser ==. val uid)
+        where_ $ ( (x ^. ChatUser ==. val uid')
                    &&. ( case patient of
                            Just (_,_,Entity iid _,_) -> x ^. ChatInterlocutor ==. val iid
                            Nothing -> val False
                        )
-                 ) ||. ( (x ^. ChatInterlocutor ==. val uid)
+                 ) ||. ( (x ^. ChatInterlocutor ==. val uid')
                          &&. ( case patient of
                                  Just (_,_,Entity iid _,_) -> x ^. ChatUser ==. val iid
                                  Nothing -> val False
@@ -185,18 +203,31 @@ getDoctorChatRoomR pid uid = do
         orderBy [desc (x ^. ChatTimemark)]
         return x )
 
-    liftHandler $ defaultLayout $ do
-        setTitleI MsgChat
-        idChatOutput <- newIdent
-        idMessageForm <- newIdent
-        idMessageInput <- newIdent
-        $(widgetFile "my/doctors/chat/chat")
+    case patient of
+      Just (_,Entity uid _,_,Entity did (Doctor name _ _ _ _)) -> do
+          doctorPhotoR <- liftHandler $ getDoctorPhotoRoute did
+          myDoctorR <- liftHandler $ getMyDoctorRoute pid uid did
+
+          ringtoneOutgoing <- liftHandler $ getStaticRoute ringtones_outgoing_chat_mp3
+          ringtoneIncoming <- liftHandler $ getStaticRoute ringtones_incoming_chat_mp3
+
+          liftHandler $ defaultLayout $ do
+              setTitleI MsgChat
+              idChatOutput <- newIdent
+              idMessageForm <- newIdent
+              idMessageInput <- newIdent
+              idAudioOutgoingChat <- newIdent
+              idAudioIncomingChat <- newIdent
+              $(widgetFile "my/doctors/chat/chat")
+              
+      Nothing -> invalidArgsI [MsgChatParticipantsNotDefined]
 
 
-getPatientChatRoomR :: PatientId -> UserId -> SubHandlerFor ChatRoom App Html
+getPatientChatRoomR :: (Yesod m, YesodChat m)
+                    => RenderMessage m ChatRoomMessage
+                    => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                    => PatientId -> UserId -> SubHandlerFor ChatRoom m Html
 getPatientChatRoomR pid uid = do
-
-    user <- maybeAuth
 
     patient <- liftHandler $ runDB $ selectOne $ do
         x :& u :& d :& l <- from $ table @Patient
@@ -217,8 +248,8 @@ getPatientChatRoomR pid uid = do
             )
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
-    case (user,patient) of
-      (Just u, Just (_,interlocutor,_,_)) -> webSockets (chatApp pid u interlocutor)
+    case patient of
+      Just (_,interlocutor,user,_) -> webSockets (chatApp pid user interlocutor)
       _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
@@ -237,18 +268,33 @@ getPatientChatRoomR pid uid = do
         orderBy [desc (x ^. ChatTimemark)]
         return x )
 
-    liftHandler $ defaultLayout $ do
-        setTitleI MsgChat
-        idChatOutput <- newIdent
-        idMessageForm <- newIdent
-        idMessageInput <- newIdent
-        $(widgetFile "my/patients/chat/chat")
+    case patient of
+      Just (_,Entity iid (User email _ _ _ _ name _ _),_,Entity did _) -> do
+          myPatientR <- liftHandler $ getMyPatientRoute uid did pid
+          accountPhotoR <- liftHandler $ getAccountPhotoRoute iid AvatarColorDark
+
+          ringtoneOutgoing <- liftHandler $ getStaticRoute ringtones_outgoing_chat_mp3
+          ringtoneIncoming <- liftHandler $ getStaticRoute ringtones_incoming_chat_mp3
+
+          liftHandler $ defaultLayout $ do
+              setTitleI MsgChat
+              idChatOutput <- newIdent
+              idMessageForm <- newIdent
+              idMessageInput <- newIdent
+              idAudioOutgoingChat <- newIdent
+              idAudioIncomingChat <- newIdent
+              $(widgetFile "my/patients/chat/chat")
+              
+      Nothing -> invalidArgsI [MsgChatParticipantsNotDefined]
 
 
 groupByKey :: Ord k => (v -> k) -> [v] -> M.Map k [v]
 groupByKey key = M.fromListWith (<>) . fmap (\x -> (key x,[x]))
 
 
-instance YesodSubDispatch ChatRoom App where
-    yesodSubDispatch :: YesodSubRunnerEnv ChatRoom App -> Application
+instance ( Yesod m, YesodChat m
+         , YesodPersist m, YesodPersistBackend m ~ SqlBackend
+         , RenderMessage m ChatRoomMessage, RenderMessage m FormMessage
+         ) =>  YesodSubDispatch ChatRoom m where
+    yesodSubDispatch :: YesodSubRunnerEnv ChatRoom m -> Application
     yesodSubDispatch = $(mkYesodSubDispatch resourcesChatRoom)

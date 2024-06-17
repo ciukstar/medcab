@@ -1,31 +1,37 @@
-$maybe (_,Entity iid (User email _ _ _ _ name _ _),_,Entity did _) <- patient
-  <header.app-top-app-bar.background>
-    <md-icon-button href=@{MyPatientR uid did pid} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
 
-    <figure>
-      <img slot=start src=@{AccountPhotoR iid AvatarColorDark} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
-      <figcaption.label-medium>
-        $maybe name <- name
-          #{name}
-        $nothing
-          #{email}
+<header.app-top-app-bar.background>
+  <md-icon-button href=@{myPatientR} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
 
-  <main>
-    <div ##{idChatOutput}>
-    
-      $forall (day,messages) <- chats
-        <time.day-bubble.body-small datetime=#{show day}>#{show day}
-        $forall Entity _ (Chat userId _ time msg _) <- messages
-          <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
-            #{msg}
-            <span.bubble-status-line>
-              <time.time-bubble.body-small datetime=#{show time}>
-              <i.icon.success>done_all
-            <span.bubble-tail-out>
-              <span.bubble-tail>
-            
-    <form ##{idMessageForm}>
-        <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
-          <md-filled-icon-button type=submit slot=trailing-icon>
-            <md-icon>send
+  <figure>
+    <img slot=start src=@{accountPhotoR} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
+    <figcaption.label-medium>
+      $maybe name <- name
+        #{name}
+      $nothing
+        #{email}
+
+<main>
+  <div ##{idChatOutput}>
+
+    $forall (day,messages) <- chats
+      <time.day-bubble.body-small datetime=#{show day}>#{show day}
+      $forall Entity _ (Chat userId _ time msg _) <- messages
+        <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
+          #{msg}
+          <span.bubble-status-line>
+            <time.time-bubble.body-small datetime=#{show time}>
+            <i.icon.success>done_all
+          <span.bubble-tail-out>
+            <span.bubble-tail>
+
+  <form ##{idMessageForm}>
+      <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
+        <md-filled-icon-button type=submit slot=trailing-icon>
+          <md-icon>send
+
+  <audio ##{idAudioOutgoingChat} preload=none>
+    <source src=@{ringtoneOutgoing} type="audio/mpeg">
+
+  <audio ##{idAudioIncomingChat} preload=none>
+    <source src=@{ringtoneIncoming} type="audio/mpeg">

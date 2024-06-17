@@ -1,29 +1,35 @@
-$maybe (_,Entity uid _,_,Entity did (Doctor name _ _ _ _)) <- patient
-  <header.app-top-app-bar.background>
-    <md-icon-button href=@{MyDoctorR pid uid did} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
 
-    <figure>
-      <img slot=start src=@{DoctorPhotoR did} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
-      <figcaption.label-medium>
-        #{name}
+<header.app-top-app-bar.background>
+  <md-icon-button href=@{myDoctorR} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
 
-  <main>
-  
-    <div ##{idChatOutput}>
-    
-      $forall (day,messages) <- chats
-        <time.day-bubble.body-small datetime=#{show day}>#{show day}
-        $forall Entity _ (Chat userId _ time msg _) <- messages
-          <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
-            <span>#{msg}
-            <span.bubble-status-line>
-              <time.time-bubble.body-small datetime=#{show time}>
-              <i.icon>done_all
-            <span.bubble-tail-out>
-              <span.bubble-tail>
-    
-    <form ##{idMessageForm}>
-        <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
-          <md-filled-icon-button type=submit slot=trailing-icon disabled>
-            <md-icon>send
+  <figure>
+    <img slot=start src=@{doctorPhotoR} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
+    <figcaption.label-medium>
+      #{name}
+
+<main>
+
+  <div ##{idChatOutput}>
+
+    $forall (day,messages) <- chats
+      <time.day-bubble.body-small datetime=#{show day}>#{show day}
+      $forall Entity _ (Chat userId _ time msg _) <- messages
+        <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
+          <span>#{msg}
+          <span.bubble-status-line>
+            <time.time-bubble.body-small datetime=#{show time}>
+            <i.icon>done_all
+          <span.bubble-tail-out>
+            <span.bubble-tail>
+
+  <form ##{idMessageForm}>
+    <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
+      <md-filled-icon-button type=submit slot=trailing-icon disabled>
+        <md-icon>send
+
+  <audio ##{idAudioOutgoingChat} preload=none>
+    <source src=@{ringtoneOutgoing} type="audio/mpeg">
+
+  <audio ##{idAudioIncomingChat} preload=none>
+    <source src=@{ringtoneIncoming} type="audio/mpeg">

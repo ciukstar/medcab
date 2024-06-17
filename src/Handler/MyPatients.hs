@@ -109,7 +109,7 @@ import Settings
 import Settings.StaticFiles
     ( img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_notifications_off_24dp_FILL0_wght400_GRAD0_opsz24_svg
-    , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
+    , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg, ringtones_outgoing_call_mp3
     )
 
 import Text.Hamlet (Html)
@@ -613,14 +613,16 @@ getMyPatientR uid did pid = do
           idButtonAudioCall <- newIdent
 
           idDialogOutgoingVideoCall <- newIdent
+          idAudioOutgoingVideoCallRingtone <- newIdent
           idButtonOutgoingVideoCallCancel <- newIdent
 
           idDialogOutgoingAudioCall <- newIdent
+          idAudioOutgoingAudioCallRingtone <- newIdent
           idButtonOutgoingAudioCallCancel <- newIdent
 
           idDialogVideoSessionEnded <- newIdent
           idDialogCallDeclined <- newIdent
-
+          
           $(widgetFile "my/patients/patient")
 
       Nothing -> invalidArgsI [MsgNoRecipient]

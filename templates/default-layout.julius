@@ -3,19 +3,19 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' });
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  [ { button: #{idButtonDeclineIncomingVideoCall},
+  [ { button: document.getElementById(#{idButtonDeclineIncomingVideoCall}),
       messageType: #{PushMsgTypeDeclineVideoCall},
       body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
-      dialog: #{idDialogIncomingVideoCall}
+      dialog: document.getElementById(#{idDialogIncomingVideoCall})
     },
-    { button: #{idButtonDeclineIncomingAudioCall},
+    { button: document.getElementById(#{idButtonDeclineIncomingAudioCall}),
       messageType: #{PushMsgTypeDeclineAudioCall},
       body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
-      dialog: #{idDialogIncomingAudioCall}
+      dialog: document.getElementById(#{idDialogIncomingAudioCall})
     }
   ].forEach(({ button, messageType, body, dialog }) => {
   
-    document.getElementById(button).onclick = function (event) {
+    button.onclick = function (event) {
       fetch(message.data.targetPush, {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -26,23 +26,23 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	  body: body
 	})
       }).then(function (result) {
-	document.getElementById(dialog).close();
+	dialog.close();
       });
     };
     
   });
 
-  [ { button: #{idButtonAcceptIncomingVideoCall},
+  [ { button: document.getElementById(#{idButtonAcceptIncomingVideoCall}),
       messageType: #{PushMsgTypeAcceptVideoCall},
-      dialog: #{idDialogIncomingVideoCall}
+      dialog: document.getElementById(#{idDialogIncomingVideoCall})
     },
-    { button: #{idButtonAcceptIncomingAudioCall},
+    { button: document.getElementById(#{idButtonAcceptIncomingAudioCall}),
       messageType: #{PushMsgTypeAcceptAudioCall},
-      dialog: #{idDialogIncomingAudioCall}
+      dialog: document.getElementById(#{idDialogIncomingAudioCall})
     }
   ].forEach(({ button, messageType, dialog }) => {
     
-    document.getElementById(button).onclick = function (event) {
+    button.onclick = function (event) {
       fetch(message.data.targetPush, {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -54,7 +54,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 	})
       }).then(function (result) {
 	
-	document.getElementById(dialog).close();
+	dialog.close();
 	
 	const params = new URLSearchParams({
 	  backlink: '@{backlink}'
@@ -92,4 +92,22 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     
   }
   
+});
+
+
+[ [#{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone}],
+  [#{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone}]
+].map(
+  (ids) => ids.map((id) => document.getElementById(id))
+).forEach(([dialog, audio]) => {
+  dialog.addEventListener('opened', (e) => { audio.play(); });
+  dialog.addEventListener('closed', (e) => { audio.pause(); });
+});
+
+
+window.addEventListener('load', (e) => {
+  [ #{idDialogIncomingVideoCall}
+  , #{idDialogIncomingAudioCall}
+  , #{idDialogMissedCall}
+  ].forEach(x => { document.getElementById(x).style.visibility = 'visible'; });
 });

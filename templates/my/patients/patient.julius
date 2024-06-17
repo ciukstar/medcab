@@ -122,3 +122,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   }
   
 });
+
+[ [#{idDialogOutgoingVideoCall}, #{idAudioOutgoingVideoCallRingtone}],
+  [#{idDialogOutgoingAudioCall}, #{idAudioOutgoingAudioCallRingtone}]
+].map(
+  (ids) => ids.map((id) => document.getElementById(id))
+).forEach(([dialog, audio]) => {
+  dialog.addEventListener('opened', (e) => { audio.play(); });
+  dialog.addEventListener('closed', (e) => { audio.pause(); });
+});

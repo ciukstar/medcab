@@ -2,15 +2,24 @@
 ^{widget}
 
 
-<md-dialog ##{idDialogIncomingVideoCall}>
+<md-dialog ##{idDialogIncomingVideoCall} style="visibility:hidden">
   <div slot=headline>
-    _{MsgIncomingVideoCall} ...
+    _{MsgIncomingVideoCall}
 
   <div slot=content>
 
     <figure ##{idFigurePhotoIncomingVideoCall}>
-      <img ##{idImgPhotoIncomingVideoCall} width=64 height=64 loading=lazy>
+      <div.img-wrapper>
+      
+        <img ##{idImgPhotoIncomingVideoCall} width=64 height=64 loading=lazy>
+
+        <div.circle.one>
+        <div.circle.two>
+        
       <figcaption.body-large ##{idFigcaptionPhotoIncomingVideoCall}>
+
+    <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
+      <source src=@{StaticR ringtones_incoming_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
 
@@ -23,15 +32,24 @@
       _{MsgAccept}
 
 
-<md-dialog ##{idDialogIncomingAudioCall}>
+<md-dialog ##{idDialogIncomingAudioCall} style="visibility:hidden">
   <div slot=headline>
-    _{MsgIncomingAudioCall} ...
+    _{MsgIncomingAudioCall}
 
   <div slot=content>
 
     <figure ##{idFigurePhotoIncomingAudioCall}>
-      <img ##{idImgPhotoIncomingAudioCall} width=64 height=64 loading=lazy>
+      <div.img-wrapper>
+      
+        <img ##{idImgPhotoIncomingAudioCall} width=64 height=64 loading=lazy>
+
+        <div.circle.one>
+        <div.circle.two>
+        
       <figcaption.body-large ##{idFigcaptionPhotoIncomingAudioCall}>
+
+    <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
+      <source src=@{StaticR ringtones_incoming_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
 
@@ -44,7 +62,7 @@
       _{MsgAccept}
 
       
-<md-dialog ##{idDialogMissedCall}>
+<md-dialog ##{idDialogMissedCall} style="visibility:hidden">
   <div slot=headline>
     _{MsgMissedCall}
 

@@ -21,6 +21,7 @@ module VideoRoom
   , wsApp
   , getWebSoketR
   , postPushMessageR
+  , getHomeRoute
   ) where
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -99,9 +100,9 @@ import Yesod
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
-import Yesod.Core.Handler (invalidArgsI)
+import Yesod.Core.Handler (invalidArgsI, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Form.Input (runInputGet, ireq)
+import Yesod.Form.Input (runInputGet, iopt)
 import Yesod.Form.Fields (urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
@@ -111,6 +112,7 @@ import Yesod.Static (StaticRoute)
 
 
 class YesodVideo m where
+    getHomeRoute :: HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
@@ -125,7 +127,11 @@ getAudioR :: (Yesod m, YesodVideo m)
 getAudioR sid pid rid polite = do
 
     let channelId = ChanId (fromIntegral $ fromSqlKey pid)
-    backlink <- runInputGet (ireq urlField paramBacklink)
+    backlink <- do
+        link <- runInputGet (iopt urlField paramBacklink)
+        home <- liftHandler getHomeRoute
+        rndr <- getUrlRender
+        return $ fromMaybe (rndr home) link
 
     toParent <- getRouteToParent
 
@@ -164,7 +170,11 @@ getRoomR :: (Yesod m, YesodVideo m)
 getRoomR sid pid rid polite = do
 
     let channelId = ChanId (fromIntegral $ fromSqlKey pid)
-    backlink <- runInputGet (ireq urlField paramBacklink)
+    backlink <- do
+        link <- runInputGet (iopt urlField paramBacklink)
+        home <- liftHandler getHomeRoute
+        rndr <- getUrlRender
+        return $ fromMaybe (rndr home) link
 
     toParent <- getRouteToParent
 

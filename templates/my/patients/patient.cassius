@@ -37,7 +37,7 @@ main
             justify-content: space-between
 
     #actions
-        padding: 0 2rem
+        padding: 0 2rem 1rem 2rem
         display: flex
         flex-direction: column
         gap: 1rem
@@ -61,6 +61,12 @@ main
             flex: 0
             md-icon
                 --md-icon-size: 56px
+            md-icon.callarrow
+                animation-name: callarrow
+                animation-duration: 3s
+                animation-delay: 0s
+                animation-iteration-count: infinite
+                animation-timing-function: steps(3, jump-end)
                 
     div[slot=actions]
         ##{idButtonOutgoingVideoCallCancel}
@@ -86,8 +92,24 @@ main
             flex: 0
             md-icon
                 --md-icon-size: 56px
+            md-icon.callarrow
+                animation-name: callarrow
+                animation-duration: 3s
+                animation-delay: 0s
+                animation-iteration-count: infinite
+                animation-timing-function: steps(3, jump-end)
                 
     div[slot=actions]
         ##{idButtonOutgoingAudioCallCancel}
             --md-sys-color-primary: red
             --md-sys-color-on-primary: white
+
+
+@keyframes callarrow
+    from
+        margin-left: 0
+        opacity: 1
+
+    to
+        margin-left: 75%
+        opacity: 0

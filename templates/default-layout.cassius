@@ -29,17 +29,48 @@
   main
     margin-left: 25%
     margin-right: 25%
-    
+
+@keyframes waves
+    from
+        transform: scale(1)
+        opacity: 1
+    to
+        transform: scale(1.5)
+        opacity: 0
+
+
 html body
 
     margin: 0
     padding: 0
+
+    div.img-wrapper
+        position: relative
+        display: inline-flex
+
+        .circle
+            width: 58px
+            height: 58px
+            border-radius: 50%
+            position: absolute
+            top: calc(50% - 30px)
+            left: calc(50% - 30px)
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.7)
+
+        .circle.one
+            animation: 6s 2s infinite linear waves
+            background: forestgreen
+
+        .circle.two
+            animation: circle 6s 0s infinite linear
+            background: dodgerblue
 
     ##{idDialogIncomingVideoCall}
         
         ##{idFigurePhotoIncomingVideoCall}
             text-align: center
             ##{idImgPhotoIncomingVideoCall}
+                z-index: 1
                 clip-path: circle(50%)
 
         ##{idButtonDeclineIncomingVideoCall}
@@ -58,6 +89,7 @@ html body
         ##{idFigurePhotoIncomingAudioCall}
             text-align: center
             ##{idImgPhotoIncomingAudioCall}
+                z-index: 1
                 clip-path: circle(50%)
 
         ##{idButtonDeclineIncomingAudioCall}
@@ -70,3 +102,11 @@ html body
           --md-sys-color-on-primary: #FFFFFF
           tab-index: 1
           margin-left: 1rem
+
+
+@keyframes slidetext
+    from
+        transform: translateX(100%)
+  
+    to
+        transform: translateX(-145%)

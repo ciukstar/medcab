@@ -14,7 +14,15 @@
 
 module Foundation where
 
-import ChatRoom.Data (ChatRoom)
+import ChatRoom
+    (YesodChat, getStaticRoute, getMyDoctorRoute, getMyPatientRoute
+    , getDoctorPhotoRoute, getAccountPhotoRoute
+    )
+import ChatRoom.Data
+    ( ChatRoom, ChatRoomMessage, defaultChatRoomMessage
+    , englishChatRoomMessage, frenchChatRoomMessage
+    , romanianChatRoomMessage, russianChatRoomMessage
+    )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
@@ -72,9 +80,12 @@ import VideoRoom
       ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys
       , getStaticRoute
       )
+    , getHomeRoute
     )
 import VideoRoom.Data
-    ( VideoRoom, VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage, frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage )
+    ( VideoRoom, VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage
+    , frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage
+    )
 
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
@@ -151,9 +162,29 @@ type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 -- | A convenient synonym for database access functions.
 type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend m a
 
+instance YesodChat App where
 
+    getStaticRoute :: StaticRoute -> HandlerFor App (Route App)
+    getStaticRoute = return . StaticR
+    
+    getMyDoctorRoute :: PatientId -> UserId -> DoctorId -> Handler (Route App)
+    getMyDoctorRoute pid uid did = return $ MyDoctorR pid uid did
+    
+    getMyPatientRoute :: UserId -> DoctorId -> PatientId -> Handler (Route App)
+    getMyPatientRoute uid did pid = return $ MyPatientR uid did pid
+    
+    getDoctorPhotoRoute :: DoctorId -> Handler (Route App)
+    getDoctorPhotoRoute did = return $ DoctorPhotoR did
+
+    getAccountPhotoRoute :: UserId -> AvatarColor -> Handler (Route App)
+    getAccountPhotoRoute uid color = return $ AccountPhotoR uid color
+    
 
 instance YesodVideo App where
+    
+    getHomeRoute :: HandlerFor App (Route App)
+    getHomeRoute = return HomeR
+    
     getAppSettings :: HandlerFor App AppSettings
     getAppSettings = appSettings <$> getYesod
 
@@ -245,6 +276,7 @@ instance Yesod App where
             idFigurePhotoIncomingVideoCall <- newIdent
             idImgPhotoIncomingVideoCall <- newIdent
             idFigcaptionPhotoIncomingVideoCall <- newIdent
+            idAudioIncomingVideoCallRingtone <- newIdent
             idButtonDeclineIncomingVideoCall <- newIdent
             idButtonAcceptIncomingVideoCall <- newIdent
 
@@ -252,6 +284,7 @@ instance Yesod App where
             idFigurePhotoIncomingAudioCall <- newIdent
             idImgPhotoIncomingAudioCall <- newIdent
             idFigcaptionPhotoIncomingAudioCall <- newIdent
+            idAudioIncomingAudioCallRingtone <- newIdent
             idButtonDeclineIncomingAudioCall <- newIdent
             idButtonAcceptIncomingAudioCall <- newIdent
 
@@ -1077,6 +1110,16 @@ isDoctorSelf did = do
 
 
 instance YesodAuthPersist App
+
+
+instance RenderMessage App ChatRoomMessage where
+    renderMessage :: App -> [Lang] -> ChatRoomMessage -> Text
+    renderMessage _ [] = defaultChatRoomMessage
+    renderMessage _ ("en":_) = englishChatRoomMessage
+    renderMessage _ ("fr":_) = frenchChatRoomMessage
+    renderMessage _ ("ro":_) = romanianChatRoomMessage
+    renderMessage _ ("ru":_) = russianChatRoomMessage
+    renderMessage app (_:xs) = renderMessage app xs
 
 
 instance RenderMessage App VideoRoomMessage where

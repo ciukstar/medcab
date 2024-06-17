@@ -47,21 +47,23 @@
         <dd.body-medium>#{name}
 
         <dt.label-large scope=row>_{MsgMobile}
-        <dd>
-          <md-text-button type=link href="tel:#{mobile}" trailing-icon>
-            #{mobile}
-            <md-icon slot=icon>smartphone
+        <dd.with-actions>
+          <span.body-medium>#{mobile}
+          <md-filled-tonal-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
+            <md-icon>smartphone
 
         $maybe phone <- phone 
           <dt.label-large scope=row>_{MsgPhone}
-          <dd>
-            <md-text-button type=link href="tel:#{phone}" trailing-icon>
-              #{phone}
-              <md-icon slot=icon>phone
+          <dd.with-actions>
+            <span.body-medium>#{phone}
+            <md-filled-tonal-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
+              <md-icon>phone
 
         <dt.label-large scope=row>_{MsgEmailAddress}
-        <dd.body-medium>
-          <a href="mailto:#{email}">#{email}
+        <dd.with-actions>
+          <span.body-medium>#{email}
+          <md-filled-tonal-icon-button type=link href="mailto:#{email}" aria-label=_{MsgSendEmail}>
+            <md-icon>mail
 
       <div #actions>
       
@@ -83,12 +85,12 @@
           <md-icon slot=icon>book_online
           _{MsgBookAppointment}
 
+
+      ^{widgetSnackbar msgs}
+
     <div #panelSpecialties role=tabpanel aria-labelledby=tabSpecialties hidden>
 
     <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
-
-
-^{widgetSnackbar msgs}
 
 <md-dialog ##{idDialogOutgoingVideoCall}>
   <div slot=headline>
@@ -133,8 +135,8 @@
       $nothing
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
 
-  <audio loop ##{idAudioOutgoingVideoCallRingtone} preload=none>
-    <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
+    <audio loop ##{idAudioOutgoingVideoCallRingtone} preload=none>
+      <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingVideoCallCancel}>
@@ -185,8 +187,8 @@
       $nothing
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
 
-  <audio loop ##{idAudioOutgoingAudioCallRingtone} preload=none>
-    <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
+    <audio loop ##{idAudioOutgoingAudioCallRingtone} preload=none>
+      <source src=@{StaticR ringtones_outgoing_call_mp3} type="audio/mpeg">
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingAudioCallCancel}>

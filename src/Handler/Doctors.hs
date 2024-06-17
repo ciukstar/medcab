@@ -14,9 +14,9 @@ import Data.Bifunctor (Bifunctor(second))
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Esqueleto.Experimental
-    (select, from, table, where_, leftJoin, on, just, orderBy, desc, selectOne
+    (select, selectOne, from, table, where_, leftJoin, on, just, val
     , (^.), (?.), (==.), (:&)((:&))
-    , Value (unValue), val, innerJoin
+    , Value (unValue), innerJoin, orderBy, desc
     )
 import Database.Persist (Entity (Entity))
 
