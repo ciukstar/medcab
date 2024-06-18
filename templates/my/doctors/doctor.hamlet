@@ -67,7 +67,7 @@
 
       <div #actions>
       
-        <md-filled-tonal-button #idButtonChat type=link href=@{ChatR $ DoctorChatRoomR pid uid}>
+        <md-filled-tonal-button #idButtonChat type=link href=@{ChatR uid $ DoctorChatRoomR pid uid}>
           <md-icon slot=icon>Chat
           _{MsgChat}
           $if unread > 0

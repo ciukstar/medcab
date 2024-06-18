@@ -1,7 +1,7 @@
 
 /rtc VideoR VideoRoom getVideoRoom
 
-/channels ChatR ChatRoom getChatRoom
+/chat/#UserId ChatR ChatRoom getChatRoom
 
 /pushsubscriptionchange PushSubscriptionEndpointR PUT
 

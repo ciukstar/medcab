@@ -1,3 +1,4 @@
+Reply: Răspundeți
 SendEmail: Trimite email
 MakeACall: Efectuați un apel
 InvalidPatient: Pacient nevalid

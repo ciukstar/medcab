@@ -10,13 +10,16 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE RecordWildCards #-}
+
 
 module ChatRoom
   ( module ChatRoom.Data
   , getDoctorChatRoomR
   , YesodChat
     ( getStaticRoute, getMyDoctorRoute, getMyPatientRoute, getDoctorPhotoRoute
-    , getAccountPhotoRoute
+    , getAccountPhotoRoute, getVapidKeys, getAppHttpManager, getAppSettings
+    , getChatRoute
     )
   ) where
 
@@ -24,15 +27,21 @@ import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route (DoctorChatRoomR, PatientChatRoomR)
     , ChatRoomMessage 
-      ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined )
+      ( MsgBack, MsgChat, MsgPhoto, MsgMessage, MsgChatParticipantsNotDefined
+      , MsgAppName, MsgPushNotificationExcception
+      )
     )
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
-import Control.Monad (forever)
 import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
+import Control.Lens ((.~), (?~))
+import Control.Monad (forever, forM_)
 
+import Data.Aeson (object, (.=))
+import Data.Function ((&))
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 import Database.Esqueleto.Experimental
@@ -41,34 +50,54 @@ import Database.Esqueleto.Experimental
     , just, SqlBackend, select, orderBy, subSelect, desc
     )
 import Database.Persist
-    ( Entity (Entity), PersistStoreWrite (insert_) )
+    ( Entity (Entity), PersistStoreWrite (insert), entityVal )
 import Database.Persist.Sql (fromSqlKey)
 
 import Data.Aeson.Text (encodeToLazyText)
 import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
-import Data.Text (pack)
+import Data.Maybe (fromMaybe)
+import Data.Text (Text, pack)
 import Data.Text.Lazy (toStrict)
 
 import Model
-    ( AvatarColor (AvatarColorDark)
+    ( AvatarColor (AvatarColorDark), statusError
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , DoctorId, Doctor (Doctor)
-    , PatientId, Patient, UserId, User (User)
+    , PatientId, Patient
+    , UserId, User (User), userEmail, userName
     , Chat (Chat)
+    , PushSubscription (PushSubscription)
+    , PushMsgType (PushMsgTypeChat)
     , EntityField
       ( DoctorId, PatientDoctor, PatientId, PatientUser, UserId, DoctorUser
-      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus
+      , ChatTimemark, ChatUser, ChatInterlocutor, ChatStatus, ChatNotified
+      , PushSubscriptionPublisher, PushSubscriptionSubscriber, ChatId
       )
     )
+
+import Network.HTTP.Client (Manager)
+import Network.HTTP.Types (extractPath)
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
-import Settings (widgetFile)
+import Settings
+    ( widgetFile, AppSettings (appSuperuser)
+    , Superuser (Superuser, superuserUsername)
+    )
 import Settings.StaticFiles
-    ( ringtones_outgoing_chat_mp3, ringtones_incoming_chat_mp3 )
+    ( ringtones_outgoing_chat_mp3, ringtones_incoming_chat_mp3
+    , img_chat_FILL0_wght400_GRAD0_opsz24_svg
+    )
 
 import Text.Shakespeare.I18N (RenderMessage)
+
+import Web.WebPush
+    ( mkPushNotification
+    , pushMessage, pushSenderEmail, pushExpireInSeconds
+    , sendPushNotification, pushTopic, PushTopic (PushTopic), pushUrgency
+    , PushUrgency (PushUrgencyHigh), VAPIDKeys
+    )
 
 import Yesod
     ( Yesod (defaultLayout), YesodSubDispatch, yesodSubDispatch
@@ -76,7 +105,10 @@ import Yesod
     , getSubYesod, setTitleI, Application, YesodPersist (YesodPersistBackend)
     , invalidArgsI
     )
-import Yesod.Core.Handler (newIdent, HandlerFor)
+import Yesod.Core.Handler
+    ( newIdent, HandlerFor, getUrlRender, getMessageRender
+    , addMessageI
+    )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Types (FormMessage)
 import Yesod.Persist (YesodPersist(runDB))
@@ -86,11 +118,15 @@ import Yesod.WebSockets
 
 
 class YesodChat m where
+    getChatRoute :: UserId -> Route ChatRoom -> HandlerFor m (Route m)
+    getAppSettings :: HandlerFor m AppSettings
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getMyDoctorRoute :: PatientId -> UserId -> DoctorId -> HandlerFor m (Route m)
     getMyPatientRoute :: UserId -> DoctorId -> PatientId -> HandlerFor m (Route m)
     getDoctorPhotoRoute :: DoctorId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> AvatarColor -> HandlerFor m (Route m)
+    getAppHttpManager :: HandlerFor m Manager
+    getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
@@ -103,12 +139,15 @@ userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-chatApp :: (YesodPersist master, YesodPersistBackend master ~ SqlBackend)
+chatApp :: YesodChat m
+        => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+        => RenderMessage m ChatRoomMessage
         => PatientId
         -> Entity User -- ^ user
         -> Entity User -- ^ interlocutor
-        -> WebSocketsT (SubHandlerFor ChatRoom master) ()
-chatApp pid (Entity uid _) (Entity iid _) = do
+        -> Route m
+        -> WebSocketsT (SubHandlerFor ChatRoom m) ()
+chatApp pid (Entity uid _) (Entity iid _) targetRoute = do
 
     let channelId = pack $ show $ fromSqlKey pid
 
@@ -140,9 +179,71 @@ chatApp pid (Entity uid _) (Entity iid _) = do
                               let status = if n > 1 then ChatMessageStatusRead else ChatMessageStatusUnread
                               
                               now <- liftIO getCurrentTime
-                              let chat = Chat uid iid now msg status
+                              let chat = Chat uid iid now msg status False
                               atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText chat
-                              liftHandler (runDB $ insert_ chat)
+                              cid <- liftHandler (runDB $ insert chat)
+
+                              mVapidKeys <- liftHandler getVapidKeys
+
+                              case mVapidKeys of
+                                Just vapidKeys -> do
+
+                                    subscriptions <- liftHandler $ runDB $ select $ do
+                                        x <- from $ table @PushSubscription
+                                        where_ $ x ^. PushSubscriptionPublisher ==. val uid
+                                        where_ $ x ^. PushSubscriptionSubscriber ==. val iid
+                                        return x
+
+                                    sender <- liftHandler $ runDB $ selectOne $ do
+                                        x <- from $ table @User
+                                        where_ $ x ^. UserId ==. val uid
+                                        return x
+
+
+                                    iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
+                                    urlr <- liftHandler getUrlRender
+                                    msgr <- liftHandler getMessageRender
+                                    Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
+
+                                    let expath = decodeUtf8 . extractPath . encodeUtf8 . urlr
+                                    
+                                    forM_ subscriptions $ \(Entity _ (PushSubscription sid pid' endpoint p256dh auth)) -> do
+                                        photor <- liftHandler $ getAccountPhotoRoute pid' AvatarColorDark
+                                        let notification = mkPushNotification endpoint p256dh auth
+                                                & pushMessage .~ object
+                                                    [ "title" .= msgr MsgAppName
+                                                    , "icon" .= expath iconr
+                                                    , "image" .= expath photor
+                                                    , "body" .= msg
+                                                    , "messageType" .= PushMsgTypeChat
+                                                    , "targetRoom" .= expath targetRoute
+                                                    , "senderId" .= pid'
+                                                    , "senderName" .= (
+                                                          (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender
+                                                                      )
+                                                    , "recipientId" .= sid
+                                                    ]
+                                                & pushSenderEmail .~ superuserUsername
+                                                & pushExpireInSeconds .~ 30 * 60
+                                                & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeChat)
+                                                & pushUrgency ?~ PushUrgencyHigh
+
+                                        manager <- liftHandler getAppHttpManager
+
+                                        result <- sendPushNotification vapidKeys manager notification
+
+                                        case result of
+                                          Left ex -> do
+                                              liftIO $ print ex
+                                              liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                          Right () -> liftHandler $ runDB $ update $ \x -> do
+                                              set x [ChatNotified =. val True]
+                                              where_ $ x ^. ChatId ==. val cid
+                                Nothing -> do
+                                    liftIO $ print @Text "No VAPID"
+                                    liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                  
+                                    
                           )
                     ))
 
@@ -153,7 +254,6 @@ chatApp pid (Entity uid _) (Entity iid _) = do
           let newChannelMap = M.alter userLeftChannel channelId m
           atomically $ writeTVar channelMapTVar newChannelMap
       Right () -> return ()
-
 
 
 getDoctorChatRoomR :: (Yesod m, YesodChat m)
@@ -183,11 +283,13 @@ getDoctorChatRoomR pid uid' = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
     case patient of
-      Just (_,user,interlocutor,_) -> webSockets (chatApp pid user interlocutor)
+      Just (_,user,interlocutor@(Entity iid _),_) -> do
+          chatr <- liftHandler $ getChatRoute iid (PatientChatRoomR pid iid)
+          webSockets (chatApp pid user interlocutor chatr)
       _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
 
-    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
+    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val uid')
                    &&. ( case patient of
@@ -249,10 +351,12 @@ getPatientChatRoomR pid uid = do
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
     case patient of
-      Just (_,interlocutor,user,_) -> webSockets (chatApp pid user interlocutor)
+      Just (_,interlocutor@(Entity iid _),user,_) -> do
+          chatr <- liftHandler $ getChatRoute iid (DoctorChatRoomR pid iid)
+          webSockets (chatApp pid user interlocutor chatr)
       _otherwise -> invalidArgsI [MsgChatParticipantsNotDefined]
 
-    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
+    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val uid)
                    &&. ( case patient of

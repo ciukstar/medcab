@@ -56,7 +56,10 @@ import Model
       ( Patient, patientUser, patientDoctor, patientSince, patientMobile
       , patientPhone
       )
-    , Chat (Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus)
+    , Chat
+      ( Chat, chatUser, chatInterlocutor, chatTimemark, chatMessage, chatStatus
+      , chatNotified
+      )
     , ChatMessageStatus (ChatMessageStatusUnread, ChatMessageStatusRead)
     , Token (Token, tokenApi, tokenStore), apiInfoVapid, apiInfoGoogle
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase)
@@ -941,6 +944,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
                        , chatMessage = "Bonjour, Dr Richard Arthur Louis"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat131
@@ -950,6 +954,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 30 (chatTimemark chat131)
                        , chatMessage = "Bonjour Bernard Jade"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat311
@@ -959,6 +964,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 60 (chatTimemark chat311)
                        , chatMessage = "Comment allez-vous?"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat312
@@ -968,6 +974,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 65 (chatTimemark chat312)
                        , chatMessage = "Dans l'ensemble, ça va, mais je m'inquiète pour la tension artérielle."
                        , chatStatus = ChatMessageStatusUnread
+                       , chatNotified = True
                        }
 
     insert_ chat132
@@ -977,6 +984,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-2) * nominalDay) now
                        , chatMessage = "Bonjour Gabriel."
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat321
@@ -986,6 +994,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 60 (chatTimemark chat321)
                        , chatMessage = "Bonjour, Dr Richard Arthur Louis"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat231
@@ -995,6 +1004,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 10 (chatTimemark chat231)
                        , chatMessage = "Tout va bien?"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat322
@@ -1004,6 +1014,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 30 (chatTimemark chat322)
                        , chatMessage = "Oui tout va bien."
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat232
@@ -1013,6 +1024,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
                        , chatMessage = "Bonjour, Dr Richard Arthur Louis"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
     insert_ chat233
 
@@ -1021,6 +1033,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 65 (chatTimemark chat233)
                        , chatMessage = "Salut Gabriel"
                        , chatStatus = ChatMessageStatusUnread
+                       , chatNotified = True
                        }
 
     insert_ chat323
@@ -1030,6 +1043,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
                        , chatMessage = "Bonjour, Dr Dubois Alice Ambre"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat141
@@ -1039,6 +1053,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 30 (chatTimemark chat141)
                        , chatMessage = "Bonjour Bernard Jade"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat411
@@ -1048,6 +1063,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 60 (chatTimemark chat411)
                        , chatMessage = "Comment allez-vous?"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat412
@@ -1057,6 +1073,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 65 (chatTimemark chat412)
                        , chatMessage = "Dans l'ensemble, ça va, mais je m'inquiète pour la tension artérielle."
                        , chatStatus = ChatMessageStatusUnread
+                       , chatNotified = True
                        }
 
     insert_ chat142
@@ -1066,6 +1083,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-2) * nominalDay) now
                        , chatMessage = "Bonjour Gabriel."
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat421
@@ -1075,6 +1093,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 60 (chatTimemark chat421)
                        , chatMessage = "Bonjour, Dr Dubois Alice Ambre"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat241
@@ -1084,6 +1103,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 10 (chatTimemark chat241)
                        , chatMessage = "Tout va bien?"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat422
@@ -1093,6 +1113,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 30 (chatTimemark chat422)
                        , chatMessage = "Oui tout va bien."
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
 
     insert_ chat242
@@ -1102,6 +1123,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime ((-1) * nominalDay) now
                        , chatMessage = "Bonjour, Dr Dubois Alice Ambre"
                        , chatStatus = ChatMessageStatusRead
+                       , chatNotified = True
                        }
     insert_ chat243
 
@@ -1110,6 +1132,7 @@ fillDemoFr appSettings = do
                        , chatTimemark = addUTCTime 65 (chatTimemark chat243)
                        , chatMessage = "Salut Gabriel"
                        , chatStatus = ChatMessageStatusUnread
+                       , chatNotified = True
                        }
 
     insert_ chat423

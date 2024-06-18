@@ -42,7 +42,7 @@ import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Maybe (fromMaybe)
 import Data.Text (unpack, pack)
-import Data.Text.Encoding (encodeUtf8)
+import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 import Model
     ( paramBacklink
@@ -57,6 +57,7 @@ import Model
     )
 
 import Network.HTTP.Client (Manager)
+import Network.HTTP.Types ( extractPath )
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
@@ -211,11 +212,14 @@ postPushMessageR :: (Yesod m, YesodVideo m)
 postPushMessageR sid rid = do
 
     messageType <- (readMaybe @PushMsgType . unpack =<<) <$> lookupPostParam "messageType"
-    icon <- lookupPostParam "icon"
-    image <- lookupPostParam "image"
+
+    let expath = decodeUtf8 . extractPath . encodeUtf8
+    
+    icon <- (expath <$>) <$> lookupPostParam "icon"
+    image <- (expath <$>) <$> lookupPostParam "image"
     body <- lookupPostParam "body"
-    targetRoom <- lookupPostParam "targetRoom"
-    targetPush <- lookupPostParam "targetPush"
+    targetRoom <- (expath <$>) <$> lookupPostParam "targetRoom"
+    targetPush <- (expath <$>) <$> lookupPostParam "targetPush"
 
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription

@@ -46,6 +46,12 @@ self.onpush = function (e) {
 		    { action: #{endCallSession}, title: #{msgr MsgEndSession} }
 		  ];
 
+      } else if (message.messageType === #{PushMsgTypeChat}) {
+	
+	actions = [ { action: #{dismissNotifcation}, title: #{msgr MsgDismissNotification} },
+		    { action: #{replyChat}, title: #{msgr MsgReply} }
+		  ];
+
       } else {
 	actions = [];
       }
@@ -271,6 +277,29 @@ self.addEventListener('notificationclick', function (e) {
         return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
 
       }
+    });
+
+    e.waitUntil(promise);
+    
+  } else if (e.action === #{replyChat}) {
+
+    e.notification.close();
+
+    const promise = self.clients.matchAll(
+      { type: 'window', includeUncontrolled: true }
+    ).then((clients) => {
+
+      return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
+
+    }).then(([targets, clients]) => {
+
+      return targets.length > 0
+        ? targets[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
+        : ( clients.length > 0
+            ? clients[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
+            : self.clients.openWindow(e.notification.data.targetRoom)
+          );
+
     });
 
     e.waitUntil(promise);

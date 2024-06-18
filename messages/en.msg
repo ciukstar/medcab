@@ -1,3 +1,4 @@
+Reply: Reply
 SendEmail: Send email
 MakeACall: Make a call
 InvalidPatient: Invalid patient

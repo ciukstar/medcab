@@ -1,3 +1,4 @@
+Reply: Отвечать
 SendEmail: Отправить письмо
 MakeACall: Позвонить
 InvalidPatient: Недействительный пациент

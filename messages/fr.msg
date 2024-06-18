@@ -1,3 +1,4 @@
+Reply: Répondez
 SendEmail: Envoyer un e-mail
 MakeACall: Passer un appel
 InvalidPatient: Patient non valide

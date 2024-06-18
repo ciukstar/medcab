@@ -94,6 +94,7 @@ Chat json
     timemark UTCTime
     message Text
     status ChatMessageStatus
+    notified Bool
 
 PushSubscription
     subscriber UserId OnDeleteCascade

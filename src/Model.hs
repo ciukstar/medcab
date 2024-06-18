@@ -41,6 +41,7 @@ import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 
 import Text.Hamlet (Html)
+import Text.Julius (ToJavascript (toJavascript), Javascript)
 import Text.Show (Show (show))
 import Text.Read (readMaybe)
 
@@ -49,10 +50,9 @@ import Yesod.Core.Dispatch
     , PathMultiPiece (fromPathMultiPiece, toPathMultiPiece)
     )
 import Yesod.Form (Textarea)
-import Text.Julius (ToJavascript (toJavascript), Javascript)
 
 
-data PushMsgType = PushMsgTypeVideoCall | PushMsgTypeAudioCall
+data PushMsgType = PushMsgTypeChat | PushMsgTypeVideoCall | PushMsgTypeAudioCall
                  | PushMsgTypeAcceptVideoCall | PushMsgTypeAcceptAudioCall
                  | PushMsgTypeDeclineVideoCall | PushMsgTypeDeclineAudioCall
                  | PushMsgTypeCancel | PushMsgTypeEnd

@@ -16,7 +16,8 @@ module Foundation where
 
 import ChatRoom
     (YesodChat, getStaticRoute, getMyDoctorRoute, getMyPatientRoute
-    , getDoctorPhotoRoute, getAccountPhotoRoute
+    , getDoctorPhotoRoute, getAccountPhotoRoute, getAppHttpManager
+    , getVapidKeys, getAppSettings, getChatRoute
     )
 import ChatRoom.Data
     ( ChatRoom, ChatRoomMessage, defaultChatRoomMessage
@@ -135,7 +136,7 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
-    , getChatRoom    :: ChatRoom
+    , getChatRoom    :: UserId -> ChatRoom
     , getVideoRoom   :: VideoRoom
     }
 
@@ -164,6 +165,12 @@ type DB a = forall (m :: Type -> Type). (MonadUnliftIO m) => ReaderT SqlBackend 
 
 instance YesodChat App where
 
+    getChatRoute :: UserId -> Route ChatRoom -> Handler (Route App)
+    getChatRoute uid chatr = return (ChatR uid chatr)
+
+    getAppSettings :: HandlerFor App AppSettings
+    getAppSettings = appSettings <$> getYesod
+
     getStaticRoute :: StaticRoute -> HandlerFor App (Route App)
     getStaticRoute = return . StaticR
     
@@ -178,6 +185,12 @@ instance YesodChat App where
 
     getAccountPhotoRoute :: UserId -> AvatarColor -> Handler (Route App)
     getAccountPhotoRoute uid color = return $ AccountPhotoR uid color
+
+    getAppHttpManager :: HandlerFor App Manager
+    getAppHttpManager = appHttpManager <$> getYesod
+
+    getVapidKeys :: HandlerFor App (Maybe VAPIDKeys)
+    getVapidKeys = getVAPIDKeys
     
 
 instance YesodVideo App where
@@ -302,7 +315,7 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
-    isAuthorized (ChatR _) _ = isAuthenticated
+    isAuthorized (ChatR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (VideoR _) _ = isAuthenticated
 
 
@@ -510,6 +523,7 @@ getServiceWorkerR = do
           declineAudioCall <- newIdent
           acceptAudioCall <- newIdent
           endCallSession <- newIdent
+          replyChat <- newIdent
 
           return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
