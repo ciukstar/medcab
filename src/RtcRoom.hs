@@ -12,8 +12,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module VideoRoom
-  ( module VideoRoom.Data
+module RtcRoom
+  ( module RtcRoom.Data
   , YesodVideo
     ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager
     , getVapidKeys, getStaticRoute
@@ -52,7 +52,8 @@ import Model
       ( PushMsgTypeEnd
       )
     , EntityField
-      ( PushSubscriptionSubscriber, UserPhotoUser, UserId
+      ( UserPhotoUser, UserId
+      , PushSubscriptionSubscriber, PushSubscriptionPublisher
       )
     )
 
@@ -75,11 +76,11 @@ import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (st)
 
-import VideoRoom.Data
-    ( resourcesVideoRoom, channelMapTVar
-    , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, PhotoR, RoomR, AudioR)
-    , VideoRoomMessage
+import RtcRoom.Data
+    ( resourcesRtcRoom, channelMapTVar
+    , RtcRoom (RtcRoom), ChanId (ChanId)
+    , Route (WebSoketR, PushMessageR, PhotoR, VideoR, AudioR)
+    , RtcRoomMessage
       ( MsgNotGeneratedVAPID, MsgVideoSession, MsgAudioSession, MsgClose
       , MsgCallEnded, MsgAppName, MsgUserCallIsOver, MsgBack, MsgUnknown
       , MsgUserOnCall
@@ -123,8 +124,8 @@ class YesodVideo m where
 
 getAudioR :: (Yesod m, YesodVideo m)
           => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-          => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
+          => (RenderMessage m RtcRoomMessage, RenderMessage m FormMessage)
+          => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor RtcRoom m Html
 getAudioR sid pid rid polite = do
 
     let channelId = ChanId (fromIntegral $ fromSqlKey pid)
@@ -164,11 +165,11 @@ getAudioR sid pid rid polite = do
         $(widgetFile "audio/session")
 
 
-getRoomR :: (Yesod m, YesodVideo m)
+getVideoR :: (Yesod m, YesodVideo m)
          => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-         => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-         => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
-getRoomR sid pid rid polite = do
+         => (RenderMessage m RtcRoomMessage, RenderMessage m FormMessage)
+         => UserId -> PatientId -> UserId -> Bool -> SubHandlerFor RtcRoom m Html
+getVideoR sid pid rid polite = do
 
     let channelId = ChanId (fromIntegral $ fromSqlKey pid)
     backlink <- do
@@ -201,14 +202,14 @@ getRoomR sid pid rid polite = do
 
 
 getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
+             => ChanId -> Bool -> SubHandlerFor RtcRoom m ()
 getWebSoketR channelId polite = webSockets (wsApp channelId polite)
 
 
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                 => (RenderMessage m VideoRoomMessage, RenderMessage m FormMessage)
-                 => UserId -> UserId -> SubHandlerFor VideoRoom m ()
+                 => (RenderMessage m RtcRoomMessage, RenderMessage m FormMessage)
+                 => UserId -> UserId -> SubHandlerFor RtcRoom m ()
 postPushMessageR sid rid = do
 
     messageType <- (readMaybe @PushMsgType . unpack =<<) <$> lookupPostParam "messageType"
@@ -224,6 +225,7 @@ postPushMessageR sid rid = do
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription
         where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+        where_ $ x ^. PushSubscriptionPublisher ==. val sid
         return x
 
     manager <- liftHandler getAppHttpManager
@@ -270,10 +272,10 @@ userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
+wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor RtcRoom m) ()
 wsApp channelId polite = do
 
-    VideoRoom {..} <- getSubYesod
+    RtcRoom {..} <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
 
@@ -306,7 +308,7 @@ wsApp channelId polite = do
 
 
 getPhotoR :: (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-          => UserId -> SubHandlerFor VideoRoom m TypedContent
+          => UserId -> SubHandlerFor RtcRoom m TypedContent
 getPhotoR uid = do
     photo <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @UserPhoto
@@ -318,7 +320,7 @@ getPhotoR uid = do
 
 instance ( Yesod m, YesodVideo m
          , YesodPersist m, YesodPersistBackend m ~ SqlBackend
-         , RenderMessage m VideoRoomMessage, RenderMessage m FormMessage
-         ) => YesodSubDispatch VideoRoom m where
-    yesodSubDispatch :: YesodSubRunnerEnv VideoRoom m -> Application
-    yesodSubDispatch = $(mkYesodSubDispatch resourcesVideoRoom)
+         , RenderMessage m RtcRoomMessage, RenderMessage m FormMessage
+         ) => YesodSubDispatch RtcRoom m where
+    yesodSubDispatch :: YesodSubRunnerEnv RtcRoom m -> Application
+    yesodSubDispatch = $(mkYesodSubDispatch resourcesRtcRoom)

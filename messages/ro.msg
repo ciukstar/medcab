@@ -1,3 +1,5 @@
+Ignore: Ignorați
+NewMessage: Mesaj nou
 Reply: Răspundeți
 SendEmail: Trimite email
 MakeACall: Efectuați un apel

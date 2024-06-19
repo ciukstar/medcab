@@ -76,16 +76,16 @@ import Text.Printf (printf)
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (stext)
 
-import VideoRoom
+import RtcRoom
     ( YesodVideo
       ( getAppSettings, getRtcPeerConnectionConfig, getAppHttpManager, getVapidKeys
       , getStaticRoute
       )
     , getHomeRoute
     )
-import VideoRoom.Data
-    ( VideoRoom, VideoRoomMessage, defaultVideoRoomMessage, englishVideoRoomMessage
-    , frenchVideoRoomMessage, romanianVideoRoomMessage, russianVideoRoomMessage
+import RtcRoom.Data
+    ( RtcRoom, RtcRoomMessage, defaultRtcRoomMessage, englishRtcRoomMessage
+    , frenchRtcRoomMessage, romanianRtcRoomMessage, russianRtcRoomMessage
     )
 
 import Web.WebPush
@@ -137,7 +137,7 @@ data App = App
     , appHttpManager :: Manager
     , appLogger      :: Logger
     , getChatRoom    :: UserId -> ChatRoom
-    , getVideoRoom   :: VideoRoom
+    , getRtcRoom     :: UserId -> RtcRoom
     }
 
 mkMessage "App" "messages" "en"
@@ -275,6 +275,7 @@ instance Yesod App where
         master <- getYesod
         lang <- fromMaybe "en" . LS.head <$> languages
         msgr <- getMessageRender
+        rndr <- getUrlRender
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
         -- default-layout-wrapper is the entire page. Since the final
@@ -284,6 +285,17 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
+
+            currentPath <- maybe "/" (TE.decodeUtf8 . extractPath . TE.encodeUtf8 . rndr) <$> getCurrentRoute
+
+            idDialogChatNotification <- newIdent
+            idFigureSenderPhoto <- newIdent
+            idImgSenderPhoto <- newIdent
+            idFigcaptionSenderInfo <- newIdent
+            idNotificationBody <- newIdent
+            idAudioIncomingChatRingtone <- newIdent
+            idButtonIgnoreNotification <- newIdent
+            idButtonReplyNotification <- newIdent
 
             idDialogIncomingVideoCall <- newIdent
             idFigurePhotoIncomingVideoCall <- newIdent
@@ -316,7 +328,7 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     isAuthorized (ChatR uid _) _ = isAuthenticatedSelf uid
-    isAuthorized (VideoR _) _ = isAuthenticated
+    isAuthorized (RtcR uid _) _ = isAuthenticatedSelf uid
 
 
     isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
@@ -1136,13 +1148,13 @@ instance RenderMessage App ChatRoomMessage where
     renderMessage app (_:xs) = renderMessage app xs
 
 
-instance RenderMessage App VideoRoomMessage where
-    renderMessage :: App -> [Lang] -> VideoRoomMessage -> Text
-    renderMessage _ [] = defaultVideoRoomMessage
-    renderMessage _ ("en":_) = englishVideoRoomMessage
-    renderMessage _ ("fr":_) = frenchVideoRoomMessage
-    renderMessage _ ("ro":_) = romanianVideoRoomMessage
-    renderMessage _ ("ru":_) = russianVideoRoomMessage
+instance RenderMessage App RtcRoomMessage where
+    renderMessage :: App -> [Lang] -> RtcRoomMessage -> Text
+    renderMessage _ [] = defaultRtcRoomMessage
+    renderMessage _ ("en":_) = englishRtcRoomMessage
+    renderMessage _ ("fr":_) = frenchRtcRoomMessage
+    renderMessage _ ("ro":_) = romanianRtcRoomMessage
+    renderMessage _ ("ru":_) = russianRtcRoomMessage
     renderMessage app (_:xs) = renderMessage app xs
 
 

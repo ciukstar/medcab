@@ -71,7 +71,17 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  if (message.data.messageType === #{PushMsgTypeCancel}) {
+  if (message.data.messageType === #{PushMsgTypeChat}) {
+
+    if (message.data.targetRoom != #{currentPath}) {
+      document.getElementById(#{idImgSenderPhoto}).src = message.data.image;
+      document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
+      document.getElementById(#{idNotificationBody}).textContent = message.data.body;
+      document.getElementById(#{idButtonReplyNotification}).href = message.data.targetRoom;
+      document.getElementById(#{idDialogChatNotification}).show();
+    }
+    
+  } else if (message.data.messageType === #{PushMsgTypeCancel}) {
     
     document.getElementById(#{idDialogIncomingVideoCall}).close();
     document.getElementById(#{idDialogIncomingAudioCall}).close();
@@ -95,8 +105,14 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 });
 
 
-[ [#{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone}],
-  [#{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone}]
+document.getElementById(#{idButtonIgnoreNotification}).addEventListener('click', function (e) {
+  document.getElementById(#{idDialogChatNotification}).close();
+});
+
+
+[ [ #{idDialogChatNotification}, #{idAudioIncomingChatRingtone} ],
+  [ #{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone} ],
+  [ #{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone} ]
 ].map(
   (ids) => ids.map((id) => document.getElementById(id))
 ).forEach(([dialog, audio]) => {
@@ -106,7 +122,8 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 
 window.addEventListener('load', (e) => {
-  [ #{idDialogIncomingVideoCall}
+  [ #{idDialogChatNotification}
+  , #{idDialogIncomingVideoCall}
   , #{idDialogIncomingAudioCall}
   , #{idDialogMissedCall}
   ].forEach(x => { document.getElementById(x).style.visibility = 'visible'; });

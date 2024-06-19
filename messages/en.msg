@@ -1,3 +1,5 @@
+Ignore: Ignore
+NewMessage: New message
 Reply: Reply
 SendEmail: Send email
 MakeACall: Make a call

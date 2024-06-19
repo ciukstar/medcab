@@ -65,6 +65,12 @@ html body
             animation: circle 6s 0s infinite linear
             background: dodgerblue
 
+    ##{idDialogChatNotification}
+        ##{idFigureSenderPhoto}
+            text-align: center
+            ##{idImgSenderPhoto}
+                clip-path: circle(50%)
+
     ##{idDialogIncomingVideoCall}
         
         ##{idFigurePhotoIncomingVideoCall}

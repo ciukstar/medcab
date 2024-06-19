@@ -150,7 +150,7 @@ import qualified Network.Wai as W (Response)
 
 import System.Environment.Blank (getEnv)
 
-import VideoRoom.Data ( VideoRoom (VideoRoom) )
+import RtcRoom.Data ( RtcRoom (RtcRoom) )
 
 import Yesod.Auth.Email (saltPass)
 
@@ -174,7 +174,7 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     getChatRoom <- newTVarIO M.empty <&> (const . ChatRoom)
-    getVideoRoom <- VideoRoom <$> newTVarIO M.empty
+    getRtcRoom <- newTVarIO M.empty <&> (const . RtcRoom)
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

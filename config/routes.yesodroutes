@@ -1,5 +1,5 @@
 
-/rtc VideoR VideoRoom getVideoRoom
+/rtc/#UserId RtcR RtcRoom getRtcRoom
 
 /chat/#UserId ChatR ChatRoom getChatRoom
 

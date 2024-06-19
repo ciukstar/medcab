@@ -1,3 +1,5 @@
+Ignore: Ignorez
+NewMessage: Nouveau message
 Reply: Répondez
 SendEmail: Envoyer un e-mail
 MakeACall: Passer un appel

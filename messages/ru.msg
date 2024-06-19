@@ -1,3 +1,5 @@
+Ignore: Игнорировать
+NewMessage: Новое сообщение
 Reply: Отвечать
 SendEmail: Отправить письмо
 MakeACall: Позвонить

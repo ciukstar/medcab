@@ -51,7 +51,7 @@ import Foundation
     ( Handler, Form, App (appHttpManager, appSettings), getVAPIDKeys
     , Route
       ( AccountPhotoR, MyPatientR, MyPatientNewR, MyPatientsR, MyDoctorPhotoR
-      , MyPatientRemoveR, ChatR, VideoR, MyPatientSubscriptionsR, StaticR, HomeR
+      , MyPatientRemoveR, ChatR, RtcR, MyPatientSubscriptionsR, StaticR, HomeR
       , MyPatientUnsubscribeR, MyPatientEditR
       )
     , AppMessage
@@ -115,7 +115,7 @@ import Settings.StaticFiles
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
-import VideoRoom.Data (Route (PushMessageR, RoomR, AudioR))
+import RtcRoom.Data (Route (PushMessageR, VideoR, AudioR))
 
 import Web.WebPush
     ( PushUrgency (PushUrgencyHigh), PushTopic (PushTopic), VAPIDKeys

@@ -39,7 +39,7 @@ import Database.Persist (Entity (Entity), upsertBy, (=.))
 import Foundation
     ( App (appSettings, appHttpManager), Handler, Form, getVAPIDKeys
     , Route
-      ( MyDoctorPhotoR, StaticR, ChatR, VideoR, AccountPhotoR, HomeR
+      ( MyDoctorPhotoR, StaticR, ChatR, RtcR, AccountPhotoR, HomeR
       , MyDoctorsR, MyDoctorSpecialtiesR, MyDoctorSubscriptionsR, MyDoctorR
       , MyDoctorUnsubscribeR
       )
@@ -106,7 +106,7 @@ import Settings.StaticFiles
 
 import Text.Hamlet (Html)
 
-import VideoRoom.Data (Route(PushMessageR, RoomR, AudioR) )
+import RtcRoom.Data (Route(PushMessageR, VideoR, AudioR) )
 
 import Web.WebPush
     ( vapidPublicKeyBytes, VAPIDKeys, mkPushNotification, pushMessage

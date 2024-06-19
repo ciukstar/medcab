@@ -1,6 +1,30 @@
 
 ^{widget}
 
+<md-dialog ##{idDialogChatNotification} style="visibility:hidden">
+  <div slot=headline>
+    _{MsgNewMessage}
+
+  <form slot=content method=dialog>
+
+    <figure ##{idFigureSenderPhoto}>
+      <img ##{idImgSenderPhoto} width=48 height=48>
+      <figcaption.body-large ##{idFigcaptionSenderInfo}>
+
+    <p.body-medium ##{idNotificationBody}>
+
+    <audio ##{idAudioIncomingChatRingtone} preload=none>
+      <source src=@{StaticR ringtones_incoming_chat_mp3} type="audio/mpeg">
+
+  <div slot=actions>
+
+    <md-text-button ##{idButtonIgnoreNotification} type=button>
+      _{MsgIgnore}
+
+    <md-filled-button ##{idButtonReplyNotification} has-icon type=link>
+      <md-icon slot=icon>reply
+      _{MsgReply}
+
 
 <md-dialog ##{idDialogIncomingVideoCall} style="visibility:hidden">
   <div slot=headline>
