@@ -3,7 +3,7 @@
     <md-icon-button href=@{DataR $ SignTagsR ps} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgTag}
 
   <div #headerEnd>
@@ -42,17 +42,17 @@
 
     $maybe (Entity _ (SignTag name descr _),group) <- tag
       <dl>
-        <dt.label-large>_{MsgName}
-        <dd.body-medium>#{name}        
+        <dt.md-typescale-label-large>_{MsgName}
+        <dd.md-typescale-body-medium>#{name}        
 
-        <dt.label-large>_{MsgDescription}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgDescription}
+        <dd.md-typescale-body-medium>
           $maybe descr <- descr
             #{descr}
 
         $maybe Entity _ (SignTag gname _ _) <- group
-          <dt.label-large>_{MsgGroup}
-          <dd.body-medium>#{gname}
+          <dt.md-typescale-label-large>_{MsgGroup}
+          <dd.md-typescale-body-medium>#{gname}
 
     ^{widgetSnackbar msgs}
 

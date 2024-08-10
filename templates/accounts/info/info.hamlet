@@ -3,7 +3,7 @@
     <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgUserAccount}
 
   $maybe _ <- info
@@ -33,48 +33,48 @@
     
     $maybe Entity _ (UserInfo _ bday gender mobile phone) <- info
       <dl>
-        <dt.label-large>
+        <dt.md-typescale-label-large>
           _{MsgMobile}
           
         <dd>
           $maybe mobile <- mobile
-            <span.body-medium>#{mobile}
+            <span.md-typescale-body-medium>#{mobile}
           $nothing
-            <i.body-small>_{MsgNotIndicated}
+            <i.md-typescale-body-small>_{MsgNotIndicated}
      
-        <dt.label-large>
+        <dt.md-typescale-label-large>
           _{MsgPhone}
           
         <dd>
           $maybe phone <- phone
-            <span.body-medium>#{phone}
+            <span.md-typescale-body-medium>#{phone}
           $nothing
-            <i.body-small>_{MsgNotIndicated}
+            <i.md-typescale-body-small>_{MsgNotIndicated}
      
-        <dt.label-large>
+        <dt.md-typescale-label-large>
           _{MsgBirthday}
           
         <dd>
           $maybe bd <- show <$> bday
-            <time.body-medium datetime=#{bd}>#{bd}
+            <time.md-typescale-body-medium datetime=#{bd}>#{bd}
           $nothing
-            <i.body-small>_{MsgNotIndicated}
+            <i.md-typescale-body-small>_{MsgNotIndicated}
      
-        <dt.label-large>
+        <dt.md-typescale-label-large>
           _{MsgGender}
           
         <dd>
           $maybe gender <- gender
             $case gender
               $of GenderFemale
-                <span.body-medium>_{MsgFemale}
+                <span.md-typescale-body-medium>_{MsgFemale}
               $of GenderMale
-                <span.body-medium>_{MsgMale}
+                <span.md-typescale-body-medium>_{MsgMale}
               $of _
-                <span.body-medium>_{MsgOther}
+                <span.md-typescale-body-medium>_{MsgOther}
 
           $nothing
-            <i.body-small>_{MsgNotIndicated}
+            <i.md-typescale-body-small>_{MsgNotIndicated}
 
       ^{widgetSnackbar msgs}
                 

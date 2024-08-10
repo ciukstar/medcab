@@ -9,7 +9,7 @@
     $nothing
       <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=auto height=56
            ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-medium>
+    <figcaption.md-typescale-body-medium>
       _{MsgPhoto}
 
 ^{fvInput photoV}

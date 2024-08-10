@@ -25,6 +25,16 @@ $doctype 5
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+
+    <script type=importmap>
+      { "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    <script type=module>
+      import '@material/web/all.js';
+      import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+      document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
     
     ^{pageHead pc}
 

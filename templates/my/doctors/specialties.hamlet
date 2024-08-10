@@ -2,7 +2,7 @@
   <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgDoctor}
 
 
@@ -18,7 +18,7 @@
           <md-icon.connection-status>repeat
         $elseif not accessible
           <md-icon.connection-status>phone_disabled
-      <figcaption.body-small>
+      <figcaption.md-typescale-body-small>
         $maybe attrib <- attrib
           #{attrib}
         $nothing
@@ -44,7 +44,7 @@
     $if null specialties
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.body-large>
+        <figcaption.md-typescale-body-large>
           _{MsgNoSpecialtiesYet}
     $else
       <md-list>

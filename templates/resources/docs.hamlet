@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgDocumentation}
 
   <span.app-top-app-bar-end>
@@ -14,119 +14,119 @@
   ^{widgetBanner msgs}
       
   <section>
-    <h2.headline-medium>_{MsgAppName}
-    <p.body-large>
+    <h2.md-typescale-headline-medium>_{MsgAppName}
+    <p.md-typescale-body-large>
       _{MsgAppDescription}
       
   <section>
-    <h2.headline-medium>_{MsgOverview}
-    <p.body-large>
+    <h2.md-typescale-headline-medium>_{MsgOverview}
+    <p.md-typescale-body-large>
       #{translate $ MsgDoc009 (rndr HomeR)}
 
   <section>
-    <h2.headline-medium>_{MsgDoc010}
-    <p.body-large>
+    <h2.md-typescale-headline-medium>_{MsgDoc010}
+    <p.md-typescale-body-large>
       _{MsgDoc011}
-    <p.body-large>
+    <p.md-typescale-body-large>
       #{translate $ MsgDoc012 "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API"}
-    <p.body-large>
+    <p.md-typescale-body-large>
       #{translate $ MsgDoc013 "https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API"}
     
     <dl>
 
-      <dt.label-large>_{MsgConfiguration}
-      <dd.body-small>
+      <dt.md-typescale-label-large>_{MsgConfiguration}
+      <dd.md-typescale-body-small>
         <code>&dollar;YESOD_RTC_PEER_CONNECTION_CONFIG
         
-    <p.body-large>
+    <p.md-typescale-body-large>
       #{translate $ MsgDoc014 "https://developer.mozilla.org/en-US/docs/Web/API/Push_API"}
 
   <section>
-    <h2.headline-medium>_{MsgBasicEntities}
+    <h2.md-typescale-headline-medium>_{MsgBasicEntities}
 
     <section>
-      <h3.headline-small>_{MsgUser}
-      <p.body-medium>#{translate $ MsgDoc005 (rndr $ AuthR LoginR)}
-      <p.body-medium>_{MsgDoc006}
-      <p.body-medium>_{MsgDoc007}
+      <h3.md-typescale-headline-small>_{MsgUser}
+      <p.md-typescale-body-medium>#{translate $ MsgDoc005 (rndr $ AuthR LoginR)}
+      <p.md-typescale-body-medium>_{MsgDoc006}
+      <p.md-typescale-body-medium>_{MsgDoc007}
 
     <section>
-      <h3.headline-small>_{MsgUnitOfMeasure}
-      <p.body-medium>#{translate $ MsgDoc008 (rndr $ DataR UnitsR)}
+      <h3.md-typescale-headline-small>_{MsgUnitOfMeasure}
+      <p.md-typescale-body-medium>#{translate $ MsgDoc008 (rndr $ DataR UnitsR)}
 
     <section>
-      <h3.headline-small>_{MsgDoctor}
-      <p.body-medium>#{translate $ MsgDoc015 (rndr $ DataR StaffR)}
-      <p.body-medium>_{MsgDoc016}
-      <p.body-medium>_{MsgDoc021}
+      <h3.md-typescale-headline-small>_{MsgDoctor}
+      <p.md-typescale-body-medium>#{translate $ MsgDoc015 (rndr $ DataR StaffR)}
+      <p.md-typescale-body-medium>_{MsgDoc016}
+      <p.md-typescale-body-medium>_{MsgDoc021}
       
     <section>
-      <h3.headline-small>_{MsgPatient}
-      <p.body-medium>_{MsgDoc017}
+      <h3.md-typescale-headline-small>_{MsgPatient}
+      <p.md-typescale-body-medium>_{MsgDoc017}
 
     <section>
-      <h3.headline-small>_{MsgSpecialty}
-      <p.body-medium>#{translate $ MsgDoc018 (rndr $ DataR $ SpecialtiesR (Specialties []))}
-      <p.body-medium>_{MsgDoc019}
-      <p.body-medium>_{MsgDoc020}
+      <h3.md-typescale-headline-small>_{MsgSpecialty}
+      <p.md-typescale-body-medium>#{translate $ MsgDoc018 (rndr $ DataR $ SpecialtiesR (Specialties []))}
+      <p.md-typescale-body-medium>_{MsgDoc019}
+      <p.md-typescale-body-medium>_{MsgDoc020}
 
   <section>
-    <h2.headline-medium>_{MsgSuperuser}
+    <h2.md-typescale-headline-medium>_{MsgSuperuser}
     <dl>
 
-      <dt.label-large>_{MsgUsername}
-      <dd.body-small>
+      <dt.md-typescale-label-large>_{MsgUsername}
+      <dd.md-typescale-body-small>
         <code>&dollar;YESOD_SUPERUSER_USERNAME
 
-      <dt.label-large>_{MsgPassword}
-      <dd.body-small>
+      <dt.md-typescale-label-large>_{MsgPassword}
+      <dd.md-typescale-body-small>
         <code>&dollar;YESOD_SUPERUSER_PASSWORD
 
-    <p.body-medium>_{MsgDoc002}
+    <p.md-typescale-body-medium>_{MsgDoc002}
 
   <section>
-    <h2.headline-medium>_{MsgDoc001}
+    <h2.md-typescale-headline-medium>_{MsgDoc001}
     <ul>
-      <li.body-large>
+      <li.md-typescale-body-large>
         _{MsgEmail}:
         <a href="https://developers.google.com/gmail/api/guides" target=_blank>Gmail API
         <dl>
-          <dt.label-large>
+          <dt.md-typescale-label-large>
             _{MsgClientId}
-          <dd.body-small>
+          <dd.md-typescale-body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_ID
 
-          <dt.label-large>
+          <dt.md-typescale-label-large>
             _{MsgClientSecret}
-          <dd.body-small>
+          <dd.md-typescale-body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
 
   <section>
-    <h2.headline-medium>_{MsgSearchEngineOptimization}
+    <h2.md-typescale-headline-medium>_{MsgSearchEngineOptimization}
     <ul>
-      <li.body-large>
+      <li.md-typescale-body-large>
         <a href="https://search.google.com/search-console" target=_blank>Google SEO
         <div>
-          <code.body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
-      <li.body-large>
+          <code.md-typescale-body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
+      <li.md-typescale-body-large>
         <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
         <div>
-          <code.body-small>&dollar;YESOD_MS_VALIDATE
-      <li.body-large>
+          <code.md-typescale-body-small>&dollar;YESOD_MS_VALIDATE
+      <li.md-typescale-body-large>
         <a href="https://webmaster.yandex.com/welcome" target=_blank>Yandex SEO
         <div>
-          <code.body-small>&dollar;YESOD_YANDEX_VERIFICATION
+          <code.md-typescale-body-small>&dollar;YESOD_YANDEX_VERIFICATION
 
   <section>
-    <h2.headline-medium>_{MsgErDiagram}
+    <h2.md-typescale-headline-medium>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_MedCab_svg} alt=_{MsgErDiagram} loading=lazy>
 
   <section>
-    <h2.headline-medium>_{MsgSourceCode}
-    <p.body-medium>#{translate $ MsgDoc003 "https://github.com/ciukstar/medcab"}
+    <h2.md-typescale-headline-medium>_{MsgSourceCode}
+    <p.md-typescale-body-medium>#{translate $ MsgDoc003 "https://github.com/ciukstar/medcab"}
 
   <section>
-    <h2.headline-medium>_{MsgIssueTracking}
-    <p.body-medium>#{translate $ MsgDoc004 "https://github.com/ciukstar/medcab/issues"}
+    <h2.md-typescale-headline-medium>_{MsgIssueTracking}
+    <p.md-typescale-body-medium>#{translate $ MsgDoc004 "https://github.com/ciukstar/medcab/issues"}
 
 ^{widgetSnackbar msgs}

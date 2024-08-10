@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgUsers}
 
   <span.app-top-app-bar-end>
@@ -17,7 +17,7 @@
   $if null users
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoUsersYet}
   $else
     <md-list>
@@ -31,7 +31,7 @@
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
+            <div.app-attribution-wrapper.md-typescale-body-small>
               #{attrib}
         <md-divider>
 

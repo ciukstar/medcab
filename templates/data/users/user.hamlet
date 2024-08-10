@@ -3,7 +3,7 @@
     <md-icon-button href=@{DataR UsersR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgUser}
 
   <div #headerEnd>
@@ -35,27 +35,27 @@
     
     <figure>
       <img src=@{DataR $ UserPhotoR uid} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-      <figcaption.body-medium>
+      <figcaption.md-typescale-body-medium>
         $maybe attrib <- attrib
-          <small.app-attribution.body-small>
+          <small.app-attribution.md-typescale-body-small>
             #{attrib}
         $nothing
           _{MsgPhoto}
         
     <dl>
       
-      <dt.label-large scope=row>_{MsgEmailAddress}
-      <dd.body-medium>#{email}
+      <dt.md-typescale-label-large scope=row>_{MsgEmailAddress}
+      <dd.md-typescale-body-medium>#{email}
       
-      <dt.label-large scope=row>_{MsgFullName}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgFullName}
+      <dd.md-typescale-body-medium>
         $maybe name <- name
           #{name}
         $nothing
           <i>_{MsgNotSpecified}
       
-      <dt.label-large scope=row>_{MsgAuthentication}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgAuthentication}
+      <dd.md-typescale-body-medium>
         $case authType
           $of UserAuthTypePassword
             _{MsgPassword}
@@ -64,29 +64,29 @@
           $of UserAuthTypeGoogle
             _{MsgGoogle}
         
-      <dt.label-large scope=row>_{MsgVerificationKey}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgVerificationKey}
+      <dd.md-typescale-body-medium>
         $maybe verkey <- verkey
           #{verkey}
         $nothing
           <i>_{MsgNotSpecified}
         
-      <dt.label-large scope=row>_{MsgVerified}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgVerified}
+      <dd.md-typescale-body-medium>
         $if verified
           _{MsgYes}
         $else
           _{MsgNo}
         
-      <dt.label-large scope=row>_{MsgSuperuser}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgSuperuser}
+      <dd.md-typescale-body-medium>
         $if super
           _{MsgYes}
         $else
           _{MsgNo}
         
-      <dt.label-large scope=row>_{MsgAdministrator}
-      <dd.body-medium>
+      <dt.md-typescale-label-large scope=row>_{MsgAdministrator}
+      <dd.md-typescale-body-medium>
         $if admin
           _{MsgYes}
         $else

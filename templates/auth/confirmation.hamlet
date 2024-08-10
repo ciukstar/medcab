@@ -3,29 +3,29 @@
     <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgEmailVerification}
       
 <main>
 
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
+    <div.app-banner.error.md-typescale-body-medium>
       #{status}. #{msg}
   
 
-  <h2.title-medium>
+  <h2.md-typescale-title-medium>
     _{MsgVerifyEmailPlease}.
 
-  <div.body-medium>
+  <div.md-typescale-body-medium>
     _{MsgJustSentEmailTo} #
-    <code.body-medium.shape-extra-small.surface-variant>
+    <code.md-typescale-body-medium.shape-extra-small.surface-variant>
       #{email}
     \.
-    <div.body-medium>
+    <div.md-typescale-body-medium>
       _{MsgClickToVerifyAccount}.
 
   <p>
-    <div.body-small>
+    <div.md-typescale-body-small>
       _{MsgDidNotGetEmail}
     <md-text-button href=@{parent registerR} type=button>
       _{MsgResendEmail}

@@ -8,7 +8,7 @@
       <md-icon-button href=@{DataR $ SignTagsR (SignTags (init tids))} aria-label=_{MsgBack}>
         <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgTag}
 
   <div #headerEnd>
@@ -31,7 +31,7 @@
     $if null tags
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.body-large>
+        <figcaption.md-typescale-body-large>
           _{MsgNoDataYet}
     $else
       <md-list>

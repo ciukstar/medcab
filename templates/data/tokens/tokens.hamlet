@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgTokens}
 
   <span.app-top-app-bar-end>
@@ -15,7 +15,7 @@
   ^{widgetBanner msgs}
 
   <div.app-card.shape-large.outline>
-    <div.app-card-title.headline-medium>
+    <div.app-card-title.md-typescale-headline-medium>
       Gmail
     <div.app-card-content>
     
@@ -31,9 +31,9 @@
         _{MsgInitialize}
 
   <div.app-card.shape-large.outline>
-    <div.app-card-title.headline-medium>
+    <div.app-card-title.md-typescale-headline-medium>
       VAPID
-    <div.body-small>_{MsgVapidGenerationWarning}.
+    <div.md-typescale-body-small>_{MsgVapidGenerationWarning}.
     <div.app-card-content>
     
       <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} ##{formTokensVapid}>

@@ -3,7 +3,7 @@
     <md-icon-button href=@?{(DataR MedSignsR,stati)} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgMedicalSign}
 
   <div #headerEnd>
@@ -42,29 +42,29 @@
 
     $maybe (Entity _ (MedSign name code icon descr _),tag) <- sign
       <dl>
-        <dt.label-large>_{MsgIcon}
+        <dt.md-typescale-label-large>_{MsgIcon}
         <dd>
           $maybe icon <- icon
             <md-icon>#{icon}
           $nothing
             <i>_{MsgNone}
 
-        <dt.label-large>_{MsgName}
-        <dd.body-medium>#{name}
+        <dt.md-typescale-label-large>_{MsgName}
+        <dd.md-typescale-body-medium>#{name}
 
-        <dt.label-large>_{MsgCode}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgCode}
+        <dd.md-typescale-body-medium>
           $maybe code <- code
             #{code}
 
-        <dt.label-large>_{MsgDescription}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgDescription}
+        <dd.md-typescale-body-medium>
           $maybe descr <- descr
             #{descr}
 
         $maybe Entity _ (SignTag tname _ _) <- tag
-          <dt.label-large>_{MsgGroup}
-          <dd.body-medium>#{tname}
+          <dt.md-typescale-label-large>_{MsgGroup}
+          <dd.md-typescale-body-medium>#{tname}
 
     ^{widgetSnackbar msgs}
 

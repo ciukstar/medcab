@@ -2,7 +2,7 @@
 #{extra}
 
 $maybe Entity _ (User email _ _ _ _ _ _ _) <- user
-  <div.label-large ##{idUserIdent}>#{email}
+  <div.md-typescale-label-large ##{idUserIdent}>#{email}
   
 <label for=#{fvId photoV} ##{idLabelPhotoUser}>
   <figure ##{idFigurePhotoUser}>
@@ -12,7 +12,7 @@ $maybe Entity _ (User email _ _ _ _ _ _ _) <- user
     $nothing
       <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=auto height=96
            ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-medium>
+    <figcaption.md-typescale-body-medium>
       _{MsgPhoto}
       
 ^{fvInput photoV}

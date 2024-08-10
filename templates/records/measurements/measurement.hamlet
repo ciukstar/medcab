@@ -3,7 +3,7 @@
     <md-icon-button href=@{RecordMeasurementsR uid rid} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgMeasurement}
 
   <div #headerEnd>
@@ -34,22 +34,22 @@
   $forall (Entity _ (Measurement _ name value _),record,sign,unit) <- measurement
     <dl>
 
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
+      <dt.md-typescale-label-large>_{MsgName}
+      <dd.md-typescale-body-medium>#{name}
 
-      <dt.label-large>_{MsgValue}
-      <dd.body-medium>
+      <dt.md-typescale-label-large>_{MsgValue}
+      <dd.md-typescale-body-medium>
         <span.app-numeric data-value=#{value}>#{value}
         $maybe Entity _ (Unit _ symbol _ _) <- unit
           \ #{symbol}
 
       $with Entity _ (MedSign name _ _ _ _) <- sign
-        <dt.label-large>_{MsgMedicalSign}
-        <dd.body-medium>#{name}
+        <dt.md-typescale-label-large>_{MsgMedicalSign}
+        <dd.md-typescale-body-medium>#{name}
 
       $with Entity _ (Record _ _ day time _) <- record
-        <dt.label-large>_{MsgDate}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgDate}
+        <dd.md-typescale-body-medium>
           $with dt <- show (LocalTime day time)
             <time datetime=#{dt}>#{dt}
 

@@ -8,13 +8,13 @@
     $nothing
       <img src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg} width=auto height=56
            ##{idImgPhoto} loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-medium>
+    <figcaption.md-typescale-body-medium>
       _{MsgPhoto}
 ^{fvInput photoV}
 
 <details.app-attribution
   ontoggle="this.querySelector('.app-expand').textContent = this.open ? 'expand_less' : 'expand_more'">
-  <summary.label-large>
+  <summary.md-typescale-label-large>
     <md-ripple>
     <span>_{MsgAttribution}
     <md-icon.app-expand>expand_more
@@ -25,5 +25,5 @@
 
 <div style="display:flex;align-items:center;gap:1rem">
   ^{fvInput adminV}
-  <label.body-large for=#{fvId adminV}>
+  <label.md-typescale-body-large for=#{fvId adminV}>
     #{fvLabel adminV}

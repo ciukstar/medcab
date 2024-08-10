@@ -9,9 +9,9 @@
 
     <figure ##{idFigureSenderPhoto}>
       <img ##{idImgSenderPhoto} width=48 height=48>
-      <figcaption.body-large ##{idFigcaptionSenderInfo}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionSenderInfo}>
 
-    <p.body-medium ##{idNotificationBody}>
+    <p.md-typescale-body-medium ##{idNotificationBody}>
 
     <audio ##{idAudioIncomingChatRingtone} preload=none>
       <source src=@{StaticR ringtones_incoming_chat_mp3} type="audio/mpeg">
@@ -40,7 +40,7 @@
         <div.circle.one>
         <div.circle.two>
         
-      <figcaption.body-large ##{idFigcaptionPhotoIncomingVideoCall}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionPhotoIncomingVideoCall}>
 
     <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
       <source src=@{StaticR ringtones_incoming_call_mp3} type="audio/mpeg">
@@ -70,7 +70,7 @@
         <div.circle.one>
         <div.circle.two>
         
-      <figcaption.body-large ##{idFigcaptionPhotoIncomingAudioCall}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionPhotoIncomingAudioCall}>
 
     <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
       <source src=@{StaticR ringtones_incoming_call_mp3} type="audio/mpeg">
@@ -91,7 +91,7 @@
     _{MsgMissedCall}
 
   <div slot=content>
-    <p.body-large ##{idMissedCallCaller}>
+    <p.md-typescale-body-large ##{idMissedCallCaller}>
       _{MsgMissedCall}
 
   <div slot=actions>

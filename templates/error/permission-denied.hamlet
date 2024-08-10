@@ -4,18 +4,18 @@
     <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgAuthentication}
 
 <main>
 
-  <h2.headline-medium>
+  <h2.md-typescale-headline-medium>
     #{msg}
   
   <md-filled-button type=button href=@{AuthR LoginR}>
     _{MsgSignIn}
 
-  <div.body-large>_{MsgOr}
+  <div.md-typescale-body-large>_{MsgOr}
 
   <md-text-button type=button href=@{HomeR}>
     _{MsgBackToHomepage}

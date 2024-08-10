@@ -3,18 +3,18 @@
     <md-icon-button href=@{AuthR LoginR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgRegistration}
       
 <main>
 
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
+    <div.app-banner.error.md-typescale-body-medium>
       #{status}. #{msg}
 
 
   <div ##{formRegisterWrapper}>
-    <h1.body-medium>
+    <h1.md-typescale-body-medium>
       _{EnterEmail}
     <form method=post action=@{parent registerR} enctype=#{et} ##{formRegister}>
       ^{fw}

@@ -1,34 +1,134 @@
 
-:root
-  --app-top-appbar-height: 64px
+:root, :host
+
+    --app-top-appbar-height: 64px
+    
+    --md-sys-color-background: #fdf7ff
+    --md-sys-color-on-background: #1d1b20
+    --md-sys-color-surface: #fdf7ff
+    --md-sys-color-surface-dim: #ded8e0
+    --md-sys-color-surface-bright: #fdf7ff
+    --md-sys-color-surface-container-lowest: #ffffff
+    --md-sys-color-surface-container-low: #f8f2fa
+    --md-sys-color-surface-container: #f2ecf4
+    --md-sys-color-surface-container-high: #ece6ee
+    --md-sys-color-surface-container-highest: #e6e0e9
+    --md-sys-color-on-surface: #1d1b20
+    --md-sys-color-surface-variant: #e7e0ee
+    --md-sys-color-on-surface-variant: #494551
+    --md-sys-color-inverse-surface: #322f35
+    --md-sys-color-inverse-on-surface: #f5eff7
+    --md-sys-color-outline: #7a7582
+    --md-sys-color-outline-variant: #cbc4d2
+    --md-sys-color-shadow: #000000
+    --md-sys-color-scrim: #000000
+    --md-sys-color-surface-tint: #6750a4
+    --md-sys-color-primary: #513a8d
+    --md-sys-color-on-primary: #ffffff
+    --md-sys-color-primary-container: #765fb4
+    --md-sys-color-on-primary-container: #ffffff
+    --md-sys-color-inverse-primary: #cfbcff
+    --md-sys-color-secondary: #63597c
+    --md-sys-color-on-secondary: #ffffff
+    --md-sys-color-secondary-container: #e5d9ff
+    --md-sys-color-on-secondary-container: #4a4162
+    --md-sys-color-tertiary: #782c5d
+    --md-sys-color-on-tertiary: #ffffff
+    --md-sys-color-tertiary-container: #a35083
+    --md-sys-color-on-tertiary-container: #ffffff
+    --md-sys-color-error: #ba1a1a
+    --md-sys-color-on-error: #ffffff
+    --md-sys-color-error-container: #ffdad6
+    --md-sys-color-on-error-container: #410002
+
+    --md-sys-shape-corner-full-family: 3px
+
+    --md-sys-shape-corner-extra-large-top-family: 1px
+    --md-sys-shape-corner-extra-large-top-default-size: 0px
+    --md-sys-shape-corner-extra-large-top-top-left: 28px
+    --md-sys-shape-corner-extra-large-top-top-right-unit: 1px
+    --md-sys-shape-corner-extra-large-top-top-right: 28px
+
+    --md-sys-shape-corner-extra-large-family: 1px
+    --md-sys-shape-corner-extra-large-default-size-unit: 1px
+    --md-sys-shape-corner-extra-large-default-size: 28px
+
+    --md-sys-shape-corner-large-top-family: 1px
+    --md-sys-shape-corner-large-top-default-size-unit: 1px
+    --md-sys-shape-corner-large-top-default-size: 0px
+    --md-sys-shape-corner-large-top-top-left-unit: 1px
+    --md-sys-shape-corner-large-top-top-left: 16px
+    --md-sys-shape-corner-large-top-top-right-unit: 1px
+    --md-sys-shape-corner-large-top-top-right: 16px
+
+    --md-sys-shape-corner-large-end-family: 1px
+    --md-sys-shape-corner-large-end-default-size-unit: 1px
+    --md-sys-shape-corner-large-end-default-size: 0px
+    --md-sys-shape-corner-large-end-top-right-unit: 1px
+    --md-sys-shape-corner-large-end-top-right: 16px
+    --md-sys-shape-corner-large-end-bottom-right-unit: 1px
+    --md-sys-shape-corner-large-end-bottom-right: 16px
+
+    --md-sys-shape-corner-large-family: 1px
+    --md-sys-shape-corner-large-default-size-unit: 1px
+    --md-sys-shape-corner-large-default-size: 16px
+
+    --md-sys-shape-corner-medium-family: 1px
+    --md-sys-shape-corner-medium-default-size-unit: 1px
+    --md-sys-shape-corner-medium-default-size: 12px
+
+    --md-sys-shape-corner-small-family: 1px
+    --md-sys-shape-corner-small-default-size-unit: 1px
+    --md-sys-shape-corner-small-default-size: 8px
+
+    --md-sys-shape-corner-extra-small-top-family: 1px
+    --md-sys-shape-corner-extra-small-top-default-size-unit: 1px
+    --md-sys-shape-corner-extra-small-top-default-size: 0px
+    --md-sys-shape-corner-extra-small-top-top-left-unit: 1px
+    --md-sys-shape-corner-extra-small-top-top-left: 4px
+    --md-sys-shape-corner-extra-small-top-top-right-unit: 1px
+    --md-sys-shape-corner-extra-small-top-top-right: 4px
+
+    --md-sys-shape-corner-extra-small-family: 1px
+    --md-sys-shape-corner-extra-small-default-size-unit: 1px
+    --md-sys-shape-corner-extra-small-default-size: 4px
+
+    --md-sys-shape-corner-none-family: 1px
+    --md-sys-shape-corner-none-default-size-unit: 1px
+    --md-sys-shape-corner-none-default-size: 0px
+
+    --md-sys-shape-small: var(--md-sys-shape-corner-small-default-size)
+    --md-sys-shape-medium: var(--md-sys-shape-corner-medium-default-size)
+    --md-sys-shape-large: var(--md-sys-shape-corner-large-default-size)
+    
   
 @media screen and (min-width: 768px)
-  header
-    --app-top-appbar-height: 64px
-  main
-    margin-left: 5rem
-    margin-right: 5rem
+    header
+        --app-top-appbar-height: 64px
+    main
+        margin-left: 5rem
+        margin-right: 5rem
 
 @media screen and (min-width: 992px)
-  header
-    --app-top-appbar-height: 64px
-  main
-    margin-left: 10rem
-    margin-right: 10rem
+    header
+        --app-top-appbar-height: 64px
+    main
+        margin-left: 10rem
+        margin-right: 10rem
 
 @media screen and (min-width: 1200px)
-  header
-    --app-top-appbar-height: 64px
-  main
-    margin-left: 20%
-    margin-right: 20%
+    header
+        --app-top-appbar-height: 64px
+    main
+        margin-left: 20%
+        margin-right: 20%
 
 @media screen and (min-width: 1400px)
-  header
-    --app-top-appbar-height: 64px
-  main
-    margin-left: 25%
-    margin-right: 25%
+    header
+        --app-top-appbar-height: 64px
+    main
+        margin-left: 25%
+        margin-right: 25%
 
 @keyframes waves
     from
@@ -41,8 +141,72 @@
 
 html body
 
+    font-family: Roboto, sans-serif
+
     margin: 0
     padding: 0
+
+    .primary
+        background: var(--md-sys-color-primary)
+        color: var(--md-sys-color-on-primary)
+        
+    .background
+         color: var(--md-sys-color-on-background)
+         background-color: var(--md-sys-color-background)
+
+    .surface
+        background: var(--md-sys-color-surface)
+        color: var(--md-sys-color-on-surface)
+
+    .error
+        color: var(--md-sys-color-on-error)
+        background-color: var(--md-sys-color-error)
+
+    .primary-container
+        color: var(--md-sys-color-on-primary-container)
+        background-color: var(--md-sys-color-primary-container)
+
+    .on-primary-container
+        color: var(--md-sys-color-primary-container)
+        background-color: var(--md-sys-color-on-primary-container)
+
+    .shape-none
+        border-radius: var(--md-sys-shape-corner-none-default-size)
+
+    .shape-extra-small
+        border-radius: var(--md-sys-shape-corner-extra-small-default-size)
+
+    .shape-small
+        border-radius: var(--md-sys-shape-corner-small-default-size)
+
+    .shape-medium
+        border-radius: var(--md-sys-shape-corner-medium-default-size)
+
+    .shape-large
+        border-radius: var(--md-sys-shape-corner-large-default-size)
+
+    .shape-extra-large
+        border-radius: var(--md-sys-shape-corner-extra-large-default-size)
+
+    .extra-small-top
+        border-top-left-radius: var(--md-sys-shape-corner-extra-small-top-top-left)
+        border-top-right-radius: var(--md-sys-shape-corner-extra-small-top-top-right)
+
+    .large-end
+        border-top-right-radius: var(--md-sys-shape-corner-large-end-top-right)
+        border-bottom-right-radius: var(--md-sys-shape-corner-large-end-bottom-right)
+
+    .large-top
+        border-top-left-radius: var(--md-sys-shape-corner-large-top-top-left)
+        border-top-right-radius: var(--md-sys-shape-corner-large-top-top-right)
+
+    .extra-large-top
+        border-top-left-radius: var(--md-sys-shape-corner-extra-large-top-top-left)
+        border-top-right-radius: var(--md-sys-shape-corner-extra-large-top-top-right)
+        
+    header h1
+        margin: 0
+        padding: 0
 
     div.img-wrapper
         position: relative

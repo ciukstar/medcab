@@ -3,7 +3,7 @@
     <md-icon-button href=@?{(DataR $ MedSignNormalsR sid,stati)} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgNormalValue}
 
   <div #headerEnd>
@@ -34,17 +34,17 @@
   $maybe (Entity _ (Normal _ name lower upper _),unit) <- normal
     <dl>
 
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
+      <dt.md-typescale-label-large>_{MsgName}
+      <dd.md-typescale-body-medium>#{name}
 
-      <dt.label-large>_{MsgLowerBound}
-      <dd.body-medium.app-numeric data-value=#{lower}>#{lower}
+      <dt.md-typescale-label-large>_{MsgLowerBound}
+      <dd.md-typescale-body-medium.app-numeric data-value=#{lower}>#{lower}
 
-      <dt.label-large>_{MsgUpperBound}
-      <dd.body-medium.app-numeric data-value=#{upper}>#{upper}
+      <dt.md-typescale-label-large>_{MsgUpperBound}
+      <dd.md-typescale-body-medium.app-numeric data-value=#{upper}>#{upper}
 
       $maybe Entity _ (Unit uname symbol _ _) <- unit
-        <dt.label-large>_{MsgUnitOfMeasure}
-        <dd.body-medium>#{symbol} (#{uname})
+        <dt.md-typescale-label-large>_{MsgUnitOfMeasure}
+        <dd.md-typescale-body-medium>#{symbol} (#{uname})
 
   ^{widgetSnackbar msgs}

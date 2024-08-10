@@ -3,7 +3,7 @@
   <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgPatient}
 
 <main>
@@ -18,7 +18,7 @@
           <md-icon.connection-status>repeat
         $elseif not accessible
           <md-icon.connection-status>phone_disabled
-        <figcaption.body-small>
+        <figcaption.md-typescale-body-small>
           $maybe attrib <- attrib
             #{attrib}
           $nothing
@@ -48,7 +48,7 @@
             $if not subscribed
               <dt>
                 <md-icon.connection-status>notifications_off
-              <dd.body-small>
+              <dd.md-typescale-body-small>
                 $maybe name <- name
                   _{MsgNotSubscribedToNotificationsFromUser name}
                 $nothing
@@ -57,7 +57,7 @@
             $if looping
               <dt>
                 <md-icon.connection-status>repeat
-              <dd.body-small>
+              <dd.md-typescale-body-small>
                 $maybe name <- name
                   _{MsgYouAndUserSubscribedOnSameDevice name}
                 $nothing
@@ -71,7 +71,7 @@
             $elseif not accessible
               <dt>
                 <md-icon.connection-status>phone_disabled
-              <dd.body-small>
+              <dd.md-typescale-body-small>
                 $maybe name <- name
                   _{MsgUserUnavailable name}
                 $nothing

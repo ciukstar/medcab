@@ -3,13 +3,13 @@
   <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgInvalidArguments}
 
 <main>
-  <h2.headline-large>400
-  <h2.headline-large>_{MsgInvalidArguments}
-  <p.body-medium>#{T.intercalate ", " msgs}.
+  <h2.md-typescale-headline-large>400
+  <h2.md-typescale-headline-large>_{MsgInvalidArguments}
+  <p.md-typescale-body-medium>#{T.intercalate ", " msgs}.
   <md-filled-button type=button href=@{HomeR} has-icon=true>
     <md-icon slot=icon>home
     _{MsgBackToHomepage}

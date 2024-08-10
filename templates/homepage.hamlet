@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgWelcome}
       
   <span.app-top-app-bar-end>
@@ -16,7 +16,7 @@
 
   <figure #figureLogo>
     <md-icon>medical_services
-    <figcaption.display-large>
+    <figcaption.md-typescale-display-medium>
       _{MsgAppName}
 
   <nav>

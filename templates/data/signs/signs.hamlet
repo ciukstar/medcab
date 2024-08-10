@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgMedicalSigns}
 
   <span.app-top-app-bar-end>
@@ -39,7 +39,7 @@
   $if null signs
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoDataYet}
   $else
     <md-list>

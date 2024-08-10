@@ -3,7 +3,7 @@
     <md-icon-button href=@{DataR UnitsR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgMeasurementUnit}
 
   <div #headerEnd>
@@ -33,19 +33,19 @@
 
   $maybe (Entity _ (Unit name symbol descr _), quantity) <- unit
     <dl>
-      <dt.label-large>_{MsgName}
-      <dd.body-medium>#{name}
+      <dt.md-typescale-label-large>_{MsgName}
+      <dd.md-typescale-body-medium>#{name}
 
-      <dt.label-large>_{MsgSymbol}
-      <dd.body-medium>#{symbol}
+      <dt.md-typescale-label-large>_{MsgSymbol}
+      <dd.md-typescale-body-medium>#{symbol}
 
-      <dt.label-large>_{MsgDescription}
-      <dd.body-medium>
+      <dt.md-typescale-label-large>_{MsgDescription}
+      <dd.md-typescale-body-medium>
         $maybe descr <- descr
           #{descr}
 
-      <dt.label-large>_{MsgQuantity}
-      <dd.body-medium>
+      <dt.md-typescale-label-large>_{MsgQuantity}
+      <dd.md-typescale-body-medium>
         $maybe Entity _ (Quantity qname _) <- quantity
           #{qname}
 

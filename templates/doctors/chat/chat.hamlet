@@ -5,7 +5,7 @@
 
     <figure>
       <img slot=start src=@{DoctorPhotoR did} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
-      <figcaption.label-medium>
+      <figcaption.md-typescale-label-medium>
         $maybe Entity _ (Doctor name _ _ _ _) <- doctor
           #{name}
       

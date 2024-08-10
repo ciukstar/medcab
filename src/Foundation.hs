@@ -283,8 +283,6 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
-            addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
-            addScript $ StaticR js_md3_min_js
 
             currentPath <- maybe "/" (TE.decodeUtf8 . extractPath . TE.encodeUtf8 . rndr) <$> getCurrentRoute
 

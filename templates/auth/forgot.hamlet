@@ -3,17 +3,17 @@
     <md-icon-button href=@{AuthR LoginR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgPasswordRecovery}
       
 <main>
 
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
+    <div.app-banner.error.md-typescale-body-medium>
       #{status}. #{msg}
 
 
-  <h1.body-medium>_{PasswordResetPrompt}
+  <h1.md-typescale-body-medium>_{PasswordResetPrompt}
   <form method=post action=@{parent forgotPasswordR} enctype=#{et} ##{idFormForgotPassword}>
     ^{fw}
     <md-filled-button type=submit>

@@ -3,7 +3,7 @@
   <md-icon-button href=#{backlink} aria-label=_{MsgBack} ##{idButtonExitAudioSession}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgAudioSession}
 
   <md-filled-icon-button has-icon ##{idButtonEndAudioSession}>
@@ -17,7 +17,7 @@
     <img src=@{toParent $ PhotoR rid} loading=lazy height=128 width=128 ##{idImgPosterRemote}>
     <img src=@{toParent $ PhotoR sid} loading=lazy height=24 width=24 ##{idImgPosterSelf}>
     <figcaption>
-      <p.body-large>
+      <p.md-typescale-body-large>
         $maybe name <- callerName
           _{MsgUserOnCall name}
         $nothing

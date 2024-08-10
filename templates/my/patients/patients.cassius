@@ -1,19 +1,20 @@
 
 header
-  position: sticky
-  top: 0
-  z-index: 2
-  padding: 0.5rem 1rem
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-  align-items: center
-  #headerStart
+    position: sticky
+    top: 0
+    z-index: 2
+    padding: 0.5rem 1rem
     display: flex
     flex-direction: row
-    justify-content: flex-start
+    justify-content: space-between
     align-items: center
-    gap: 0.5rem
+
+    #headerStart
+        display: flex
+        flex-direction: row
+        justify-content: flex-start
+        align-items: center
+        gap: 0.5rem
 
 main
   md-list
@@ -27,7 +28,7 @@ main
     
       .app-attribution-wrapper
           position: absolute
-          bottom: 0
+          bottom: 5px
           left: 0.4rem
           font-size: 0.5rem
         

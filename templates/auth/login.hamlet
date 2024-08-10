@@ -4,7 +4,7 @@
     <md-icon-button href=#{ult} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgAuthentication}
 <main>
   ^{forM_ (authPlugins app) (flip apLogin tp)}

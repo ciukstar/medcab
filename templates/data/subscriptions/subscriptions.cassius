@@ -26,6 +26,6 @@ main
 
         .app-attribution-wrapper
             position: absolute
-            bottom: 0
+            bottom: 5px
             left: 0.4rem
             font-size: 0.5rem

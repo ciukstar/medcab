@@ -4,7 +4,7 @@
     <md-icon-button href=@{DataR QuantitiesR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgQuantity}
 
   <div #headerEnd>
@@ -27,7 +27,7 @@
     $if null units
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.body-large>
+        <figcaption.md-typescale-body-large>
           _{MsgNoDataYet}
     $else
       <md-list>

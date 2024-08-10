@@ -5,7 +5,7 @@
 
   <figure>
     <img slot=start src=@{doctorPhotoR} width=42 height=42 alt=_{MsgPhoto} loading=lazy>
-    <figcaption.label-medium>
+    <figcaption.md-typescale-label-medium>
       #{name}
 
 <main>
@@ -13,12 +13,12 @@
   <div ##{idChatOutput}>
 
     $forall (day,messages) <- chats
-      <time.day-bubble.body-small datetime=#{show day}>#{show day}
+      <time.day-bubble.md-typescale-body-small datetime=#{show day}>#{show day}
       $forall Entity _ (Chat userId _ time msg _ _) <- messages
-        <p.bubble.body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
+        <p.bubble.md-typescale-body-medium :uid == userId:.right.user :uid /= userId:.left.interlocutor>
           <span>#{msg}
           <span.bubble-status-line>
-            <time.time-bubble.body-small datetime=#{show time}>
+            <time.time-bubble.md-typescale-body-small datetime=#{show time}>
             <i.icon>done_all
           <span.bubble-tail-out>
             <span.bubble-tail>

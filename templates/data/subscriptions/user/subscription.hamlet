@@ -3,7 +3,7 @@
   <md-icon-button href=@{DataR $ UserSubscriptionsR uid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgSubscription}
 
   <div #headerEnd>
@@ -30,9 +30,9 @@
 
   $maybe Entity _ (PushSubscription _ _ endpoint _ _) <- subscription
     <dl>
-      <dt.label-large>
+      <dt.md-typescale-label-large>
         _{MsgEndpoint}
-      <dd.body-medium>
+      <dd.md-typescale-body-medium>
         #{endpoint}
 
 ^{widgetSnackbar msgs}

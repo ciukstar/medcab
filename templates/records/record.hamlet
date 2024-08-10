@@ -3,7 +3,7 @@
     <md-icon-button href=@{RecordsR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgRecord}
 
   <div #headerEnd>
@@ -43,16 +43,16 @@
     $forall ((Entity _ (Record _ _ day time remarks),Entity _ (MedSign name _ _ _ _)),measurements) <- record
       <dl>
 
-        <dt.label-large>_{MsgDate}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgDate}
+        <dd.md-typescale-body-medium>
           $with dt <- show (LocalTime day time)
             <time datetime=#{dt}>#{dt}
 
-        <dt.label-large>_{MsgMedicalSign}
-        <dd.body-medium>#{name}
+        <dt.md-typescale-label-large>_{MsgMedicalSign}
+        <dd.md-typescale-body-medium>#{name}
 
-        <dt.label-large>_{MsgMeasurement}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgMeasurement}
+        <dd.md-typescale-body-medium>
           <table>
             <tbody>
               $forall (Entity _ (Measurement _ name value _),unit) <- measurements
@@ -65,8 +65,8 @@
                       #{symbol}
 
         $maybe remarks <- remarks
-          <dt.label-large>_{MsgRemarks}
-          <dd.body-medium>
+          <dt.md-typescale-label-large>_{MsgRemarks}
+          <dd.md-typescale-body-medium>
             #{remarks}
 
     ^{widgetSnackbar msgs}

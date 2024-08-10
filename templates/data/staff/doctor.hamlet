@@ -3,7 +3,7 @@
     <md-icon-button href=@{DataR StaffR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgDoctor}
 
   <div #headerEnd>
@@ -35,7 +35,7 @@
 
     <figure>
       <img src=@{DataR $ StaffPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-      <figcaption.body-small>
+      <figcaption.md-typescale-body-small>
         $maybe attrib <- attrib
           #{attrib}
         $nothing
@@ -50,18 +50,18 @@
 
     <div ##{idPanelDetails} role=tabpanel aria-labelledby=tabDetails>
       <dl>
-        <dt.label-large scope=row>_{MsgFullName}
-        <dd.body-medium>#{name}
+        <dt.md-typescale-label-large scope=row>_{MsgFullName}
+        <dd.md-typescale-body-medium>#{name}
 
-        <dt.label-large scope=row>_{MsgMobile}
-        <dd.body-medium>#{mobile}
+        <dt.md-typescale-label-large scope=row>_{MsgMobile}
+        <dd.md-typescale-body-medium>#{mobile}
   
         $maybe phone <- phone
-          <dt.label-large scope=row>_{MsgPhone}
-          <dd.body-medium>#{phone}
+          <dt.md-typescale-label-large scope=row>_{MsgPhone}
+          <dd.md-typescale-body-medium>#{phone}
 
-        <dt.label-large scope=row>_{MsgEmailAddress}
-        <dd.body-medium>#{email}
+        <dt.md-typescale-label-large scope=row>_{MsgEmailAddress}
+        <dd.md-typescale-body-medium>#{email}
 
     ^{widgetSnackbar msgs}
 

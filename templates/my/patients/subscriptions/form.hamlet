@@ -4,11 +4,11 @@
   <dl>
     <dt style="display:flex;align-items:center;gap:1rem">
       ^{fvInput subscribedV}
-      <label.body-large for=#{fvId subscribedV}>
+      <label.md-typescale-body-large for=#{fvId subscribedV}>
         #{fvLabel subscribedV}
 
     $maybe Entity _ (User email _ _ _ _ name _ _) <- patient
-      <dd.body-small style="margin-top:1rem">
+      <dd.md-typescale-body-small style="margin-top:1rem">
         $maybe name <- name
           _{MsgAllowUserToSendYouNotifications name}
         $nothing

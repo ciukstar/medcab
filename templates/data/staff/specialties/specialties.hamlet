@@ -3,7 +3,7 @@
     <md-icon-button href=@{DataR StaffR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgSpecialties}
 
   <div #headerEnd>
@@ -12,7 +12,7 @@
 
   <figure>
     <img src=@{DataR $ StaffPhotoR did} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
-    <figcaption.body-small>
+    <figcaption.md-typescale-body-small>
       $maybe attrib <- attrib
         #{attrib}
       $nothing
@@ -34,7 +34,7 @@
     $if null specialties
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.body-large>
+        <figcaption.md-typescale-body-large>
           _{MsgNoSpecialtiesYet}
     $else
       <md-list>

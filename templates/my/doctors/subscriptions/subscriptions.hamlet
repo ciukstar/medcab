@@ -3,7 +3,7 @@
   <md-icon-button href=@{MyDoctorsR uid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgDoctor}
 
 <main>
@@ -18,7 +18,7 @@
         <md-icon.connection-status>repeat
       $elseif not accessible
         <md-icon.connection-status>phone_disabled
-      <figcaption.body-small>
+      <figcaption.md-typescale-body-small>
         $maybe attrib <- attrib
           #{attrib}
         $nothing
@@ -52,13 +52,13 @@
           $if not subscribed
             <dt>
               <md-icon.connection-status>notifications_off
-            <dd.body-small>
+            <dd.md-typescale-body-small>
               _{MsgNotSubscribedToNotificationsFromUser name}
 
           $if looping
             <dt>
               <md-icon.connection-status>repeat
-            <dd.body-small>
+            <dd.md-typescale-body-small>
               _{MsgYouAndUserSubscribedOnSameDevice name}
 
             <form method=post action=@{MyDoctorUnsubscribeR pid uid did} enctype=#{et2}>
@@ -69,7 +69,7 @@
           $elseif not accessible
             <dt>
               <md-icon.connection-status>phone_disabled
-            <dd.body-small>
+            <dd.md-typescale-body-small>
               _{MsgUserUnavailable name}
 
       ^{widgetSnackbar msgs}

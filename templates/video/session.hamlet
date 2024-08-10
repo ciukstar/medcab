@@ -3,7 +3,7 @@
   <md-icon-button href=#{backlink} aria-label=_{MsgBack} ##{idButtonExitVideoSession}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgVideoSession}
 
   <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>

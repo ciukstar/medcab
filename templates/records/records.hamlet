@@ -3,7 +3,7 @@
   <div #headerStart>
     ^{widgetMenu}
 
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgRecords}
 
   <span.app-top-app-bar-end>
@@ -17,7 +17,7 @@
   $if null groups
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoDataYet}
   $else
     $with m <- length groups 
@@ -25,7 +25,7 @@
         <details open>
           <summary>
             $with d <- show day
-              <time.app-day.body-large datetime=#{d}>d
+              <time.app-day.md-typescale-body-large datetime=#{d}>d
           <md-list>
             $with n <- length records
               $forall (i,((Entity rid (Record uid _ day time _),sign),measurements)) <- zip irange records

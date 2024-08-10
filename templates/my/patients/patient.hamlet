@@ -3,7 +3,7 @@
   <md-icon-button href=@{MyPatientsR did} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgPatient}
       
   <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
@@ -41,9 +41,9 @@
         $elseif not accessible
           <md-icon.connection-status>phone_disabled
           
-      <figcaption.body-medium>
+      <figcaption.md-typescale-body-medium>
         $maybe attrib <- attrib
-          <small.app-attribution.body-small>
+          <small.app-attribution.md-typescale-body-small>
             #{attrib}
         $nothing
           _{MsgPhoto}
@@ -64,49 +64,49 @@
 
       <dl>
 
-        <dt.label-large>_{MsgSinceDate}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgSinceDate}
+        <dd.md-typescale-body-medium>
           $with dt <- show since
             <time datetime=#{dt}>#{dt}
 
-        <dt.label-large>_{MsgFullName}
-        <dd.body-medium>
+        <dt.md-typescale-label-large>_{MsgFullName}
+        <dd.md-typescale-body-medium>
           $maybe name <- name
             #{name}
 
         $maybe mobile <- mobile
-          <dt.label-large scope=row>_{MsgMobile}
+          <dt.md-typescale-label-large scope=row>_{MsgMobile}
           <dd.with-actions>
-            <span.body-medium>#{mobile}
+            <span.md-typescale-body-medium>#{mobile}
             <md-filled-tonal-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
               <md-icon>smartphone
         $nothing
           $maybe Entity _ (UserInfo _ _ _ mobile _) <- patientInfo
             $maybe mobile <- mobile
-              <dt.label-large scope=row>_{MsgMobile}
+              <dt.md-typescale-label-large scope=row>_{MsgMobile}
               <dd.with-actions>
-                <span.body-medium>#{mobile}
+                <span.md-typescale-body-medium>#{mobile}
                 <md-filled-tonal-icon-button type=link href="tel:#{mobile}" aria-label=_{MsgMakeACall}>
                   <md-icon>smartphone
 
         $maybe phone <- phone
-          <dt.label-large scope=row>_{MsgPhone}
+          <dt.md-typescale-label-large scope=row>_{MsgPhone}
           <dd.with-actions>
-            <span.body-medium>#{phone}
+            <span.md-typescale-body-medium>#{phone}
             <md-filled-tonal-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
               <md-icon>phone
         $nothing
           $maybe Entity _ (UserInfo _ _ _ _ phone) <- patientInfo
             $maybe phone <- phone
-              <dt.label-large scope=row>_{MsgPhone}
+              <dt.md-typescale-label-large scope=row>_{MsgPhone}
               <dd.with-actions>
-                <span.body-medium>#{phone}
+                <span.md-typescale-body-medium>#{phone}
                 <md-filled-tonal-icon-button type=link href="tel:#{phone}" aria-label=_{MsgMakeACall}>
                   <md-icon>phone
 
-        <dt.label-large>_{MsgEmailAddress}
+        <dt.md-typescale-label-large>_{MsgEmailAddress}
         <dd.with-actions>
-          <span.body-medium>#{email}
+          <span.md-typescale-body-medium>#{email}
           <md-filled-tonal-icon-button type=link href="mailto:#{email}" aria-label=_{MsgSendEmail}>
             <md-icon>mail
 
@@ -141,11 +141,11 @@
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=#{dname}>
         $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(subscribed,(_,_))))) <- patient
           $if (||) (isJust attrib) (not subscribed)
-            <figcaption.body-small>
+            <figcaption.md-typescale-body-small>
               $maybe attribution <- attrib
                 #{attribution}
               $if not subscribed
-                <p.body-small>
+                <p.md-typescale-body-small>
                   $maybe name <- name
                     _{MsgNotSubscribedToNotificationsFromUser name}
                   $nothing
@@ -157,7 +157,7 @@
       $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(_,(looping,_))))) <- patient
         $if looping
           <md-icon>repeat
-          <figcaption.body-small>
+          <figcaption.md-typescale-body-small>
             $maybe name <- name
               _{MsgYouAndUserSubscribedOnSameDevice name}
             $nothing
@@ -171,11 +171,11 @@
       $maybe (_,(Entity uid (User email _ _ _ _ name _ _),(attrib,(_,(looping,accessible))))) <- patient
         <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 alt=#{fromMaybe email name}>
         $if (||) (isJust attrib) ((&&) (not looping) (not accessible))
-          <figcaption.body-small>
+          <figcaption.md-typescale-body-small>
             $maybe attribution <- attrib
               #{attribution}
             $if (&&) (not looping) (not accessible)
-              <p.body-small>
+              <p.md-typescale-body-small>
                 $maybe name <- name
                   _{MsgUserUnavailable name}
                 $nothing
@@ -202,11 +202,11 @@
         <img src=@{MyDoctorPhotoR uid did} width=56 height=56 alt=#{dname}>
         $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(subscribed,(_,_))))) <- patient
           $if (||) (isJust attrib) (not subscribed)
-            <figcaption.body-small>
+            <figcaption.md-typescale-body-small>
               $maybe attribution <- attrib
                 #{attribution}
               $if not subscribed
-                <p.body-small>
+                <p.md-typescale-body-small>
                   $maybe name <- name
                     _{MsgNotSubscribedToNotificationsFromUser name}
                   $nothing
@@ -218,7 +218,7 @@
       $maybe (_,(Entity _ (User email _ _ _ _ name _ _),(_,(_,(looping,_))))) <- patient
         $if looping
           <md-icon>repeat
-          <figcaption.body-small>
+          <figcaption.md-typescale-body-small>
             $maybe name <- name
               _{MsgYouAndUserSubscribedOnSameDevice name}
             $nothing
@@ -232,11 +232,11 @@
       $maybe (_,(Entity uid (User email _ _ _ _ name _ _),(attrib,(_,(looping,accessible))))) <- patient
         <img src=@{AccountPhotoR uid AvatarColorDark} width=56 height=56 alt=#{fromMaybe email name}>
         $if (||) (isJust attrib) ((&&) (not looping) (not accessible))
-          <figcaption.body-small>
+          <figcaption.md-typescale-body-small>
             $maybe attribution <- attrib
               #{attribution}
             $if (&&) (not looping) (not accessible)
-              <p.body-small>
+              <p.md-typescale-body-small>
                 $maybe name <- name
                   _{MsgUserUnavailable name}
                 $nothing
@@ -258,7 +258,7 @@
     _{MsgCallEnded}
 
   <form slot=content method=dialog>
-    <p.body-large>_{MsgCallEnded} ...
+    <p.md-typescale-body-large>_{MsgCallEnded} ...
 
   <div slot=actions>
     <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">

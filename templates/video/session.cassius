@@ -12,7 +12,7 @@ header
     align-items: center
     column-gap: 0.5rem
 
-    h1.title-large
+    h1.md-typescale-title-large
         overflow: hidden
         text-overflow: ellipsis
 
